@@ -1,0 +1,163 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+@include b(switch) {
+  position: relative;
+  display: inline-flex;
+  height: $--switch-height;
+  align-items: center;
+  font-size: $--switch-font-size;
+  line-height: $--switch-height;
+  vertical-align: middle;
+  @include when(disabled) {
+    & .el-switch__core,
+    & .el-switch__label {
+      cursor: not-allowed;
+    }
+  }
+
+  @include e(label) {
+    display: inline-block;
+    height: $--switch-height;
+    cursor: pointer;
+    font-size: $--switch-font-size;
+    font-weight: 500;
+    transition: 0.2s;
+    vertical-align: middle;
+
+    @include when(active) {
+      color: $--color-brand;
+    }
+
+    @include m(left) {
+      margin-right: 10px;
+    }
+    @include m(right) {
+      margin-left: 10px;
+    }
+    & * {
+      display: inline-block;
+      font-size: $--switch-font-size;
+      line-height: 1;
+    }
+  }
+
+  @include e(input) {
+    position: absolute;
+    width: 0;
+    height: 0;
+    margin: 0;
+    opacity: 0;
+  }
+
+  @include e(core) {
+    position: relative;
+    display: inline-block;
+    width: $--switch-width;
+    height: $--switch-height;
+    box-sizing: border-box;
+    margin: 0;
+    border: 1px solid $--color-neutral-5;
+    background: $--color-neutral-5;
+    border-radius: 12px;
+    cursor: pointer;
+    outline: none;
+    transform: translateZ(0);
+    transition: border-color 0.3s, background-color 0.3s;
+    vertical-align: middle;
+
+    & .el-switch__button {
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: $--switch-button-size;
+      height: $--switch-button-size;
+      background-color: $--color-white;
+      border-radius: $--border-radius-circle;
+      transition: transform 0.3s;
+    }
+    &:hover {
+      border-color: mix(#fff, $--color-neutral-5, 20%);
+      background-color: mix(#fff, $--color-neutral-5, 20%);
+    }
+    &:active {
+      border-color: mix(#000, $--color-neutral-5, 10%);
+      background-color: mix(#000, $--color-neutral-5, 10%);
+    }
+  }
+
+  @include when(checked) {
+    .el-switch__core {
+      border-color: $--color-success;
+      background-color: $--color-success;
+      &:hover {
+        border-color: mix(#fff, #02bf0f, 20%);
+        background-color: mix(#fff, #02bf0f, 20%);
+      }
+      &:active {
+        border-color: mix(#000, #02bf0f, 10%);
+        background-color: mix(#000, #02bf0f, 10%);
+      }
+    }
+  }
+
+  @include when(disabled) {
+    opacity: 0.4;
+  }
+
+  @include m(wide) {
+    .el-switch__label {
+      &.el-switch__label--left {
+        span {
+          left: 10px;
+        }
+      }
+      &.el-switch__label--right {
+        span {
+          right: 10px;
+        }
+      }
+    }
+  }
+
+  @include m(medium) {
+    .el-switch__core {
+      height: 24px;
+      .el-switch__button {
+        top: 0;
+        left: -1px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  @include m(small) {
+    .el-switch__core {
+      height: 20px;
+      .el-switch__button {
+        top: 0;
+        left: -1px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  @include m(mini) {
+    .el-switch__core {
+      height: 16px;
+      .el-switch__button {
+        top: 0;
+        left: -1px;
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+
+  & .label-fade-enter,
+  & .label-fade-leave-active {
+    opacity: 0;
+  }
+}

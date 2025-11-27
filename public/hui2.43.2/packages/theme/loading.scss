@@ -1,0 +1,130 @@
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import 'common/var';
+
+@include b(loading-mask) {
+  position: absolute;
+  z-index: 10000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: opacity 0.3s;
+
+  @include when(fullscreen) {
+    position: fixed;
+
+    .el-loading-spinner {
+      margin-top: calc(-#{$--loading-fullscreen-spinner-size} / 2);
+
+      .circular {
+        size: $--loading-fullscreen-spinner-size;
+      }
+    }
+  }
+
+  @include when(mini) {
+    .loading-icon {
+      font-size: 16px;
+    }
+  }
+
+  @include when(small) {
+    .loading-icon {
+      font-size: 24px;
+    }
+  }
+
+  @include when(default) {
+    .loading-icon {
+      font-size: 40px;
+    }
+  }
+
+  @include when(large) {
+    .loading-icon {
+      font-size: 80px;
+    }
+  }
+
+  @include when(primary) {
+    /* .el-loading-text {
+      color: $--color-brand;
+    } */
+    .loading-icon {
+      color: $--color-brand;
+    }
+  }
+
+  @include when(gray) {
+    /* .el-loading-text {
+      color: $--color-neutral-2;
+    } */
+    .loading-icon {
+      color: $--color-neutral-2;
+    }
+  }
+}
+
+@include b(loading-spinner) {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  margin-top: calc(-#{$--loading-spinner-size} / 2);
+  text-align: center;
+
+  .el-loading-text {
+    margin: 3px 0;
+    color: rgba($--color-black, 0.6);
+    font-size: 14px;
+  }
+  .loading-icon {
+    color: $--color-brand;
+    font-size: 40px;
+  }
+
+  /*
+  .circular {
+    size: var(--loading-spinner-size);
+    animation: loading-rotate 2s linear infinite;
+  }
+
+  .path {
+    animation: loading-dash 1.5s ease-in-out infinite;
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: 0;
+    stroke-width: 2;
+    stroke: var(--color-primary);
+    stroke-linecap: round;
+  }
+  */
+}
+
+.el-loading-fade-enter,
+.el-loading-fade-leave-active {
+  opacity: 0;
+}
+
+@keyframes loading-rotate {
+  100% {
+    -ms-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -40px;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -120px;
+  }
+}

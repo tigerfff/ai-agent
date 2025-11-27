@@ -1,0 +1,140 @@
+//@import "input";
+@import 'common/var';
+@import 'mixins/mixins';
+
+@include b(input-number) {
+  position: relative;
+  display: inline-block;
+  width: 96px;
+
+  & .el-input {
+    display: block;
+    line-height: calc(#{$--input-height} - 2px);
+  }
+  & .el-input__inner {
+    // padding-right: calc(#{$--input-height} * 2 + 10px);
+    padding-right: calc(#{$--input-height});
+    appearance: none;
+  }
+  & .el-input__suffix {
+    margin-right: 25px;
+    line-height: 24px;
+  }
+  & .el-decrease,
+  & .el-increase {
+    position: absolute;
+    z-index: 1;
+    right: 1px;
+    min-width: 24px !important;
+    height: 12px;
+    padding: 0 !important;
+    margin: 1px 3px 1px 0;
+    i {
+      font-size: 14px !important;
+      line-height: 13px;
+      vertical-align: super !important;
+    }
+  }
+  & .el-increase {
+    top: 3px;
+  }
+  & .el-decrease {
+    bottom: 3px;
+  }
+  @each $type in (increase, decrease) {
+    @include e(#{$type}) {
+      @include when(disabled) {
+        background: none !important;
+        color: $--disabled-color !important;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  @include e(increase) {
+    right: 1px;
+  }
+  @include e(decrease) {
+    right: calc(#{$--input-height} + 1px);
+  }
+
+  @include when(disabled) {
+    .el-input-number__decrease,
+    & .el-input-number__increase {
+      border-color: $--color-neutral-6;
+      color: $--color-neutral-6;
+
+      &:hover {
+        color: $--color-neutral-6;
+        cursor: not-allowed;
+        &:not(.is-disabled) ~ .el-input .el-input__inner:not(.is-disabled) {
+          border-color: $--color-neutral-6;
+        }
+      }
+    }
+  }
+  @include m(large) {
+    width: 200px;
+    & .el-input {
+      line-height: calc(#{$--input-large-height} - 3px);
+    }
+    & .el-input-number__increase,
+    .el-input-number__decrease {
+      width: $--input-large-height;
+      font-size: $--input-large-font-size;
+      line-height: calc(#{$--input-large-height} - 3px);
+    }
+    & .el-input-number__decrease {
+      right: calc(#{$--input-large-height} + 1px);
+    }
+    & .el-input__inner {
+      padding-right: calc(#{$--input-large-height} * 2 + 10px);
+    }
+  }
+  @include m(small) {
+    width: 130px;
+    & .el-input {
+      line-height: calc(#{$--input-small-height} - 2px);
+    }
+    & .el-input-number__increase,
+    .el-input-number__decrease {
+      width: $--input-small-height;
+      font-size: $--input-small-font-size;
+      line-height: calc(#{$--input-small-height} - 2px);
+    }
+    & .el-input-number__decrease {
+      right: calc(#{$--input-small-height} + 1px);
+    }
+    & .el-input__inner {
+      padding-right: calc(#{$--input-small-height} * 2 + 10px);
+    }
+  }
+  @include when(without-controls) {
+    & .el-input__inner {
+      padding-right: 10px;
+    }
+  }
+
+  /* 加减号左右分布 */
+  &.controls-left-right {
+    .el-input__inner {
+      padding-right: calc(#{$--input-height} + 10px);
+      padding-left: calc(#{$--input-height} + 10px);
+      text-align: center;
+    }
+    &.el-input-number--small .el-input__inner {
+      padding-right: calc(#{$--input-small-height} + 10px);
+      padding-left: calc(#{$--input-small-height} + 10px);
+    }
+    &.el-input-number--large .el-input__inner {
+      padding-right: calc(#{$--input-large-height} + 10px);
+      padding-left: calc(#{$--input-large-height} + 10px);
+    }
+    .el-input-number__decrease {
+      left: 1px;
+      border-right: $--border-base;
+      border-left: none;
+      text-align: center;
+    }
+  }
+}

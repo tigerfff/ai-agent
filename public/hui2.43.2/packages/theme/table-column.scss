@@ -1,0 +1,153 @@
+@charset "UTF-8";
+@import './checkbox.scss';
+@import './tag.scss';
+@import './popper.scss';
+@import './common/var.scss';
+
+@include b(table-column) {
+  @include m(selection) {
+    .cell {
+      padding-right: 8px;
+      padding-left: 7px;
+      font-size: 0;
+      line-height: normal;
+      > label {
+        vertical-align: middle;
+      }
+    }
+  }
+  @include m(radio) {
+    .cell {
+      padding-right: 8px;
+      padding-left: 7px;
+      font-size: 0;
+      line-height: normal;
+      & .el-radio__label {
+        display: none;
+      }
+    }
+  }
+}
+
+@include b(table-filter) {
+  box-sizing: border-box;
+  margin: 4px 0;
+  background-color: $--fill;
+  border-radius: 2px;
+  box-shadow: $--box-shadow;
+
+  /** used for dropdown mode */
+  @include e(list) {
+    min-width: 100px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  @include e(list-item) {
+    padding: 0 8px;
+    color: $--option-color;
+    cursor: pointer;
+    font-size: $--font-size;
+    line-height: $--select-option-height;
+
+    &:hover {
+      background-color: $--option-fill-hov;
+      color: $--option-hov-color;
+    }
+    &:active {
+      background-color: $--option-fill-pre;
+      color: $--option-pre-color;
+    }
+
+    @include when(active) {
+      background-color: $--option-selected-fill;
+      color: $--option-selected-color;
+    }
+  }
+
+  @include e(content) {
+    min-width: 96px;
+  }
+
+  @include e(bottom) {
+    padding: 6px 16px;
+    border-top: 1px solid $--color-neutral-6;
+
+    button {
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: $--button-link-color;
+      cursor: pointer;
+      font-size: $--font-size;
+
+      & + button {
+        margin-left: 16px;
+      }
+
+      &:hover {
+        background: transparent;
+        color: $--button-link-color-hover;
+        text-decoration: underline;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &.is-disabled {
+        background-color: transparent;
+        color: $--button-text-disabled-color;
+        cursor: not-allowed;
+        text-decoration: none;
+      }
+    }
+  }
+
+  @include e(checkbox-group) {
+    padding: 16px;
+
+    label.el-checkbox {
+      display: block;
+      margin-bottom: 8px;
+      margin-left: 4px;
+    }
+
+    .el-checkbox:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+@include b(table-selection) {
+  box-sizing: border-box;
+  margin: 4px 0;
+  background-color: $--fill;
+  border-radius: 2px;
+  box-shadow: $--box-shadow;
+
+  /** used for dropdown mode */
+  @include e(list) {
+    min-width: 100px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  @include e(list-item) {
+    padding: 0 8px;
+    color: $--option-color;
+    cursor: pointer;
+    font-size: $--font-size;
+    line-height: $--select-option-height;
+
+    &:hover {
+      background-color: $--option-fill-hov;
+    }
+
+    &:active {
+      background-color: $--option-fill-pre;
+    }
+  }
+}

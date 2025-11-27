@@ -1,0 +1,83 @@
+// 皮肤公共样式
+[class^='skin-'],
+[class*=' skin-'] {
+  transition: all 0.1s ease-in-out;
+}
+
+/* 颜色为主题色
+------------------------------ */
+// primary-lighten
+.skin-lighten-color,
+.skin-lighten-color-hover:hover,
+.skin-lighten-color-active.active {
+  color: $--color-brand-hov !important;
+}
+// primary
+.skin-color,
+.skin-color-hover:hover,
+.skin-color-active.active {
+  color: $--color-brand !important;
+}
+// primary-darken
+.skin-darken-color,
+.skin-darken-color-hover:hover,
+.skin-darken-color-active.active {
+  color: $--color-brand-pre !important;
+}
+
+/* 背景色为主题色
+------------------------------ */
+// primary-lighten
+.skin-lighten-bgcolor,
+.skin-lighten-bgcolor-hover:hover,
+.skin-lighten-bgcolor-active.active {
+  background-color: $--color-brand-hov !important;
+  color: $--color-white !important;
+}
+// primary
+.skin-bgcolor,
+.skin-bgcolor-hover:hover,
+.skin-bgcolor-active.active {
+  background-color: $--color-brand !important;
+  color: $--color-white !important;
+}
+// primary-darken
+.skin-darken-bgcolor,
+.skin-darken-bgcolor-hover:hover,
+.skin-darken-bgcolor-active.active {
+  background-color: $--color-brand-pre !important;
+  color: $--color-white !important;
+}
+
+/* 边框为主题色
+------------------------------ */
+// primary-lighten
+.skin-lighten-bdcolor,
+.skin-lighten-bdcolor-hover:hover,
+.skin-lighten-bdcolor-active.active {
+  border-color: $--color-brand-hov !important;
+}
+// primary
+.skin-bdcolor,
+.skin-bdcolor-hover:hover,
+.skin-bdcolor-active.active {
+  border-color: $--color-brand !important;
+}
+// primary-darken
+.skin-darken-bdcolor,
+.skin-darken-bdcolor-hover:hover,
+.skin-darken-bdcolor-active.active {
+  border-color: $--color-brand-pre !important;
+}
+
+/* 主题色的透明度
+------------------------------ */
+// hui 规范中背景色的 hover 效果
+.skin-hui-bgcolor-hover:hover {
+  background-color: $--color-neutral-9 !important;
+}
+// hui 规范中背景色的 active 效果
+.skin-hui-bgcolor-active.active {
+  background-color: $--color-brand !important;
+  color: $--color-white;
+}

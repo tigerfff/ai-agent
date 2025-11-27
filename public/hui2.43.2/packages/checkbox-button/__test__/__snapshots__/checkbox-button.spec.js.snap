@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CheckboxButton snapshot test 1`] = `
+"<div role=\\"group\\" aria-label=\\"checkbox-group\\" class=\\"el-checkbox-group\\"><label role=\\"checkbox\\" class=\\"el-checkbox\\"><span aria-checked=\\"mixed\\" class=\\"el-checkbox__input\\"><span class=\\"el-checkbox__inner\\"><div class=\\"h-svg-icon-wrapper\\" style=\\"font-size: 14px;\\"><div class=\\"h-svg-icon\\">ctrl_tick.svg</div></div></span> <input type=\\"checkbox\\" aria-hidden=\\"true\\" class=\\"el-checkbox__original\\" value=\\"复选框 A\\"></span> <!----> <span title=\\"\\" class=\\"el-checkbox__label\\"> 
+      复选框 A
+    </span></label> <label role=\\"checkbox\\" class=\\"el-checkbox\\"><span aria-checked=\\"mixed\\" class=\\"el-checkbox__input\\"><span class=\\"el-checkbox__inner\\"><div class=\\"h-svg-icon-wrapper\\" style=\\"font-size: 14px;\\"><div class=\\"h-svg-icon\\">ctrl_tick.svg</div></div></span> <input type=\\"checkbox\\" aria-hidden=\\"true\\" class=\\"el-checkbox__original\\" value=\\"复选框 B\\"></span> <!----> <span title=\\"\\" class=\\"el-checkbox__label\\"> 
+      复选框 B
+    </span></label> <label role=\\"checkbox\\" class=\\"el-checkbox\\"><span aria-checked=\\"mixed\\" class=\\"el-checkbox__input\\"><span class=\\"el-checkbox__inner\\"><div class=\\"h-svg-icon-wrapper\\" style=\\"font-size: 14px;\\"><div class=\\"h-svg-icon\\">ctrl_tick.svg</div></div></span> <input type=\\"checkbox\\" aria-hidden=\\"true\\" class=\\"el-checkbox__original\\" value=\\"复选框 C\\"></span> <!----> <span title=\\"\\" class=\\"el-checkbox__label\\"> 
+      复选框 C
+    </span></label> <label aria-disabled=\\"true\\" role=\\"checkbox\\" class=\\"el-checkbox is-disabled\\"><span aria-checked=\\"mixed\\" class=\\"el-checkbox__input is-disabled\\"><span class=\\"el-checkbox__inner\\"><div class=\\"h-svg-icon-wrapper\\" style=\\"font-size: 14px;\\"><div class=\\"h-svg-icon\\">ctrl_tick.svg</div></div></span> <input disabled=\\"disabled\\" type=\\"checkbox\\" aria-hidden=\\"true\\" class=\\"el-checkbox__original\\" value=\\"禁用\\"></span> <!----> <span title=\\"\\" class=\\"el-checkbox__label\\"> 
+      禁用
+    </span></label> <label aria-disabled=\\"true\\" role=\\"checkbox\\" class=\\"el-checkbox is-disabled\\"><span aria-checked=\\"mixed\\" class=\\"el-checkbox__input is-disabled\\"><span class=\\"el-checkbox__inner\\"><div class=\\"h-svg-icon-wrapper\\" style=\\"font-size: 14px;\\"><div class=\\"h-svg-icon\\">ctrl_tick.svg</div></div></span> <input disabled=\\"disabled\\" type=\\"checkbox\\" aria-hidden=\\"true\\" class=\\"el-checkbox__original\\" value=\\"选中且禁用\\"></span> <!----> <span title=\\"\\" class=\\"el-checkbox__label\\"> 
+      选中且禁用
+    </span></label></div>"
+`;

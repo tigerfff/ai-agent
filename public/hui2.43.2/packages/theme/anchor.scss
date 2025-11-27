@@ -1,0 +1,246 @@
+@import 'mixins/mixins';
+
+$namespace: 'h';
+
+@include b(anchor-wrapper) {
+  position: relative;
+  display: inline-block;
+  min-width: 120px; // 保证中文情况下，二级锚点能显示四个中文
+  max-width: 320px; // 保证一级锚点文字最大宽度为 256px
+  padding: 12px 0;
+  text-align: left;
+
+  &.folded {
+    background-color: $--fill;
+    border-radius: 2px;
+    box-shadow: $--box-shadow;
+
+    & .h-subanchor__title,
+    & .h-anchor-link__title {
+      &:hover {
+        background-color: $--anchor-link-hover-bg-color;
+        color: $--color-neutral-1;
+      }
+
+      &:active {
+        background-color: $--anchor-link-active-bg-color;
+      }
+    }
+  }
+}
+
+@include b(anchor) {
+  position: relative;
+
+  @include when(folded) {
+    width: 36px;
+    height: 36px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    float: right;
+    text-align: center;
+
+    & .h-anchor-icon {
+      font-size: 24px;
+      line-height: 36px;
+    }
+  }
+
+  @include e(ink-ball) {
+    position: absolute;
+    z-index: 2;
+    left: -5px;
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    background-color: $--color-brand;
+    border-radius: 50%;
+    transform: translateY(4px);
+    // transition: $--transition-all;
+  }
+}
+
+@include b(subanchor) {
+  position: relative;
+  max-width: 320px;
+
+  &::before,
+  &::after {
+    position: absolute;
+    z-index: 2;
+    left: 20px;
+    display: block;
+    width: 1px;
+    background-color: $--color-neutral-6;
+    content: ' ';
+  }
+
+  &::before {
+    top: 0;
+    height: 23px;
+  }
+
+  &::after {
+    bottom: 0;
+    height: calc(100% - 23px);
+  }
+
+  @include e(point) {
+    position: absolute;
+    z-index: 1;
+    top: 14px;
+    left: 17px;
+    width: 7px;
+    height: 7px;
+    background-color: $--color-neutral-6;
+    border-radius: 50%;
+  }
+
+  @include e(title) {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding-top: 8px;
+    padding-right: 20px;
+    padding-bottom: 8px;
+    color: $--color-neutral-2;
+    font-size: $--font-size;
+    line-height: 20px;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    transition: all 0.3s;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: none !important;
+    }
+  }
+
+  @include e(content) {
+    display: none;
+  }
+
+  @include when(expand) {
+    @include e(content) {
+      display: block;
+    }
+  }
+}
+
+@include b(anchor-link) {
+  position: relative;
+  max-width: 320px;
+
+  &::before,
+  &::after {
+    position: absolute;
+    z-index: 2;
+    left: 20px;
+    display: block;
+    width: 1px;
+    background-color: $--color-neutral-6;
+    content: ' ';
+  }
+
+  &::before {
+    top: 0;
+    height: 12px;
+  }
+
+  &::after {
+    bottom: 0;
+    height: calc(100% - 23px);
+  }
+
+  // 激活时小圆点的大小是 11px，比原先的了4px
+  @include when(active) {
+    &::before {
+      height: 10px;
+    }
+
+    &::after {
+      height: calc(100% - 25px);
+    }
+
+    & > .h-anchor-link__title {
+      color: $--color-neutral-1;
+      font-weight: 500;
+    }
+  }
+
+  // 有子锚点时
+  @include when(parent) {
+    &::after {
+      bottom: 0;
+      height: calc(100% - 23px);
+    }
+
+    &.is-active::after {
+      height: calc(100% - 23px);
+    }
+
+    &:nth-last-child(2)::after {
+      bottom: 23px;
+      height: calc(100% - 46px);
+    }
+  }
+
+  @include e(point) {
+    position: absolute;
+    z-index: 1;
+    top: 14px;
+    left: 17px;
+    width: 7px;
+    height: 7px;
+    background-color: $--color-neutral-6;
+    border-radius: 50%;
+  }
+
+  @include e(title) {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding-top: 8px;
+    padding-right: 20px;
+    padding-bottom: 8px;
+    color: $--color-neutral-2;
+    font-size: $--font-size;
+    line-height: 20px;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    transition: all 0.3s;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.h-anchor .h-anchor-link a.h-anchor-link__title:hover {
+  text-decoration: none;
+}
+
+// 二级锚点
+.h-subanchor .h-anchor-link {
+  &::before,
+  &::after,
+  .h-anchor-link__point {
+    display: none;
+  }
+}
+
+.h-subanchor .h-subanchor {
+  &::before,
+  &::after,
+  .h-subanchor__point {
+    display: none;
+  }
+}
+
+.el-anchor-scrollbar__wrap {
+  height: 100%;
+  overflow-x: hidden;
+}

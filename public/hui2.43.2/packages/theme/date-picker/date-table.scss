@@ -1,0 +1,67 @@
+@import '../common/var';
+@import '../mixins/mixins';
+@import '../mixins/utils';
+
+@include b(date-table) {
+  &.el-date-table__calendar {
+    padding: 8px 16px 16px 16px;
+  }
+  td {
+    width: 32px;
+    height: 32px;
+    &.next-month,
+    &.prev-month {
+      color: $--datepicker-off-color;
+    }
+  }
+  th {
+    padding: 0;
+    color: $--datepicker-header-color;
+    font-weight: 400;
+  }
+  &.el-date-table__week {
+    display: flex;
+    justify-content: center;
+    padding: 0 16px;
+    background-color: $--color-neutral-9;
+    .el-date-table__week-cell {
+      @include utils-ellipsis;
+
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      color: $--color-neutral-4;
+      line-height: 32px;
+      text-align: center;
+    }
+  }
+  @include when(week-mode) {
+    .el-date-table__row {
+      &:active {
+        background-color: $--datepicker-cell-pre-fill;
+        color: $--datepicker-cell-pre-color;
+      }
+      &.selected,
+      &:hover {
+        background-color: $--datepicker-cell-hov-fill;
+        color: $--datepicker-cell-hov-color;
+      }
+
+      td {
+        &.in-range {
+          background-color: $--datepicker-active-fill !important;
+          color: h-best-color-contrast(
+            $--datepicker-active-fill,
+            $colors: ($--color-white, $--font-color-regular)
+          );
+          &::after {
+            color: h-best-color-contrast(
+              $--datepicker-active-fill,
+              $colors: ($--color-white, $--font-color-regular)
+            );
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+@import 'mixins/mixins';
+@import './common/var.scss';
+
+@include b(paged-table) {
+  & .el-table {
+    height: 100%;
+
+    & .el-table__body-wrapper {
+      height: calc(100% - #{$--table-th-td-height});
+    }
+  }
+
+  @include e(table) {
+    height: calc(100% - #{$--table-pagination-height});
+    border-bottom: none;
+  }
+
+  @include e(pagination) {
+    height: $--table-pagination-height;
+    padding: 0;
+    border: 1px solid $--table-border-color;
+    border-top: none;
+    background-color: $--fill;
+  }
+}

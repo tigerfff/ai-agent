@@ -1,0 +1,104 @@
+@import 'common/var';
+@font-face {
+  font-family: 'h-animation-icons';
+  src: url('#{$--font-path}/h-animation-icons.eot');
+  src: url('#{$--font-path}/h-animation-icons.eot#iefix')
+      format('embedded-opentype'),
+    url('#{$--font-path}/h-animation-icons.ttf') format('truetype'),
+    url('#{$--font-path}/h-animation-icons.woff') format('woff'),
+    url('#{$--font-path}/h-animation-icons.svg#h-animation-icons') format('svg');
+}
+
+[class^='h-an-icon-'],
+[class*=' h-an-icon-'],
+[class^='h-an-icon-'] *,
+[class*=' h-an-icon-'] * {
+  display: inline-block;
+
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'h-animation-icons', sans-serif !important;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  line-height: 1;
+  speak: none;
+  text-transform: none;
+  vertical-align: baseline;
+}
+
+/* loading */
+.h-an-icon-loading {
+  position: relative;
+  top: 6px;
+  color: $--color-brand;
+  font-size: 24px;
+  line-height: 1;
+  text-align: center;
+  .path1,
+  .path2,
+  .path3,
+  .path4 {
+    display: inline-block;
+    animation: icon-scale 1.5s infinite;
+    line-height: 0;
+    opacity: 0.3;
+  }
+}
+
+.h-an-icon-loading .path1::before {
+  content: '\e900';
+}
+.h-an-icon-loading .path2::before {
+  content: '\e901';
+}
+.h-an-icon-loading .path3::before {
+  content: '\e902';
+}
+.h-an-icon-loading .path4::before {
+  content: '\e903';
+}
+
+.h-an-icon-loading .path1 {
+  animation-delay: 0s;
+  -ms-transform-origin: 6% 50%;
+  transform-origin: 6% 50% 0;
+}
+.h-an-icon-loading .path2 {
+  margin-left: -1em;
+  animation-delay: 0.2s;
+  -ms-transform-origin: 36% 50%;
+  transform-origin: 36% 50% 0;
+}
+.h-an-icon-loading .path3 {
+  margin-left: -1em;
+  animation-delay: 0.4s;
+  -ms-transform-origin: 66% 50%;
+  transform-origin: 66% 50% 0;
+}
+.h-an-icon-loading .path4 {
+  margin-left: -1em;
+  animation-delay: 0.6s;
+  -ms-transform-origin: 96% 50%;
+  transform-origin: 96% 50% 0;
+}
+
+@keyframes icon-scale {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1) translateZ(0);
+  }
+  20%,
+  80% {
+    opacity: 0.3;
+    transform: scale(1) translateZ(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.7) translateZ(0);
+  }
+}

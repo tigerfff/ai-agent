@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Radio snapshot test 1`] = `"<label aria-checked=\\"true\\" tabindex=\\"0\\" role=\\"radio\\" class=\\"el-radio radio is-checked\\"><span class=\\"el-radio__input is-checked\\"><span class=\\"el-radio__inner\\"></span> <input type=\\"radio\\" tabindex=\\"-1\\" class=\\"el-radio__original\\" value=\\"1\\"></span> <!----> <span class=\\"el-radio__label\\">备选项 <!----></span></label>"`;

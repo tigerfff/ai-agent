@@ -1,0 +1,253 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+@include b(tree) {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+  height: 100%;
+  background: $--fill;
+  cursor: default;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+
+  // &.has-border {
+  //   border: 1px solid $--color-neutral-6;
+  // }
+
+  @include e(empty-block) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 60px;
+    text-align: center;
+  }
+
+  @include e(empty-text) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: $--color-neutral-5;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+  }
+
+  /* 移动的节点 */
+  @include e(move-block) {
+    position: fixed;
+    z-index: 10001;
+    padding: 0 10px;
+    background-color: $--color-neutral-7;
+    pointer-events: none;
+    white-space: nowrap;
+    .el-tree-node__expand-icon {
+      display: none;
+    }
+  }
+
+  /* 移动节点的箭头 */
+  @include e(move-arrow) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: $--color-neutral-4;
+    &::before {
+      position: absolute;
+      top: -3px;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border: 2px solid $--color-neutral-4;
+      background-color: $--color-white;
+      border-radius: 50%;
+      content: '';
+    }
+  }
+}
+
+@include b(tree-node) {
+  white-space: nowrap;
+
+  @include when(drop-target) {
+    border: 2px solid $--color-neutral-4;
+  }
+
+  @include e(content) {
+    min-width: 100%;
+    height: 32px;
+    box-sizing: border-box;
+    // 2px的透明默认边框，是为了移动节点时边框变色而不会影响内部元素
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0;
+    line-height: 28px;
+    transition: all 0.1s ease-in-out;
+
+    & > .el-checkbox {
+      width: 24px;
+      font-size: $--font-size;
+      vertical-align: middle;
+    }
+    & > * {
+      font-size: $--font-size;
+    }
+    &:hover {
+      background-color: $--tree-content-hover-fill;
+    }
+    &:active {
+      background-color: $--tree-content-pre-fill;
+    }
+  }
+
+  @include e(expand-icon) {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-left: 2px;
+    color: $--color-neutral-2;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg);
+    transition: transform 0.1s ease-in-out, color 0.1s ease-in-out;
+    vertical-align: middle;
+
+    &.expanded {
+      -ms-transform: rotate(90deg);
+      transform: rotate(90deg);
+    }
+
+    &.is-leaf::before {
+      content: '';
+    }
+  }
+
+  @include e(icon) {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    color: $--svg-icon-color;
+    font-size: 24px;
+    text-align: center;
+    transition: color 0.1s ease-in-out;
+
+    /* line-height: 24px; */
+    vertical-align: middle;
+  }
+
+  @include e(label) {
+    display: inline-block;
+    padding-right: 8px;
+    margin-left: 4px;
+    color: $--color-neutral-2;
+    font-size: $--font-size;
+    transition: color 0.1s ease-in-out;
+    vertical-align: middle;
+  }
+
+  @include e(loading-icon) {
+    display: inline-block;
+    margin-right: 4px;
+    color: $--color-neutral-2;
+    font-size: $--font-size;
+    vertical-align: middle;
+  }
+
+  & > .el-tree-node__children {
+    /* overflow: hidden; */
+    background-color: transparent;
+  }
+
+  &.is-expanded > .el-tree-node__children {
+    display: block;
+  }
+
+  /* 拖拽到节点范围中时，显示背景色 */
+  &.is-nonselectable > .el-tree-node__content {
+    .el-tree-node__icon,
+    .el-tree-node__label {
+      color: $--color-neutral-5;
+      cursor: not-allowed;
+    }
+  }
+  &.is-drag.is-drag-inner > .el-tree-node__content {
+    border-color: $--color-neutral-4;
+  }
+
+  /* 树进行拖拽时，不显示节点 hover 效果 */
+  &.is-drag > .el-tree-node__content:hover {
+    background-color: transparent;
+  }
+}
+
+/* 避免 line-height 被其他字体图标覆盖 */
+.el-tree-node__content .el-tree-node__icon {
+  line-height: 24px;
+  vertical-align: middle;
+}
+
+.el-tree-node__loading-icon {
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-name: loadingIcon;
+  animation-timing-function: linear;
+}
+
+.el-tree--highlight-current
+  .el-tree-node.is-current:not(.is-drag)
+  > .el-tree-node__content {
+  background-color: $--tree-highlight-normal-bg-color;
+  @include svg-active($--tree-highlight-normal-bg-color);
+  @include checkbox-active($--tree-highlight-normal-bg-color);
+
+  & > .el-tree-node__loading-icon,
+  & > .el-tree-node__icon,
+  & > .el-tree-node__expand-icon,
+  & > .el-tree-node__label,
+  & .el-tree-node_highlight {
+    color: $--tree-highlight-normal-color;
+  }
+}
+
+/* 树进行拖拽时，不显示节点 active 效果 */
+.el-tree--highlight-current
+  .el-tree-node.is-drag.is-current
+  > .el-tree-node__content {
+  background-color: transparent;
+  & > .el-tree-node__expand-icon,
+  & > .el-tree-node__icon,
+  & > .el-tree-node__label {
+    color: $--color-neutral-2;
+  }
+}
+
+.el-tree-scrollbar__wrap {
+  height: 100%;
+  margin-bottom: 0 !important;
+  overflow-x: hidden !important;
+}
+
+.el-tree-scrollbar__view {
+  padding-bottom: 10px;
+  &.el-scrollbar__view {
+    margin-bottom: 0;
+  }
+}
+
+.el-tree-node_highlight {
+  color: $--color-brand;
+}
+
+@keyframes loadingIcon {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

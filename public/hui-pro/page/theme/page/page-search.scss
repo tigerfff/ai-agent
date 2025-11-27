@@ -1,0 +1,103 @@
+@include b(page-search) {
+  overflow: visible !important; // 解决快速点击搜索图标，h-page-search 上会残留 overflow: hidden 的问题 #125
+  padding: 6px 0 !important;
+  border-bottom: $--page-border;
+
+  // 解决样式 overflow: visible 引起的问题：搜索框执行展开收起动画效果时，搜索框中的元素不会跟着一起移动的问题 #151
+  &.collapse-transition {
+    overflow: hidden !important;
+  }
+
+  // 搜索栏可展开收起时
+  @include when(collapse) {
+    background-color: $--color-neutral-9;
+  }
+
+  &:not(.is-collapse) .el-form {
+    margin-right: -$--page-gutter;
+    margin-left: -$--page-gutter;
+  }
+
+  &.row-amount-2 .h-page-search-item {
+    width: 50%;
+  }
+  &.row-amount-3 .h-page-search-item {
+    width: 33.33333333%;
+  }
+  &.row-amount-4 .h-page-search-item {
+    width: 25%;
+  }
+  &.row-amount-6 .h-page-search-item {
+    width: 16.66666667%;
+  }
+
+  @include e(form) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  @include e(action) {
+    display: flex;
+    width: 100%;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 6px $--page-gutter;
+    text-align: right;
+
+    @include m(more) {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      margin-left: 8px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 24px;
+      line-height: 34px !important;
+      text-align: center;
+      transition: background-color 0.3s;
+      &:hover {
+        background-color: $--color-neutral-8;
+      }
+      &:active {
+        background-color: $--color-neutral-6;
+      }
+      i {
+        transition: transform 0.3s;
+      }
+      @include when(active) {
+        i {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    .el-button {
+      min-width: 78px;
+      & + .el-button {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+@include b(page-search-item) {
+  width: 100%;
+  flex: none;
+  padding: 6px $--page-gutter;
+  .el-form-item {
+    margin-bottom: 0;
+    .el-select,
+    .el-date-editor.el-input {
+      width: 100%;
+    }
+  }
+  .el-autocomplete {
+    width: 100%;
+  }
+  .el-form-item__content {
+    height: 32px;
+  }
+  // 多选下拉框在搜索框极限小的情况下，可能出现换行的情况，这里避免进行换行
+  .el-select__tags {
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,23 @@
+[class^='el-'],
+[class^='el-']::before,
+[class^='el-']::after {
+  box-sizing: border-box;
+}
+
+[class*=' el-'],
+[class*=' el-']::before,
+[class*=' el-']::after {
+  box-sizing: border-box;
+}
+
+[class^='h-'],
+[class^='h-']::before,
+[class^='h-']::after {
+  box-sizing: border-box;
+}
+
+[class*=' h-'],
+[class*=' h-']::before,
+[class*=' h-']::after {
+  box-sizing: border-box;
+}

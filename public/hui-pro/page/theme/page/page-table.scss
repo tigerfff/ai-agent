@@ -1,0 +1,89 @@
+@include b(page-table) {
+  position: relative;
+  // 占据剩余空间
+  @include when(full) {
+    display: flex;
+    flex: auto;
+    .h-page-table__main {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      .el-table {
+        height: 100%;
+      }
+      .h-page-table__pagination {
+        flex: none;
+      }
+    }
+  }
+  // 滚动条固底
+  @include when(scrollbar-fixed) {
+    .el-scrollbar__bar {
+      position: fixed;
+    }
+  }
+  // 分页栏
+  @include e(pagination) {
+    // 覆盖HUI样式，分页高度为56px
+    .el-pagination--table {
+      .el-pagination-wrapper {
+        height: 56px;
+        & > * {
+          margin-top: 12px;
+        }
+      }
+      .el-pagination__total {
+        margin-left: 0;
+      }
+      .el-pagination__tableRightPageWrapper {
+        right: 0;
+      }
+    }
+    // 固定状态下的分页栏
+    @include m(affix) {
+      position: fixed;
+      z-index: 1002;
+      bottom: 0;
+      border-top: $--page-border;
+    }
+  }
+  // 分页栏开启固定模式时，每页显示条数下拉框的样式类
+  @include e(pagination-dropdown) {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 44px !important;
+  }
+  .el-pagination {
+    background-color: $--color-white;
+  }
+  .h-affix {
+    z-index: 1002;
+    .el-pagination {
+      border-top: $--page-border;
+    }
+  }
+  // 以下为覆盖 Table 样式
+  &:not(.has-border) {
+    // 移除表格左侧和右侧的边框
+    .el-table {
+      border-left: none;
+      &::after {
+        width: 0;
+      }
+    }
+  }
+  // 移除单元格的padding值
+  .el-table td {
+    padding: 0;
+  }
+  .el-table__header-wrapper {
+    position: relative;
+    z-index: 2;
+  }
+  .el-table__fixed-header-wrapper {
+    z-index: 4;
+  }
+  .el-table .el-table__fixed-box-shadow {
+    z-index: 2;
+  }
+}

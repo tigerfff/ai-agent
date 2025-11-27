@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Pagination event and complex test 1`] = `
+"<div class=\\"el-pagination\\"><span class=\\"el-pagination__sizes\\"><div class=\\"el-select\\"><!----> <span class=\\"el-select__text\\"></span> <!----> <div class=\\"el-input el-input--suffix\\"><!----> <!----> <!----> <input autocomplete=\\"off\\" placeholder=\\"Select\\" readonly=\\"readonly\\" unselectable=\\"off\\" type=\\"text\\" rows=\\"2\\" tipsmaxwidth=\\"480\\" tipsplacement=\\"top-start\\" tipsoffset=\\"0\\" tipstrigger=\\"focus\\" tipsclass=\\"\\" debounce=\\"0\\" title=\\"\\" class=\\"el-input__inner\\"> <!----> <span class=\\"el-input__suffix\\"><span class=\\"el-input__suffix-inner\\"><i class=\\"el-input__icon h-icon-angle_down_sm\\"></i> <!----></span></span> <!----> <!----></div> <div class=\\"el-select-dropdown el-pagination__paged-select \\" style=\\"display: none;\\"><div class=\\"el-scrollbar is-empty\\" always-show=\\"\\" is-small=\\"\\" style=\\"display: none;\\"><div class=\\"el-select-dropdown__wrap el-scrollbar__wrap el-scrollbar__wrap--hidden-default\\"><ul class=\\"el-scrollbar__view el-select-dropdown__list\\"><li title=\\"\\" class=\\"el-select-dropdown__item selected radio\\"><!----> <span class=\\"\\">
+      10 /page
+    </span> <!----> <!----></li><li title=\\"\\" class=\\"el-select-dropdown__item radio\\"><!----> <span class=\\"\\">
+      20 /page
+    </span> <!----> <!----></li><li title=\\"\\" class=\\"el-select-dropdown__item radio\\"><!----> <span class=\\"\\">
+      30 /page
+    </span> <!----> <!----></li><li title=\\"\\" class=\\"el-select-dropdown__item radio\\"><!----> <span class=\\"\\">
+      40 /page
+    </span> <!----> <!----></li> <!----></ul></div><div class=\\"el-scrollbar__bar is-horizontal\\" style=\\"opacity: 1; height: 12px; display: none;\\"><div class=\\"el-scrollbar__rail\\"><div class=\\"el-scrollbar__thumb\\" style=\\"opacity: 1; transform: translateX(NaN%); webkit-transform: translateX(NaN%);\\"></div></div></div><div class=\\"el-scrollbar__bar is-vertical\\" style=\\"opacity: 1; width: 12px; display: none;\\"><div class=\\"el-scrollbar__rail\\"><div class=\\"el-scrollbar__thumb\\" style=\\"opacity: 1; transform: translateY(NaN%); webkit-transform: translateY(NaN%);\\"></div></div></div></div> <!----></div></div></span><button type=\\"button\\" class=\\"btn-prev\\"><i class=\\"el-icon h-icon-angle_left\\"></i></button><ul class=\\"el-pager\\"><li class=\\"number\\">
+    1
+  </li> <!----> <li class=\\"number\\">
+    3
+  </li><li class=\\"number\\">
+    4
+  </li><li class=\\"number active\\">
+    5
+  </li><li class=\\"number\\">
+    6
+  </li><li class=\\"number\\">
+    7
+  </li> <li class=\\"el-tooltip el-icon more btn-quicknext h-icon-more_hori\\" aria-describedby=\\"undefined\\" tabindex=\\"undefined\\"></li> <li class=\\"number\\">
+    40
+  </li></ul><button type=\\"button\\" class=\\"btn-next\\"><i class=\\"el-icon h-icon-angle_right\\"></i></button><span class=\\"el-pagination__jump\\">Go to<div class=\\"el-input el-pagination__editor\\"><!----> <!----> <!----> <input autocomplete=\\"off\\" type=\\"text\\" rows=\\"2\\" validateevent=\\"true\\" tipsmaxwidth=\\"480\\" tipsplacement=\\"top-start\\" tipsoffset=\\"0\\" tipstrigger=\\"focus\\" tipsclass=\\"\\" debounce=\\"0\\" min=\\"1\\" class=\\"el-input__inner\\"> <!----> <!----> <!----> <!----></div></span></div>"
+`;
+
+exports[`Pagination mini test 1`] = `"<div class=\\"el-pagination el-pagination--small\\"><button type=\\"button\\" class=\\"btn-prev disabled\\"><i class=\\"el-icon h-icon-angle_left\\"></i></button><div class=\\"el-pagination__mini-pager\\"><div class=\\"el-pagination__mini-pager-num\\">1</div><div class=\\"el-pagination__mini-pager-slash\\"> / </div><div class=\\"el-pagination__mini-pager-max-num\\">5</div></div><button type=\\"button\\" class=\\"btn-next\\"><i class=\\"el-icon h-icon-angle_right\\"></i></button></div>"`;
+
+exports[`Pagination snapshot test 1`] = `
+"<div class=\\"el-pagination\\"><button type=\\"button\\" class=\\"btn-prev disabled\\"><i class=\\"el-icon h-icon-angle_left\\"></i></button><ul class=\\"el-pager\\"><li class=\\"number active\\">
+    1
+  </li> <!----> <li class=\\"number\\">
+    2
+  </li><li class=\\"number\\">
+    3
+  </li><li class=\\"number\\">
+    4
+  </li> <!----> <li class=\\"number\\">
+    5
+  </li></ul><button type=\\"button\\" class=\\"btn-next\\"><i class=\\"el-icon h-icon-angle_right\\"></i></button></div>"
+`;

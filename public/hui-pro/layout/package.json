@@ -1,0 +1,12 @@
+{
+  "name": "@hui-pro/layout",
+  "version": "2.0.0-beta.2",
+  "description": "",
+  "main": "index.js",
+  "author": "chenguanbin",
+  "dependencies": {
+    "@hui-pro/theme": "^2.0.0-beta.1",
+    "@hui-pro/utils": "^2.0.0-beta.2"
+  },
+  "gitHead": "98cb971033897ecc2fa165b4441a485ebf021613"
+}

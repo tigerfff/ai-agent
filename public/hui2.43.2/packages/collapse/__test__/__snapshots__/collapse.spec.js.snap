@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Collapse snapshot test 1`] = `
+"<div class=\\"el-collapse\\"><div class=\\"el-collapse-item\\"><div class=\\"el-collapse-item__header\\"><i class=\\"el-collapse-item__arrow h-icon-angle_right_sm\\"></i> <span>
+        a
+      </span> <!----></div> <div class=\\"el-collapse-item__wrap\\" style=\\"display: none;\\"><div class=\\"el-collapse-item__content\\">
+          aaa
+        </div></div></div> <div class=\\"el-collapse-item\\"><div class=\\"el-collapse-item__header\\"><i class=\\"el-collapse-item__arrow h-icon-angle_right_sm\\"></i> <span>
+        b
+      </span> <!----></div> <div class=\\"el-collapse-item__wrap\\" style=\\"display: none;\\"><div class=\\"el-collapse-item__content\\">
+          bbb
+        </div></div></div></div>"
+`;

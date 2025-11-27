@@ -1,0 +1,22 @@
+@charset "UTF-8";
+@import 'mixins/mixins';
+@import 'common/var';
+
+@include b(checkbox-group) {
+  display: inline-block;
+  font-size: 0;
+  line-height: 1.4;
+  vertical-align: middle;
+
+  & .el-checkbox {
+    margin-right: 16px;
+    font-size: $--checkbox-font-size;
+  }
+}
+@include b(checkbox-group--vertical) {
+  & .el-checkbox {
+    display: block;
+    margin-right: 16px;
+    margin-bottom: 16px;
+  }
+}

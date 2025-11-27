@@ -1,0 +1,13 @@
+{
+  "name": "@hui-pro/page",
+  "version": "2.0.0-beta.2",
+  "description": "",
+  "main": "index.js",
+  "author": "chenguanbin",
+  "dependencies": {
+    "@hui-pro/ellipsis": "^2.0.0-beta.1",
+    "@hui-pro/layout": "^2.0.0-beta.1",
+    "@hui-pro/theme": "^2.0.0-beta.1",
+    "@hui-pro/utils": "^2.0.0-beta.1"
+  }
+}

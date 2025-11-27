@@ -1,0 +1,60 @@
+/* ------------------------------*\
+    页面初始化样式
+
+    @author chenguanbin
+    @date 2019-02-18
+\*------------------------------ */
+
+$--font-family: 'segoe UI', 'PingFang SC', 'Microsoft Yahei', 'arial',
+  'Helvetica', 'sans-serif';
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  position: relative;
+  height: 100%;
+  background-color: $--color-white;
+  color: $--color-neutral-2;
+  font-family: $--font-family;
+  font-size: $--font-size;
+  font-style: normal;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+input,
+textarea,
+button {
+  font-family: $--font-family; // 防止被浏览器默认样式覆盖
+}
+
+// 字体修改后，默认的 font-weight 500 会加粗，改为 400
+.h-page .el-button {
+  font-weight: 400;
+}
+
+// 移除IE下自带的 input 清空图标和密码显示图标
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+}

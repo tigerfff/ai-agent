@@ -1,0 +1,35 @@
+// 页面上的 tabs
+.page-tabs {
+  height: 40px;
+  .el-tabs__header {
+    margin: 0;
+  }
+  .el-tabs__item {
+    height: 36px;
+  }
+}
+
+// 表单
+.page-form {
+  width: 480px;
+  margin-top: 40px;
+}
+
+// 详情页中的分组样式
+.page-detail-group {
+  padding: 0 28px;
+  margin-bottom: 24px;
+  &:first-child {
+    margin-top: 40px;
+  }
+}
+
+// 表格中的操作列按钮样式
+.page-table-action {
+  .el-button.is-icon-text {
+    padding: 0;
+  }
+  .el-button + .el-button:not(.el-button--mini) {
+    margin-left: 0;
+  }
+}

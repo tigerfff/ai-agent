@@ -1,0 +1,56 @@
+@import '../common/var';
+@import '../mixins/mixins';
+@import '../mixins/utils';
+@import './picker-panel.scss';
+
+@include b(date-picker) {
+  width: 256px;
+
+  &.has-sidebar {
+    width: 376px;
+  }
+
+  @include e(editor-wrap) {
+    position: relative;
+    display: table-cell;
+    padding: 8px 0;
+    border-top: 1px solid $--datepicker-inner-border-color;
+  }
+
+  @include e(time-header) {
+    position: relative;
+    display: table;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 16px;
+    //border-bottom: 1px solid $--datepicker-inner-border-color;
+    font-size: 12px;
+  }
+
+  @include e(header) {
+    display: flex;
+    height: 48px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    text-align: center;
+
+    @include m(bordered) {
+      & + .el-picker-panel__content {
+        margin-top: 0;
+      }
+    }
+  }
+
+  @include e(time-wrap) {
+    padding: 10px;
+    text-align: center;
+  }
+
+  @include e(time-label) {
+    margin-left: 10px;
+    cursor: pointer;
+    float: left;
+    line-height: 30px;
+  }
+}

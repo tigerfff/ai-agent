@@ -1,0 +1,3196 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`table snapshot 合并行或列 1`] = `
+<div>
+  <div
+    class="el-table el-table--fit el-table--border el-table--enable-row-hover el-table--enable-row-transition"
+    style="width: 100%;"
+  >
+    <div
+      class="hidden-columns"
+    >
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+    </div>
+     
+    <div
+      class="el-table__header-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__header"
+        style="width: 477px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_23"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_24"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_25"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_26"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_27"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_28"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_29"
+            width="75"
+          />
+        </colgroup>
+        <thead>
+          <tr
+            class=""
+          >
+            <th
+              class="el-table_1_column_23     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  ID
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_24     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  姓名
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_25     is-leaf is-sortable"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <span
+                  class="has-icon-right"
+                >
+                  分类
+                </span>
+                <span
+                  class="caret-wrapper"
+                >
+                  <i
+                    class="sort-caret ascending"
+                  />
+                  <i
+                    class="sort-caret descending"
+                  />
+                </span>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_26     is-leaf is-sortable"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <span
+                  class="has-icon-right"
+                >
+                  单位
+                </span>
+                <span
+                  class="caret-wrapper"
+                >
+                  <i
+                    class="sort-caret ascending"
+                  />
+                  <i
+                    class="sort-caret descending"
+                  />
+                </span>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_27     is-leaf is-sortable"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <span
+                  class="has-icon-right"
+                >
+                  地址
+                </span>
+                <span
+                  class="caret-wrapper"
+                >
+                  <i
+                    class="sort-caret ascending"
+                  />
+                  <i
+                    class="sort-caret descending"
+                  />
+                </span>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_28     is-leaf is-sortable"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <span
+                  class="has-icon-right"
+                >
+                  所属主体
+                </span>
+                <span
+                  class="caret-wrapper"
+                >
+                  <i
+                    class="sort-caret ascending"
+                  />
+                  <i
+                    class="sort-caret descending"
+                  />
+                </span>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_29     is-leaf is-sortable"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <span
+                  class="has-icon-right"
+                >
+                  主体编号
+                </span>
+                <span
+                  class="caret-wrapper"
+                >
+                  <i
+                    class="sort-caret ascending"
+                  />
+                  <i
+                    class="sort-caret descending"
+                  />
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+     
+    <div
+      class="el-table__body-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__body"
+        style="width: 477px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_23"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_24"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_25"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_26"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_27"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_28"
+            width="75"
+          />
+          <col
+            name="el-table_1_column_29"
+            width="75"
+          />
+        </colgroup>
+        <tbody>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_23  "
+              colspan="2"
+              rowspan="1"
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987122
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_25  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  嗯啊
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_26  "
+              colspan="1"
+              rowspan="0"
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_27  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  阡陌路
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_28  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_29  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  10333
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_23  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987123
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_24  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  AI Cloud
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_25  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  嗯啊
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_27  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  阡陌路
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_28  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_29  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  10333
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_23  "
+              colspan="2"
+              rowspan="1"
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987125
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_25  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  嗯啊
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_27  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  阡陌路
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_28  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_29  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  10333
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_23  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987126
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_24  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  AI Cloud
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_25  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  嗯啊
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_27  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  阡陌路
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_28  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_29  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  10333
+                </div>
+              </div>
+            </td>
+          </tr>
+          <!---->
+        </tbody>
+      </table>
+       
+      <!---->
+       
+      <!---->
+    </div>
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <div
+      class="el-table__column-resize-proxy"
+      style="display: none;"
+    />
+  </div>
+</div>
+`;
+
+exports[`table snapshot 基础表格 1`] = `
+<div
+  class="el-table el-table--fit el-table--enable-row-hover el-table--enable-row-transition"
+  style="width: 100%;"
+>
+  <div
+    class="hidden-columns"
+  >
+    <div />
+     
+    <div />
+     
+    <div />
+  </div>
+   
+  <div
+    class="el-table__header-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__header"
+      style="width: 381px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_1"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_2"
+          width="150"
+        />
+        <col
+          name="el-table_1_column_3"
+          width="51"
+        />
+      </colgroup>
+      <thead>
+        <tr
+          class=""
+        >
+          <th
+            class="el-table_1_column_1     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                日期
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_2     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                品牌
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_3     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                地址
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+   
+  <div
+    class="el-table__body-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__body"
+      style="width: 381px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_1"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_2"
+          width="150"
+        />
+        <col
+          name="el-table_1_column_3"
+          width="51"
+        />
+      </colgroup>
+      <tbody>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_1  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/02
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_2  "
+          >
+            <div
+              class="cell el-tooltip"
+            >
+              <div
+                class="label"
+              >
+                海康威视海康威视海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_3  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_1  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/04
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_2  "
+          >
+            <div
+              class="cell el-tooltip"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_3  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_1  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/01
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_2  "
+          >
+            <div
+              class="cell el-tooltip"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_3  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_1  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/03
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_2  "
+          >
+            <div
+              class="cell el-tooltip"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_3  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <!---->
+      </tbody>
+    </table>
+     
+    <!---->
+     
+    <!---->
+  </div>
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <div
+    class="el-table__column-resize-proxy"
+    style="display: none;"
+  />
+</div>
+`;
+
+exports[`table snapshot 带斑马纹表格 1`] = `
+<div
+  class="el-table el-table--fit el-table--striped el-table--enable-row-hover el-table--enable-row-transition"
+  style="width: 100%;"
+>
+  <div
+    class="hidden-columns"
+  >
+    <div />
+     
+    <div />
+     
+    <div />
+  </div>
+   
+  <div
+    class="el-table__header-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__header"
+      style="width: 411px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_4"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_5"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_6"
+          width="51"
+        />
+      </colgroup>
+      <thead>
+        <tr
+          class=""
+        >
+          <th
+            class="el-table_1_column_4     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                日期
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_5     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                品牌
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_6     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                地址
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+   
+  <div
+    class="el-table__body-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__body"
+      style="width: 411px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_4"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_5"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_6"
+          width="51"
+        />
+      </colgroup>
+      <tbody>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_4  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/02
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_5  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视海康威视海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_6  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row el-table__row--striped"
+        >
+          <td
+            class="el-table_1_column_4  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/04
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_5  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_6  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_4  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/01
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_5  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_6  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row el-table__row--striped"
+        >
+          <td
+            class="el-table_1_column_4  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/03
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_5  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_6  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <!---->
+      </tbody>
+    </table>
+     
+    <!---->
+     
+    <!---->
+  </div>
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <div
+    class="el-table__column-resize-proxy"
+    style="display: none;"
+  />
+</div>
+`;
+
+exports[`table snapshot 带状态表格 1`] = `
+<div
+  class="el-table el-table--fit el-table--enable-row-hover el-table--enable-row-transition"
+  style="width: 100%;"
+>
+  <div
+    class="hidden-columns"
+  >
+    <div />
+     
+    <div />
+     
+    <div />
+  </div>
+   
+  <div
+    class="el-table__header-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__header"
+      style="width: 411px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_10"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_11"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_12"
+          width="51"
+        />
+      </colgroup>
+      <thead>
+        <tr
+          class=""
+        >
+          <th
+            class="el-table_1_column_10     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                日期
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_11     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                品牌
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_12     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                地址
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+   
+  <div
+    class="el-table__body-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__body"
+      style="width: 411px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_10"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_11"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_12"
+          width="51"
+        />
+      </colgroup>
+      <tbody>
+        <tr
+          class="el-table__row "
+        >
+          <td
+            class="el-table_1_column_10  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/02
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_11  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视海康威视海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_12  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row info-row"
+        >
+          <td
+            class="el-table_1_column_10  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/04
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_11  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_12  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row "
+        >
+          <td
+            class="el-table_1_column_10  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/01
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_11  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_12  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row positive-row"
+        >
+          <td
+            class="el-table_1_column_10  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/03
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_11  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_12  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <!---->
+      </tbody>
+    </table>
+     
+    <!---->
+     
+    <!---->
+  </div>
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <div
+    class="el-table__column-resize-proxy"
+    style="display: none;"
+  />
+</div>
+`;
+
+exports[`table snapshot 带边框表格 1`] = `
+<div
+  class="el-table el-table--fit el-table--border el-table--enable-row-hover el-table--enable-row-transition"
+  style="width: 100%;"
+>
+  <div
+    class="hidden-columns"
+  >
+    <div />
+     
+    <div />
+     
+    <div />
+  </div>
+   
+  <div
+    class="el-table__header-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__header"
+      style="width: 411px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_7"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_8"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_9"
+          width="51"
+        />
+      </colgroup>
+      <thead>
+        <tr
+          class=""
+        >
+          <th
+            class="el-table_1_column_7     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                日期
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_8     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                品牌
+              </div>
+            </div>
+          </th>
+          <th
+            class="el-table_1_column_9     is-leaf"
+            colspan="1"
+            rowspan="1"
+          >
+            <div
+              class="cell show-header-overflow"
+            >
+              <div
+                class="label"
+              >
+                地址
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+   
+  <div
+    class="el-table__body-wrapper"
+  >
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      class="el-table__body"
+      style="width: 411px;"
+    >
+      <colgroup>
+        <col
+          name="el-table_1_column_7"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_8"
+          width="180"
+        />
+        <col
+          name="el-table_1_column_9"
+          width="51"
+        />
+      </colgroup>
+      <tbody>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_7  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/02
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_8  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视海康威视海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_9  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_7  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/04
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_8  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_9  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_7  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/01
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_8  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_9  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="el-table__row"
+        >
+          <td
+            class="el-table_1_column_7  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                2018/01/03
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_8  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                海康威视
+              </div>
+            </div>
+          </td>
+          <td
+            class="el-table_1_column_9  "
+          >
+            <div
+              class="cell show-overflow-title"
+            >
+              <div
+                class="label"
+              >
+                杭州市滨江区阡陌路555号
+              </div>
+            </div>
+          </td>
+        </tr>
+        <!---->
+      </tbody>
+    </table>
+     
+    <!---->
+     
+    <!---->
+  </div>
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <!---->
+   
+  <div
+    class="el-table__column-resize-proxy"
+    style="display: none;"
+  />
+</div>
+`;
+
+exports[`table snapshot 表尾合计行 1`] = `
+<div>
+  <div
+    class="el-table el-table--fit el-table--enable-row-hover el-table--enable-row-transition"
+    style="width: 100%;"
+  >
+    <div
+      class="hidden-columns"
+    >
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+    </div>
+     
+    <div
+      class="el-table__header-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__header"
+        style="width: 384px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_13"
+            width="180"
+          />
+          <col
+            name="el-table_1_column_14"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_15"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_16"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_17"
+            width="51"
+          />
+        </colgroup>
+        <thead>
+          <tr
+            class=""
+          >
+            <th
+              class="el-table_1_column_13     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  ID
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_14     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  品牌
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_15     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  数值 1
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_16     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  数值 2
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_17     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  数值 3
+                </div>
+              </div>
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+     
+    <div
+      class="el-table__body-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__body"
+        style="width: 384px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_13"
+            width="180"
+          />
+          <col
+            name="el-table_1_column_14"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_15"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_16"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_17"
+            width="51"
+          />
+        </colgroup>
+        <tbody>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_13  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987122
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_14  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_15  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  234
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_16  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  3.2
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_17  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  10
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_13  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987123
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_14  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_15  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  165
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_16  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  4.43
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_17  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_13  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987124
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_14  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_15  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  324
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_16  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  1.9
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_17  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  9
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_13  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987125
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_14  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_15  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  621
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_16  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  2.2
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_17  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  17
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="el-table__row"
+          >
+            <td
+              class="el-table_1_column_13  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  12987126
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_14  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  海康威视
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_15  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  539
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_16  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  4.1
+                </div>
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_17  "
+            >
+              <div
+                class="cell show-overflow-title"
+              >
+                <div
+                  class="label"
+                >
+                  15
+                </div>
+              </div>
+            </td>
+          </tr>
+          <!---->
+        </tbody>
+      </table>
+       
+      <!---->
+       
+      <!---->
+    </div>
+     
+    <div
+      class="el-table__footer-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__footer"
+        style="width: 384px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_13"
+            width="180"
+          />
+          <col
+            name="el-table_1_column_14"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_15"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_16"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_17"
+            width="51"
+          />
+        </colgroup>
+        <tbody>
+          <tr>
+            <td
+              class="el-table_1_column_13 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                Sum
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_14 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              />
+            </td>
+            <td
+              class="el-table_1_column_15 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                1883
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_16 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                15.83
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_17 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                63
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <div
+      class="el-table__column-resize-proxy"
+      style="display: none;"
+    />
+  </div>
+   
+  <div
+    class="el-table el-table--fit el-table--enable-row-hover el-table--enable-row-transition"
+    style="width: 100%; margin-top: 20px; height: 200px;"
+  >
+    <div
+      class="hidden-columns"
+    >
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+       
+      <div />
+    </div>
+     
+    <div
+      class="el-table__header-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__header"
+        style="width: 384px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_18"
+            width="180"
+          />
+          <col
+            name="el-table_1_column_19"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_20"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_21"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_22"
+            width="51"
+          />
+        </colgroup>
+        <thead>
+          <tr
+            class=""
+          >
+            <th
+              class="el-table_1_column_18     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  ID
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_19     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  品牌
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_20     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  数值 1（¥）
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_21     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  数值 2（¥）
+                </div>
+              </div>
+            </th>
+            <th
+              class="el-table_1_column_22     is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell show-header-overflow"
+              >
+                <div
+                  class="label"
+                >
+                  数值 3（¥）
+                </div>
+              </div>
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+     
+    <div
+      class="el-table__body-wrapper"
+      style="height: 1px;"
+    >
+      <div
+        class="el-scrollbar"
+      >
+        <div
+          class="el-table-scrollbar__wrap el-scrollbar__wrap el-scrollbar__wrap--hidden-default"
+        >
+          <div
+            class="el-scrollbar__view el-table-scrollbar__view"
+            style="width: 384px;"
+          >
+            <table
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              class="el-table__body"
+              style="width: 384px;"
+            >
+              <colgroup>
+                <col
+                  name="el-table_1_column_18"
+                  width="180"
+                />
+                <col
+                  name="el-table_1_column_19"
+                  width="51"
+                />
+                <col
+                  name="el-table_1_column_20"
+                  width="51"
+                />
+                <col
+                  name="el-table_1_column_21"
+                  width="51"
+                />
+                <col
+                  name="el-table_1_column_22"
+                  width="51"
+                />
+              </colgroup>
+              <tbody>
+                <tr
+                  class="el-table__row"
+                >
+                  <td
+                    class="el-table_1_column_18  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        12987122
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_19  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        海康威视
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_20  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        234
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_21  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        3.2
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_22  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        10
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="el-table__row"
+                >
+                  <td
+                    class="el-table_1_column_18  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        12987123
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_19  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        海康威视
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_20  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        165
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_21  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        4.43
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_22  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        12
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="el-table__row"
+                >
+                  <td
+                    class="el-table_1_column_18  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        12987124
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_19  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        海康威视
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_20  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        324
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_21  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        1.9
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_22  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        9
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="el-table__row"
+                >
+                  <td
+                    class="el-table_1_column_18  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        12987125
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_19  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        海康威视
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_20  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        621
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_21  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        2.2
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_22  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        17
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="el-table__row"
+                >
+                  <td
+                    class="el-table_1_column_18  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        12987126
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_19  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        海康威视
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_20  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        539
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_21  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        4.1
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="el-table_1_column_22  "
+                  >
+                    <div
+                      class="cell show-overflow-title"
+                    >
+                      <div
+                        class="label"
+                      >
+                        15
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <!---->
+              </tbody>
+            </table>
+             
+            <!---->
+          </div>
+        </div>
+        <div
+          class="el-scrollbar__bar is-horizontal"
+          style="opacity: 1; height: 12px; display: none;"
+        >
+          <div
+            class="el-scrollbar__rail"
+          >
+            <div
+              class="el-scrollbar__thumb"
+              style="opacity: 1; transform: translateX(NaN%); webkit-transform: translateX(NaN%);"
+            />
+          </div>
+        </div>
+        <div
+          class="el-scrollbar__bar is-vertical"
+          style="opacity: 1; width: 12px; display: none;"
+        >
+          <div
+            class="el-scrollbar__rail"
+          >
+            <div
+              class="el-scrollbar__thumb"
+              style="opacity: 1; transform: translateY(NaN%); webkit-transform: translateY(NaN%);"
+            />
+          </div>
+        </div>
+      </div>
+       
+      <!---->
+    </div>
+     
+    <div
+      class="el-table__footer-wrapper"
+    >
+      <table
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        class="el-table__footer"
+        style="width: 384px;"
+      >
+        <colgroup>
+          <col
+            name="el-table_1_column_18"
+            width="180"
+          />
+          <col
+            name="el-table_1_column_19"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_20"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_21"
+            width="51"
+          />
+          <col
+            name="el-table_1_column_22"
+            width="51"
+          />
+        </colgroup>
+        <tbody>
+          <tr>
+            <td
+              class="el-table_1_column_18 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                总价
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_19 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                N/A
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_20 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                ¥ 1883
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_21 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                ¥ 15.83
+              </div>
+            </td>
+            <td
+              class="el-table_1_column_22 is-leaf"
+              colspan="1"
+              rowspan="1"
+            >
+              <div
+                class="cell"
+              >
+                ¥ 63
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <!---->
+     
+    <div
+      class="el-table__column-resize-proxy"
+      style="display: none;"
+    />
+  </div>
+</div>
+`;

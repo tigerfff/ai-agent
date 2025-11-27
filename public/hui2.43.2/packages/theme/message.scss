@@ -1,0 +1,97 @@
+@import 'mixins/mixins';
+@import './common/var.scss';
+
+@include b(message) {
+  position: fixed;
+  left: 50%;
+  overflow: hidden;
+  min-width: $--message-min-width;
+  max-width: $--message-max-width;
+  box-sizing: border-box;
+  padding: $--message-padding;
+  background-color: $--fill;
+  border-radius: $--border-radius-sm;
+  box-shadow: $--box-shadow-lg;
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  transition: opacity 0.3s, top 0.4s, transform 0.4s;
+
+  @include e(group) {
+    position: relative;
+
+    /* display: flex; */
+    align-items: center;
+
+    /* height: 20px; */
+    line-height: 20px;
+
+    @include when(with-icon) {
+      margin-left: 0;
+    }
+
+    @include when(show-close) {
+      p {
+        margin-right: 32px;
+      }
+    }
+
+    & p {
+      margin: 0 4px 0 36px;
+
+      @include when(close) {
+        margin-right: 28px;
+      }
+
+      /* white-space: nowrap; */
+      color: $--message-content-color;
+      font-size: $--font-size;
+      line-height: 20px;
+      text-align: justify;
+      word-break: break-word;
+    }
+  }
+
+  @include e(img) {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 28px;
+  }
+
+  @include e(typeImg) {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 24px;
+  }
+
+  @include e(icon) {
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @include e(closeBtn) {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    color: $--message-close-color;
+    cursor: pointer;
+    font-size: 24px;
+    transform: translateY(-50%);
+
+    &:hover {
+      color: $--message-close-hover-color;
+    }
+
+    &:active {
+      color: $--message-close-active-color;
+    }
+  }
+}
+
+.el-message-fade-enter,
+.el-message-fade-leave-active {
+  opacity: 0;
+  -ms-transform: translate(-50%, -100%);
+  transform: translate(-50%, -100%);
+}

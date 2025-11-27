@@ -1,0 +1,40 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+@include b(select-group) {
+  padding: 0;
+  margin: 0;
+
+  @include e(wrap) {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    // &:not(:last-of-type) {
+    //   padding-bottom: 24px;
+
+    //   &::after {
+    //     content: '';
+    //     position: absolute;
+    //     display: block;
+    //     left: $gap;
+    //     right: $gap;
+    //     bottom: 12px;
+    //     height: 1px;
+    //     background: $--color-neutral-6;
+    //   }
+    // }
+  }
+
+  @include e(title) {
+    height: $--select-group-height;
+    padding-left: 8px;
+    color: $--select-group-color;
+    font-size: $--select-group-font-size;
+    line-height: $--select-group-height;
+  }
+
+  // & .el-select-dropdown__item {
+  //   padding-left: 20px;
+  // }
+}

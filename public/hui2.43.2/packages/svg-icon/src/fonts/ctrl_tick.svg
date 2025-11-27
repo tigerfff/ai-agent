@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="5 5 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <desc>Created with Sketch.</desc>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g class="el-checkbox__tick">
+            <g transform="translate(5.000000, 5.000000)">
+                <rect fill-opacity="0" x="0" y="0" width="14" height="14" rx="1" ></rect>
+                <g transform="translate(2.000000, 3.000000)">
+                    <path d="M3.8044344,5.5168557 L8.6780673,0.76615083 C8.9540622,0.44048717 9.4314325,0.40937065 9.7443038,0.69665013 C10.0571751,0.98392961 10.0870694,1.4808182 9.8110745,1.80648186 L4.3639727,7.2338586 C4.060806,7.591584 3.5239337,7.5881988 3.2249529,7.2266766 L0.18291667,4.5483022 C-0.08926753,4.2191821 -0.05359216,3.7227069 0.26259985,3.4393939 C0.57879185,3.156081 1.055765,3.193215 1.3279492,3.5223351 L3.8044344,5.5168557 Z"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

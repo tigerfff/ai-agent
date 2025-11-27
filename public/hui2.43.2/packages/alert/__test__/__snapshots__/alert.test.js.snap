@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Alert snapshot test 1`] = `
+"<div class=\\"el-alert el-alert--success is-simple\\"><i class=\\"el-alert__icon h-icon-feedback_success_sm\\"><span class=\\"path1\\"></span> <span class=\\"path2\\"></span></i> <div class=\\"el-alert__content is-icon is-close\\"><span class=\\"el-alert__title is-simple\\">
+          成功提示的文案
+        </span> <!----> <i class=\\"el-alert__closebtn h-icon-close_sm\\">
+        
+      </i></div></div>"
+`;
+
+exports[`Alert snapshot test 2`] = `
+"<div class=\\"el-alert el-alert--error is-center\\"><!----> <div class=\\"el-alert__content\\"><span class=\\"el-alert__title\\"><span simple=\\"\\">系统部分授权将于2019-03-26 23:59:59过期，请联系管理员，详情请查看<a href=\\"#\\" class=\\"link\\">运行管理中心</a>。</span></span> <!----> <i class=\\"el-alert__closebtn h-icon-close_sm\\" style=\\"display: none;\\">
+        
+      </i></div></div>"
+`;

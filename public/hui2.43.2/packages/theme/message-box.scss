@@ -1,0 +1,195 @@
+@import './common/var.scss';
+@import './common/popup.scss';
+@import './button.scss';
+@import './input.scss';
+
+@include b(message-box) {
+  display: inline-block;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background-color: $--fill;
+  border-radius: $--msgbox-border-radius;
+  box-shadow: $--box-shadow-lg;
+  font-size: $--msgbox-font-size;
+  text-align: left;
+  vertical-align: middle;
+
+  @include m(small) {
+    width: $--msgbox-width-small;
+  }
+  @include m(middle) {
+    width: $--msgbox-width-middle;
+  }
+  @include m(large) {
+    width: $--msgbox-width-large;
+  }
+
+  @include e(wrapper) {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    &::after {
+      display: inline-block;
+      width: 0;
+      height: 100%;
+      content: '';
+      vertical-align: middle;
+    }
+  }
+
+  @include e(header) {
+    position: relative;
+    padding: 10px 40px 10px 16px;
+    border: 1px solid #e5e5e5;
+  }
+
+  @include e(headerbtn) {
+    position: absolute;
+    top: 11px;
+    right: 11px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+
+    .el-message-box__close {
+      color: #999;
+    }
+
+    &:focus,
+    &:hover {
+      .el-message-box__close {
+        color: $--color-brand;
+      }
+    }
+  }
+
+  @include e(content) {
+    position: relative;
+    overflow: hidden;
+    min-height: 98px;
+    box-sizing: border-box;
+    padding: 36px 24px 24px 40px;
+    color: $--msgbox-content-color;
+    font-size: $--msgbox-content-font-size;
+  }
+
+  @include e(container) {
+    position: relative;
+  }
+
+  @include e(input) {
+    padding-top: 15px;
+    & input.invalid {
+      border-color: $--color-danger;
+      &:focus {
+        border-color: $--color-danger;
+      }
+    }
+  }
+
+  @include e(errormsg) {
+    min-height: 18px;
+    margin-top: 2px;
+    color: $--color-danger;
+    font-size: $--msgbox-error-font-size;
+  }
+
+  @include e(titleWrapper) {
+    display: flex;
+  }
+
+  @include e(title) {
+    display: flex;
+    align-items: center;
+    padding-left: 0;
+    margin-bottom: 0;
+    color: $--msgbox-title-color;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    word-break: break-word;
+  }
+
+  @include e(message) {
+    margin: 0;
+    font-size: 14px;
+    & p {
+      max-height: 120px;
+      margin: 0;
+      line-height: 20px;
+      word-break: break-word;
+    }
+  }
+
+  @include e(btns) {
+    padding: 0 24px 24px;
+    text-align: right;
+
+    & button {
+      min-width: 96px;
+    }
+
+    & button:nth-child(2) {
+      margin-left: 8px;
+    }
+  }
+
+  @include e(btns-reverse) {
+    flex-direction: row-reverse;
+  }
+
+  @include e(status) {
+    position: absolute;
+    top: 24px;
+    font-size: 40px !important;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+}
+
+.msgbox-fade-enter-active {
+  animation: msgbox-fade-in 0.3s;
+}
+
+.msgbox-fade-leave-active {
+  animation: msgbox-fade-out 0.3s;
+  animation-fill-mode: forwards;
+}
+
+/* stylelint-disable */
+_:-ms-fullscreen,
+:root .msgbox-fade-leave-active {
+  animation: none;
+}
+/* stylelint-enable */
+
+@keyframes msgbox-fade-in {
+  0% {
+    opacity: 0;
+    -ms-transform: translate3d(0, -20px, 0);
+    transform: translate3d(0, -20px, 0);
+  }
+  100% {
+    opacity: 1;
+    -ms-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes msgbox-fade-out {
+  0% {
+    opacity: 1;
+    -ms-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    -ms-transform: translate3d(0, -20px, 0);
+    transform: translate3d(0, -20px, 0);
+  }
+}

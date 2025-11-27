@@ -1,0 +1,17 @@
+@include b(page-container) {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 100vh; // 不存在 h-page，使用浏览器高度
+  min-height: 0;
+  flex-direction: column;
+  @include e(main) {
+    display: flex;
+    height: 100%;
+  }
+}
+
+.h-page .h-page-container {
+  height: 100%; // 存在 h-page，使用 100%
+}

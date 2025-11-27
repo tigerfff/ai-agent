@@ -1,0 +1,33 @@
+.page-transfer {
+  padding: 0 4.16%;
+  margin-top: 40px;
+}
+
+// 侧边栏
+.page-transfer-aside {
+  width: 256px;
+  padding: 0 16px;
+  border: 1px solid #e5e5e5;
+  border-right: none;
+}
+.page-transfer-aside__header {
+  display: inline-block;
+  height: 48px;
+  padding: 12px 0;
+  margin: 0;
+  color: #4c4c4c;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 24px;
+}
+.page-transfer-aside__main {
+  height: calc(100% - 80px);
+  padding-top: 8px;
+}
+
+// 操作栏
+.page-transfer-action {
+  margin-top: 48px;
+  margin-bottom: 40px;
+  text-align: center;
+}

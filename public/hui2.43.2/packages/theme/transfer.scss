@@ -1,0 +1,263 @@
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import 'common/var';
+@import 'input';
+@import 'button';
+@import 'checkbox';
+
+@include b(transfer) {
+  font-size: $--font-size;
+
+  @include e(buttons) {
+    display: inline-block;
+    padding: 0 16px;
+    vertical-align: middle;
+
+    &:first-child {
+      margin-bottom: 10px;
+    }
+
+    .el-button {
+      display: block;
+      min-width: 48px;
+      padding: 8px;
+      margin: 0 auto;
+
+      span {
+        margin-left: 0;
+      }
+    }
+  }
+
+  @include e(button) {
+    display: block;
+    padding: 10px;
+    margin: 0 auto;
+    // background-color: $--color-brand;
+    // color: $--color-white;
+    font-size: 0;
+    line-height: 0;
+
+    @include when(with-texts) {
+      border-radius: $--border-radius;
+    }
+
+    // @include when(disabled) {
+    //   border: $--border-base;
+    //   background-color: $--color-neutral-9;
+    //   color: $--color-neutral-5;
+
+    //   &:hover {
+    //     border: $--border-base;
+    //     background-color: $--color-neutral-9;
+    //     color: $--color-neutral-5;
+    //   }
+    // }
+
+    &:first-child {
+      margin-bottom: 10px;
+    }
+
+    &:nth-child(2) {
+      margin: 0;
+    }
+
+    i,
+    span {
+      font-size: 16px;
+    }
+
+    & [class*='h-icon-'] + span {
+      margin-left: 0;
+    }
+  }
+}
+
+@include b(transfer-panel) {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  width: $--transfer-panel-width;
+  max-height: 100%;
+  box-sizing: border-box;
+  border: 1px solid $--transfer-border-color;
+  background: $--fill;
+  border-radius: $--transfer-border-radius;
+  vertical-align: middle;
+
+  @include e(body) {
+    height: $--transfer-panel-body-height;
+
+    @include when(with-footer) {
+      padding-bottom: $--transfer-panel-footer-height;
+    }
+
+    @include when(filterable) {
+      .el-scrollbar {
+        height: $--transfer-panel-body-height - $--transfer-filter-height -
+          $--transfer-filter-height - 14;
+      }
+    }
+  }
+
+  @include e(list) {
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 6px 0;
+    margin: 0;
+    list-style: none;
+
+    @include when(filterable) {
+      padding-top: 0;
+    }
+  }
+
+  @include e(item) {
+    display: block;
+    height: $--transfer-item-height;
+    padding-left: 16px;
+    line-height: $--transfer-item-height;
+
+    & + .el-transfer-panel__item {
+      margin-left: 0;
+    }
+
+    &.el-checkbox {
+      color: $--color-neutral-3;
+    }
+
+    &:hover {
+      // color: $--color-brand;
+    }
+
+    &.el-checkbox .el-checkbox__label {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding-left: 24px;
+      @include utils-ellipsis;
+      // line-height: $--transfer-item-height;
+    }
+
+    .el-checkbox__input {
+      position: absolute;
+      top: 4px;
+    }
+  }
+
+  @include e(filter) {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 $--transfer-panel-padding;
+    // margin: 8px 0;
+    text-align: center;
+
+    .el-input__inner {
+      display: inline-block;
+      width: 100%;
+      height: $--transfer-filter-height;
+      box-sizing: border-box;
+      padding-right: 25px;
+      padding-left: 10px;
+      font-size: 12px;
+    }
+
+    .el-input__icon {
+      position: absolute;
+      top: 4px;
+      right: 16px;
+      margin-left: 5px;
+    }
+
+    .h-icon-close_f {
+      cursor: pointer;
+    }
+  }
+
+  .el-checkbox__label {
+    padding-left: 8px;
+  }
+
+  .el-transfer-panel__header {
+    overflow: hidden;
+    max-width: $--transfer-panel-width-max;
+    height: $--transfer-panel-header-height;
+    box-sizing: border-box;
+    padding: 0 $--transfer-panel-padding;
+    margin: 0;
+    // HUI 2.0 规范无背景与分隔线
+    // border-bottom: 1px solid $--transfer-border-color;
+    // background: $--transfer-panel-header-background;
+    color: $--color-neutral-1;
+    line-height: $--transfer-panel-header-height;
+    text-overflow: ellipsis;
+
+    .el-checkbox {
+      display: block;
+      line-height: 40px;
+
+      .el-checkbox__label {
+        color: $--color-neutral-2;
+        font-size: 16px;
+        font-weight: normal;
+
+        span {
+          position: absolute;
+          right: 15px;
+          color: $--color-neutral-4;
+          font-size: 12px;
+          font-weight: normal;
+        }
+      }
+    }
+  }
+
+  .el-transfer-panel__footer {
+    position: absolute;
+    z-index: $--index-normal;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: $--transfer-panel-footer-height;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid $--transfer-border-color;
+    background: $--fill;
+    @include utils-vertical-center;
+
+    .el-checkbox {
+      padding-left: 20px;
+      color: $--color-neutral-3;
+      vertical-align: middle;
+    }
+  }
+
+  .el-transfer-panel__empty {
+    height: $--transfer-item-height;
+    padding: 6px 15px 0;
+    margin: 0;
+    color: $--color-neutral-4;
+    line-height: $--transfer-item-height;
+    text-align: center;
+  }
+}
+
+@include b(transfer-scrollbar) {
+  @include e(wrap) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+@include b(transfer-scrollbar-filterable) {
+  @include e(wrap) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+}

@@ -1,0 +1,486 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshot test 1`] = `
+NodeList [
+  <div
+    class="el-message-box el-message-box--small"
+  >
+    <div
+      class="el-message-box__content"
+    >
+      <div
+        class="el-message-box__container"
+      >
+        <i
+          class="el-message-box__status h-icon-"
+        >
+          <span
+            class="path1"
+          />
+           
+          <span
+            class="path2"
+          />
+        </i>
+         
+        <!---->
+         
+        <!---->
+         
+        <!---->
+      </div>
+    </div>
+     
+    <div
+      class="el-message-box__btns"
+    >
+      <div>
+        <button
+          class="el-button el-button--default el-button--primary "
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            OK
+          
+          </span>
+        </button>
+         
+        <button
+          class="el-button el-button--default"
+          style="display: none;"
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            Cancel
+          
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`测试-small、middle、large尺寸弹框 1`] = `
+NodeList [
+  <div
+    class="el-message-box el-message-box--small"
+  >
+    <div
+      class="el-message-box__content"
+    >
+      <div
+        class="el-message-box__container"
+      >
+        <i
+          class="el-message-box__status h-icon-"
+        >
+          <span
+            class="path1"
+          />
+           
+          <span
+            class="path2"
+          />
+        </i>
+         
+        <div
+          class="el-message-box__titleWrapper"
+          style="margin-top: 0px;"
+        >
+          <div
+            class="el-message-box__title"
+            style="margin-left: 0px;"
+          >
+            <span>
+              消息
+            </span>
+          </div>
+        </div>
+         
+        <div
+          class="el-message-box__message"
+          style="margin-left: 0px; margin-top: 4px;"
+        >
+          <div
+            class="el-scrollbar"
+          >
+            <div
+              class="el-scrollbar__wrap el-scrollbar__wrap--hidden-default"
+            >
+              <div
+                class="el-scrollbar__view"
+              >
+                <p>
+                  
+                  这是一条small消息
+                
+                </p>
+              </div>
+            </div>
+            <div
+              class="el-scrollbar__bar is-horizontal"
+              style="opacity: 1; height: 12px; display: none;"
+            >
+              <div
+                class="el-scrollbar__rail"
+              >
+                <div
+                  class="el-scrollbar__thumb"
+                  style="opacity: 1; transform: translateX(NaN%); webkit-transform: translateX(NaN%);"
+                />
+              </div>
+            </div>
+            <div
+              class="el-scrollbar__bar is-vertical"
+              style="opacity: 1; width: 12px; display: none;"
+            >
+              <div
+                class="el-scrollbar__rail"
+              >
+                <div
+                  class="el-scrollbar__thumb"
+                  style="opacity: 1; transform: translateY(NaN%); webkit-transform: translateY(NaN%);"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+         
+        <!---->
+      </div>
+    </div>
+     
+    <div
+      class="el-message-box__btns"
+    >
+      <div>
+        <button
+          class="el-button el-button--default el-button--primary "
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            OK
+          
+          </span>
+        </button>
+         
+        <button
+          class="el-button el-button--default"
+          style="display: none;"
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            Cancel
+          
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`测试-small、middle、large尺寸弹框 2`] = `
+NodeList [
+  <div
+    class="el-message-box el-message-box--middle"
+  >
+    <div
+      class="el-message-box__content"
+    >
+      <div
+        class="el-message-box__container"
+      >
+        <i
+          class="el-message-box__status h-icon-"
+        >
+          <span
+            class="path1"
+          />
+           
+          <span
+            class="path2"
+          />
+        </i>
+         
+        <div
+          class="el-message-box__titleWrapper"
+          style="margin-top: 0px;"
+        >
+          <div
+            class="el-message-box__title"
+            style="margin-left: 0px;"
+          >
+            <span>
+              消息
+            </span>
+          </div>
+        </div>
+         
+        <div
+          class="el-message-box__message"
+          style="margin-left: 0px; margin-top: 4px;"
+        >
+          <div
+            class="el-scrollbar"
+          >
+            <div
+              class="el-scrollbar__wrap el-scrollbar__wrap--hidden-default"
+            >
+              <div
+                class="el-scrollbar__view"
+              >
+                <p>
+                  
+                  这是一条middle消息
+                
+                </p>
+              </div>
+            </div>
+            <div
+              class="el-scrollbar__bar is-horizontal"
+              style="opacity: 1; height: 12px; display: none;"
+            >
+              <div
+                class="el-scrollbar__rail"
+              >
+                <div
+                  class="el-scrollbar__thumb"
+                  style="opacity: 1; transform: translateX(NaN%); webkit-transform: translateX(NaN%);"
+                />
+              </div>
+            </div>
+            <div
+              class="el-scrollbar__bar is-vertical"
+              style="opacity: 1; width: 12px; display: none;"
+            >
+              <div
+                class="el-scrollbar__rail"
+              >
+                <div
+                  class="el-scrollbar__thumb"
+                  style="opacity: 1; transform: translateY(NaN%); webkit-transform: translateY(NaN%);"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+         
+        <!---->
+      </div>
+    </div>
+     
+    <div
+      class="el-message-box__btns"
+    >
+      <div>
+        <button
+          class="el-button el-button--default el-button--primary "
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            OK
+          
+          </span>
+        </button>
+         
+        <button
+          class="el-button el-button--default"
+          style="display: none;"
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            Cancel
+          
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`测试-small、middle、large尺寸弹框 3`] = `
+NodeList [
+  <div
+    class="el-message-box el-message-box--large"
+  >
+    <div
+      class="el-message-box__content"
+    >
+      <div
+        class="el-message-box__container"
+      >
+        <i
+          class="el-message-box__status h-icon-"
+        >
+          <span
+            class="path1"
+          />
+           
+          <span
+            class="path2"
+          />
+        </i>
+         
+        <div
+          class="el-message-box__titleWrapper"
+          style="margin-top: 0px;"
+        >
+          <div
+            class="el-message-box__title"
+            style="margin-left: 0px;"
+          >
+            <span>
+              消息
+            </span>
+          </div>
+        </div>
+         
+        <div
+          class="el-message-box__message"
+          style="margin-left: 0px; margin-top: 4px;"
+        >
+          <div
+            class="el-scrollbar"
+          >
+            <div
+              class="el-scrollbar__wrap el-scrollbar__wrap--hidden-default"
+            >
+              <div
+                class="el-scrollbar__view"
+              >
+                <p>
+                  
+                  这是一条large消息
+                
+                </p>
+              </div>
+            </div>
+            <div
+              class="el-scrollbar__bar is-horizontal"
+              style="opacity: 1; height: 12px; display: none;"
+            >
+              <div
+                class="el-scrollbar__rail"
+              >
+                <div
+                  class="el-scrollbar__thumb"
+                  style="opacity: 1; transform: translateX(NaN%); webkit-transform: translateX(NaN%);"
+                />
+              </div>
+            </div>
+            <div
+              class="el-scrollbar__bar is-vertical"
+              style="opacity: 1; width: 12px; display: none;"
+            >
+              <div
+                class="el-scrollbar__rail"
+              >
+                <div
+                  class="el-scrollbar__thumb"
+                  style="opacity: 1; transform: translateY(NaN%); webkit-transform: translateY(NaN%);"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+         
+        <!---->
+      </div>
+    </div>
+     
+    <div
+      class="el-message-box__btns"
+    >
+      <div>
+        <button
+          class="el-button el-button--default el-button--primary "
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            OK
+          
+          </span>
+        </button>
+         
+        <button
+          class="el-button el-button--default"
+          style="display: none;"
+          title=""
+          type="button"
+        >
+          <!---->
+           
+          <!---->
+           
+          <!---->
+           
+          <span>
+            
+            Cancel
+          
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+]
+`;

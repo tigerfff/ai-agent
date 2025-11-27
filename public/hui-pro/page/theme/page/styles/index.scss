@@ -1,0 +1,19 @@
+/** 
+ * 除了布局控件外的页面公共样式
+ */
+@import './common';
+@import './style';
+@import './result-form';
+@import './plan';
+@import './transfer';
+@import './skin';
+@import './data-chart';
+@import './import'; // 未开发完成，先注释代码，以免影响项目中的导入样式
+
+/* 页面滚动条
+------------------------------ */
+.page-scrollbar__wrap,
+.page-scrollbar__view {
+  height: 100%;
+  overflow-x: hidden !important;
+}

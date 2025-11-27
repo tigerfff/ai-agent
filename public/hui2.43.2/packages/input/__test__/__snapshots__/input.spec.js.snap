@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Input snapshot test 1`] = `"<div class=\\"el-input\\"><!----> <!----> <!----> <input autocomplete=\\"off\\" type=\\"text\\" rows=\\"2\\" validateevent=\\"true\\" tipsmaxwidth=\\"480\\" tipsplacement=\\"top-start\\" tipsoffset=\\"0\\" tipstrigger=\\"focus\\" tipsclass=\\"\\" debounce=\\"0\\" class=\\"el-input__inner\\"> <!----> <!----> <!----> <!----></div>"`;

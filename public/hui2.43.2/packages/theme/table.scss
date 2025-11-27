@@ -1,0 +1,648 @@
+@charset "UTF-8";
+@import './checkbox.scss';
+@import './tag.scss';
+@import './common/var.scss';
+
+@include b(table) {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  border: 1px solid $--table-border-color;
+  background-color: $--fill;
+  color: $--table-text-color;
+  font-size: $--font-size;
+
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  &::before {
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: $--table-border-color;
+    content: '';
+  }
+
+  &::after {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background-color: $--table-border-color;
+    content: '';
+  }
+
+  .el-tooltip.cell,
+  .show-overflow-title.cell {
+    min-width: 50px;
+    white-space: nowrap;
+    .label {
+      overflow: hidden;
+      max-width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .is-sortable .has-icon-right {
+    max-width: calc(100% - 24px);
+  }
+  .is-filterable .has-icon-right {
+    max-width: calc(100% - 32px);
+  }
+  .show-header-overflow.cell {
+    min-width: 50px;
+    white-space: nowrap;
+    .label {
+      overflow: hidden;
+      max-width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .has-icon-right {
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+    }
+    .double-icon {
+      max-width: calc(100% - 56px);
+    }
+  }
+
+  @include e(empty-block) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 60px;
+    text-align: center;
+  }
+
+  @include e(empty-text) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: $--color-neutral-3;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+  }
+
+  @include e(expand-column) {
+    .cell {
+      padding: 0;
+      text-align: center;
+    }
+  }
+
+  @include e(expand-icon) {
+    position: relative;
+    height: 24px;
+    color: $--color-neutral-2;
+    cursor: pointer;
+    font-size: 24px;
+    transition: transform 0.2s ease-in-out;
+
+    @include m(expanded) {
+      -ms-transform: rotate(90deg);
+      transform: rotate(90deg);
+    }
+
+    // > .el-icon {
+    //   position: absolute;
+    //   top: 50%;
+    //   left: 50%;
+    //   margin-top: -5px;
+    //   margin-left: -5px;
+    // }
+  }
+
+  @include m(fit) {
+    border-right: 0;
+    border-bottom: 0;
+
+    & th.gutter,
+    td.gutter {
+      border-right-width: 1px;
+    }
+  }
+
+  & th {
+    overflow: hidden;
+    background-color: $--table-header-background !important;
+    color: $--color-neutral-1;
+    font-weight: 500;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  & th,
+  td {
+    position: relative;
+    min-width: 0;
+    height: $--table-th-td-height;
+    box-sizing: border-box;
+    padding: 6px 0;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+
+    &.el-table__expanded-cell {
+      padding: 8px 12px;
+      background-color: $--color-neutral-9;
+    }
+
+    @include when(center) {
+      text-align: center;
+    }
+
+    @include when(left) {
+      text-align: left;
+    }
+
+    @include when(right) {
+      text-align: right;
+    }
+  }
+
+  & th.is-leaf,
+  td {
+    position: static;
+    border-bottom: 1px solid $--table-border-color;
+    background: rgba(255, 255, 255, 0);
+  }
+
+  & th.is-sortable,
+  th.is-filterable {
+    cursor: pointer;
+  }
+
+  @include m(border) {
+    & th {
+      position: initial;
+      border-right: 1px solid $--color-neutral-rgba-7; // 表头边带透明度用于与底色叠加
+      border-bottom: 1px solid $--color-neutral-rgba-7; // 表头边带透明度用于与底色叠加(多级表头情况下)
+      background: rgba(255, 255, 255, 0);
+      > .cell {
+        border: 0;
+        &::after {
+          display: none;
+        }
+      }
+    }
+    & td {
+      border-right: 1px solid $--table-border-color;
+      background: rgba(255, 255, 255, 0);
+    }
+  }
+
+  @include m(hidden) {
+    visibility: hidden;
+  }
+
+  & th > div {
+    overflow: hidden;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & td > div {
+    box-sizing: border-box;
+  }
+
+  @include e([fixed, fixed-right]) {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    /* box-shadow: 1px 0 8px $--table-boxshadow-color1); */
+    overflow-x: hidden;
+
+    &::before {
+      position: absolute;
+      z-index: 4;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background-color: $--table-border-color;
+      content: '';
+    }
+  }
+
+  @include e(fixed-right-patch) {
+    position: absolute;
+    top: -1px;
+    right: 0;
+    border-bottom: 1px solid $--table-border-color;
+    background-color: $--table-base-background;
+  }
+
+  @include e(fixed-right) {
+    top: 0;
+    right: 0;
+    left: auto;
+
+    /* box-shadow: -1px 0 8px $--table-boxshadow-color1); */
+
+    .el-table__fixed-header-wrapper,
+    .el-table__fixed-body-wrapper,
+    .el-table__fixed-footer-wrapper {
+      right: 0;
+      left: auto;
+    }
+  }
+
+  .el-table__fixed-box-shadow {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+  }
+  .el-table__fixed-box-shadow-left {
+    left: 0;
+    box-shadow: 1px 0 8px $--table-boxshadow-color1;
+  }
+  .el-table__fixed-box-shadow-right {
+    right: 0;
+    box-shadow: -1px 0 8px $--table-boxshadow-color1;
+  }
+
+  @include e(fixed-header-wrapper) {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+
+    & thead div {
+      color: $--table-text-color;
+    }
+  }
+
+  @include e(fixed-footer-wrapper) {
+    position: absolute;
+    z-index: 3;
+    bottom: 0;
+    left: 0;
+
+    & tbody td {
+      border-top: 1px solid $--table-border-color;
+      background-color: $--table-footer-background;
+      color: $--table-text-color;
+    }
+  }
+
+  @include e(fixed-body-wrapper) {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+
+    /* top: 37px; */
+    overflow: hidden;
+  }
+
+  @include e([header-wrapper, body-wrapper, footer-wrapper]) {
+    display: flex;
+    width: 100%;
+  }
+
+  @include e(footer-wrapper) {
+    margin-top: -1px;
+    td {
+      border-top: 1px solid $--table-border-color;
+    }
+  }
+
+  @include e([header, body, footer]) {
+    width: 100%;
+    table-layout: fixed;
+    visibility: visible;
+  }
+
+  @include e([header-wrapper, footer-wrapper]) {
+    overflow: hidden;
+    flex: 0 0 auto;
+    flex-direction: column;
+
+    & tbody td {
+      background-color: $--table-footer-background;
+      color: $--table-text-color;
+    }
+  }
+
+  @include e(body-wrapper) {
+    position: relative;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  & th.required > div::before {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+    background: $--table-th-required-background;
+    border-radius: 50%;
+    content: '';
+    vertical-align: middle;
+  }
+
+  & .caret-wrapper {
+    position: relative;
+    display: inline-block;
+    overflow: initial;
+    width: 6px;
+    height: 24px;
+    margin: 0 9px;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  & .sort-caret {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border: 0;
+    content: '';
+
+    &.ascending {
+      top: 5px;
+      border-top: none;
+      border-right: 3px solid transparent;
+      border-bottom: 5px solid $--color-neutral-3;
+      border-left: 3px solid transparent;
+    }
+
+    &.descending {
+      bottom: 6px;
+      border-top: 5px solid $--color-neutral-3;
+      border-right: 3px solid transparent;
+      border-bottom: none;
+      border-left: 3px solid transparent;
+    }
+  }
+
+  & .ascending .sort-caret.ascending {
+    border-bottom-color: $--color-neutral-1;
+  }
+
+  & .descending .sort-caret.descending {
+    border-top-color: $--color-neutral-1;
+  }
+
+  & th.gutter,
+  td.gutter {
+    width: 15px;
+    padding: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+  }
+
+  & td.gutter {
+    width: 0;
+  }
+
+  th.is-hidden,
+  & tr.is-hidden {
+    > * {
+      visibility: hidden;
+    }
+  }
+
+  & .cell {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-right: 12px;
+    padding-left: 12px;
+    line-height: $--table-lineheight;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: normal;
+    word-break: break-all;
+    word-break: break-word;
+  }
+  & th > .cell {
+    max-height: $--table-th-td-height;
+    &.highlight {
+      /* color: $--color-brand); */
+    }
+  }
+
+  & th:not(:first-child) > .cell::after {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 0;
+    width: 1px;
+    height: 16px;
+    margin-top: -8px;
+    background-color: $--color-neutral-5;
+    content: '';
+  }
+
+  & tr input[type='checkbox'] {
+    margin: 0;
+  }
+
+  & tr {
+    background-color: $--fill;
+  }
+
+  @include m(striped) {
+    &:not(.el-table--border) {
+      td {
+        border: none;
+      }
+    }
+    & .el-table__body {
+      & tr.el-table__row--striped {
+        td {
+          background: $--table-tr-striped-background;
+          // background-clip: padding-box;
+        }
+
+        &.current-row td {
+          background: $--table-tr-select-background;
+        }
+      }
+    }
+  }
+
+  @include e(body) {
+    td {
+      button {
+        min-width: auto;
+      }
+    }
+    tr.current-row > td {
+      background: $--table-tr-select-background;
+    }
+    tr.disabled {
+      color: $--color-neutral-5;
+      cursor: not-allowed;
+    }
+
+    tr.hover-row {
+      &,
+      &.el-table__row--striped {
+        &,
+        &.current-row {
+          > td {
+            background: $--table-tr-hover-background;
+          }
+        }
+      }
+    }
+
+    td.el-table_td-hover {
+      background: $--table-tr-hover-background;
+    }
+  }
+
+  @include e(column-resize-proxy) {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    bottom: 0;
+    left: 200px;
+    width: 0;
+    border-left: 1px solid $--table-border-color;
+  }
+
+  & .hidden-columns {
+    position: absolute;
+    z-index: -1;
+    visibility: hidden;
+  }
+
+  @include e(column-filter-trigger) {
+    display: inline-block;
+    margin-left: 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    float: right;
+
+    &:hover {
+      background-color: $--color-neutral-rgba-7;
+    }
+
+    &:active {
+      background-color: $--color-neutral-rgba-6;
+    }
+
+    & i {
+      color: inherit;
+      font-size: 24px;
+      vertical-align: middle;
+    }
+
+    & .h-icon-filter_f {
+      color: $--color-brand;
+    }
+
+    & .filter-opened {
+      background-color: $--color-neutral-6;
+    }
+  }
+
+  @include e(column-selection-icon) {
+    display: inline-block;
+    height: 24px;
+    cursor: pointer;
+    vertical-align: middle;
+
+    & i {
+      color: inherit;
+      font-size: 24px;
+    }
+  }
+
+  /*
+   * 表格 border=false 时多级表头无分割线，表头保持 border=true 下样式
+   * add by yangzhini 2019-02-27
+   */
+  @include m(group) {
+    & th {
+      position: initial;
+      border-right: 1px solid $--color-neutral-rgba-7; // 表头边带透明度用于与底色叠加
+      border-bottom: 1px solid $--color-neutral-rgba-7; // 表头边带透明度用于与底色叠加
+      background: rgba(255, 255, 255, 0);
+      > .cell {
+        border: 0;
+        &::after {
+          display: none;
+        }
+      }
+    }
+  }
+
+  @include m(enable-row-transition) {
+    .el-table__body td {
+      transition: background-color 0.25s ease;
+    }
+  }
+
+  @include m(enable-row-hover) {
+    .el-table__body tr:not(.disabled):hover > td:not(.el-table__expanded-cell) {
+      background: $--table-tr-hover-background;
+      // background-clip: padding-box;
+    }
+  }
+
+  @include m(fluid-height) {
+    .el-table__fixed,
+    .el-table__fixed-right {
+      bottom: 0;
+      overflow: hidden;
+    }
+  }
+
+  .el-table-scrollbar__wrap {
+    height: 100%;
+    margin-bottom: 0 !important;
+    overflow-x: hidden !important;
+  }
+  .el-table__body-wrapper {
+    &::before {
+      position: absolute;
+      z-index: 1;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background-color: $--table-border-color;
+      content: '';
+    }
+    .el-scrollbar__view {
+      margin-bottom: 0;
+    }
+  }
+
+  @include e(loading) {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 50px;
+    text-align: center;
+    span {
+      display: block;
+      height: 100%;
+      -ms-transform: translateY(40%);
+      transform: translateY(40%);
+    }
+  }
+}

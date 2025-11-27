@@ -1,0 +1,490 @@
+@use "sass:math";
+@import 'mixins/mixins';
+@import 'common/var';
+
+textarea::-webkit-scrollbar-button {
+  height: 0;
+}
+
+textarea::-webkit-scrollbar {
+  width: 12px;
+}
+
+textarea::-webkit-scrollbar-track {
+  padding: 0 2px;
+  background-color: $--scrollbar-bar-hover-background-color;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  width: 8px;
+  border: 3px solid $--scrollbar-bar-hover-background-color;
+  background-color: $--scrollbar-background-color;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    border: 2px solid $--scrollbar-bar-hover-background-color;
+    background-color: $--scrollbar-hover-background-color;
+  }
+}
+
+%icon {
+  position: absolute;
+  top: 4px;
+  min-width: $--icon-width;
+  height: $--icon-height;
+  color: $--color-neutral-4;
+  line-height: $--icon-height + 2px;
+  pointer-events: none;
+  text-align: center;
+
+  .el-input__icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: $--icon-color;
+    transition: all 0.3s;
+    &:hover {
+      background: $--icon-fill;
+      border-radius: $--input-border-radius;
+    }
+    &:active {
+      background: $--icon-fill-pre;
+      border-radius: $--input-border-radius;
+    }
+    &.h-icon-angle_down_sm,
+    &.h-icon-angle_up_sm {
+      &:hover {
+        background: none !important;
+      }
+      &:active {
+        background: none !important;
+      }
+    }
+  }
+  .el-button {
+    &.is-icon {
+      min-width: $--icon-width;
+      height: $--icon-height;
+      padding: 0;
+      vertical-align: top;
+    }
+  }
+}
+
+@include b(textarea) {
+  @include m(height) {
+    height: 92px;
+  }
+
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  vertical-align: bottom;
+  @include e(inner) {
+    display: block;
+    width: 100%;
+    min-width: 120px;
+    max-width: inherit;
+    min-height: 32px;
+    max-height: inherit;
+    box-sizing: border-box;
+    padding: 5px 16px 5px 8px;
+    border: $--input-border;
+    background-color: $--input-fill;
+    background-image: none;
+    border-radius: $--input-border-radius;
+    color: $--input-font-color;
+    font-family: $--font-family;
+    font-size: $--font-size;
+    line-height: 20px;
+    resize: none;
+    transition: $--transition-border-base;
+
+    &::placeholder {
+      color: $--input-placeholder-color;
+    }
+
+    &:hover {
+      border-color: $--input-border-color-hov;
+    }
+
+    &:focus {
+      border-color: $--input-border-color-focus;
+      color: $--input-color;
+      outline: none;
+    }
+  }
+
+  @include e(count) {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    color: $--input-count-color;
+    line-height: 14px;
+  }
+  @include when(count) {
+    padding-bottom: 24px;
+    border: $--input-border;
+    border-radius: $--input-border-radius;
+    @include e(inner) {
+      border: none;
+    }
+    @include when(hover) {
+      border-color: $--input-border-color-hov;
+    }
+    @include when(focus) {
+      border-color: $--input-border-color-focus;
+      color: $--input-color;
+    }
+    @include e(inner) {
+      height: 100%;
+      padding-bottom: 0;
+    }
+  }
+  @include when(disabled) {
+    .el-textarea__inner {
+      border-color: $--input-disabled-border;
+      background-color: $--input-disabled-fill;
+      color: $--input-disabled-color;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@include b(input) {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  font-size: $--font-size;
+  @include m(width-group) {
+    width: 336px;
+  }
+  @include m(width) {
+    width: 240px;
+  }
+  @include m(width-sm) {
+    width: 120px;
+  }
+  @include e(inner) {
+    display: inline-block;
+    width: 100%;
+    height: $--input-height;
+    box-sizing: border-box;
+    padding: 0 8px;
+    border: $--input-border;
+    appearance: none;
+    background-color: $--input-fill;
+    background-image: none;
+    border-radius: $--input-border-radius;
+    color: $--input-font-color;
+    font-family: $--font-family;
+    font-size: $--font-size;
+    line-height: 32px;
+    outline: none;
+    transition: $--transition-border-base;
+
+    &::placeholder {
+      color: $--input-placeholder-color;
+    }
+
+    &:hover {
+      border-color: $--input-border-color-hov;
+    }
+
+    &:focus {
+      border-color: $--input-border-color-focus;
+      color: $--input-color;
+      outline: none;
+    }
+  }
+
+  @include e(suffix) {
+    @extend %icon;
+    span {
+      line-height: inherit;
+    }
+
+    right: 4px;
+  }
+
+  @include e(suffix-inner) {
+    pointer-events: all;
+  }
+
+  @include e(prefix) {
+    @extend %icon;
+    span {
+      line-height: inherit;
+    }
+
+    left: 4px;
+  }
+
+  // @include m(suffix) {
+  //   .el-input__inner {
+  //     padding-right: 32px;
+  //   }
+  // }
+  // @include m(prefix) {
+  //   .el-input__inner {
+  //     padding-left: 32px;
+  //   }
+  // }
+
+  @include e(icon) {
+    width: $--icon-width;
+    height: $--icon-height;
+    // cursor: pointer;
+    font-size: $--icon-font-size;
+    &::after {
+      display: inline-block;
+      width: 0;
+      height: 100%;
+      content: '';
+      vertical-align: middle;
+    }
+
+    @include when(clickable) {
+      &:hover {
+        background: none;
+        color: $--color-neutral-5;
+        cursor: pointer;
+      }
+      &:active {
+        color: $--color-neutral-4;
+      }
+    }
+
+    @include when(fill) {
+      &:hover {
+        background: $--icon-fill;
+      }
+      &:active {
+        background: $--icon-fill-pre;
+      }
+    }
+  }
+
+  @include e(validateIcon) {
+    pointer-events: none;
+  }
+
+  @include when(active) {
+    .el-input__inner {
+      border-color: $--input-border-color-focus;
+      color: $--input-color;
+      outline: none;
+    }
+  }
+
+  @include when(disabled) {
+    .el-input__inner {
+      border-color: $--input-disabled-border;
+      background-color: $--input-disabled-fill;
+      color: $--input-disabled-color;
+      cursor: not-allowed;
+    }
+
+    .el-input__icon {
+      color: $--input-disabled-color;
+      cursor: not-allowed;
+    }
+  }
+
+  @include m(surface) {
+    & .el-input__inner {
+      border: none;
+      background-color: $--color-neutral-8;
+    }
+  }
+
+  @include m(suspension) {
+    & .el-input__inner {
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  @include m(large) {
+    & .el-input__inner {
+      height: $--height-lg;
+      font-size: $--font-size-lg;
+      line-height: $--height-lg;
+    }
+  }
+
+  @include m(small) {
+    & .el-input__inner {
+      height: $--height-sm;
+      font-size: $--font-size-sm;
+      line-height: $--height-sm;
+    }
+  }
+
+  @include m(mini) {
+    & .el-input__inner {
+      height: $--height-xs;
+      font-size: $--font-size-xs;
+    }
+  }
+}
+
+@include b(input-group) {
+  display: inline-table;
+  width: 100%;
+  border-collapse: separate;
+  line-height: normal;
+  // border: $--border-base;
+
+  > .el-input__inner {
+    position: relative;
+    display: table-cell;
+    vertical-align: middle;
+  }
+
+  @include e((append, prepend)) {
+    display: table-cell;
+    width: 1px;
+    padding: 0 8px;
+    border: $--border-base;
+    background-color: $--color-neutral-9;
+    border-radius: $--input-border-radius;
+    color: $--color-neutral-3;
+    vertical-align: middle;
+    white-space: nowrap;
+    &:focus {
+      outline: none;
+    }
+
+    button.el-button,
+    div.el-select .el-input__inner,
+    div.el-select:hover .el-input__inner {
+      height: 30px;
+      border: none;
+      border-top: 0;
+      border-bottom: 0;
+      background-color: $--color-white;
+      color: $--font-color-regular;
+    }
+    .el-select,
+    button.el-button {
+      display: block;
+      margin: 0 -9px;
+      border: none;
+      border-right: 1px solid $--border-color;
+      border-left: 1px solid $--border-color;
+      background-color: transparent;
+      font-size: inherit;
+
+      .el-input__suffix {
+        top: 50%;
+        width: $--icon-width;
+        margin-top: -(math.div($--icon-width, 2));
+      }
+    }
+    i {
+      font-size: $--icon-font-size;
+      vertical-align: middle;
+    }
+  }
+
+  @include e(prepend) {
+    border-right: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  @include e(append) {
+    border-left: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  @include m(prepend) {
+    .el-input__inner {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    }
+
+    .el-select .el-input.is-focus .el-input__inner {
+      border-color: transparent;
+    }
+  }
+
+  @include m(append) {
+    .el-input__inner {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    .el-select .el-input.is-focus .el-input__inner {
+      border-color: transparent;
+    }
+  }
+}
+
+/** disalbe default clear on IE */
+.el-input__inner::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* input 元素上的提示框 */
+.el-popover__for-input {
+  min-width: auto;
+  min-height: 32px;
+  padding: 6px 10px;
+  &.el-popover__for-input-form .popper__arrow {
+    border-color: $--tooltip-light-fill;
+  }
+}
+
+.el-popover__for-input-form {
+  margin-right: 12px;
+  margin-left: 12px;
+  background: $--tooltip-light-fill;
+  color: $--color-neutral-1;
+}
+.el-validate__icon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+  0% {
+    -ms-transform: rotate(0deg);
+    transform: rotateZ(0deg);
+  }
+
+  100% {
+    -ms-transform: rotate(360deg);
+    transform: rotateZ(360deg);
+  }
+}
+// .el-input__suffix,
+// .el-input--suffix,
+.h-icon-close_f {
+  color: $--color-neutral-5;
+  cursor: pointer;
+  transform: none;
+  transition: none;
+  &.is-clickable {
+    position: absolute;
+    top: 4px;
+    &:hover {
+      color: $--color-neutral-4;
+    }
+    &:active {
+      color: $--color-neutral-3;
+    }
+  }
+  &:hover {
+    color: $--color-neutral-4;
+  }
+  &:active {
+    color: $--color-neutral-3;
+  }
+}

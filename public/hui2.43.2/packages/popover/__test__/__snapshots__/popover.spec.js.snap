@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Popover click test 1`] = `"<body><div><span class=\\"el-popover-wrap\\"><div class=\\"el-popover\\" style=\\"width: 200px; max-width: nullpx; margin-top: 10px; display: none;\\"><div class=\\"el-popover__title\\">标题</div> 这是一段内容,这是一段内容,这是一段内容,这是一段内容。</div> </span> <button type=\\"button\\" title=\\"\\" class=\\"el-button el-button--default\\"><!----> <!----> <!----> <span>click 激活</span></button></div></body>"`;
+
+exports[`Popover nest test 1`] = `
+"<body><div><span class=\\"el-popover-wrap\\"><div class=\\"el-popover\\" style=\\"width: 160px; max-width: nullpx; margin-bottom: 10px; display: none;\\"><!----> <p>这是一段内容这是一段内容确定删除吗？</p> <div style=\\"text-align: right; margin: 0px;\\"><button type=\\"button\\" title=\\"\\" class=\\"el-button el-button--link el-button--mini\\"><!----> <!----> <!----> <span>
+                确定
+              </span></button> <button type=\\"button\\" title=\\"\\" class=\\"el-button el-button--text el-button--mini\\"><!----> <!----> <!----> <span>
+                取消
+              </span></button></div></div> </span> <button type=\\"button\\" title=\\"\\" class=\\"el-button el-button--default\\"><!----> <!----> <!----> <span>删除</span></button></div></body>"
+`;

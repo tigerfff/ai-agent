@@ -1,0 +1,191 @@
+@use "sass:math";
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import 'common/var';
+@import 'select-dropdown';
+@import 'input';
+@import 'tag';
+@import 'option';
+@import 'option-group';
+@import 'scrollbar';
+
+@include b(select) {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  font-size: 0;
+
+  .el-select__tags:not(.el-select__tags--nowrap) > span {
+    display: contents;
+  }
+
+  @include m(width-sm) {
+    width: 96px;
+  }
+
+  .el-select-dropdown {
+    left: 0 !important;
+  }
+
+  .el-input__inner {
+    padding-right: 35px;
+    cursor: pointer;
+
+    &:focus {
+      border-color: $--select-border-color-focus;
+    }
+  }
+
+  &:hover {
+    .el-input__inner {
+      border-color: $--select-border-color-hover;
+    }
+  }
+
+  .el-input {
+    & .el-input__icon {
+      transform: rotate(0);
+      transition: transform 0.3s;
+      vertical-align: middle;
+    }
+
+    @include when(disabled) {
+      .el-input__suffix {
+        cursor: not-allowed;
+
+        &:hover,
+        &:active {
+          background-color: $--input-disabled-fill;
+          color: $--input-disabled-color;
+        }
+      }
+    }
+
+    &.is-focus .el-input__inner {
+      border-color: $--select-border-color-focus;
+    }
+  }
+
+  .el-input__suffix {
+    @include when(reverse) {
+      .el-input__icon {
+        transform: rotate(180deg);
+      }
+    }
+
+    top: 50%;
+    width: $--icon-width;
+    margin-top: -(math.div($--icon-width, 2));
+    &:active {
+      background: $--icon-fill-pre;
+    }
+
+    .h-icon-close_f {
+      position: absolute;
+      right: 0;
+      background: $--color-white !important;
+      color: $--color-neutral-5;
+      &:hover {
+        color: $--color-neutral-4;
+      }
+      &:active {
+        color: $--color-neutral-3;
+      }
+    }
+  }
+
+  > .el-input {
+    display: block;
+  }
+
+  > .el-select__isIE {
+    position: absolute;
+    z-index: 1;
+    right: 32px;
+    left: 0;
+    height: 32px;
+    background-color: #000;
+    cursor: pointer;
+    filter: alpha(opacity=0);
+    opacity: 0;
+  }
+
+  @include e(input) {
+    height: 28px;
+    padding-left: 8px;
+    margin: 0;
+    border: none;
+    appearance: none;
+    background-color: transparent;
+    color: $--select-multiple-input-color;
+    font-size: $--select-font-size;
+    outline: none;
+    vertical-align: baseline;
+
+    @include when(mini) {
+      height: 14px;
+    }
+  }
+
+  @include e(text) {
+    position: absolute;
+    z-index: -1;
+    height: 0;
+    font-size: $--font-size;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  @include e(close) {
+    position: absolute;
+    z-index: $--index-top;
+    top: 8px;
+    right: 25px;
+    color: $--select-input-color;
+    cursor: pointer;
+    font-size: $--select-input-font-size;
+    line-height: 18px;
+  }
+
+  @include e(tags) {
+    position: absolute;
+    z-index: $--index-normal;
+    top: 50%;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    padding: 2px 0;
+    line-height: normal;
+    transform: translateY(-50%);
+    white-space: normal;
+
+    .el-tag {
+      margin: 2px 0 2px 4px;
+      cursor: pointer;
+
+      .h-icon-close {
+        width: 22px;
+      }
+    }
+
+    @include e(close) {
+      margin: 0 4px;
+    }
+
+    @include m(nowrap) {
+      overflow: hidden;
+      flex-wrap: nowrap;
+      justify-content: flex-end;
+      margin-left: 4px;
+      white-space: nowrap;
+      .el-tag {
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+    @include m(filterable-left) {
+      left: 1px;
+    }
+  }
+}

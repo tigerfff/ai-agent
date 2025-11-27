@@ -1,0 +1,421 @@
+@import '../common/var';
+@import '../mixins/mixins';
+@import '../mixins/utils';
+
+@include b(picker-panel) {
+  box-sizing: border-box;
+  margin: 5px 0;
+  background: $--fill;
+  // border-radius: $--border-radius / 2;
+  box-shadow: $--box-shadow;
+  color: $--font-color-regular;
+  font-family: $--font-family;
+  line-height: 30px;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  &.el-popper[x-placement^='bottom'] {
+    margin-top: 4px;
+  }
+  &.el-popper[x-placement^='top'] {
+    margin-bottom: 4px;
+  }
+  .v-modal {
+    position: absolute;
+    background-color: $--color-neutral-rgba-4;
+  }
+
+  @include e((body, body-wrapper)) {
+    &::after {
+      display: table;
+      clear: both;
+      content: '';
+    }
+  }
+  @include e(body) {
+    position: relative;
+    @include when(month-range) {
+      min-height: 136px;
+    }
+  }
+  @include e(header-label-wrapper) {
+    display: flex;
+    width: 100%;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    line-height: 24px;
+
+    @include when(en) {
+      flex-direction: row-reverse;
+    }
+    &.is-year,
+    &.is-month {
+      @include e(header-label) {
+        &:first-child {
+          max-width: 164px;
+        }
+      }
+    }
+  }
+  @include e(header-label) {
+    @include utils-ellipsis;
+
+    display: inline-block;
+    margin: 0 4px;
+    color: $--font-color-regular;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+
+    &:hover {
+      color: $--datepicker-text-hover-color;
+    }
+    &.active {
+      color: $--datepicker-active-color;
+    }
+  }
+  @include has(time) {
+    .v-modal {
+      height: 288px;
+      @include when(time) {
+        height: 311px;
+      }
+    }
+    .el-picker-panel__body-wrapper {
+      position: relative;
+    }
+    .el-time-panel {
+      bottom: 49px;
+      left: -16px;
+      width: 256px;
+      box-shadow: 0 0 0 0;
+    }
+    .el-date-table__calendar {
+      padding: 8px 16px;
+    }
+    &.has-sidebar {
+      .el-time-panel {
+        bottom: 49px;
+        left: -16px;
+      }
+    }
+  }
+  @include has(sidebar) {
+    &.el-date-picker {
+      .el-button {
+        min-width: 80px;
+      }
+      .el-picker-panel__footer {
+        margin-top: -1px;
+      }
+    }
+  }
+  @include e(content) {
+    position: relative;
+    @include has(modal) {
+      .el-year-table,
+      .el-month-table {
+        position: absolute;
+        z-index: 20;
+        top: 0;
+        left: 0;
+      }
+      .el-year-table {
+        border: 1px solid $--datepicker-inner-border-color;
+        border-top: 0;
+      }
+    }
+  }
+
+  @include e(footer) {
+    position: relative;
+    display: flex;
+    height: 49px;
+    padding: 8px;
+    border-top: 1px solid $--datepicker-inner-border-color;
+    background-color: $--color-neutral-9;
+    font-size: 0;
+    .el-picker-panel__link-btn {
+      min-width: 80px;
+      @include utils-ellipsis;
+    }
+    .el-picker-panel-btn__today {
+      flex: auto;
+      + button {
+        min-width: 72px;
+        @include utils-ellipsis;
+      }
+    }
+    .el-date-picker__editor-wrap {
+      position: relative;
+      top: -1px;
+      display: inline-block;
+      width: 96px;
+      padding: 0;
+      margin: 0 8px;
+    }
+  }
+  @include e(footer-message) {
+    flex: 1;
+    margin-right: 8px;
+    font-size: $--font-size;
+    line-height: 32px;
+    @include utils-ellipsis;
+    span {
+      padding-left: 4px;
+      float: left;
+    }
+    span:first-child {
+      padding-left: 8px;
+    }
+    @include when(warning) {
+      color: $--color-danger;
+    }
+  }
+
+  @include e(shortcut) {
+    display: block;
+    width: 100%;
+    padding-left: 12px;
+    border: 0;
+    background-color: transparent;
+    color: $--datepicker-color;
+    color: $--font-color-regular;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 34px;
+    outline: none;
+    text-align: left;
+    @include utils-ellipsis;
+    &:hover {
+      background-color: $--datepicker-cell-hov-fill;
+      color: $--datepicker-cell-hov-color;
+    }
+    &:active {
+      background-color: $--datepicker-cell-pre-fill;
+      color: $--datepicker-cell-pre-color;
+    }
+  }
+
+  @include e(btn) {
+    padding: 0 20px;
+    border: 1px solid #dcdcdc;
+    background-color: transparent;
+    border-radius: 2px;
+    color: #333;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 24px;
+    outline: none;
+
+    &[disabled] {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+
+  @include e(icon-btn) {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    border: 0;
+    background: transparent;
+    color: $--datepicker-icon-color;
+    cursor: pointer;
+    font-size: 24px;
+    outline: none;
+    &:hover:not(.is-disabled) {
+      background-color: $--datepicker-cell-hov-fill;
+    }
+    &:active:not(.is-disabled) {
+      background-color: $--datepicker-cell-pre-fill;
+    }
+    @include when(disabled) {
+      opacity: $--disabled-opacity;
+      &:hover {
+        cursor: not-allowed;
+      }
+    }
+    @include when(hide) {
+      visibility: hidden;
+    }
+  }
+
+  @include e(link-btn) {
+    vertical-align: middle;
+  }
+}
+
+.el-date-table,
+.el-month-table,
+.el-year-table {
+  display: block;
+  width: 100%;
+  margin: 0;
+  background-color: $--fill;
+  border-collapse: collapse;
+  font-size: $--font-size;
+  table-layout: fixed;
+  user-select: none;
+
+  td {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    color: $--font-color-regular;
+    cursor: pointer;
+    text-align: center;
+
+    &.today {
+      position: relative;
+      color: $--color-brand;
+      &::after {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        display: inline-block;
+        width: 100%;
+        height: 26px;
+        color: $--datepicker-active-color;
+        content: '.';
+        font-family: sans-serif;
+        font-size: 20px;
+        text-align: center;
+      }
+    }
+
+    > .cell {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      &.tag {
+        &::after {
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          display: block;
+          width: 0;
+          height: 0;
+          border-width: 0 6px 6px 0;
+          border-style: solid;
+          border-color: transparent #2196f3 transparent;
+          content: '';
+        }
+      }
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: $--disabled-opacity;
+      &::after {
+        color: $--disabled-color;
+      }
+    }
+    &.in-range {
+      background-color: $--datepicker-inrange-color;
+      color: h-best-color-contrast(
+        $--datepicker-inrange-color,
+        $colors: ($--color-white, $--font-color-regular)
+      );
+      &::after {
+        color: h-best-color-contrast(
+          $--datepicker-inrange-color,
+          $colors: ($--color-white, $--font-color-regular)
+        );
+      }
+    }
+    &.start-date,
+    &.end-date {
+      background-color: $--datepicker-active-color;
+      color: h-best-color-contrast(
+        $--datepicker-active-color,
+        $colors: ($--color-white, $--font-color-regular)
+      );
+
+      &::after {
+        color: h-best-color-contrast(
+          $--datepicker-active-color,
+          $colors: ($--color-white, $--font-color-regular)
+        );
+      }
+    }
+    &.selected {
+      background-color: $--datepicker-active-color;
+      color: h-best-color-contrast(
+        $--datepicker-active-color,
+        $colors: ($--color-white, $--font-color-regular)
+      );
+      &.today {
+        &::after {
+          color: h-best-color-contrast(
+            $--datepicker-active-color,
+            $colors: ($--color-white, $--font-color-regular)
+          );
+        }
+      }
+      > .cell {
+        &.tag {
+          &::after {
+            border-color: transparent
+              h-best-color-contrast(
+                $--datepicker-active-color,
+                $colors: ($--color-white, #2196f3)
+              )
+              transparent;
+          }
+        }
+      }
+    }
+  }
+  @include when(unlink) {
+    .in-range {
+      background-color: transparent;
+      color: $--font-color-regular;
+    }
+  }
+  tr:not(.selected) {
+    td:not(.selected):not(.disabled):not(.in-range):not(.selected):not(.start-date):not(.end-date):not(.prev-month):not(.next-month):not(.prev-year):not(.next-year) {
+      &:hover {
+        background-color: $--datepicker-cell-hov-fill;
+        color: $--datepicker-cell-hov-color;
+      }
+      &:active {
+        background-color: $--datepicker-cell-pre-fill;
+        color: $--datepicker-cell-pre-color;
+      }
+    }
+  }
+  @include when(week-mode) {
+    td:not(.selected):not(.disabled):not(.in-range):not(.selected):not(.start-date):not(.end-date):not(.prev-month):not(.next-month):not(.prev-year):not(.next-year) {
+      &:hover,
+      &:active {
+        background-color: $--datepicker-cell-hov-fill !important;
+      }
+    }
+  }
+}
+
+.el-picker-panel *[slot='sidebar'],
+.el-picker-panel__sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+  width: 120px;
+  box-sizing: border-box;
+  padding-top: 8px;
+  border-right: 1px solid $--datepicker-inner-border-color;
+  background-color: $--fill;
+}
+.el-picker-panel__sidebar + .el-picker-panel__body,
+.el-picker-panel *[slot='sidebar'] + .el-picker-panel__body {
+  margin-left: 120px;
+}

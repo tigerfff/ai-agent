@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Breadcrumb snapshot test 1`] = `
+"<div class=\\"el-breadcrumb\\"><span class=\\"el-breadcrumb__item\\"><span title=\\"\\" role=\\"link\\" class=\\"el-breadcrumb__item__inner\\">首页</span> <span class=\\"el-breadcrumb__separator\\">
+    
+  </span></span> <span class=\\"el-breadcrumb__item\\"><span title=\\"\\" role=\\"link\\" class=\\"el-breadcrumb__item__inner\\">活动管理</span> <span class=\\"el-breadcrumb__separator\\">
+    
+  </span></span> <span class=\\"el-breadcrumb__item\\"><span title=\\"\\" role=\\"link\\" class=\\"el-breadcrumb__item__inner\\">活动列表</span> <span class=\\"el-breadcrumb__separator\\">
+    
+  </span></span> <span class=\\"el-breadcrumb__item\\"><span title=\\"\\" role=\\"link\\" class=\\"el-breadcrumb__item__inner\\">活动详情</span> <span class=\\"el-breadcrumb__separator\\">
+    
+  </span></span></div>"
+`;
+
+exports[`Breadcrumb 省略展示 1`] = `
+<div
+  class="el-breadcrumb"
+>
+  <span
+    class="el-breadcrumb__item el-breadcrumb__item__unclickable"
+    separator-class=""
+  >
+    <span
+      class="el-breadcrumb__item__inner"
+      role="link"
+      title=""
+    >
+      活动b管理
+    </span>
+     
+    <span
+      class="el-breadcrumb__separator h-icon-angle_right_sm"
+    >
+      
+    
+  
+    </span>
+  </span>
+   
+  <span
+    class="el-breadcrumb__item el-breadcrumb__item__unclickable"
+    separator-class=""
+  >
+    <span
+      class="el-breadcrumb__item__inner"
+      role="link"
+      title=""
+    >
+      活动管理
+    </span>
+     
+    <span
+      class="el-breadcrumb__separator h-icon-angle_right_sm"
+    >
+      
+    
+  
+    </span>
+  </span>
+   
+  <span
+    class="el-breadcrumb__item el-breadcrumb__item__unclickable"
+    separator-class=""
+  >
+    <span
+      class="el-breadcrumb__item__inner"
+      role="link"
+      title=""
+    >
+      活动管理
+    </span>
+     
+    <span
+      class="el-breadcrumb__separator h-icon-angle_right_sm"
+    >
+      
+    
+  
+    </span>
+  </span>
+</div>
+`;

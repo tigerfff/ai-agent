@@ -1,0 +1,107 @@
+@import '../common/var';
+@import '../mixins/mixins';
+@import '../mixins/utils';
+
+@include b(date-range-picker) {
+  width: 512px;
+
+  &.has-sidebar {
+    width: 632px;
+  }
+
+  .el-picker-panel__content {
+    margin: 0;
+  }
+  @include e(title) {
+    height: 24px;
+    padding: 4px 6px 2px 6px;
+    margin: 0;
+    color: $--color-neutral-4;
+    font-size: 12px;
+    line-height: 18px;
+  }
+  @include e(header) {
+    display: flex;
+    height: 48px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    text-align: center;
+    .el-picker-panel__icon-btn {
+      font-size: 24px;
+    }
+  }
+
+  @include e(content) {
+    width: 50%;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    float: left;
+
+    @include when(left) {
+      &::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        border-right: 1px solid $--datepicker-inner-border-color;
+        content: '';
+      }
+    }
+
+    @include when(right) {
+      .el-date-range-picker__header {
+        div {
+          margin-right: 50px;
+          margin-left: 50px;
+        }
+      }
+    }
+  }
+
+  @include e(editors-wrap) {
+    display: inline-block;
+    width: 50%;
+    box-sizing: border-box;
+    padding: 0 16px;
+    float: left;
+
+    @include when(right) {
+      margin-left: -1px;
+      border-left: 1px solid $--datepicker-inner-border-color;
+      text-align: right;
+    }
+  }
+
+  @include e(time-header) {
+    position: relative;
+    display: table;
+    width: 100%;
+    box-sizing: border-box;
+    //border-bottom: 1px solid $--datepicker-inner-border-color;
+    font-size: 12px;
+
+    > .h-icon-angle_right {
+      display: table-cell;
+      color: $--datepicker-icon-color;
+      font-size: 20px;
+      vertical-align: middle;
+    }
+  }
+
+  @include e(time-picker-wrap) {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    padding: 8px 0;
+    border-top: 1px solid $--datepicker-inner-border-color;
+    .el-picker-panel {
+      position: absolute;
+      z-index: 1;
+      top: 13px;
+      right: 0;
+      background: $--color-white;
+    }
+  }
+}

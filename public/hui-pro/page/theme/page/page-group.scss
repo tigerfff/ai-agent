@@ -1,0 +1,50 @@
+@include b(page-group) {
+  width: 100%;
+  flex: none;
+  margin-bottom: 48px;
+  // 分组头部
+  @include e(header) {
+    height: 24px;
+    margin-bottom: 24px;
+    line-height: 24px;
+    @include m(action) {
+      display: inline-block;
+      height: 24px;
+      margin-left: 8px;
+      font-size: 24px;
+      vertical-align: top;
+      i {
+        cursor: pointer;
+      }
+    }
+  }
+  // 展开收起图标
+  @include e(collapse) {
+    display: inline-block;
+    margin-right: 4px;
+    cursor: pointer;
+    font-size: 24px;
+    vertical-align: top;
+    @include m(icon) {
+      transform: rotate(0deg);
+      transition: transform 0.2s;
+      @include when(expanded) {
+        transform: rotate(90deg);
+      }
+    }
+  }
+  // 分组标题
+  @include e(title) {
+    color: $--color-neutral-1;
+    font-size: 18px;
+    font-weight: 500;
+    vertical-align: top;
+  }
+  // 分组内容区域
+  @include e(main) {
+    position: relative;
+    @include when(collapsable) {
+      overflow: visible !important;
+    }
+  }
+}

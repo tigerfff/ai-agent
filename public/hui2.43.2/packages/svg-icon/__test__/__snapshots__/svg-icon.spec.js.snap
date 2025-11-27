@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SvgIcon snapshot test 1`] = `"<div class=\\"h-svg-icon-wrapper\\"><svg version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"24\\" height=\\"24\\" viewBox=\\"0 0 24 24\\" class=\\"h-svg-icon__main\\"><path d=\\"M7 12h8v-1h-8v-3c0-0.552 0.448-1 1-1h11c0.552 0 1 0.448 1 1v8c0 0.552-0.448 1-1 1h-11c-0.552 0-1-0.448-1-1v-4zM6 11h-2v1h2v3h-3c-0.552 0-1-0.448-1-1v-4c0-0.552 0.448-1 1-1h3v2z\\"></path></svg></div>"`;

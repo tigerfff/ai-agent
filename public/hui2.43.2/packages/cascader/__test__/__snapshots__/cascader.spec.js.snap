@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cascader snapshot test 1`] = `"<span class=\\"el-cascader\\"><div class=\\"el-input el-input--suffix\\"><!----> <!----> <!----> <input autocomplete=\\"off\\" placeholder=\\"Select\\" readonly=\\"readonly\\" type=\\"text\\" rows=\\"2\\" tipsmaxwidth=\\"480\\" tipsplacement=\\"top-start\\" tipsoffset=\\"0\\" tipstrigger=\\"focus\\" tipsclass=\\"\\" debounce=\\"0\\" class=\\"el-input__inner\\"> <!----> <span class=\\"el-input__suffix\\"><span class=\\"el-input__suffix-inner\\"><i class=\\"el-input__icon h-icon-angle_down_sm\\"></i> <!----></span></span> <!----> <!----></div> <span title=\\"\\" class=\\"el-cascader__label\\"></span></span>"`;
+
+exports[`Cascader 动态加载 1`] = `
+<li
+  class="el-cascader-menu__item"
+  title=""
+>
+  city1
+  <i
+    class=""
+  />
+</li>
+`;
+
+exports[`Cascader 选择即改变 1`] = `
+"<span>
+        指南
+        <!----></span>"
+`;
+
+exports[`Cascader 默认值 1`] = `
+"<span>
+        指南
+        <span class=\\"el-cascader__separator\\">
+          /
+        </span></span><span>
+        设计原则
+        <span class=\\"el-cascader__separator\\">
+          /
+        </span></span><span>
+        一致
+        <!----></span>"
+`;

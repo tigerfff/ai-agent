@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Layout 布局 snapshot test 1`] = `"<section class=\\"h-layout\\" style=\\"height: 360px;\\"><aside class=\\"h-layout-aside\\" style=\\"width: 200px; line-height: 360px;\\">Aside</aside> <section class=\\"h-layout is-vertical\\"><div class=\\"h-layout-header\\" style=\\"height: 80px;\\">Header</div> <div class=\\"h-layout-content is-flex is-vertical is-overflow\\">Content</div> <div class=\\"h-layout-footer\\" style=\\"height: 80px;\\">Footer</div></section></section>"`;

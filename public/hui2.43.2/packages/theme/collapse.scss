@@ -1,0 +1,82 @@
+@import 'mixins/mixins';
+@import 'common/var';
+@import 'common/transition';
+
+@include b(collapse) {
+  border-top: 1px solid $--collapse-border-color;
+  border-bottom: 1px solid $--collapse-border-color;
+}
+@include b(collapse-item) {
+  @include e(header) {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    height: $--collapse-header-height;
+    align-items: center;
+    border-bottom: 1px solid $--collapse-border-color;
+    background-color: $--collapse-header-fill;
+    color: $--collapse-header-color;
+    cursor: pointer;
+    font-size: $--collapse-header-size;
+    font-weight: 500;
+    line-height: $--collapse-header-line-height;
+    outline: none;
+    text-overflow: ellipsis;
+    transition: border-bottom-color 0.3s;
+    white-space: nowrap;
+
+    & > span {
+      display: inline-block;
+      overflow: hidden;
+      width: calc(100% - 8px * 2 - 24px - 4px);
+      margin-left: 4px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @include e(arrow) {
+      margin-right: 8px;
+      margin-left: 8px;
+      font-size: 24px;
+      font-weight: 300;
+      transition: transform 0.3s;
+      @include when(active) {
+        transform: rotate(90deg);
+      }
+      & + span {
+        margin-left: -4px;
+      }
+      &.on-right {
+        margin: 0 8px 0 auto;
+        transform: rotate(90deg);
+        @include when(active) {
+          transform: rotate(270deg);
+        }
+      }
+    }
+    &.focusing:focus:not(:hover) {
+      color: $--color-brand;
+    }
+    @include when(active) {
+      border-bottom-color: transparent;
+    }
+  }
+
+  @include e(wrap) {
+    overflow: hidden;
+    box-sizing: border-box;
+    border-bottom: 1px solid $--collapse-border-color;
+    background-color: $--collapse-content-fill;
+    will-change: height;
+  }
+
+  @include e(content) {
+    padding: 16px;
+    color: $--collapse-content-color;
+    font-size: $--collapse-content-size;
+    line-height: 1.769230769230769;
+  }
+
+  &:last-child {
+    margin-bottom: -1px;
+  }
+}

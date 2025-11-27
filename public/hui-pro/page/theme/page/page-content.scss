@@ -1,0 +1,29 @@
+@include b(page-content) {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 0 $--page-gutter;
+  @include when(flex) {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    & > .h-page-action,
+    & > .h-page-search {
+      flex: none;
+    }
+  }
+  @include when(align-center) {
+    align-items: center;
+  }
+  @include when(horizontal) {
+    flex-direction: row;
+  }
+  // 嵌套在 h-page-content 中时，移除 padding-left
+  .h-page-sidebar {
+    padding-left: 0;
+  }
+}

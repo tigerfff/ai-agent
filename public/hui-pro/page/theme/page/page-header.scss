@@ -1,0 +1,106 @@
+@include b(page-header) {
+  display: flex;
+  min-width: 0;
+  height: $--page-herder-height;
+  min-height: 0;
+  flex: none;
+  padding: 0 $--page-gutter;
+  border-bottom: $--page-border;
+
+  @include when(affix) {
+    position: fixed;
+    right: 0;
+    transition: left 0.2s ease-in-out;
+  }
+
+  @include e(return) {
+    display: inline-block;
+    width: 22px;
+    flex: none;
+    padding-top: 9px;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+    &:hover {
+      color: $--color-brand-hov;
+    }
+    // 有返回图标时，头部内容区域宽度需要减去图标所占宽度
+    & + .h-layout {
+      width: calc(100% - 34px);
+    }
+  }
+  @include e(return-icon) {
+    font-size: 22px;
+  }
+  @include e(main) {
+    position: relative;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  // 面包屑
+  @include e(breadcrumb) {
+    height: 40px;
+    flex: none;
+    padding: 10px 0;
+    .el-breadcrumb__separator {
+      color: $--color-neutral-3;
+    }
+
+    .el-breadcrumb__item__inner,
+    .el-breadcrumb__item__inner a,
+    .el-breadcrumb__item__inner:hover,
+    .el-breadcrumb__item__inner a:hover {
+      color: $--color-neutral-2;
+      cursor: text;
+    }
+
+    .el-breadcrumb__item:hover,
+    .el-breadcrumb__item a:hover {
+      cursor: default;
+    }
+
+    // 节点有路由，且不是当前路径
+    .has-router:not(:last-child) .el-breadcrumb__item__inner,
+    .has-router:not(:last-child) .el-breadcrumb__item__inner a {
+      cursor: pointer;
+    }
+    .has-router:not(:last-child) .el-breadcrumb__item__inner:hover,
+    .has-router:not(:last-child) .el-breadcrumb__item__inner a:hover {
+      color: $--color-brand-8;
+      cursor: pointer;
+    }
+
+    // 当前路径
+    /* stylelint-disable */
+    .el-breadcrumb__item:last-child .el-breadcrumb__item__inner,
+    .el-breadcrumb__item:last-child .el-breadcrumb__item__inner:hover,
+    .el-breadcrumb__item:last-child .el-breadcrumb__item__inner a,
+    .el-breadcrumb__item:last-child .el-breadcrumb__item__inner a:hover {
+      color: $--color-neutral-1;
+      cursor: text;
+      font-weight: 600;
+    }
+  }
+
+  // 标题
+  @include e(title) {
+    height: $--page-herder-height;
+    font-weight: 600;
+    line-height: $--page-herder-height;
+  }
+
+  // 副标题
+  @include e(subtitle) {
+    color: $--color-neutral-3;
+    line-height: 20px;
+  }
+
+  // 头部操作按钮
+  @include e(action) {
+    display: flex;
+    height: 32px;
+    margin-top: ($--page-herder-height - 32px) / 2; // 头部操作栏居中
+  }
+}

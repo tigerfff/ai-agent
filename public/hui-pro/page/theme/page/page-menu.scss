@@ -1,0 +1,22 @@
+@include b(page-menu) {
+  position: fixed;
+  left: 0;
+  height: 100%;
+  background-color: $--menu-item-fill;
+  box-shadow: $--menu-box-shadow;
+  transition: width 0.2s ease-in-out;
+  .el-menu {
+    min-height: 100%;
+  }
+  @include e(dividing) {
+    height: 1px;
+    margin: 4px 12px;
+    background-color: $--menu-dividing-fill;
+  }
+}
+
+.page-menu-scrollbar__wrap,
+.page-menu-scrollbar__view {
+  margin-bottom: 0 !important;
+  overflow-x: hidden !important;
+}

@@ -1,0 +1,257 @@
+@use "sass:math";
+@import './input-number.scss';
+@import './tooltip.scss';
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import './common/var.scss';
+
+@include b(slider) {
+  @include utils-clearfix;
+
+  @include m(with-button) {
+    display: flex;
+    align-items: center;
+  }
+
+  @include e(runway) {
+    position: relative;
+    width: 100%;
+    height: $--slider-height;
+    margin: $--slider-margin;
+    background-color: $--slider-runway-background-color;
+    border-radius: $--slider-border-radius;
+    cursor: pointer;
+    vertical-align: middle;
+
+    &.show-input {
+      width: auto;
+      margin-right: 108px;
+    }
+
+    &.show-button {
+      width: calc(100% - 80px);
+      margin-right: 8px;
+      margin-left: 8px;
+    }
+
+    &.disabled {
+      cursor: default;
+      opacity: 0.4;
+
+      .el-slider__button-wrapper {
+        &:hover,
+        &.hover {
+          cursor: not-allowed;
+        }
+
+        &.dragging {
+          cursor: not-allowed;
+        }
+      }
+
+      .el-slider__button {
+        &:hover,
+        &.hover,
+        &.dragging {
+          width: $--slider-button-size;
+          height: $--slider-button-size;
+
+          &::after {
+            content: none;
+          }
+        }
+
+        &:hover,
+        &.hover {
+          cursor: not-allowed;
+        }
+
+        &.dragging {
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  @include e(runway-click-area) {
+    position: absolute;
+    z-index: 1000;
+    top: -(math.div(($--slider-runway-click-area-height - $--slider-height), 2));
+    width: 100%;
+    height: $--slider-runway-click-area-height;
+  }
+
+  @include e(input) {
+    margin-top: 1px;
+    float: right;
+  }
+
+  @include e(range-input) {
+    width: 56px;
+  }
+
+  @include e(bar) {
+    position: absolute;
+    height: $--slider-height;
+    background-color: $--slider-main-background-color;
+    border-bottom-left-radius: $--slider-border-radius;
+    border-top-left-radius: $--slider-border-radius;
+  }
+
+  @include e(button-wrapper) {
+    position: absolute;
+    z-index: 1001;
+    top: $--slider-button-wrapper-offset;
+    width: $--slider-button-wrapper-size;
+    height: $--slider-button-wrapper-size;
+    background-color: transparent;
+    line-height: 0;
+    text-align: center;
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    user-select: none;
+    @include utils-vertical-center;
+
+    .el-tooltip {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    &:hover,
+    &.hover {
+      cursor: grab;
+    }
+
+    &.dragging {
+      z-index: 1002;
+      cursor: grabbing;
+    }
+  }
+
+  @include e(button) {
+    width: $--slider-button-size;
+    height: $--slider-button-size;
+    border: 1px solid $--slider-button-border-color;
+    background-color: $--slider-button-background-color;
+    border-radius: 50%;
+    transition: 0.2s;
+    user-select: none;
+
+    &:hover,
+    &.hover,
+    &.dragging {
+      width: $--slider-button-zoom-size;
+      height: $--slider-button-zoom-size;
+
+      /* background-color: $--slider-button-hover-color; */
+      &::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: block;
+        width: 6px;
+        height: 6px;
+        background-color: $--slider-button-inner-background-color;
+        border-radius: $--border-radius-circle;
+        content: '';
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    &:hover,
+    &.hover {
+      cursor: grab;
+    }
+
+    &.dragging {
+      cursor: grabbing;
+    }
+  }
+
+  @include e(stop) {
+    position: absolute;
+    width: 1px;
+    height: 3px;
+    background-color: $--slider-stop-background-color;
+
+    @include m(top) {
+      transform: translate(-50%, -7px);
+    }
+
+    @include m(bottom) {
+      transform: translate(-50%, 6px);
+    }
+  }
+
+  @include e(mark) {
+    position: absolute;
+    margin-top: 15px;
+    color: $--slider-button-color;
+    font-size: 14px;
+    transform: translateX(-50%);
+  }
+
+  @include when(vertical) {
+    &.el-slider--with-button {
+      flex-direction: column;
+    }
+
+    .el-slider__runway.show-button {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    position: relative;
+
+    .el-slider__runway {
+      width: $--slider-height;
+      height: 100%;
+      margin: 0 16px;
+    }
+
+    .el-slider__bar {
+      width: $--slider-height;
+      height: auto;
+      border-radius: 0 0 3px 3px;
+    }
+
+    .el-slider__button-wrapper {
+      top: auto;
+      left: $--slider-button-wrapper-offset;
+      -ms-transform: translateY(50%);
+      transform: translateY(50%);
+    }
+
+    .el-slider__stop--left,
+    .el-slider__stop--right {
+      width: 3px;
+      height: 1px;
+    }
+
+    .el-slider__stop--left {
+      transform: translate(-7px, 50%);
+    }
+
+    .el-slider__stop--right {
+      transform: translate(6px, 50%);
+    }
+
+    &.el-slider--with-input {
+      padding-bottom: calc(#{$--input-large-height} + 22px);
+
+      .el-slider__input {
+        position: absolute;
+        bottom: 22px;
+        overflow: visible;
+        width: 55px;
+        float: none;
+
+        .el-input__inner {
+          padding-right: 25px;
+          padding-left: 5px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

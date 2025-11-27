@@ -1,0 +1,10 @@
+@include b(page-button-group) {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  &.over-long {
+    .el-button i + span {
+      display: none;
+    }
+  }
+}

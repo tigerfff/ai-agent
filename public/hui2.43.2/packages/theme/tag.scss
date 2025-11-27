@@ -1,0 +1,201 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+@include b(tag) {
+  position: relative;
+  display: inline-block;
+  height: $--tag-medium-line-height;
+  box-sizing: border-box;
+  padding: $--tag-padding;
+  border: 1px solid $--tag-border;
+  background-color: $--tag-fill;
+  border-radius: $--tag-border-radius;
+  color: $--tag-color;
+  font-size: $--tag-medium-font-size;
+  line-height: $--tag-medium-line-height;
+  white-space: nowrap;
+
+  .h-icon-close {
+    position: absolute;
+    // top: -1px;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    // 根据实际来的，可能需要微调
+    margin-left: 0;
+    // border-radius: 50%;
+    // color: $--tag-color;
+    color: $--color-neutral-3;
+    cursor: pointer;
+    font-size: 21px;
+    line-height: 22px;
+    text-align: center;
+    vertical-align: middle;
+
+    &::before {
+      display: block;
+    }
+
+    &:hover {
+      // background-color: $--tag-color;
+      color: $--color-neutral-2;
+    }
+    &:active {
+      color: $--color-neutral-1;
+    }
+  }
+  // 自定义颜色时，字体颜色改为 $--color-white
+  &.el-tag--custom--color {
+    & span {
+      color: $--color-white;
+    }
+    & i {
+      color: rgba($--color-white, 0.7);
+    }
+    .el-tag__close:hover {
+      color: rgba($--color-white, 0.9);
+    }
+    .el-tag__close:active {
+      color: rgba($--color-white, 0.9);
+    }
+  }
+
+  a {
+    color: inherit;
+  }
+
+  @include m(info) {
+    border-color: $--tag-info-border;
+    background-color: $--tag-info-fill;
+    color: $--tag-info-color;
+
+    @include when(hit) {
+      border-color: $--tag-info-color;
+    }
+
+    .el-tag__close {
+      color: $--tag-info-color;
+    }
+
+    .el-tag__close:active {
+      color: rgba($--tag-info-color, 0.9);
+    }
+    .el-tag__close:hover {
+      color: rgba($--tag-info-color, 0.7);
+    }
+  }
+
+  @include m(success) {
+    border-color: $--tag-success-border;
+    background-color: $--tag-success-fill;
+    color: $--tag-success-color;
+
+    @include when(hit) {
+      border-color: $--tag-success-color;
+    }
+
+    .el-tag__close {
+      color: $--tag-success-color;
+    }
+
+    .el-tag__close:active {
+      color: rgba($--tag-success-color, 0.9);
+    }
+    .el-tag__close:hover {
+      color: rgba($--tag-success-color, 0.7);
+    }
+  }
+
+  @include m(warning) {
+    border-color: $--tag-warning-border;
+    background-color: $--tag-warning-fill;
+    color: $--tag-warning-color;
+
+    @include when(hit) {
+      border-color: $--tag-warning-color;
+    }
+
+    .el-tag__close {
+      color: $--tag-warning-color;
+    }
+
+    .el-tag__close:active {
+      color: rgba($--tag-warning-color, 0.9);
+    }
+    .el-tag__close:hover {
+      color: rgba($--tag-warning-color, 0.7);
+    }
+  }
+
+  @include m(danger) {
+    border-color: $--tag-danger-border;
+    background-color: $--tag-danger-fill;
+    color: $--tag-danger-color;
+
+    @include when(hit) {
+      border-color: $--tag-danger-color;
+    }
+
+    .el-tag__close {
+      color: $--tag-danger-color;
+    }
+
+    .el-tag__close:active {
+      color: rgba($--tag-danger-color, 0.9);
+    }
+    .el-tag__close:hover {
+      color: rgba($--tag-danger-color, 0.7);
+    }
+  }
+
+  @include m(large) {
+    height: $--tag-large-line-height;
+    font-size: $--tag-large-font-size;
+    line-height: $--tag-large-line-height;
+    .h-icon-close {
+      top: 2px;
+    }
+  }
+
+  @include m(medium) {
+    height: $--tag-medium-line-height;
+    font-size: $--tag-medium-font-size;
+    line-height: $--tag-medium-line-height;
+  }
+
+  @include m(small) {
+    height: $--tag-small-line-height;
+    padding: 0 8px;
+    font-size: $--tag-small-font-size;
+    line-height: $--tag-small-line-height;
+  }
+  // 暂时不用
+  @include m(mini) {
+    height: 20px;
+    padding: 0 5px;
+    line-height: 19px;
+  }
+
+  @include m(maxwidth) {
+    overflow: hidden;
+    // height: 20px;
+    // line-height: 20px;
+    text-overflow: ellipsis;
+    vertical-align: top;
+
+    & > .el-tag--maxwidth {
+      // 修复多 span 下
+      margin-top: -1px;
+    }
+  }
+
+  @include m(closable) {
+    padding: 0 24px 0 8px;
+  }
+
+  @include m(disabled) {
+    border-color: $--tag-border-disabled;
+    background: $--tag-fill-disabled;
+    color: $--tag-color-disabled;
+  }
+}

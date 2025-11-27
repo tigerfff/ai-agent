@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`notification 使用 HTML 片段 1`] = `
+NodeList [
+  <div
+    class="el-notification el-notification--small right el-notification-fade-enter el-notification-fade-enter-active"
+    style="top: 16px; z-index: 2000;"
+  >
+    <div
+      class="el-notification__group"
+    >
+      <div
+        class="el-notification__title"
+      >
+        
+        标题名称
+      
+      </div>
+       
+      <div
+        class="el-notification__content"
+      >
+        <p>
+          
+            这是一条定时关闭的消息
+          
+        </p>
+      </div>
+       
+      <div
+        class="el-notification__closeBtn h-icon-close_sm"
+      />
+    </div>
+     
+    <!---->
+  </div>,
+  <div
+    class="el-notification el-notification--small right el-notification-fade-enter el-notification-fade-enter-active"
+    style="top: 32px; z-index: 2001;"
+  >
+    <div
+      class="el-notification__group"
+    >
+      <div
+        class="el-notification__title"
+      >
+        
+        标题名称
+      
+      </div>
+       
+      <div
+        class="el-notification__content"
+      >
+        <p>
+          
+            这是一条定时关闭的消息
+          
+        </p>
+      </div>
+       
+      <div
+        class="el-notification__closeBtn h-icon-close_sm"
+      />
+    </div>
+     
+    <!---->
+  </div>,
+  <div
+    class="el-notification el-notification--small right el-notification-fade-enter el-notification-fade-enter-active"
+    style="top: 48px; z-index: 2002;"
+  >
+    <div
+      class="el-notification__group"
+    >
+      <div
+        class="el-notification__title"
+      >
+        
+        提示
+      
+      </div>
+       
+      <div
+        class="el-notification__content"
+      >
+        <p>
+          
+            这是一条不会自动关闭的消息
+          
+        </p>
+      </div>
+       
+      <div
+        class="el-notification__closeBtn h-icon-close_sm"
+      />
+    </div>
+     
+    <!---->
+  </div>,
+  <div
+    class="el-notification el-notification--small right"
+    style="top: 64px; display: none; z-index: 2003;"
+  >
+    <div
+      class="el-notification__group"
+    >
+      <div
+        class="el-notification__title"
+      >
+        
+        标题名称
+      
+      </div>
+       
+      <div
+        class="el-notification__content"
+      >
+        <p>
+          <i
+            style="color: teal"
+          >
+            这是提示文案这是提示文案这是提示文案这是提示文案这是提示文案这是提示文案这是提示文案这是提示文案
+          </i>
+        </p>
+      </div>
+       
+      <div
+        class="el-notification__closeBtn h-icon-close_sm"
+      />
+    </div>
+     
+    <!---->
+  </div>,
+]
+`;
+
+exports[`notification 基础用法 1`] = `
+NodeList [
+  <div
+    class="el-notification el-notification--small right"
+    style="top: 16px; display: none; z-index: 2000;"
+  >
+    <div
+      class="el-notification__group"
+    >
+      <div
+        class="el-notification__title"
+      >
+        
+        标题名称
+      
+      </div>
+       
+      <div
+        class="el-notification__content"
+      >
+        <p>
+          
+            这是一条定时关闭的消息
+          
+        </p>
+      </div>
+       
+      <div
+        class="el-notification__closeBtn h-icon-close_sm"
+      />
+    </div>
+     
+    <!---->
+  </div>,
+]
+`;

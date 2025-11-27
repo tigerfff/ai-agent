@@ -1,0 +1,189 @@
+@import 'mixins/mixins';
+@import 'common/var';
+@import 'button';
+@import './popper';
+
+@include b(dropdown) {
+  position: relative;
+  display: inline-block;
+  color: $--color-neutral-3;
+  font-size: $--font-size;
+  .el-button {
+    padding-right: 8px;
+  }
+  // i {
+  //   position: relative;
+  //   // top: 5px;
+  //   font-size: 24px;
+  //   line-height: 0;
+  // }
+  .el-button-group {
+    display: block;
+
+    .el-button {
+      min-width: auto;
+      float: none;
+    }
+  }
+
+  & .el-dropdown__caret-button {
+    position: relative;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-left: none;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: block;
+      width: 1px;
+      background: mix(white, transparent, 50%);
+      content: '';
+    }
+
+    // &:hover {
+    //   &::before {
+    //     top: 0;
+    //     bottom: 0;
+    //   }
+    // }
+
+    & .el-dropdown__icon {
+      padding-left: 0;
+    }
+  }
+
+  @include e(icon) {
+    margin: 0 3px;
+    font-size: 24px;
+  }
+
+  .el-dropdown-selfdefine {
+    // 自定义
+    &:focus:active,
+    &:focus:not(.focusing) {
+      outline-width: 0;
+    }
+  }
+}
+
+@include b(dropdown-menu) {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  padding: 10px 0;
+  margin: 5px 0;
+  // border: 1px solid $--color-neutral-7;
+  background-color: $--fill;
+  border-radius: $--border-radius-sm;
+  box-shadow: $--box-shadow;
+
+  @include e(item) {
+    padding: 0 20px;
+    margin: 0;
+    color: $--option-color;
+    cursor: pointer;
+    font-size: $--font-size;
+    line-height: 36px;
+    list-style: none;
+    outline: none;
+
+    &:focus,
+    &:hover:not(.is-disabled) {
+      background-color: $--option-fill-hov;
+      color: $--option-hov-color;
+    }
+    &:active:not(.is-disabled) {
+      background-color: $--option-fill-pre;
+      color: $--option-pre-color;
+    }
+
+    @include m(divided) {
+      $divided-offset: 6px;
+
+      position: relative;
+      margin-top: $divided-offset;
+      border-top: 1px solid $--color-neutral-7;
+
+      &::before {
+        display: block;
+        height: $divided-offset;
+        margin: 0 -20px;
+        background-color: $--option-fill;
+        content: '';
+      }
+    }
+
+    @include when(disabled) {
+      color: $--color-neutral-5;
+      cursor: default;
+      pointer-events: none;
+    }
+  }
+
+  @include m(medium) {
+    padding: 6px 0;
+
+    @include e(item) {
+      padding: 0 17px;
+      font-size: 14px;
+      line-height: 30px;
+
+      &.el-dropdown-menu__item--divided {
+        $divided-offset: 6px;
+
+        margin-top: $divided-offset;
+
+        &::before {
+          height: $divided-offset;
+          margin: 0 -17px;
+        }
+      }
+    }
+  }
+
+  @include m(small) {
+    padding: 6px 0;
+
+    @include e(item) {
+      padding: 0 15px;
+      font-size: 13px;
+      line-height: 27px;
+
+      &.el-dropdown-menu__item--divided {
+        $divided-offset: 4px;
+
+        margin-top: $divided-offset;
+
+        &::before {
+          height: $divided-offset;
+          margin: 0 -15px;
+        }
+      }
+    }
+  }
+
+  @include m(mini) {
+    padding: 3px 0;
+
+    @include e(item) {
+      padding: 0 10px;
+      font-size: 12px;
+      line-height: 24px;
+
+      &.el-dropdown-menu__item--divided {
+        $divided-offset: 3px;
+
+        margin-top: $divided-offset;
+
+        &::before {
+          height: $divided-offset;
+          margin: 0 -10px;
+        }
+      }
+    }
+  }
+}

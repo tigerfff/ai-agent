@@ -1,0 +1,139 @@
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import 'common/var';
+
+@include b(breadcrumb) {
+  height: $--breadcrumb-line-height;
+  font-size: $--breadcrumb-font-size;
+  line-height: $--breadcrumb-line-height;
+  @include utils-clearfix;
+
+  @include e(separator) {
+    // HUI2.0 设计中使用图标分隔，故去除分隔
+    // margin: 0 8px;
+    margin-top: -2px;
+    color: $--color-neutral-3;
+    float: right;
+    font-size: $--breadcrumb-icon-size;
+  }
+
+  @include e(item__unclickable) {
+    .el-breadcrumb__item__inner,
+    .el-breadcrumb__item__inner a {
+      &,
+      &:hover {
+        color: $--color-neutral-2;
+        cursor: default;
+        text-decoration: none;
+      }
+      &:active {
+        color: $--color-neutral-2;
+      }
+    }
+  }
+
+  @include e(item) {
+    float: left;
+
+    @include e(item__inner) {
+      display: inline-block;
+      // overflow: hidden;
+      // max-width: 213px;
+      @include utils-ellipsis;
+      // text-overflow: ellipsis;
+      // white-space: nowrap;
+      &,
+      & a {
+        color: $--color-neutral-2;
+        transition: color 0.15s linear;
+
+        &:hover {
+          // color: $--color-brand;
+          cursor: pointer;
+          text-decoration: underline;
+        }
+        &:active {
+          color: $--color-neutral-1;
+        }
+      }
+    }
+
+    &:last-child {
+      .el-breadcrumb__item__inner,
+      .el-breadcrumb__item__inner a {
+        &,
+        &:hover {
+          color: $--color-neutral-1;
+          cursor: default;
+          text-decoration: none;
+        }
+        &:active {
+          color: $--color-neutral-1;
+        }
+      }
+
+      .el-breadcrumb__separator {
+        display: none;
+      }
+    }
+  }
+
+  @include e(dropdown__menu) {
+    // & {
+    //   display: inline;
+    // }
+    .el-breadcrumb__item {
+      width: 100%;
+      // display: inline-block;
+    }
+    .el-breadcrumb__separator {
+      display: none;
+    }
+  }
+
+  & button.el-breadcrumb__item__omit {
+    width: $--breadcrumb-omit-width;
+    min-width: $--breadcrumb-omit-width;
+    height: $--breadcrumb-omit-height;
+    margin-top: -2px;
+    line-height: $--breadcrumb-omit-height;
+    &.el-button i {
+      // margin: 0;
+      // 微调的结果
+      margin-top: -4px;
+    }
+  }
+}
+// 特殊处理，tooltip 形式的省略面包屑需要
+@include b(tooltip) {
+  @include e(contain--breadcrumb) {
+    max-width: none !important;
+    padding: $--breadcrumb-tooltip-padding;
+    @include b(breadcrumb) {
+      margin: $--breadcrumb-tooltip-margin;
+      @include e(item) {
+        &:last-child {
+          .el-breadcrumb__item__inner,
+          .el-breadcrumb__item__inner a {
+            color: $--color-neutral-1;
+            transition: color 0.15s linear;
+            &:hover {
+              color: $--color-neutral-1;
+              cursor: default;
+            }
+          }
+          // &,
+          // & a {
+          //   color: $--color-neutral-1;
+          //   transition: color 0.15s linear;
+
+          //   &:hover {
+          //     color: $--color-brand;
+          //     cursor: pointer;
+          //   }
+          // }
+        }
+      }
+    }
+  }
+}

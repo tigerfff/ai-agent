@@ -1,0 +1,110 @@
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import 'common/var';
+@import 'input';
+@import 'scrollbar';
+@import 'button';
+
+@include b(autocomplete) {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+@include b(autocomplete-suggestion) {
+  margin: 5px 0;
+  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.04), 0 2px 4px 0 rgba(0, 0, 0, 0.12);
+
+  @include e(wrap) {
+    overflow: auto;
+    max-height: 243px;
+    box-sizing: border-box;
+    margin-top: -1px;
+    margin-left: -1px;
+    border: 1px solid $--color-neutral-6;
+    background-color: $--fill;
+
+    /* padding: 6px 0; */
+    border-radius: 2px;
+    .el-autocomplete__nodata {
+      min-height: 225px;
+      color: $--color-neutral-3;
+      line-height: 225px;
+      text-align: center;
+    }
+  }
+
+  @include e(list) {
+    padding: 0;
+    margin: 0;
+  }
+
+  @include e(item) {
+    overflow: hidden;
+    padding: 0 10px;
+    margin: 0;
+    color: $--option-color;
+    cursor: pointer;
+    line-height: 32px;
+    list-style: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: $--option-fill-hov;
+      color: $--option-hov-color;
+    }
+    &:active {
+      background-color: $--option-fill-pre;
+      color: $--option-pre-color;
+    }
+    &.highlighted {
+      background-color: $--color-brand;
+      color: $--color-white;
+    }
+    &.divider {
+      margin-top: 6px;
+      border-top: 1px solid $--color-neutral-6;
+    }
+
+    &.divider:last-child {
+      margin-bottom: -6px;
+    }
+  }
+
+  @include e(action) {
+    height: 32px;
+    background-color: $--fill;
+    color: $--color-neutral-2;
+    cursor: pointer;
+    line-height: 32px;
+    text-align: center;
+    span {
+      &:hover {
+        text-decoration: underline;
+      }
+      &:active {
+        color: $--font-color-primary;
+      }
+    }
+  }
+
+  @include when(loading) {
+    li {
+      height: 100px;
+      color: #999;
+      font-size: 20px;
+      line-height: 100px;
+      text-align: center;
+      @include utils-vertical-center;
+
+      &:hover {
+        background-color: $--color-white;
+      }
+    }
+
+    & .el-icon-loading {
+      vertical-align: middle;
+    }
+  }
+}

@@ -1,0 +1,51 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+$namespace: 'h';
+
+@include b(ip-input) {
+  display: inline-block;
+  min-width: 162px;
+  border: 1px solid $--color-neutral-4;
+  background-color: $--input-fill;
+  border-radius: $--input-border-radius;
+  line-height: 29px;
+  transition: $--transition-border-base;
+
+  &:not(.is-disabled):hover {
+    border-color: $--color-neutral-2;
+  }
+  @include when(focus) {
+    border-color: $--color-neutral-1;
+  }
+  @include when(disabled) {
+    border-color: $--input-disabled-border;
+    background-color: $--input-disabled-fill;
+  }
+
+  @include e(verse) {
+    &.el-input {
+      position: relative;
+      width: 25%;
+      border-radius: 0;
+    }
+    &:not(:last-child)::after {
+      position: absolute;
+      z-index: 10;
+      top: 0;
+      right: 0;
+      color: $--color-neutral-3;
+      content: '.';
+    }
+    input {
+      height: 30px;
+      border: none;
+      text-align: center;
+    }
+  }
+}
+
+.el-form-item.is-error .h-ip-input input:focus,
+.el-form-item.is-error .h-ip-input input:hover {
+  border-color: $--color-danger;
+}

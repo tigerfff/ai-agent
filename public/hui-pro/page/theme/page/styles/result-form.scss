@@ -1,0 +1,59 @@
+/* 结果表单
+------------------------------ */
+.page-result-form {
+  margin-top: 64px;
+  .page-result-form__icon {
+    position: relative;
+    left: 50%;
+    font-size: 56px;
+    transform: translate(-50%);
+    &.is-success {
+      color: $--color-success;
+    }
+    &.is-warning {
+      color: $--color-warning;
+    }
+    &.is-remind {
+      color: $--color-remind;
+    }
+    &.is-info {
+      color: $--color-info;
+    }
+    &.is-danger {
+      color: $--color-danger;
+    }
+  }
+  .page-result-form__title {
+    margin-top: 16px;
+    color: $--color-neutral-1;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 26px;
+    text-align: center;
+  }
+  .page-result-form__subtitle {
+    margin-top: 8px;
+    color: $--color-neutral-3;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+  }
+  .page-result-form__block {
+    width: 560px;
+    padding: 32px 40px;
+    margin: 24px 0;
+    border: 1px solid $--color-neutral-7;
+    background-color: $--color-neutral-9;
+    .el-form--label-top .el-form-item__label {
+      height: 20px;
+      line-height: 20px;
+    }
+    .el-form-item__content {
+      color: $--color-neutral-1;
+      line-height: 20px;
+    }
+    .el-form-item:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

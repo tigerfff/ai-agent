@@ -1,0 +1,501 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Message 不同状态 1`] = `
+NodeList [
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 20px; z-index: 2000;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            这是一条消息提示
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 36px; z-index: 2001;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <p>
+        <span>
+          内容可以是 
+        </span>
+        <i
+          style="color: teal;"
+        >
+          VNode
+        </i>
+      </p>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message"
+    style="top: 52px; display: none; z-index: 2002;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            这是一条消息提示
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message"
+    style="top: 68px; display: none; z-index: 2003;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_success_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            恭喜你，这是一条成功消息
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message"
+    style="top: 84px; display: none; z-index: 2004;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_warning_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            警告哦，这是一条警告消息
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message"
+    style="top: 100px; display: none; z-index: 2005;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_error_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            错了哦，这是一条错误消息
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+]
+`;
+
+exports[`Message 可关闭 1`] = `
+NodeList [
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 20px; z-index: 2000;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            这是一条消息提示
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 36px; z-index: 2001;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <p>
+        <span>
+          内容可以是 
+        </span>
+        <i
+          style="color: teal;"
+        >
+          VNode
+        </i>
+      </p>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 52px; z-index: 2002;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            这是一条消息提示
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 68px; z-index: 2003;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_success_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            恭喜你，这是一条成功消息
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 84px; z-index: 2004;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_warning_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            警告哦，这是一条警告消息
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message el-message-fade-enter el-message-fade-enter-active"
+    style="top: 100px; z-index: 2005;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_error_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            错了哦，这是一条错误消息
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message"
+    style="top: 116px; display: none; z-index: 2006;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_success_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class="is-close"
+        >
+          
+            恭喜你，这是一条成功消息
+          
+        </p>
+      </div>
+       
+      <div
+        class="el-message__closeBtn h-icon-close_sm"
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`Message 基础用法 1`] = `
+NodeList [
+  <div
+    class="el-message"
+    style="top: 20px; display: none; z-index: 2000;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <div>
+        <p
+          class=""
+        >
+          
+            这是一条消息提示
+          
+        </p>
+      </div>
+       
+      <!---->
+    </div>
+  </div>,
+  <div
+    class="el-message"
+    style="top: 36px; display: none; z-index: 2001;"
+  >
+    <i
+      class="el-message__typeImg h-icon-feedback_info_md"
+    >
+      <span
+        class="path1"
+      />
+       
+      <span
+        class="path2"
+      />
+    </i>
+     
+    <div
+      class="el-message__group"
+    >
+      <p>
+        <span>
+          内容可以是 
+        </span>
+        <i
+          style="color: teal;"
+        >
+          VNode
+        </i>
+      </p>
+       
+      <!---->
+    </div>
+  </div>,
+]
+`;

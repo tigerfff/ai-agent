@@ -1,0 +1,64 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+@include b(select-dropdown) {
+  @include e(item) {
+    position: relative;
+    overflow: hidden;
+    height: $--select-option-height;
+    box-sizing: border-box;
+    padding: 0 8px;
+    background-color: $--option-fill;
+    color: $--option-color;
+    cursor: pointer;
+    font-size: $--font-size;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    .brand-font {
+      color: $--color-brand;
+    }
+
+    &.hover,
+    &:hover {
+      background-color: $--option-fill-hov;
+      color: $--option-hov-color;
+    }
+    &:active {
+      background-color: $--option-fill-pre;
+      color: $--option-pre-color;
+    }
+
+    @include when(disabled) {
+      color: $--option-disabled-color;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: $--option-disabled-fill;
+      }
+    }
+
+    &.selected {
+      .brand-font {
+        color: $--option-selected-color;
+      }
+      //只有单选背景变红
+      &.radio {
+        background-color: $--option-selected-fill;
+        color: $--option-selected-color;
+      }
+
+      &:hover {
+        background-color: $--option-selected-fill-hov;
+      }
+
+      &:active {
+        background-color: $--option-selected-fill-pre;
+      }
+    }
+
+    & > span {
+      line-height: $--select-option-height;
+    }
+  }
+}

@@ -1,0 +1,324 @@
+@charset "UTF-8";
+@import 'mixins/mixins';
+@import 'mixins/utils';
+@import './common/var.scss';
+
+@include b(pagination) {
+  color: $--pagination-color;
+  text-align: left;
+  white-space: nowrap;
+  @include utils-clearfix;
+
+  .btn-prev,
+  .btn-next,
+  .btn-first,
+  .btn-last,
+  .el-pagination__total,
+  .el-pagination__jump,
+  .el-pagination__sizes {
+    display: inline-block;
+    min-width: $--pagination-button-size;
+    height: $--pagination-button-size;
+    box-sizing: border-box;
+    font-size: $--pagination-font-size;
+    line-height: $--pagination-button-size;
+    vertical-align: top;
+  }
+
+  .el-select .el-input {
+    width: 112px;
+
+    input {
+      height: $--pagination-item-height;
+      padding-right: 25px;
+      border-radius: $--border-radius-sm;
+    }
+  }
+
+  .btn-prev,
+  .btn-first {
+    margin: 0 $--pagination-item-margin 0 0;
+    border-radius: $--pagination-border-radius 0 0 $--pagination-border-radius;
+  }
+
+  .btn-next,
+  .btn-last {
+    margin: 0 $--pagination-item-margin 0 0;
+    border-radius: 0 $--pagination-border-radius $--pagination-border-radius 0;
+  }
+
+  .btn-prev,
+  .btn-next,
+  .btn-first,
+  .btn-last {
+    padding: 0 6px;
+    border: none;
+    background: center center no-repeat;
+    background-color: $--pagination-fill;
+    background-size: 16px;
+    color: $--pagination-button-color;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:hover {
+      background-color: $--pagination-hover-fill;
+      color: $--pagination-hover-color;
+    }
+
+    &.disabled {
+      background-color: $--pagination-button-disabled-fill;
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .el-icon {
+      display: block;
+      font-size: $--pagination-icon-font-size;
+    }
+  }
+
+  @include m(small) {
+    .btn-prev,
+    .btn-next,
+    .btn-first,
+    .btn-last,
+    .el-pager li,
+    .el-pager li.btn-quicknext,
+    .el-pager li.btn-quickprev,
+    .el-pager li:last-child {
+      min-width: 24px;
+      height: 24px;
+      padding: 0;
+      margin-right: 8px;
+      border-color: transparent;
+      font-size: 14px;
+      line-height: 24px;
+    }
+
+    .arrow.disabled {
+      visibility: hidden;
+    }
+
+    @include e(editor) {
+      height: 24px;
+      line-height: normal;
+    }
+  }
+
+  @include e(sizes) {
+    margin: 0 24px 0 0;
+
+    .el-input .el-input__inner {
+      font-size: $--pagination-font-size;
+    }
+  }
+
+  @include e(jump) {
+    margin-left: 8px;
+  }
+
+  @include e(mini-pager) {
+    display: inline-block;
+    margin-right: 8px;
+    color: $--color-neutral-1;
+    text-align: center;
+
+    div {
+      display: inline-block;
+      line-height: 24px;
+    }
+  }
+
+  @include e(mini-pager-slash) {
+    margin: 0 5px;
+    color: $--color-neutral-3;
+  }
+
+  @include e(mini-pager-max-num) {
+    color: $--color-neutral-3;
+  }
+
+  @include e(total) {
+    margin: 0 8px;
+  }
+
+  @include e(rightwrapper) {
+    float: right;
+  }
+
+  @include e(editor) {
+    &.el-input {
+      width: 72px;
+      height: $--pagination-item-height;
+      margin: 0 8px;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  @include m(table) {
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    .el-pagination-wrapper {
+      position: relative;
+      min-width: 380px;
+      height: $--table-pagination-height;
+
+      & > * {
+        margin-top: 12px;
+      }
+    }
+
+    .el-pagination__total {
+      margin: 12px 8px 12px 0;
+      line-height: $--pagination-item-height;
+    }
+
+    .el-pagination__jump {
+      > span {
+        min-width: auto;
+        line-height: $--pagination-item-height;
+      }
+
+      .el-button {
+        width: 56px;
+        min-width: initial;
+        height: 32px;
+        padding: 0;
+        margin-left: 16px;
+      }
+    }
+
+    .el-pagination__tableRightPageWrapper {
+      position: absolute;
+      right: 0;
+      display: inline-block;
+    }
+
+    @include e(pager) {
+      display: inline-block;
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+
+      li {
+        display: inline-block;
+        width: $--pagination-item-height;
+        height: $--pagination-item-height;
+        margin-right: 8px;
+        background-color: $--pagination-table-pager-bg;
+        cursor: pointer;
+        font-size: $--pagination-font-size;
+        line-height: $--pagination-item-height;
+        text-align: center;
+        vertical-align: middle;
+
+        @include when(disabled) {
+          cursor: not-allowed;
+          opacity: 0.4;
+
+          &:hover {
+            background-color: $--pagination-table-pager-bg;
+          }
+        }
+
+        &:hover {
+          background-color: $--pagination-table-pager-bg-hover;
+        }
+
+        &.h-icon-angle_line_left,
+        &.h-icon-angle_line_right,
+        &.h-icon-angle_left,
+        &.h-icon-angle_right {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .el-select {
+      .el-input {
+        .el-input__inner {
+          height: $--pagination-item-height;
+          border-radius: 2px;
+        }
+      }
+    }
+  }
+
+  @include e(paged-select) {
+    .el-select-dropdown__item {
+      height: 28px;
+    }
+  }
+}
+
+@include b(pager) {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  font-size: 0;
+  list-style: none;
+  user-select: none;
+  vertical-align: top;
+
+  li {
+    display: inline-block;
+    min-width: $--pagination-button-size;
+    height: $--pagination-button-size;
+    box-sizing: border-box;
+    padding: 0 4px;
+    margin: 0;
+    margin-right: $--pagination-item-margin;
+    background: $--pagination-fill;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: $--pagination-font-size;
+    line-height: $--pagination-button-size;
+    text-align: center;
+    vertical-align: top;
+
+    &.btn-quicknext,
+    &.btn-quickprev {
+      color: $--pagination-button-color;
+      font-size: $--pagination-icon-font-size;
+      line-height: $--pagination-button-size;
+    }
+
+    &.btn-quickprev:hover {
+      cursor: pointer;
+    }
+
+    &.btn-quicknext:hover {
+      cursor: pointer;
+    }
+
+    &:hover {
+      background-color: $--pagination-hover-fill;
+      color: $--pagination-hover-color;
+    }
+
+    &.disabled {
+      background-color: $--pagination-button-disabled-fill;
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    &.active {
+      background-color: $--pagination-active-fill !important;
+      color: $--pagination-active-color;
+      cursor: default;
+    }
+  }
+}

@@ -1,0 +1,64 @@
+// 数据展示类样式
+.page-data-toolbar {
+  .split-line {
+    height: 16px;
+    margin: 0 8px;
+    border-right: 1px solid $--color-neutral-rgba-6;
+  }
+  .h-page-action__main {
+    border: none;
+  }
+  .is-actived {
+    z-index: 2;
+    border-color: $--color-brand !important;
+    color: $--color-brand-pre !important;
+  }
+  .el-button.is-icon-border:not(:last-child) {
+    border-right: none;
+  }
+  .el-button.is-icon-border.is-actived + .is-icon-border {
+    z-index: 2;
+    border-left-color: $--color-brand !important;
+  }
+}
+.time-container {
+  width: 100%;
+  height: 44px;
+  padding: 6px 8px;
+}
+
+.page-data-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  .page-data-title {
+    height: 26px;
+    margin: 16px 0 12px;
+    line-height: 26px;
+    text-align: center;
+  }
+  .page-data-subtitle {
+    height: 50px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .page-data-chart {
+    min-height: 372px;
+    flex: 1;
+    margin-bottom: 32px;
+  }
+}
+.card-mode.h-page-content {
+  .page-data-toolbar {
+    margin-top: 4px;
+  }
+  .page-data-card-contain {
+    flex: 1;
+    padding: 16px 16px 24px 16px;
+    margin: 0 -12px;
+    background-color: $--color-neutral-9;
+    .page-data-card {
+      background-color: $--color-white;
+    }
+  }
+}

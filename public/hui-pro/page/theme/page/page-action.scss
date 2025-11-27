@@ -1,0 +1,58 @@
+@include b(page-action) {
+  @include e(main) {
+    position: relative;
+    height: $--page-action-height;
+    padding: 6px 0;
+    border-bottom: $--page-border;
+    background-color: $--color-white;
+    @include when(show-search-icon) {
+      padding-right: 44px;
+    }
+    .dividing {
+      position: relative;
+      top: 4px;
+      display: inline-block;
+      width: 1px;
+      height: 16px;
+      margin: 0 10px;
+      background-color: #ddd;
+    }
+  }
+  @include e(left-action) {
+    float: left;
+  }
+  @include e(right-action) {
+    float: right;
+  }
+  @include e(search-icon) {
+    position: absolute;
+    top: 6px;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: $--color-neutral-8;
+    }
+    @include when(active) {
+      background-color: $--color-neutral-8;
+    }
+    i {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 24px;
+    }
+  }
+  @include e(tooltip) {
+    white-space: nowrap;
+  }
+}
+
+.h-page-action__left-action,
+.h-page-action__right-action {
+  & > .el-checkbox {
+    top: 2px;
+  }
+}

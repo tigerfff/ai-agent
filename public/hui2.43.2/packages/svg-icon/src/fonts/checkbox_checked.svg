@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <defs>
+        <path d="M3.80443443,5.51685566 L8.67806729,0.766150827 C8.95406217,0.44048717 9.43143253,0.409370647 9.74430382,0.696650128 C10.0571751,0.983929609 10.0870694,1.4808182 9.81107447,1.80648186 L4.36397272,7.23385857 C4.06080599,7.59158399 3.52393374,7.5881988 3.22495286,7.22667661 L0.182916667,4.54830223 C-0.0892675314,4.21918209 -0.0535921568,3.72270694 0.262599847,3.43939395 C0.57879185,3.15608096 1.055765,3.19321499 1.3279492,3.52233513 L3.80443443,5.51685566 Z" id="path-1"></path>
+    </defs>
+    <g stroke="none" stroke-width="1" fill-rule="evenodd">
+        <g transform="translate(2.000000, 3.000000)">
+            <mask class="el-checkbox__mask">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <use class="el-checkbox__tick" fill-rule="nonzero" xlink:href="#path-1"></use>
+        </g>
+    </g>
+</svg>

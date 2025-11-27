@@ -1,0 +1,131 @@
+@import 'mixins/mixins';
+@import 'common/var';
+
+@mixin alert-simple($color) {
+  border-color: rgba($color, 0.12);
+  background: rgba($color, 0.08);
+  .el-alert__title,
+  .el-alert__description {
+    color: $--alert-content-color;
+  }
+  .el-alert__icon {
+    color: $color;
+  }
+}
+
+@include b(alert) {
+  position: relative;
+  display: table;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  padding: $--alert-padding;
+  margin: 0;
+  border: 1px solid transparent;
+  background-color: $--color-white;
+  color: $--color-white;
+  opacity: 1;
+  transition: opacity 0.2s;
+
+  @include when(center) {
+    text-align: center;
+  }
+
+  @include m(success) {
+    background-color: $--color-success;
+  }
+
+  @include m(info) {
+    background-color: $--color-info;
+  }
+
+  @include m(warning) {
+    background-color: $--color-warning;
+  }
+
+  @include m(error) {
+    background-color: $--color-danger;
+  }
+
+  @include e(content) {
+    display: table-cell;
+    padding: 0 12px;
+    line-height: 24px;
+    @include when(close) {
+      padding-right: 24px;
+    }
+    @include when(icon) {
+      padding-left: 4px;
+    }
+  }
+
+  @include e(icon) {
+    display: table-cell;
+    width: $--alert-icon-size;
+    color: $--color-white;
+    font-size: $--alert-icon-size;
+    vertical-align: top;
+  }
+
+  @include e(title) {
+    font-size: $--font-size;
+    line-height: 14px;
+    word-break: break-word;
+    @include when(bold) {
+      font-weight: bold;
+    }
+  }
+
+  & .el-alert__description {
+    margin: 0;
+    color: $--color-white;
+    font-size: $--alert-description-font-size;
+
+    @include when(title) {
+      margin: 5px 0 0 0;
+    }
+  }
+
+  @include e(closebtn) {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: $--alert-close-color;
+    cursor: pointer;
+    font-size: $--alert-close-font-size;
+    opacity: 1;
+    &:hover {
+      color: $--alert-close-hover-color;
+    }
+    &:active {
+      color: $--alert-close-active-color;
+    }
+
+    @include when(customed) {
+      top: 5px;
+      font-size: $--alert-close-customed-font-size;
+      font-style: normal;
+    }
+  }
+
+  @include when(simple) {
+    background-color: $--fill;
+    &.el-alert--success {
+      @include alert-simple($--color-success);
+    }
+    &.el-alert--info {
+      @include alert-simple($--color-info);
+    }
+    &.el-alert--warning {
+      @include alert-simple($--color-warning);
+    }
+    &.el-alert--error {
+      @include alert-simple($--color-danger);
+    }
+  }
+}
+
+.el-alert-fade-enter,
+.el-alert-fade-leave-active {
+  opacity: 0;
+}

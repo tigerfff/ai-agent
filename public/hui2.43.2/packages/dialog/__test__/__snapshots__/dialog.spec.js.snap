@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dialog snapshot test 1`] = `"<div class=\\"el-dialog__wrapper\\" style=\\"display: none;\\"><div class=\\"el-dialog el-dialog--small\\" style=\\"top: 15%; margin-left: -25%;\\"><div class=\\"el-dialog__header\\"><span class=\\"el-dialog__title\\"></span> <button type=\\"button\\" aria-label=\\"Close\\" class=\\"el-dialog__headerbtn\\"><i class=\\"el-dialog__close el-icon h-icon-close\\"></i></button></div> <!----> <!----></div></div>"`;

@@ -1,0 +1,88 @@
+.page-plan-container {
+  .h-page-sidebar {
+    padding-top: 0;
+  }
+  .h-page-sidebar__action {
+    height: 44px;
+    padding: 0;
+    margin: 0 12px 12px 12px;
+    border-bottom: 1px solid $--color-neutral-7;
+    line-height: 44px;
+  }
+  .el-alert {
+    margin-bottom: 16px;
+  }
+}
+
+.page-plan {
+  max-width: 1008px;
+  padding: 24px 24px 0;
+  margin: 0 auto;
+  .el-alert {
+    width: calc(100% + 24px);
+    margin: 0 -12px 24px;
+  }
+}
+
+/* 表单 */
+.page-plan-form {
+  width: 480px;
+  margin-bottom: 25px;
+}
+
+/* 顶部栏 */
+.page-plan-topbar {
+  display: flex;
+  height: 32px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+/* 模板类型选项 */
+.page-plan-options {
+  float: left;
+  .el-radio-button__inner {
+    min-width: 96px;
+    border-color: #ddd;
+    &:hover {
+      color: #666;
+    }
+  }
+  .el-radio-button__orig-radio:checked + .el-radio-button__inner {
+    border-color: #ddd !important;
+    background-color: #f2f2f2;
+    box-shadow: none;
+    color: #666;
+  }
+
+  .page-plan-flag {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    margin-right: 6px;
+    background-color: #3d6ce5;
+    border-radius: 100%;
+  }
+}
+
+// 操作按钮
+.page-plan-btns {
+  margin-top: 48px;
+}
+
+// 复制
+.page-plan-popover {
+  width: 360px;
+  padding: 16px;
+  .el-checkbox {
+    margin: 0 15px 5px 0 !important;
+  }
+}
+.page-plan-copy {
+  display: none;
+  &.show {
+    display: block;
+  }
+}

@@ -1,0 +1,36 @@
+@import 'common/var';
+@import 'mixins/mixins';
+
+@include b(steps) {
+  font-size: 0;
+
+  @include when(horizontal) {
+    display: flex;
+    margin: 0 60px;
+    white-space: nowrap;
+    .el-steps-content {
+      transform: translateX(17%);
+    }
+    .el-step__head,
+    .el-step__main {
+      text-align: center;
+      transform: translateX(-50%);
+    }
+    .el-step__title {
+      margin: 4px 0;
+    }
+  }
+  @include when(center) {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
+  @include when(vertical) {
+    display: flex;
+    flex-flow: column;
+
+    .el-step__title {
+      margin-bottom: 4px;
+    }
+  }
+}
