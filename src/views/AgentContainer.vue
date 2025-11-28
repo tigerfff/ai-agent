@@ -6,6 +6,7 @@
         :agents="allAgents" 
         :current-agent-id="currentAgentId"
         @select="handleSelectAgent"
+        @new-chat="handleNewChat"
       >
         <template #bottom>
           <slot name="sidebar-bottom"></slot>
@@ -36,19 +37,25 @@
           <component 
             v-if="currentAgent && currentAgent.type === 'built-in'"
             :is="currentAgent.component"
+            :key="`builtin-${componentKey}`"
           />
 
           <!-- B. 外部注入智能体 (Slot) -->
-          <slot 
+          <div 
             v-else-if="currentAgent && currentAgent.type === 'slot'"
-            name="agent-view" 
-            :agent="currentAgent"
+            class="slot-wrapper"
+            :key="`slot-${componentKey}`"
           >
-            <div class="empty-tip">
-              请在父组件通过 slot="agent-view" 渲染内容<br>
-              Agent ID: {{ currentAgent.id }}
-            </div>
-          </slot>
+            <slot 
+              name="agent-view" 
+              :agent="currentAgent"
+            >
+              <div class="empty-tip">
+                请在父组件通过 slot="agent-view" 渲染内容<br>
+                Agent ID: {{ currentAgent.id }}
+              </div>
+            </slot>
+          </div>
         </div>
       </div>
     </template>
@@ -90,7 +97,8 @@ export default {
   },
   data() {
     return {
-      currentAgentId: null // null 表示首页
+      currentAgentId: null, // null 表示首页
+      componentKey: 0 // 用于强制刷新组件的 key
     };
   },
   computed: {
@@ -108,6 +116,13 @@ export default {
   methods: {
     handleSelectAgent(agent) {
       this.currentAgentId = agent.id;
+    },
+    handleNewChat() {
+      console.log('User clicked new chat');
+      this.componentKey++; // 简单粗暴：强制刷新当前组件，重置状态
+      
+      // 如果需要更复杂的逻辑，可以调用 currentAgent 组件内部的 reset 方法
+      // 但依赖注入 + key 刷新是最通用的
     },
     goHome() {
       this.currentAgentId = null;
@@ -169,6 +184,10 @@ export default {
   border: 2px dashed #eee;
   margin: 20px;
   border-radius: 8px;
+}
+
+.slot-wrapper {
+  height: 100%;
 }
 </style>
 
