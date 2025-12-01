@@ -117,7 +117,7 @@
 </template>
 
 <script>
-import { SpeechRecognizer } from '@/ai-core/audio/SpeechRecognizer';
+import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 import AIAttachments from '@/ai-ui/attachments/AIAttachments.vue';
 
 export default {
@@ -150,8 +150,8 @@ export default {
       type: String,
       default: 'enter' // 'enter' | 'shiftEnter'
     },
-    // 必须传入生成签名的函数
-    asrUrlGenerator: {
+    // 提供语音识别配置: async () => ({ secretId, secretKey, appId })
+    speechConfigProvider: {
       type: Function,
       default: null
     }
@@ -188,7 +188,7 @@ export default {
   },
   mounted() {
     // 初始化录音实例
-    this.recognizer = new SpeechRecognizer({
+    this.recognizer = new SpeechRecognizerWrapper({
       onText: (text, isFinal) => {
         if (isFinal) {
            this.inputValue += text;
@@ -312,14 +312,19 @@ export default {
       if (this.isRecording) {
         this.recognizer.stop();
       } else {
-        if (!this.asrUrlGenerator) {
-          // console.warn('No asrUrlGenerator provided');
+        if (!this.speechConfigProvider) {
+          console.warn('No speechConfigProvider provided. Please pass keys to test ASR.');
+          // 可以在这里加个 alert 提示用户
+          alert('请配置 speechConfigProvider 以启用语音功能 (需要腾讯云 ASR 密钥)');
+          return;
         }
         
         try {
-          const url = this.asrUrlGenerator ? await this.asrUrlGenerator() : '';
+          const config = await this.speechConfigProvider();
+          if (!config) return;
+          
           this.isRecording = true;
-          this.recognizer.start(url);
+          this.recognizer.start(config);
         } catch (e) {
           console.error('Failed to start recording:', e);
           this.isRecording = false;

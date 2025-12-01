@@ -1,20 +1,23 @@
+// 这是一个旧式 UMD/Global 库，需要副作用导入
+import 'tencentcloud-speech-sdk-js/dist/speechrecognizer';
+
 /**
- * 腾讯云实时语音识别 & 录音管理器
+ * 腾讯云语音识别 SDK 封装
+ * 文档: https://github.com/TencentCloud/tencentcloud-speech-sdk-js
  */
-export class SpeechRecognizer {
+export class SpeechRecognizerWrapper {
   constructor(options = {}) {
-    this.ws = null;
-    this.mediaStream = null;
-    this.audioContext = null;
-    this.scriptProcessor = null;
-    this.config = options;
+    this.recognizer = null;
+    this.options = options;
     
-    // 静音检测相关
-    this.silenceTimer = null;
-    this.silenceThreshold = options.silenceThreshold || 0.02; // 音量阈值
-    this.silenceDuration = options.silenceDuration || 3000; // 静音持续多久自动断开(ms)
+    // 从 window 对象获取 SDK 类
+    this.SpeechRecognizerClass = window.SpeechRecognizer;
+
+    if (!this.SpeechRecognizerClass) {
+      console.error('Tencent Speech SDK not loaded correctly.');
+    }
     
-    // 回调
+    // 回调函数
     this.onText = options.onText || (() => {});
     this.onStart = options.onStart || (() => {});
     this.onStop = options.onStop || (() => {});
@@ -22,139 +25,86 @@ export class SpeechRecognizer {
   }
 
   /**
-   * 开始录音识别
-   * @param {string} url - 腾讯云带签名的 WSS URL
+   * 开始识别
+   * @param {Object} config - 鉴权配置
+   * @param {string} config.secretId
+   * @param {string} config.secretKey
+   * @param {string} config.appId
+   * @param {string} [config.engine_model_type='16k_zh']
    */
-  async start(url) {
-    if (!url) {
-      this.onError(new Error('WebSocket URL is required'));
-      return;
+  start(config) {
+    if (this.recognizer) {
+      this.stop();
     }
 
     try {
-      // 1. 获取麦克风权限
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      // 2. 初始化 AudioContext 处理音频流
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-      
-      // 创建 ScriptProcessor 用于获取音频数据 (缓冲区大小 4096)
-      this.scriptProcessor = this.audioContext.createScriptProcessor(4096, 1, 1);
-      
-      // 3. 连接 WebSocket
-      this.ws = new WebSocket(url);
-      this.ws.binaryType = 'arraybuffer';
+      // 实例化 SDK
+      if (!this.SpeechRecognizerClass) {
+        throw new Error('SpeechRecognizer SDK not found on window object');
+      }
 
-      this.ws.onopen = () => {
+      this.recognizer = new this.SpeechRecognizerClass({
+        params: {
+          signCallback: null, // 如果需要后端签名，可扩展此逻辑
+          secretid: config.secretId,
+          secretkey: config.secretKey,
+          appid: config.appId,
+          engine_model_type: config.engineModelType || '16k_zh', // 引擎模式
+          voice_format: 1, // PCM
+          hotword_id: config.hotwordId || '',
+          needvad: 1, // 开启 VAD 静音检测
+          filter_dirty: 1,
+          filter_modal: 1,
+          filter_punc: 0,
+          convert_num_mode: 1,
+          word_info: 0
+        }
+      });
+
+      // 绑定事件
+      this.recognizer.OnRecognitionStart = (res) => {
+        console.log('ASR Start:', res);
         this.onStart();
-        // 连接建立后，开始处理音频流
-        source.connect(this.scriptProcessor);
-        this.scriptProcessor.connect(this.audioContext.destination);
       };
 
-      this.ws.onmessage = (e) => {
-        const res = JSON.parse(e.data);
-        if (res.code !== 0) {
-          this.onError(new Error(res.message));
-          return;
-        }
-        // 腾讯云返回的字段: result.voice_text_str
-        if (res.result) {
-          this.onText(res.result.voice_text_str, res.final === 1);
+      this.recognizer.OnRecognitionResultChange = (res) => {
+        // 实时变化的结果
+        if (res && res.result && res.result.voice_text_str) {
+          this.onText(res.result.voice_text_str, false);
         }
       };
 
-      this.ws.onerror = (e) => this.onError(e);
-
-      // 4. 实时音频处理
-      this.scriptProcessor.onaudioprocess = (e) => {
-        if (this.ws.readyState !== WebSocket.OPEN) return;
-
-        const inputBuffer = e.inputBuffer;
-        const inputData = inputBuffer.getChannelData(0); // 单声道
-
-        // A. 发送数据 (这里简化处理，实际需要降采样到 16k 并转 16bit PCM)
-        // 为了演示逻辑，这里假设输入已经是符合要求的，实际项目需引入 recorder-core 等库进行转换
-        const pcmData = this._floatTo16BitPCM(inputData);
-        this.ws.send(pcmData);
-
-        // B. 静音检测
-        this._checkSilence(inputData);
+      this.recognizer.OnSentenceEnd = (res) => {
+        // 句子结束（最终结果）
+        if (res && res.result && res.result.voice_text_str) {
+          this.onText(res.result.voice_text_str, true);
+        }
       };
 
-    } catch (error) {
-      this.onError(error);
-      this.stop();
+      this.recognizer.OnRecognitionComplete = (res) => {
+        console.log('ASR Complete:', res);
+        this.onStop();
+      };
+
+      this.recognizer.OnError = (res) => {
+        console.error('ASR Error:', res);
+        this.onError(new Error(res.error_msg || 'ASR Error'));
+        this.stop();
+      };
+
+      // 开始识别
+      this.recognizer.start();
+
+    } catch (e) {
+      this.onError(e);
     }
   }
 
-  /**
-   * 停止录音
-   */
   stop() {
-    // 1. 发送结束帧 (腾讯云协议)
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type: 'end' }));
-      this.ws.close();
+    if (this.recognizer) {
+      this.recognizer.stop();
+      this.recognizer = null;
     }
-
-    // 2. 停止音频流
-    if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach(track => track.stop());
-    }
-    if (this.audioContext) {
-      this.audioContext.close();
-    }
-    if (this.scriptProcessor) {
-      this.scriptProcessor.disconnect();
-    }
-    if (this.silenceTimer) {
-      clearTimeout(this.silenceTimer);
-    }
-
-    this.ws = null;
-    this.mediaStream = null;
     this.onStop();
   }
-
-  /**
-   * 简单的静音检测逻辑
-   */
-  _checkSilence(data) {
-    let sum = 0.0;
-    for (let i = 0; i < data.length; ++i) {
-      sum += data[i] * data[i];
-    }
-    const volume = Math.sqrt(sum / data.length);
-
-    if (volume < this.silenceThreshold) {
-      // 声音很小，开启倒计时
-      if (!this.silenceTimer) {
-        this.silenceTimer = setTimeout(() => {
-          console.log('[ASR] Auto stop due to silence');
-          this.stop();
-        }, this.silenceDuration);
-      }
-    } else {
-      // 有声音，清除倒计时
-      if (this.silenceTimer) {
-        clearTimeout(this.silenceTimer);
-        this.silenceTimer = null;
-      }
-    }
-  }
-
-  /**
-   * Float32 转 Int16 PCM
-   */
-  _floatTo16BitPCM(input) {
-    let output = new Int16Array(input.length);
-    for (let i = 0; i < input.length; i++) {
-      let s = Math.max(-1, Math.min(1, input[i]));
-      output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-    }
-    return output.buffer;
-  }
 }
-

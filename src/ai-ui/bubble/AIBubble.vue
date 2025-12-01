@@ -33,13 +33,31 @@
           <span></span><span></span><span></span>
         </div>
 
-        <!-- 文本内容 (Markdown 渲染) -->
-        <div 
-          v-else 
-          class="markdown-body" 
-          v-html="renderedHtml"
-          ref="contentRef"
-        ></div>
+        <!-- 混合内容渲染 (Markdown + Widgets) -->
+        <div v-else class="bubble-content-mix">
+          <template v-for="(part, idx) in contentParts">
+            <!-- 文本片段 -->
+            <div 
+              v-if="part.type === 'text'"
+              :key="'text-' + idx"
+              class="markdown-body" 
+              v-html="renderMarkdown(part.content)"
+            ></div>
+
+            <!-- 组件片段 (Loading 或 Done) -->
+            <div 
+              v-else-if="part.type === 'widget'"
+              :key="'widget-' + idx"
+              class="widget-wrapper"
+            >
+              <slot name="widget" :info="part">
+                <div class="widget-fallback">
+                  [Unknown Widget: {{ part.widgetType }}]
+                </div>
+              </slot>
+            </div>
+          </template>
+        </div>
 
         <!-- 光标 (打字时显示) -->
         <span v-if="isTyping" class="cursor">|</span>
@@ -56,6 +74,7 @@
 <script>
 import { marked } from 'marked';
 import { Typewriter } from './Typewriter';
+import { StreamMessageParser } from '@/ai-core/parser/StreamMessageParser';
 import AIAttachments from '@/ai-ui/attachments/AIAttachments.vue';
 
 export default {
@@ -104,14 +123,14 @@ export default {
     return {
       displayContent: '', // 当前展示的文本（可能是部分）
       typewriter: null,
-      isTyping: false
+      isTyping: false,
+      parser: new StreamMessageParser()
     };
   },
   computed: {
-    renderedHtml() {
-      // 使用 marked 解析 Markdown
-      // 简单的防止 XSS 可以配合 dompurify，这里暂略
-      return marked.parse(this.displayContent || '');
+    // 解析后的内容片段列表
+    contentParts() {
+      return this.parser.parse(this.displayContent || '');
     }
   },
   watch: {
@@ -144,6 +163,10 @@ export default {
     }
   },
   methods: {
+    renderMarkdown(text) {
+      if (!text) return '';
+      return marked.parse(text);
+    },
     initTypewriter() {
       if (this.typewriter) return;
       
@@ -204,9 +227,6 @@ export default {
 .bubble-body .bubble-attachments:last-child {
   margin-bottom: 0;
 }
-
-/* 覆盖 attachments 在气泡里的样式，使其对齐 */
-/* .ai-bubble.end .bubble-attachments { } */
 
 /* 头像 */
 .bubble-avatar .avatar-img {
@@ -286,5 +306,20 @@ export default {
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
 }
-</style>
 
+/* Widget Styles */
+.widget-wrapper {
+  margin: 8px 0;
+  width: 100%;
+}
+
+.widget-fallback {
+  background: #f0f2f5;
+  color: #909399;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  border: 1px dashed #dcdfe6;
+}
+</style>

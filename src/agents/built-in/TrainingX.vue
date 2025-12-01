@@ -22,6 +22,19 @@
             {{ item.role === 'user' ? '👤' : '🤖' }}
           </div>
         </template>
+
+        <!-- Widget 插槽 -->
+        <template #widget="{ info }">
+           <div v-if="info.loading" class="widget-loading">
+              <span class="loading-icon">⏳</span> 正在加载业务组件...
+           </div>
+           <DemoForm 
+             v-else-if="info.widgetType === 'form:demo'" 
+             :data="info.data" 
+           />
+           <!-- 可以在这里增加其他类型的判断 -->
+        </template>
+
       </AIHistory>
     </div>
 
@@ -29,6 +42,7 @@
     <div class="footer">
       <AIInput 
         :loading="isStreaming" 
+        :speech-config-provider="getSpeechConfig"
         @send="handleSend" 
         @stop="handleStop"
       />
@@ -37,8 +51,13 @@
 </template>
 
 <script>
+import DemoForm from './widgets/DemoForm.vue';
+
 export default {
   name: 'TrainingXAgent',
+  components: {
+    DemoForm
+  },
   data() {
     // 生成假数据撑开高度
     const mockMessages = Array.from({ length: 20 }).map((_, i) => ({
@@ -64,17 +83,14 @@ export default {
         }
       ],
       // 模拟的长文本数据源
-      fullResponse: `好的，这是一段 **Python** 代码示例：
-
-\`\`\`python
-def hello_world():
-    print("Hello AI World!")
-    
-if __name__ == "__main__":
-    hello_world()
-\`\`\`
-
-希望能对你有所帮助！如果有其他问题，请随时提问。`
+      fullResponse: `好的，这里有一个表单需要您确认：
+<form:demo>
+{
+  "id": "FORM-001",
+  "name": "采购申请单"
+}
+</form:demo>
+请确认无误后提交。`
     };
   },
   methods: {
@@ -166,6 +182,18 @@ if __name__ == "__main__":
         this.isStreaming = false;
         console.log('AI 回复完毕');
       }
+    },
+
+    // 提供给 AIInput 的语音配置
+    async getSpeechConfig() {
+      // TODO: 替换为您真实的腾讯云 ASR 密钥进行测试
+      // 警告：不要将真实密钥提交到 Git 仓库！
+      // 实际项目中，建议请求后端接口获取临时凭证
+      return {
+        secretId: 'YOUR_SECRET_ID', 
+        secretKey: 'YOUR_SECRET_KEY',
+        appId: 'YOUR_APP_ID'
+      };
     }
   }
 };
@@ -239,5 +267,17 @@ if __name__ == "__main__":
 
 .custom-avatar.ai {
   background: #e6f7ff;
+}
+
+.widget-loading {
+  padding: 12px;
+  background: #fdf6ec;
+  color: #e6a23c;
+  border-radius: 4px;
+  font-size: 13px;
+  margin: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 </style>
