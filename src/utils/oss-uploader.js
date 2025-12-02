@@ -10,6 +10,7 @@ export class OssUploader {
    * @param {Function} options.tokenProvider - 获取 STS Token 的函数，返回 Promise
    */
   constructor(options) {
+    console.log(options,'options')
     this.sliceSize = options.sliceSize || SLICE_SIZE;
     this.tokenProvider = options.tokenProvider;
     
@@ -32,14 +33,14 @@ export class OssUploader {
       this.bucketDomain = credentials.domain;
       this.bucketName = credentials.bucket;
       this.object = credentials.object;
-      BUCKET_REGION = credentials.region;
 
-      this.client = new OSS({
+      // 构造 ali-oss 配置
+      const ossConfig = {
         accessKeyId: credentials.accessKeyId,
         accessKeySecret: credentials.accessKeySecret,
         stsToken: credentials.securityToken,
         bucket: this.bucketName,
-        region: BUCKET_REGION,
+        secure: true, // 强制 HTTPS
         refreshSTSToken: async () => {
           const info = await this.tokenProvider();
           return {
@@ -48,7 +49,27 @@ export class OssUploader {
             stsToken: info.securityToken
           };
         }
-      });
+      };
+
+      // 1. 如果有 endpoint，优先使用 endpoint
+      if (credentials.endpoint) {
+        ossConfig.endpoint = credentials.endpoint;
+        // 如果后端返回了 cname 标识（1 或 true），则开启 cname 模式
+        if (credentials.cname) {
+          ossConfig.cname = true;
+        }
+      } 
+      // 2. 否则如果后端返回了 region，则使用 region
+      else if (credentials.region) {
+        ossConfig.region = credentials.region;
+        BUCKET_REGION = credentials.region; // 更新全局默认值
+      } 
+      // 3. 兜底：如果都没有，尝试使用默认的 BUCKET_REGION
+      else if (BUCKET_REGION) {
+        ossConfig.region = BUCKET_REGION;
+      }
+
+      this.client = new OSS(ossConfig);
       return this.client;
     } catch (error) {
       console.error('OSS init failed:', error);

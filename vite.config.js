@@ -21,6 +21,14 @@ export default defineConfig({
           Referer: 'https://pbsse.hik-cloud.com'
         }
       },
+      '/v1': {
+        target: 'https://pbchain.hik-cloud.com',
+        changeOrigin: true,
+        secure: false,
+        headers: {
+          Referer: 'https://pbchain.hik-cloud.com'
+        }
+      },
       // 2. 代理 /AIApi 开头的请求 (兼容原项目接口风格)
       // 假设原项目 /AIApi 映射到后端的 /v1
       '/AIApi': {

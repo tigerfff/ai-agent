@@ -7,7 +7,7 @@ export const InspectApi = {
    */
   getOssToken(client) {
     return client.send({
-      url: '/AIOSSApi/inspect/algorithm/models/upload/ossInfo',
+      url: '/v1/inspect/algorithm/models/upload/ossInfo',
       method: 'get'
     });
   },

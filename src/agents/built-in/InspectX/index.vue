@@ -38,6 +38,7 @@
         placeholder="有问题尽管问我~"
         accepts=".jpg,.jpeg,.png,.mp4"
         :max-size="200 * 1024 * 1024"
+        :before-add-attachments="handlePreUpload"
         @send="handleSend" 
         @stop="handleStop"
       />
@@ -105,6 +106,52 @@ export default {
           }
         }
       });
+    },
+
+    /**
+     * 预上传钩子：在文件进入附件栏前先上传到 OSS，返回带 url 的附件信息
+     */
+    async handlePreUpload(rawFiles) {
+      if (!this.ossUploader) {
+        // 没有配置 OSS 上传器时，直接走本地模式
+        return rawFiles.map(file => ({
+          url: '',
+          name: file.name,
+          size: file.size,
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          rawFile: file
+        }));
+      }
+
+      this.isUploading = true;
+      try {
+        const results = await Promise.all(
+          rawFiles.map(async (file) => {
+            const res = await this.ossUploader.upload(file);
+            return {
+              url: res.url,
+              name: res.name || file.name,
+              size: file.size,
+              type: file.type.startsWith('video') ? 'video' : 'image',
+              // 预上传完成后，正常情况下不再需要 rawFile；保留 null 即可
+              rawFile: null
+            };
+          })
+        );
+        return results;
+      } catch (e) {
+        console.error('[InspectAgent] OSS pre-upload failed:', e);
+        // 失败退回本地模式，至少还能在 UI 层看到选中的附件
+        return rawFiles.map(file => ({
+          url: '',
+          name: file.name,
+          size: file.size,
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          rawFile: file
+        }));
+      } finally {
+        this.isUploading = false;
+      }
     },
 
     handleWelcomeSelect(text) {
@@ -218,65 +265,28 @@ export default {
 
       const userMsgKey = Date.now();
       
-      // 1. 立即显示用户消息
+      // 1. 立即显示用户消息（附件已经在 beforeAddAttachments 中完成预上传）
       const userMsg = {
         key: userMsgKey,
         role: 'user',
         content: data.text,
-        attachments: [], // 稍后填充已上传的文件
+        attachments: attachments,
         placement: 'end',
         variant: 'filled'
       };
       this.messages.push(userMsg);
 
-      // 2. 上传附件
-      let uploadedUrls = [];
+      // 2. 从附件中提取 OSS URL，构造 imageList / videoList
       let uploadType = 'img'; // 默认为图片，如果有视频则切换
+      const imageUrls = attachments
+        .filter(a => a.type === 'image' && a.url)
+        .map(a => a.url);
+      const videoUrls = attachments
+        .filter(a => a.type === 'video' && a.url)
+        .map(a => a.url);
 
-      if (attachments.length > 0) {
-        this.isUploading = true;
-        try {
-          // 过滤出需要上传的文件 (File 对象)
-          const uploadPromises = attachments.map(async (fileObj) => {
-            // AIInput 中 processFiles 使用的是 rawFile 字段
-            const raw = fileObj.rawFile || fileObj.file;
-            if (raw) {
-              const res = await this.ossUploader.upload(raw);
-              return { ...res, rawType: raw.type };
-            } else {
-              // 已经是上传好的 (比如回显)，直接返回
-              return { url: fileObj.url, rawType: 'image/jpeg' }; // 暂时无法得知旧文件类型
-            }
-          });
-
-          const results = await Promise.all(uploadPromises);
-          
-          // 更新用户消息的附件显示
-          userMsg.attachments = results.map(r => ({
-            type: r.rawType?.startsWith('video') ? 'video' : 'image',
-            url: r.url,
-            name: r.name
-          }));
-          
-          uploadedUrls = results.map(r => r.url);
-          
-          // 判断上传类型 (只要有一个视频就算视频模式)
-          if (results.some(r => r.rawType?.startsWith('video'))) {
-            uploadType = 'video';
-          }
-        } catch (e) {
-          console.error('Upload failed', e);
-          // 上传失败处理：追加一条系统消息或 Toast
-          this.messages.push({
-            key: Date.now() + '_err',
-            role: 'system',
-            content: '附件上传失败，请重试。'
-          });
-          this.isUploading = false;
-          return;
-        } finally {
-          this.isUploading = false;
-        }
+      if (videoUrls.length > 0) {
+        uploadType = 'video';
       }
 
       // 3. 准备 AI 占位消息
@@ -301,8 +311,8 @@ export default {
         chatId: this.chatId,
         input: {
           prompt: data.text,
-          imageList: uploadType === 'img' ? uploadedUrls : [],
-          videoList: uploadType === 'video' ? uploadedUrls : []
+          imageList: imageUrls,
+          videoList: videoUrls
         }
       };
 

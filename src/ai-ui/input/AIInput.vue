@@ -154,6 +154,15 @@ export default {
     speechConfigProvider: {
       type: Function,
       default: null
+    },
+    /**
+     * 预上传钩子：在文件进入附件列表前触发
+     * async (rawFiles: File[]) => Promise<UploadedItem[]>
+     * UploadedItem: { url, name, size, type, rawFile? }
+     */
+    beforeAddAttachments: {
+      type: Function,
+      default: null
     }
   },
   data() {
@@ -260,11 +269,11 @@ export default {
       }
     },
 
-    handlePaste(e) {
+    async handlePaste(e) {
       const files = e.clipboardData?.files;
       if (files?.length) {
         e.preventDefault();
-        this.processFiles(Array.from(files));
+        await this.processFiles(Array.from(files));
       }
     },
 
@@ -280,13 +289,42 @@ export default {
       this.$refs.fileInput.click();
     },
 
-    handleFileChange(e) {
-      this.processFiles(Array.from(e.target.files));
+    async handleFileChange(e) {
+      await this.processFiles(Array.from(e.target.files));
       e.target.value = ''; // Reset
     },
 
-    processFiles(files) {
-      files.forEach(file => {
+    async processFiles(files) {
+      const rawFiles = Array.from(files);
+
+      // 如果外部提供了预上传钩子，则优先交给外部处理（例如上传到 OSS）
+      if (this.beforeAddAttachments) {
+        try {
+          const uploaded = await this.beforeAddAttachments(rawFiles);
+          if (Array.isArray(uploaded)) {
+            uploaded.forEach(file => {
+              const item = {
+                uid: Date.now() + Math.random(),
+                name: file.name,
+                size: file.size,
+                type: file.type || this.getFileType(file),
+                rawFile: file.rawFile || null,
+                url: file.url || '',
+                status: file.status || 'done',
+                percent: file.percent || 100
+              };
+              this.fileList.push(item);
+            });
+            return;
+          }
+        } catch (e) {
+          console.error('[AIInput] beforeAddAttachments failed:', e);
+          // 失败则退回到本地模式
+        }
+      }
+
+      // 默认本地模式：仅保存 File 引用与基本信息，url 由父级自行处理或忽略
+      rawFiles.forEach(file => {
         const item = {
           uid: Date.now() + Math.random(),
           name: file.name,
