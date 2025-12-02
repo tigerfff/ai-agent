@@ -51,7 +51,7 @@
         </template>
         <template #label="{ item }">
           <div class="conversation-label">
-            <span class="label-text">{{ item.label }}</span>
+            <span class="label-text">{{ item.label }}</span>               
             <span class="label-time" v-if="item.time">{{ item.time }}</span>
           </div>
         </template>

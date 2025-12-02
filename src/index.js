@@ -2,7 +2,8 @@ import AIAgentContainer from './views/AgentContainer.vue';
 import AIInput from './ai-ui/input/AIInput.vue';
 import AIBubble from './ai-ui/bubble/AIBubble.vue';
 import AIHistory from './ai-ui/history/AIHistory.vue';
-import AIConversations from './ai-ui/conversations/AIConversations.vue'; // 新增
+import AIConversations from './ai-ui/conversations/AIConversations.vue';
+import AIWelcome from './ai-ui/welcome/AIWelcome.vue';
 import { setAdapter } from './ai-core/adapter';
 import { AIClient } from './ai-core/client/AIClient';
 import { EventBus } from './ai-core/event-bus';
@@ -14,7 +15,8 @@ const install = (Vue, options = {}) => {
   Vue.component('AIInput', AIInput);
   Vue.component('AIBubble', AIBubble);
   Vue.component('AIHistory', AIHistory);
-  Vue.component('AIConversations', AIConversations); // 新增注册
+  Vue.component('AIConversations', AIConversations);
+  Vue.component('AIWelcome', AIWelcome);
 
   // 2. 处理适配器注入
   setAdapter(options);
@@ -30,7 +32,7 @@ const install = (Vue, options = {}) => {
 };
 
 // 导出组件
-export { AIAgentContainer, AIInput, AIBubble, AIHistory, AIConversations, AIClient, EventBus };
+export { AIAgentContainer, AIInput, AIBubble, AIHistory, AIConversations, AIWelcome, AIClient, EventBus };
 
 export default {
   install

@@ -1,6 +1,5 @@
 import Vue from 'vue';
 
-// 使用 Vue 实例作为 EventBus，这是 Vue 2 中最简单的实现方式
 // 它天然支持 $on, $emit, $off
 export const EventBus = new Vue();
 

@@ -2,14 +2,28 @@
   <div class="training-x-agent">
     <div class="header">
       <h1>Training-X 助手 (内置)</h1>
-      <button @click="startStreamDemo" :disabled="isStreaming" class="test-btn">
-        {{ isStreaming ? '正在流式输出...' : '▶️ 测试流式打字' }}
-      </button>
+      <div class="header-actions">
+        <button @click="handleNewSession" class="test-btn" style="margin-right: 8px;">
+          + 新会话
+        </button>
+        <button @click="startStreamDemo" :disabled="isStreaming" class="test-btn">
+          {{ isStreaming ? '正在流式输出...' : '▶️ 测试流式打字' }}
+        </button>
+      </div>
     </div>
     
-    <!-- 聊天区域：使用 AIHistory 组件 -->
+    <!-- 聊天区域 -->
     <div class="chat-area-wrapper">
+      <!-- 欢迎页：无消息时显示 -->
+      <AIWelcome
+        v-if="messages.length === 0"
+        v-bind="welcomeConfig"
+        @select="handleWelcomeSelect"
+      />
+
+      <!-- 聊天历史：有消息时显示 -->
       <AIHistory 
+        v-else
         ref="history"
         :list="messages" 
         max-height="100%"
@@ -52,36 +66,36 @@
 
 <script>
 import DemoForm from './widgets/DemoForm.vue';
+import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 
 export default {
   name: 'TrainingXAgent',
+  inject: ['sessionApi'],
   components: {
-    DemoForm
+    DemoForm,
+    AIWelcome
   },
   data() {
-    // 生成假数据撑开高度
-    const mockMessages = Array.from({ length: 20 }).map((_, i) => ({
-      key: `mock-${i}`,
-      role: i % 2 === 0 ? 'user' : 'ai',
-      content: i % 2 === 0 ? `这是第 ${i + 1} 条历史消息（用户）` : `这是第 ${i + 1} 条历史消息（AI），为了撑开页面高度测试滚动条。`,
-      placement: i % 2 === 0 ? 'end' : 'start',
-      variant: i % 2 === 0 ? 'filled' : 'outlined'
-    }));
-
-      return {
+    return {
       isStreaming: false,
       delayTimer: null,
       streamTimer: null,
-      // 消息列表数据源 (包含大量历史消息)
-      messages: [
-        ...mockMessages,
-        {
-          key: 'msg-static',
-          role: 'ai',
-          content: '**这是一条静态消息**，展示 `Markdown` 渲染能力：\n- 列表项 1\n- 列表项 2',
-          placement: 'start'
-        }
-      ],
+      // 消息列表数据源 (默认空，以显示欢迎页)
+      messages: [],
+      
+      // 欢迎页配置
+      welcomeConfig: {
+        icon: '🎓',
+        title: '你好，我是 Training-X 助手',
+        description: '我可以帮你制定学习计划、解答技术难题，或者只是陪你聊聊最新的技术趋势。',
+        prompts: [
+          { icon: '📅', title: '制定学习计划', desc: '根据我的基础定制 Python 学习路线', text: '请帮我制定一份 Python 学习计划' },
+          { icon: '🐍', title: 'Python 基础语法', desc: '讲解一下 Python 的装饰器', text: '请讲解 Python 装饰器的用法' },
+          { icon: '🐛', title: '代码调试助手', desc: '帮我查找这段代码的 bug', text: '帮我看看这段代码有什么问题' },
+          { icon: '📝', title: '生成表单演示', desc: '测试流式组件渲染能力', text: '请生成一个采购申请单表单' }
+        ]
+      },
+
       // 模拟的长文本数据源
       fullResponse: `好的，这里有一个表单需要您确认：
 <form:demo>
@@ -94,8 +108,23 @@ export default {
     };
   },
   methods: {
+    handleWelcomeSelect(text) {
+      this.handleSend({ text });
+    },
+    handleNewSession() {
+      if (this.sessionApi) {
+        this.sessionApi.createNewSession();
+      }
+    },
     handleSend(data) {
       console.log('发送内容:', data);
+
+      // 演示：每次发送消息都更新会话标题
+      if (this.sessionApi) {
+         const newTitle = data.text.slice(0, 10) || '新会话';
+         this.sessionApi.updateCurrentTitle(newTitle);
+      }
+
       // 1. 追加用户消息
       this.messages.push({
         key: Date.now(),
@@ -219,6 +248,11 @@ export default {
 .header h1 {
   font-size: 18px;
   margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
 }
 
 .test-btn {
