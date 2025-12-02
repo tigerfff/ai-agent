@@ -67,6 +67,7 @@
 <script>
 import DemoForm from './widgets/DemoForm.vue';
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
+import { TrainingApi } from './api';
 
 export default {
   name: 'TrainingXAgent',
@@ -106,6 +107,10 @@ export default {
 </form:demo>
 请确认无误后提交。`
     };
+  },
+  created() {
+    // 示例：可以从 API 加载配置
+    // TrainingApi.getWelcomeConfig().then(config => this.welcomeConfig = config);
   },
   methods: {
     handleWelcomeSelect(text) {
@@ -315,3 +320,4 @@ export default {
   gap: 6px;
 }
 </style>
+

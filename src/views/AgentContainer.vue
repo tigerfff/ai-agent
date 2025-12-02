@@ -70,7 +70,8 @@
 import AILayout from '@/ai-ui/layout/AILayout.vue';
 import AISidebar from '@/ai-ui/layout/AISidebar.vue';
 import Home from './Home.vue';
-import TrainingXAgent from '@/agents/built-in/TrainingX.vue';
+import TrainingXAgent from '@/agents/built-in/TrainingX/index.vue';
+import InspectAgent from '@/agents/built-in/InspectX/index.vue';
 
 // 内置智能体配置
 const BUILT_IN_AGENTS = [
@@ -80,7 +81,15 @@ const BUILT_IN_AGENTS = [
     icon: '🎓',
     description: '专业的培训助手，帮助你快速学习。',
     type: 'built-in',
-    component: TrainingXAgent // 直接引用组件对象
+    component: TrainingXAgent
+  },
+  {
+    id: 'inspect-agent',
+    name: '云小智',
+    icon: '🔍',
+    description: '智能图像与视频检测助手',
+    type: 'built-in',
+    component: InspectAgent
   }
 ];
 
@@ -88,7 +97,8 @@ const MOCK_CONVERSATIONS = [
   { id: 'conv-1', agentId: 'training-x', label: '如何学习 Python 编程？', group: 'today', time: '15:30' },
   { id: 'conv-2', agentId: 'training-x', label: 'Vue 组件设计最佳实践', group: 'today', time: '14:20' },
   { id: 'conv-3', agentId: 'training-x', label: '前端性能优化方案', group: 'today', time: '10:15' },
-  { id: 'conv-4', agentId: 'other-agent', label: 'React vs Vue 对比分析', group: 'yesterday', time: '昨天 18:45' }
+  { id: 'conv-4', agentId: 'other-agent', label: 'React vs Vue 对比分析', group: 'yesterday', time: '昨天 18:45' },
+  { id: 'conv-5', agentId: 'inspect-agent', label: '示例图片分析', group: 'today', time: '12:00' }
 ];
 
 export default {

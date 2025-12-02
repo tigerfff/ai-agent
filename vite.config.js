@@ -12,13 +12,36 @@ export default defineConfig({
     port: 3000,
     open: true,
     proxy: {
-      // 开发环境下，将 /api 代理到 PB 网关（仅用于本项目调试）
-      '/api': {
-        target: 'https://pbchain.hik-cloud.com',
+      // 1. 直接代理 /v1 开头的请求 (用于 SSE 和新改的接口)
+      '/v1': {
+        target: 'https://pbsse.hik-cloud.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/v1'),
-        // 如遇到自签名证书问题，可打开下一行
-        // secure: false,
+        secure: false,
+        headers: {
+          Referer: 'https://pbsse.hik-cloud.com'
+        }
+      },
+      // 2. 代理 /AIApi 开头的请求 (兼容原项目接口风格)
+      // 假设原项目 /AIApi 映射到后端的 /v1
+      '/AIApi': {
+        target: 'https://pbsse.hik-cloud.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/AIApi/, '/v1'),
+        secure: false
+      },
+      // 3. 保留 /api 配置 (如果还有其他接口用这个)
+      '/api': {
+        target: 'https://pbsse.hik-cloud.com',
+        changeOrigin: true,
+        rewrite: (path) => {
+          // 针对 /api/v1/... 的情况，只需去掉 /api，保留 /v1
+          if (path.startsWith('/api/v1')) {
+            return path.replace(/^\/api/, '');
+          }
+          // 其他 /api/... 替换为 /v1/...
+          return path.replace(/^\/api/, '/v1');
+        },
+        secure: false
       }
     }
   },
@@ -51,4 +74,3 @@ export default defineConfig({
     }
   }
 })
-
