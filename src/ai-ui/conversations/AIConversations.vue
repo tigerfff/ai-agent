@@ -29,7 +29,7 @@
                   :key="item.id"
                   :item="item"
                   :active="activeKey === item.id"
-                  @click="handleItemClick"
+                  @click="handleItemClick(item)"
                   @menu-command="handleMenuCommand"
                 >
                   <template v-if="$slots.label" #label="{ item }">
@@ -47,7 +47,7 @@
               :key="item.id"
               :item="item"
               :active="activeKey === item.id"
-              @click="handleItemClick"
+              @click="handleItemClick(item)"
               @menu-command="handleMenuCommand"
             >
               <template v-if="$slots.label" #label="{ item }">
@@ -138,6 +138,7 @@ export default {
   },
   methods: {
     handleItemClick(item) {
+      console.log(item,'item')
       this.$emit('update:activeKey', item.id);
       this.$emit('change', item);
     },

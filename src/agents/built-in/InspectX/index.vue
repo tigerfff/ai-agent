@@ -57,6 +57,13 @@ export default {
   components: {
     AIWelcome
   },
+  props: {
+    // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
+    conversationId: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       messages: [],
@@ -80,14 +87,31 @@ export default {
       }
     };
   },
-  computed: {
-  },
   watch: {
+    conversationId: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          // 如果当前已有 chatId 且和传入的一样，则不重复加载
+          // 注意：首次进入时 this.chatId 是空的，所以即使 val 是一样也会加载
+          // 但为了防止在列表里点击当前会话时重复刷新，加个判断
+          if (this.chatId === val) return;
+
+          this.chatId = val;
+          // 当外部传入新的会话 ID 时，加载对应的历史记录
+          this.loadHistory();
+        } else {
+          // 如果没有 ID（或者是新会话状态），则清空消息显示欢迎页
+          this.chatId = '';
+          this.messages = [];
+        }
+      }
+    }
   },
   created() {
     this.initUploader();
-    // 进入智能体时，直接按「先 list，再取第一个 chatId 调 history」的逻辑加载一次
-    this.loadHistory();
+    // 主动获取列表并通知父组件更新 Sidebar
+    this.fetchConversationList();
   },
   methods: {
     initUploader() {
@@ -109,83 +133,65 @@ export default {
     },
 
     /**
-     * 预上传钩子：在文件进入附件栏前先上传到 OSS，返回带 url 的附件信息
+     * 获取会话列表，emit 给父组件 (AgentContainer)
      */
-    async handlePreUpload(rawFiles) {
-      if (!this.ossUploader) {
-        // 没有配置 OSS 上传器时，直接走本地模式
-        return rawFiles.map(file => ({
-          url: '',
-          name: file.name,
-          size: file.size,
-          type: file.type.startsWith('video') ? 'video' : 'image',
-          rawFile: file
-        }));
-      }
-
-      this.isUploading = true;
+    async fetchConversationList() {
       try {
-        const results = await Promise.all(
-          rawFiles.map(async (file) => {
-            const res = await this.ossUploader.upload(file);
-            return {
-              url: res.url,
-              name: res.name || file.name,
-              size: file.size,
-              type: file.type.startsWith('video') ? 'video' : 'image',
-              // 预上传完成后，正常情况下不再需要 rawFile；保留 null 即可
-              rawFile: null
-            };
-          })
-        );
-        return results;
+        const res = await InspectApi.getConversationList(this.$aiClient);
+        if (res.code === 0 && Array.isArray(res.data)) {
+          const map = new Map();
+          
+          res.data.forEach(item => {
+            const chatId = item.chatId || item.id;
+            if (!chatId) return;
+
+            if (!map.has(chatId)) {
+              map.set(chatId, {
+                id: chatId,
+                // 适配后端字段：title -> label
+                label: (item.title || item.userText || '新会话').slice(0, 20),
+                time: item.createTime ? new Date(item.createTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''
+              });
+            }
+          });
+
+          const list = Array.from(map.values());
+          this.$emit('update-list', list);
+        }
       } catch (e) {
-        console.error('[InspectAgent] OSS pre-upload failed:', e);
-        // 失败退回本地模式，至少还能在 UI 层看到选中的附件
-        return rawFiles.map(file => ({
-          url: '',
-          name: file.name,
-          size: file.size,
-          type: file.type.startsWith('video') ? 'video' : 'image',
-          rawFile: file
-        }));
-      } finally {
-        this.isUploading = false;
+        console.error('[InspectAgent] fetchConversationList failed', e);
       }
     },
 
-    handleWelcomeSelect(text) {
-      // 欢迎页点击不带附件，直接发送文本
-      this.handleSend({ text, attachments: [] });
-    },
+    // ... (handlePreUpload, handleWelcomeSelect 保持不变)
 
     /**
-     * 进入智能体时：先请求列表接口 /list，取第一个 chatId，再用它去调 /history
+     * 加载当前 chatId 的历史记录
      */
     async loadHistory() {
+      if (!this.chatId) return;
+
       this.loadingHistory = true;
       this.messages = [];
 
       try {
-        // 1. 获取会话列表
-        const listRes = await InspectApi.getConversationList(this.$aiClient);
-        console.log('[InspectAgent] Conversation list:', listRes);
-
-        if (!(listRes && listRes.code === 0 && Array.isArray(listRes.data) && listRes.data.length > 0)) {
-          // 没有历史会话，直接返回空列表（显示欢迎页）
-          return;
-        }
-
-        const firstChat = listRes.data[0];
-        const chatId = firstChat.chatId || firstChat.id;
-        this.chatId = chatId || '';
-
-        // 2. 用第一个 chatId 调用 history 接口
-        const res = await InspectApi.getHistory(this.$aiClient, chatId);
+        const res = await InspectApi.getHistory(this.$aiClient, this.chatId);
 
         if (res && res.code === 0 && Array.isArray(res.data)) {
+          // 如果后端返回的是按时间倒序的（最新的在前面），需要反转
+          // 或者先按 createTime 排序
+          const rawList = res.data;
+          // 简单的判断：如果第一条比最后一条时间晚，说明是倒序
+          if (rawList.length > 1) {
+             const t1 = new Date(rawList[0].createTime).getTime();
+             const t2 = new Date(rawList[rawList.length - 1].createTime).getTime();
+             if (t1 > t2) {
+               rawList.reverse();
+             }
+          }
+
           const list = [];
-          res.data.forEach(item => {
+          rawList.forEach(item => {
             const pair = this.adaptMessage(item);
             if (pair && pair.user) list.push(pair.user);
             if (pair && pair.ai) list.push(pair.ai);

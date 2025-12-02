@@ -42,6 +42,8 @@
             v-if="currentAgent && currentAgent.type === 'built-in'"
             :is="currentAgent.component"
             :key="`builtin-${componentKey}`"
+            :conversation-id="currentConversationId"
+            @update-list="handleUpdateConversationList"
           />
 
           <!-- B. 外部注入智能体 (Slot) -->
@@ -72,6 +74,7 @@ import AISidebar from '@/ai-ui/layout/AISidebar.vue';
 import Home from './Home.vue';
 import TrainingXAgent from '@/agents/built-in/TrainingX/index.vue';
 import InspectAgent from '@/agents/built-in/InspectX/index.vue';
+import { InspectApi } from '@/agents/built-in/InspectX/api';
 
 // 内置智能体配置
 const BUILT_IN_AGENTS = [
@@ -98,7 +101,8 @@ const MOCK_CONVERSATIONS = [
   { id: 'conv-2', agentId: 'training-x', label: 'Vue 组件设计最佳实践', group: 'today', time: '14:20' },
   { id: 'conv-3', agentId: 'training-x', label: '前端性能优化方案', group: 'today', time: '10:15' },
   { id: 'conv-4', agentId: 'other-agent', label: 'React vs Vue 对比分析', group: 'yesterday', time: '昨天 18:45' },
-  { id: 'conv-5', agentId: 'inspect-agent', label: '示例图片分析', group: 'today', time: '12:00' }
+  // 模拟数据参考后端返回结构
+  { id: '455d0eb28a4e44c0bcceeee56d94f3df', agentId: 'inspect-agent', label: '我是云眸智能体', group: 'today', time: '14:43' }
 ];
 
 export default {
@@ -138,7 +142,7 @@ export default {
       currentAgentId: null, // null 表示首页
       componentKey: 0, // 用于强制刷新组件的 key
       conversations: [...MOCK_CONVERSATIONS],
-      currentConversationId: 'conv-1'
+      currentConversationId: ''
     };
   },
   computed: {
@@ -159,22 +163,51 @@ export default {
     }
   },
   methods: {
-    handleSelectAgent(agent) {
+    async handleSelectAgent(agent) {
       this.currentAgentId = agent.id;
+      
       // 切换智能体后，尝试选中该智能体的最新会话
+      // 如果是 InspectAgent，列表可能是空的，等待组件 emit update-list 后再选中
       const firstConv = this.conversations.find(c => c.agentId === agent.id);
       this.currentConversationId = firstConv ? firstConv.id : null;
       this.componentKey++; 
     },
+    
+    // 由子组件 (InspectAgent) 触发，更新会话列表
+    handleUpdateConversationList(newList) {
+      // 1. 移除当前 Agent 的旧会话
+      this.conversations = this.conversations.filter(c => c.agentId !== this.currentAgentId);
+      
+      // 2. 补全 agentId 并合并新会话
+      const formattedList = newList.map(item => ({
+        ...item,
+        agentId: this.currentAgentId,
+        group: item.group || 'today'
+      }));
+      
+      this.conversations = [...this.conversations, ...formattedList];
+
+      // 3. 如果当前没有选中会话，默认选中第一个
+      if (!this.currentConversationId && formattedList.length > 0) {
+        this.currentConversationId = formattedList[0].id;
+      }
+    },
+
     handleSelectConversation(id) {
       this.currentConversationId = id;
-      this.componentKey++; // 切换会话时刷新组件状态
+      // this.componentKey++; // 切换会话时不再强制刷新组件，让子组件自己 watch conversationId
     },
     handleNewChat() {
       console.log('User clicked new chat');
       if (!this.currentAgentId) return;
 
       const newId = 'conv-' + Date.now();
+      // 这里对于 InspectAgent 应该调接口创建新会话？
+      // 暂时只在前端创建，等发消息时后端可能会返回新 ID
+      // 但 InspectAgent 的逻辑通常是需要先有 chatId (或者发消息时生成)
+      // 现有的逻辑里，handleSend 用的是 this.chatId。如果这里的 newId 是前端生成的，传给 API 可能会有问题
+      // 除非 API 支持传空 chatId 创建新会话。
+      // 先保持前端逻辑：
       this.conversations.unshift({
         id: newId,
         agentId: this.currentAgentId,

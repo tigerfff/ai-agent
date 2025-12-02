@@ -37,7 +37,7 @@
         :items="displayConversations"
         :active-key="activeConversationId"
         :groupable="true"
-        @update:active-key="handleConversationSelect"
+        @update:activeKey="handleConversationSelect"
         @change="handleConversationChange"
         @menu-command="handleMenuCommand"
       >
@@ -158,6 +158,7 @@ export default {
       this.$emit('toggle', this.isCollapsed);
     },
     handleConversationSelect(id) {
+      console.log(id,'id')
       this.$emit('update:activeConversationId', id);
     },
     handleConversationChange(item) {
