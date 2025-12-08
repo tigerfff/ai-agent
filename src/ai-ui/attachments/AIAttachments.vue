@@ -34,6 +34,7 @@
         :icon-size="iconSize"
         :mode="cardMode"
         @delete="handleDelete(index)"
+        @preview="onPreview(index)"
       />
     </div>
 
@@ -45,16 +46,28 @@
     >
       ›
     </div>
+
+    <!-- 预览弹窗 -->
+    <AttachmentsPreview
+      :visible="previewVisible"
+      :file="currentPreviewFile"
+      :show-nav="value.length > 1"
+      @close="closePreview"
+      @prev="prevPreview"
+      @next="nextPreview"
+    />
   </div>
 </template>
 
 <script>
 import FilesCard from '@/ai-ui/file-card/FilesCard.vue';
+import AttachmentsPreview from './AttachmentsPreview.vue';
 
 export default {
   name: 'AIAttachments',
   components: {
-    FilesCard
+    FilesCard,
+    AttachmentsPreview
   },
   props: {
     // 初始文件列表
@@ -85,8 +98,15 @@ export default {
   data() {
     return {
       showLeftArrow: false,
-      showRightArrow: false
+      showRightArrow: false,
+      previewVisible: false,
+      previewIndex: 0
     };
+  },
+  computed: {
+    currentPreviewFile() {
+      return this.value[this.previewIndex];
+    }
   },
   watch: {
     value() {
@@ -169,86 +189,104 @@ export default {
       const el = this.$refs.scrollContainer;
       if (!el) return;
       el.scrollBy({ left: el.clientWidth * 0.8, behavior: 'smooth' });
+    },
+
+    /* --- 预览逻辑 --- */
+    onPreview(index) {
+      this.previewIndex = index;
+      this.previewVisible = true;
+    },
+    
+    closePreview() {
+      this.previewVisible = false;
+    },
+    
+    prevPreview() {
+      this.previewIndex = (this.previewIndex - 1 + this.value.length) % this.value.length;
+    },
+    
+    nextPreview() {
+      this.previewIndex = (this.previewIndex + 1) % this.value.length;
     }
   }
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-attachments {
   width: 100%;
   box-sizing: border-box;
   position: relative;
-}
 
-.attachments-list {
-  display: flex;
-  gap: 8px;
-  /* 隐藏滚动条但保留功能 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-}
+  .attachments-list {
+    display: flex;
+    gap: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
-.attachments-list::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 
-/* 布局模式 */
-.ai-attachments.overflow-wrap .attachments-list {
-  flex-wrap: wrap;
-  overflow: visible;
-}
+  &.overflow-wrap {
+    .attachments-list {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
 
-.ai-attachments.overflow-scrollY .attachments-list {
-  flex-wrap: wrap;
-  overflow-y: auto;
-  max-height: 200px; /* 默认最大高度，可覆盖 */
-}
+  &.overflow-scrollY {
+    .attachments-list {
+      flex-wrap: wrap;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+  }
 
-.ai-attachments.overflow-scrollX .attachments-list {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  white-space: nowrap;
-}
+  &.overflow-scrollX {
+    padding: 0 4px;
 
-/* 箭头样式 */
-.scroll-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #eee;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  font-size: 18px;
-  color: #606266;
-  user-select: none;
-  transition: all 0.2s;
-}
+    .attachments-list {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+  }
 
-.scroll-arrow:hover {
-  color: #409eff;
-  background: #fff;
-  box-shadow: 0 2px 12px rgba(64, 158, 255, 0.2);
-}
+  .scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    font-size: 18px;
+    color: #606266;
+    user-select: none;
+    transition: all 0.2s;
 
-.arrow-left {
-  left: 0;
-}
+    &:hover {
+      color: #409eff;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(64, 158, 255, 0.2);
+    }
 
-.arrow-right {
-  right: 0;
-}
+    &.arrow-left {
+      left: 0;
+    }
 
-/* 滚动时给两边留一点空隙防止箭头遮挡 */
-.ai-attachments.overflow-scrollX {
-  padding: 0 4px;
+    &.arrow-right {
+      right: 0;
+    }
+  }
 }
 </style>

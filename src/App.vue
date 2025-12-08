@@ -3,6 +3,7 @@
     <!-- 模拟父项目使用组件库 -->
     <AIAgentContainer 
       :extra-agents="customAgents"
+      business-line="retail"
     >
       <!-- 处理自定义智能体的渲染 -->
       <template #agent-view="{ agent }">
@@ -15,11 +16,11 @@
       </template>
 
       <!-- 侧边栏底部的自定义内容 -->
-      <template #sidebar-bottom>
+      <!-- <template #sidebar-bottom>
         <div style="padding: 10px; text-align: center; font-size: 12px; color: #999;">
           v1.0.0
         </div>
-      </template>
+      </template> -->
     </AIAgentContainer>
   </div>
 </template>
@@ -30,22 +31,22 @@ export default {
   data() {
     return {
       // 父项目定义的额外智能体
-      customAgents: [
-        {
-          id: 'order-helper',
-          name: '订单助手',
-          icon: '📦',
-          description: '查询订单状态和物流信息',
-          type: 'slot' // 标记为 slot 类型
-        },
-        {
-          id: 'approval-helper',
-          name: '审批精灵',
-          icon: '✍️',
-          description: '快速处理待办审批',
-          type: 'slot'
-        }
-      ]
+      // customAgents: [
+      //   {
+      //     id: 'order-helper',
+      //     name: '订单助手',
+      //     icon: '📦',  
+      //     description: '查询订单状态和物流信息',
+      //     type: 'slot' // 标记为 slot 类型
+      //   },
+      //   {
+      //     id: 'approval-helper',
+      //     name: '审批精灵',
+      //     icon: '✍️',
+      //     description: '快速处理待办审批',
+      //     type: 'slot'
+      //   }
+      // ]
     };
   },
   methods: {
@@ -66,8 +67,10 @@ export default {
 }
 </script>
 
-<style>
-html, body, #app {
+<style lang="scss">
+html,
+body,
+#app {
   height: 100%;
   margin: 0;
   padding: 0;

@@ -171,68 +171,70 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-history-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
+  .ai-history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    position: relative;
+    scroll-behavior: smooth;
+
+    .history-inner {
+      display: flex;
+      flex-direction: column;
+      min-height: min-content;
+    }
+
+    .back-to-bottom-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+      border: 1px solid #e4e7ed;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      padding: 8px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #409eff;
+      font-size: 14px;
+      z-index: 10;
+      transition: all 0.3s;
+      user-select: none;
+
+      &:hover {
+        background-color: #f2f6fc;
+        transform: translateX(-50%) translateY(-2px);
+      }
+
+      .arrow-down {
+        font-weight: bold;
+      }
+
+      .new-msg-tip {
+        color: #f56c6c;
+        font-size: 12px;
+      }
+    }
+  }
 }
 
-.ai-history-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  position: relative;
-  scroll-behavior: smooth; 
-}
-
-.history-inner {
-  display: flex;
-  flex-direction: column;
-  /* 确保内容撑开容器 */
-  min-height: min-content; 
-}
-
-.back-to-bottom-btn {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #fff;
-  border: 1px solid #e4e7ed;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
-  border-radius: 20px;
-  padding: 8px 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #409eff;
-  font-size: 14px;
-  z-index: 10;
-  transition: all 0.3s;
-  user-select: none;
-}
-
-.back-to-bottom-btn:hover {
-  background-color: #f2f6fc;
-  transform: translateX(-50%) translateY(-2px);
-}
-
-.arrow-down {
-  font-weight: bold;
-}
-
-.new-msg-tip {
-  color: #f56c6c;
-  font-size: 12px;
-}
-
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s, transform 0.3s;
 }
-.fade-enter, .fade-leave-to {
+
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
   transform: translateX(-50%) translateY(10px);
 }

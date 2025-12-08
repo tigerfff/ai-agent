@@ -29,11 +29,15 @@
 
     <!-- 输入区域 -->
     <div class="footer">
+      <!-- 
+        mode="file" 开启文件上传支持
+        accepts 限制上传类型
+      -->
       <AIInput 
         ref="aiInput"
         :loading="isStreaming || isUploading"
         placeholder="有问题尽管问我~"
-        accepts=".jpg,.jpeg,.png,.mp4"
+        :allowed-types="['image', 'video']"
         :max-size="200 * 1024 * 1024"
         :before-add-attachments="handlePreUpload"
         @send="handleSend" 
@@ -289,6 +293,13 @@ export default {
     async loadHistory() {
       if (!this.chatId) return;
 
+      // 如果是临时会话ID（AgentContainer 生成的），则不加载历史，直接显示欢迎页
+      if (this.chatId.startsWith('conv-')) {
+        this.messages = [];
+        this.loadingHistory = false;
+        return;
+      }
+
       this.loadingHistory = true;
       this.messages = [];
 
@@ -323,7 +334,6 @@ export default {
         this.loadingHistory = false;
       }
     },
-
     /**
      * 适配历史消息格式
      * 后端数据结构示例：
@@ -383,13 +393,43 @@ export default {
       return { user, ai };
     },
 
+    /**
+     * 发送消息处理
+     */
     async handleSend(data) {
       const attachments = Array.isArray(data.attachments) ? data.attachments : [];
       if (!data.text && attachments.length === 0) return;
 
+      // 1. 如果当前没有会话ID 或 是临时ID，先创建会话
+      if (!this.chatId || this.chatId.startsWith('conv-')) {
+        try {
+          // 创建新会话
+          const res = await TryApi.getChatId(this.$aiClient, {
+            mineType: 'image'
+          });
+          if (res.code === 0 && res.data) {
+             // 假设返回的是 chatId 字符串或包含 chatId 的对象
+             this.chatId = typeof res.data === 'string' ? res.data : res.data.chatId;
+             
+             // 通知父组件选中新会话（这一步可选，如果 fetchConversationList 能及时更新）
+             // 但为了 URL 同步，建议 emit select
+             this.$emit('select-conversation', this.chatId);
+             
+             // 刷新列表，让 Sidebar 出现新会话
+             this.fetchConversationList();
+          } else {
+            this.$message.error('创建会话失败');
+            return;
+          }
+        } catch (e) {
+          console.error('[TryAgent] Create session failed', e);
+          return;
+        }
+      }
+
       const userMsgKey = Date.now();
       
-      // 1. 立即显示用户消息（附件已经在 beforeAddAttachments 中完成预上传）
+      // 2. 立即显示用户消息
       const userMsg = {
         key: userMsgKey,
         role: 'user',
@@ -400,8 +440,8 @@ export default {
       };
       this.messages.push(userMsg);
 
-      // 2. 从附件中提取 OSS URL，构造 imageList / videoList
-      let uploadType = 'img'; // 默认为图片，如果有视频则切换
+      // 3. 构造请求参数
+      let uploadType = 'img'; 
       const imageUrls = attachments
         .filter(a => a.type === 'image' && a.url)
         .map(a => a.url);
@@ -413,7 +453,7 @@ export default {
         uploadType = 'video';
       }
 
-      // 3. 准备 AI 占位消息
+      // 4. 准备 AI 占位消息
       const aiMsgKey = Date.now() + '_ai';
       const aiMsg = {
         key: aiMsgKey,
@@ -426,11 +466,10 @@ export default {
       };
       this.messages.push(aiMsg);
 
-      // 4. 发起 SSE 请求
+      // 5. 发起 SSE 请求
       this.isStreaming = true;
       this.abortController = new AbortController();
 
-      // 构造请求体：chatId 使用 loadHistory 时保存下来的真实 chatId
       const requestBody = {
         chatId: this.chatId,
         input: {
@@ -447,16 +486,12 @@ export default {
           uploadType,
           onMessage: (msgData) => {
             aiMsg.loading = false;
-
-            // 后端 SSE 返回结构示例：
-            // { requestId, text, status, sessionId, chatId, msgId }
             if (!msgData) return;
 
             if (msgData.text) {
               aiMsg.content += msgData.text;
             }
 
-            // status === 0 表示流式中间片段，非 0 视为结束
             if (msgData.status !== 0) {
               this.isStreaming = false;
               this.handleFinish({ index: this.messages.indexOf(aiMsg) });
@@ -473,11 +508,32 @@ export default {
           }
         });
       } catch (e) {
-        // SSE 启动失败 (非流过程中的错误)
         console.error('SSE Start Error', e);
         aiMsg.loading = false;
         aiMsg.content = '服务暂时不可用，请稍后再试。';
         this.isStreaming = false;
+      }
+    },
+
+    /**
+     * 删除会话
+     * @param {string} id 会话ID
+     */
+    async deleteSession(id) {
+      try {
+        const res = await TryApi.deleteHistory(this.$aiClient, { chatId: id });
+        if (res.code === 0) {
+          // 如果删除的是当前会话，清空显示
+          if (id === this.chatId) {
+            this.chatId = '';
+            this.messages = [];
+            // 通知父组件清空选中状态（或由父组件自己处理）
+          }
+          // 刷新列表
+          this.fetchConversationList();
+        }
+      } catch (e) {
+        console.error('[TryAgent] Delete session failed', e);
       }
     },
 
@@ -511,7 +567,6 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgb(239, 247, 250);
 
   .chat-area {
     flex: 1;
@@ -529,7 +584,6 @@ export default {
 
   .footer {
     padding: 16px 16px 44px;
-    border-top: 1px solid #eee;
     flex-shrink: 0;
   }
 

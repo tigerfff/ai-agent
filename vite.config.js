@@ -59,6 +59,9 @@ export default defineConfig({
     alias: {
       // 源码别名
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // 静态资源别名
+      '@images': fileURLToPath(new URL('./src/assets/images', import.meta.url)),
+      '@svg': fileURLToPath(new URL('./src/assets/svg', import.meta.url)),
       // Hui UI 资源，从 public/hui2.43.2 下引入
       '@hui': resolve(__dirname, 'public/hui2.43.2')
     }

@@ -1,10 +1,9 @@
 <template>
   <div class="ai-home">
     <div class="home-header">
-      <h2>欢迎使用 AI 助手</h2>
-      <p>请选择一个智能体开始对话</p>
+      <h2>海康云眸-AI试用</h2>
+      <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
     </div>
-    
     <div class="agent-grid">
       <div 
         v-for="agent in agents" 
@@ -12,9 +11,18 @@
         class="agent-card"
         @click="$emit('select', agent)"
       >
-        <div class="card-icon">{{ agent.icon || '🤖' }}</div>
+        <div class="card-header-row">
+          <div class="card-icon">
+            <img :src="agent.icon" :alt="agent.name" />
+          </div>
+          <div class="go-use-btn">去使用 ></div>
+        </div>
+        
         <div class="card-info">
           <div class="card-name">{{ agent.name }}</div>
+          <div class="card-tag">
+            <el-tag type="primary" v-for="(item,index) in agent.tags" :key="index">{{ item }}</el-tag>
+          </div>
           <div class="card-desc">{{ agent.description || '暂无描述' }}</div>
         </div>
       </div>
@@ -34,80 +42,211 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-home {
   padding: 40px;
   height: 100%;
   overflow-y: auto;
-  background: #f9f9f9;
-}
+  background: 
+    radial-gradient(circle at 50% 50%, #C5CEFF 0%, rgba(255, 255, 255, 0) 100%),
+    radial-gradient(circle at 50% 50%, #388EFF 0%, rgba(56, 142, 255, 0) 100%),
+    #E2ECF9;
 
-.home-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
+  .home-header {
+    text-align: center;
+    margin-bottom: 40px;
 
-.home-header h2 {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 10px;
-}
+    h2 {
+      color: rgba(0, 0, 0, 0.9);
+      font-weight: bold;
+      font-size: 28px;
+      line-height: 36px;
+      letter-spacing: 0px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
 
-.home-header p {
-  color: #666;
-}
+    p {
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 16px;
+      line-height: 24px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+  }
 
-.agent-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
+  .agent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(368px, 1fr));
+    gap: 16px;
+    max-width: 1200px;
+    padding: 0 32px;
+    margin: 0 auto;
+    box-sizing: border-box;
 
-.agent-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  align-items: flex-start;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid #eee;
-}
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 600px;
+      gap: 16px;
+    }
+  }
 
-.agent-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
+  .agent-card {
+    box-sizing: border-box;
+    background: #fff;
+    width: 368px;
+    height: 196px;
+    border-radius: 8px;
+    padding: 24px;
+    cursor: pointer;
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
 
-.card-icon {
-  font-size: 32px;
-  margin-right: 16px;
-  width: 48px;
-  height: 48px;
-  background: #f0f7ff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    @media (max-width: 768px) {
+      width: 100%;
+      max-width: 260px;
+      height: 196px;
+      min-width: 250px;
+    }
 
-.card-info {
-  flex: 1;
-}
+    &:hover {
+      box-shadow: 0 8px 24px rgba(56, 142, 255, 0.2);
+      background: linear-gradient(135deg, #9D83FF 0%, #388EFF 100%);
+      border-color: transparent;
 
-.card-name {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 6px;
-}
+      .go-use-btn {
+        opacity: 1;
+        transform: translateX(0);
+      }
 
-.card-desc {
-  font-size: 13px;
-  color: #999;
-  line-height: 1.4;
+      .card-name {
+        color: #fff;
+      }
+
+      .card-tag {
+        .el-tag {
+          background-image: none !important;
+          background-color: #fff !important;
+          color: #388EFF !important;
+          -webkit-background-clip: border-box !important;
+          background-clip: border-box !important;
+          -webkit-text-fill-color: currentColor !important;
+
+          &::before {
+            display: none;
+          }
+        }
+      }
+
+      .card-desc {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .go-use-btn {
+      font-size: 14px;
+      color: #fff;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+
+    .card-icon {
+      font-size: 32px;
+      width: 44px;
+      height: 44px;
+      background: #f0f7ff;
+      border-radius: 8px;
+      line-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .card-info {
+      flex: 1;
+    }
+
+    .card-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 6px;
+    }
+
+    .card-tag {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .el-tag {
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+
+        &:nth-child(2n + 1) {
+          background-color: rgba(#388EFF, 0.1);
+          color: #388EFF;
+        }
+
+        &:nth-child(2n) {
+          position: relative;
+          background-image: linear-gradient(89.21deg, rgba(157, 131, 255, 1) 0%, rgba(56, 142, 255, 1) 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          z-index: 1;
+
+          &::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            inset: 0;
+            background-image: linear-gradient(90deg, rgba(157, 131, 255, 1) 0%, rgba(56, 142, 255, 1) 100%);
+            border-radius: 4px;
+            z-index: 0;
+            opacity: 0.3;
+          }
+        }
+      }
+    }
+
+    .card-desc {
+      color: rgba(0, 0, 0, 0.4);
+      font-weight: regular;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: left;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
 }
 </style>
+
 

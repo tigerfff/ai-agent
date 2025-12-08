@@ -11,7 +11,11 @@
     @mouseleave="handleMouseLeave"
   >
     <!-- 1. 图标/图片区域 -->
-    <div class="files-card-icon" :style="{ width: iconSize, height: iconSize }">
+    <div 
+      class="files-card-icon" 
+      :style="{ width: iconSize, height: iconSize, cursor: imgPreview ? 'pointer' : 'default' }"
+      @click="handlePreview"
+    >
       <slot name="icon" :item="$props">
         <!-- 图片类型 -->
         <template v-if="isImage">
@@ -20,7 +24,6 @@
             :src="imgUrl" 
             class="files-card-image"
             :class="imgVariant"
-            @click="handlePreview"
           />
           <span v-else class="files-card-file-icon">🖼️</span>
         </template>
@@ -34,11 +37,22 @@
       <div 
         v-if="isImage && imgPreview && imgPreviewMask && status === 'done'" 
         class="files-card-mask"
-        @click="handlePreview"
       >
         <slot name="image-preview-actions" :item="$props">
           <span class="view-icon">👁️</span>
         </slot>
+      </div>
+
+      <!-- mini 模式下的圆形进度条遮罩 -->
+      <div 
+        v-if="mode === 'mini' && status === 'uploading'"
+        class="mini-progress-overlay"
+      >
+        <div class="mini-progress-circle" :style="miniProgressStyle">
+          <div class="mini-progress-inner">
+            <span class="mini-progress-text">{{ percent }}%</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -139,6 +153,14 @@ export default {
     },
     imgUrl() {
       return this.url || this.localImgUrl;
+    },
+    // mini 模式圆形进度条样式
+    miniProgressStyle() {
+      const p = Math.max(0, Math.min(100, this.percent || 0));
+      const deg = (p / 100) * 360;
+      return {
+        backgroundImage: `conic-gradient(#409eff ${deg}deg, rgba(255, 255, 255, 0.15) 0deg)`
+      };
     }
   },
   watch: {
@@ -168,8 +190,12 @@ export default {
     },
     handlePreview() {
       if (!this.imgPreview) return;
-      this.$emit('image-preview', this.$props);
-      // 这里可以集成一个全局的图片预览组件，简单起见先 emit
+      // 触发通用的预览事件
+      this.$emit('preview', this.$props);
+      // 兼容旧的图片预览事件
+      if (this.isImage) {
+        this.$emit('image-preview', this.$props);
+      }
     },
     formatFileSize(bytes) {
       if (!bytes) return '';
@@ -196,7 +222,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .files-card {
   position: relative;
   display: flex;
@@ -210,151 +236,186 @@ export default {
   box-sizing: border-box;
   gap: 10px;
   flex-shrink: 0;
-}
 
-.files-card:hover {
-  background-color: #ecf5ff;
-}
+  &:hover {
+    background-color: #ecf5ff;
+  }
 
-.files-card.is-hover-delete:hover {
-  /* 可以添加特定样式 */
-}
+  &.is-mini {
+    gap: 0;
+    border-radius: 4px;
 
-.files-card.is-mini {
-  gap: 0;
-  border-radius: 4px;
-}
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05) !important;
+    }
 
-.files-card.is-mini:hover {
-  background-color: rgba(0,0,0,0.05) !important;
-}
+    .files-card-close {
+      top: -6px;
+      right: -6px;
+      background: #f56c6c;
+      color: #fff;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #fff;
+    }
+  }
 
-.files-card.is-mini .files-card-close {
-  top: -6px;
-  right: -6px;
-  background: #f56c6c;
-  color: #fff;
-  width: 18px;
-  height: 18px;
-  border: 2px solid #fff;
-}
+  &.is-hover-delete {
+    .files-card-close {
+      opacity: 1;
+    }
+  }
 
-/* Icon */
-.files-card-icon {
-  flex-shrink: 0;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  background: #fff;
-  overflow: hidden;
-}
+  .files-card-icon {
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: #fff;
+    overflow: hidden;
 
-.files-card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    .files-card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-.files-card-file-icon {
-  font-size: 24px;
-}
+    .files-card-file-icon {
+      font-size: 24px;
+    }
 
-/* Mask */
-.files-card-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
+    .files-card-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      cursor: pointer;
 
-.files-card-icon:hover .files-card-mask {
-  opacity: 1;
-}
+      .view-icon {
+        color: #fff;
+        font-size: 16px;
+      }
+    }
 
-.view-icon {
-  color: #fff;
-  font-size: 16px;
-}
+    &:hover {
+      .files-card-mask {
+        opacity: 1;
+      }
+    }
 
-/* Content */
-.files-card-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+    .mini-progress-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
 
-.files-card-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2px;
-}
+      .mini-progress-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-.files-card-name {
-  font-size: 14px;
-  color: #303133;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-}
+        .mini-progress-inner {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-.files-card-desc {
-  font-size: 12px;
-  color: #909399;
-  line-height: 1.2;
-}
+          .mini-progress-text {
+            font-size: 10px;
+            color: #409eff;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
 
-.status-text {
-  color: #409eff;
-}
+  .files-card-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-.status-text.error {
-  color: #f56c6c;
-}
+    .files-card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2px;
 
-/* Close Btn */
-.files-card-close {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.1);
-  color: #909399;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  cursor: pointer;
-  z-index: 2;
-}
+      .files-card-name {
+        font-size: 14px;
+        color: #303133;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+      }
+    }
 
-.files-card-close:hover {
-  background: #f56c6c;
-  color: #fff;
-}
+    .files-card-desc {
+      font-size: 12px;
+      color: #909399;
+      line-height: 1.2;
 
-/* Progress Bar */
-.upload-progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  background-color: #409eff;
-  transition: width 0.2s;
-  opacity: 0.6;
+      .status-text {
+        color: #409eff;
+
+        &.error {
+          color: #f56c6c;
+        }
+      }
+    }
+  }
+
+  .files-card-close {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    color: #909399;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s;
+
+    &:hover {
+      background: #f56c6c;
+      color: #fff;
+    }
+  }
+
+  .upload-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background-color: #409eff;
+    transition: width 0.2s;
+    opacity: 0.6;
+  }
 }
 </style>

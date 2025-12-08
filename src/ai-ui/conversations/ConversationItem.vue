@@ -29,7 +29,7 @@
         >
           <span ref="labelRef" class="label-text">{{ item.label }}</span>
         </el-tooltip>
-        <span v-else class="label-text">{{ item.label }}</span>
+        <span class="label-text">{{ item.label }}</span>
       </div>
 
       <!-- Menu / Suffix -->
@@ -102,66 +102,65 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-conversation-item {
-  padding: 10px 12px;
-  margin-bottom: 4px;
+  padding: 12px 16px;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
   position: relative;
   user-select: none;
-}
+  color: rgba(0, 0, 0, 0.7);
 
-.ai-conversation-item:hover {
-  background-color: #f5f7fa;
-}
+  &:hover {
+    background: rgba(56, 142, 255, 0.08);
+  }
 
-.ai-conversation-item.active {
-  background-color: #e6f7ff;
-  color: #409eff;
-}
+  &.active {
+    background: rgba(56, 142, 255, 0.08);
+  }
 
-.ai-conversation-item.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: transparent;
-}
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: transparent;
+  }
 
-.item-content {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
+  .item-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
 
-.item-prefix {
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-}
+    .item-prefix {
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+    }
 
-.item-label {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: 14px;
-}
+    .item-label {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 14px;
+    }
 
-.item-menu {
-  margin-left: 8px;
-  display: flex;
-  align-items: center;
-  color: #909399;
-}
+    .item-menu {
+      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      color: #909399;
 
-.menu-trigger {
-  padding: 2px 6px;
-  border-radius: 4px;
-}
+      .menu-trigger {
+        padding: 2px 6px;
+        border-radius: 4px;
 
-.menu-trigger:hover {
-  background-color: rgba(0,0,0,0.05);
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
+  }
 }
 </style>
 

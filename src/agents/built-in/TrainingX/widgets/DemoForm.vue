@@ -32,64 +32,66 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .demo-form-card {
   border: 1px solid #ebeef5;
   border-radius: 8px;
   background: #fff;
   overflow: hidden;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
   margin: 4px 0;
   max-width: 300px;
-}
 
-.form-header {
-  background: #f5f7fa;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid #ebeef5;
-}
+  .form-header {
+    background: #f5f7fa;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #ebeef5;
 
-.form-body {
-  padding: 16px;
-}
+    .tag {
+      background: #ecf5ff;
+      color: #409eff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  }
 
-.form-content p {
-  margin: 8px 0;
-  font-size: 14px;
-  color: #606266;
-}
+  .form-body {
+    padding: 16px;
 
-.tag {
-  background: #ecf5ff;
-  color: #409eff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-}
+    .form-content {
+      p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #606266;
+      }
+    }
 
-.form-actions {
-  margin-top: 16px;
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
+    .form-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
 
-.btn {
-  padding: 6px 12px;
-  border-radius: 4px;
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  cursor: pointer;
-  font-size: 12px;
-}
+      .btn {
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: 1px solid #dcdfe6;
+        background: #fff;
+        cursor: pointer;
+        font-size: 12px;
 
-.btn.primary {
-  background: #409eff;
-  color: #fff;
-  border-color: #409eff;
+        &.primary {
+          background: #409eff;
+          color: #fff;
+          border-color: #409eff;
+        }
+      }
+    }
+  }
 }
 </style>
 

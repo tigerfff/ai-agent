@@ -26,40 +26,47 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-layout {
   display: flex;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #fff;
-}
+  background: rgb(239, 247, 250);
+  min-width: 1280px;
+  overflow-x: auto;
 
-.layout-sider {
-  flex-shrink: 0;
-  height: 100%;
-}
+  @media (max-width: 768px) {
+    min-width: auto;
+    overflow-x: visible;
+  }
 
-.layout-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}
+  .layout-sider {
+    flex-shrink: 0;
+    height: 100%;
+  }
 
-.content-header {
-  height: 50px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-}
+  .layout-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
 
-.content-body {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
+    .content-header {
+      height: 50px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .content-body {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+  }
 }
 </style>
 

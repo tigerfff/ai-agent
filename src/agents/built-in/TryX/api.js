@@ -1,6 +1,6 @@
-// InspectX 智能体 API 定义
+// TryX 智能体 API 定义
 
-export const InspectApi = {
+export const TryApi = {
   /**
    * 获取 OSS 上传凭证
    * @param {AIClient} client 
@@ -41,6 +41,46 @@ export const InspectApi = {
   },
 
   /**
+   * 删除历史消息
+   * @param {AIClient} client
+   * @param {Object} data - 删除参数（通常包含 chatId）
+   */
+  deleteHistory(client, data) {
+    return client.send({
+      url: '/v1/inspect/chat/web/agent/chat/delete',
+      method: 'get',
+      data
+    });
+  },
+
+  /**
+   * 创建会话/获取会话ID
+   * @param {AIClient} client
+   * @param {Object} data - 创建会话的参数
+   */
+  getChatId(client, data) {
+    return client.send({
+      url: '/v1/inspect/chat/web/agent/chat/add',
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 评价消息
+   * @param {AIClient} client
+   * @param {Object} data - 评价参数
+   * @note URL 在 proxy.js 中为空，需要确认实际接口地址
+   */
+  evaluateMessage(client, data) {
+    return client.send({
+      url: '/v1/inspect/chat/web/agent/chat/evaluate',
+      method: 'post',
+      data
+    });
+  },
+
+  /**
    * 发起流式对话
    * @param {AIClient} client 
    * @param {Object} options
@@ -70,3 +110,4 @@ export const InspectApi = {
     });
   }
 };
+

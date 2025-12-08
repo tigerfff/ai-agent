@@ -17,10 +17,10 @@
                 class="group-title sticky-title" 
                 @click="toggleGroup(group.key)"
               >
-                <span class="group-toggle-icon" :class="{ 'is-collapsed': collapsedGroups[group.key] }">
-                  ▼
-                </span>
                 {{ group.title }}
+                <span class="group-toggle-icon" :class="{ 'is-collapsed': collapsedGroups[group.key] }">
+                  <i class="h-icon-angle_up"></i>
+                </span>
               </div>
               
               <div class="group-items" v-show="!collapsedGroups[group.key]">
@@ -152,60 +152,59 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-conversations {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
-}
+  background: transparent;
 
-.conversations-list-wrapper {
-  flex: 1;
-  overflow: hidden;
-}
+  .conversations-list-wrapper {
+    flex: 1;
+    overflow: hidden;
 
-.conversations-content {
-  padding: 10px;
-}
+    .conversations-content {
+      padding: 10px;
 
-.conversation-group {
-  margin-bottom: 16px;
-}
+      .conversation-group {
+        margin-bottom: 16px;
 
-.group-title {
-  font-size: 12px;
-  color: #909399;
-  padding: 4px 12px;
-  margin-bottom: 4px;
-  background: #fff; /* 确保吸顶时不透明 */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  user-select: none;
-}
+        .group-title {
+          font-size: 12px;
+          color: #909399;
+          padding: 4px 12px;
+          margin-bottom: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          user-select: none;
 
-.group-title:hover {
-  color: #606266;
-}
+          &:hover {
+            color: #606266;
+          }
 
-.group-toggle-icon {
-  display: inline-block;
-  margin-right: 4px;
-  font-size: 10px;
-  transition: transform 0.2s;
-  transform: rotate(0deg);
-}
+          &.sticky-title {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+          }
 
-.group-toggle-icon.is-collapsed {
-  transform: rotate(-90deg);
-}
+          .group-toggle-icon {
+            display: inline-block;
+            margin-right: 4px;
+            font-size: 16px;
+            transition: transform 0.2s;
+            transform: rotate(0deg);
 
-/* 简单的吸顶效果 (sticky) */
-.sticky-title {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+            &.is-collapsed {
+              transform: rotate(-180deg);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 </style>
 

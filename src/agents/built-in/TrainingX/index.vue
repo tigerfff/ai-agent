@@ -113,7 +113,9 @@ export default {
     // TrainingApi.getWelcomeConfig().then(config => this.welcomeConfig = config);
   },
   methods: {
-    handleWelcomeSelect(text) {
+    handleWelcomeSelect(data) {
+      // 兼容新协议：data 可能是对象或字符串
+      const text = typeof data === 'string' ? data : (data.text || data.title || '');
       this.handleSend({ text });
     },
     handleNewSession() {
@@ -233,91 +235,89 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .training-x-agent {
   display: flex;
   flex-direction: column;
   height: 100%;
   background: #fff;
-}
 
-.header {
-  padding: 16px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-}
+  .header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
 
-.header h1 {
-  font-size: 18px;
-  margin: 0;
-}
+    h1 {
+      font-size: 18px;
+      margin: 0;
+    }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-}
+    .header-actions {
+      display: flex;
+      align-items: center;
 
-.test-btn {
-  padding: 6px 12px;
-  background: #e6f7ff;
-  color: #1890ff;
-  border: 1px solid #91d5ff;
-  border-radius: 4px;
-  cursor: pointer;
-}
+      .test-btn {
+        padding: 6px 12px;
+        background: #e6f7ff;
+        color: #1890ff;
+        border: 1px solid #91d5ff;
+        border-radius: 4px;
+        cursor: pointer;
 
-.test-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
 
-/* 聊天区域容器 */
-.chat-area-wrapper {
-  flex: 1;
-  overflow: hidden; /* 让 AIHistory 处理内部滚动 */
-  background: #f9f9f9;
-  position: relative;
-}
+  .chat-area-wrapper {
+    flex: 1;
+    overflow: hidden;
+    background: #f9f9f9;
+    position: relative;
+  }
 
-.footer {
-  padding: 20px;
-  border-top: 1px solid #eee;
-  flex-shrink: 0;
-}
+  .footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+  }
 
-/* 自定义头像样式 */
-.custom-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  background: #eee;
-}
+  .custom-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: #eee;
 
-.custom-avatar.user {
-  background: #dbefff;
-}
+    &.user {
+      background: #dbefff;
+    }
 
-.custom-avatar.ai {
-  background: #e6f7ff;
-}
+    &.ai {
+      background: #e6f7ff;
+    }
+  }
 
-.widget-loading {
-  padding: 12px;
-  background: #fdf6ec;
-  color: #e6a23c;
-  border-radius: 4px;
-  font-size: 13px;
-  margin: 4px 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  .widget-loading {
+    padding: 12px;
+    background: #fdf6ec;
+    color: #e6a23c;
+    border-radius: 4px;
+    font-size: 13px;
+    margin: 4px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
 }
 </style>
 

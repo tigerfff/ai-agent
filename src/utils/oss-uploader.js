@@ -92,7 +92,12 @@ export class OssUploader {
     return res;
   }
 
-  async upload(file) {
+  /**
+   * 上传文件到 OSS
+   * @param {File|Blob} file 原始文件
+   * @param {Function} [onProgress] 进度回调 (percent: 0-1)
+   */
+  async upload(file, onProgress) {
     const client = await this.initClient();
     if (!client) {
       throw new Error('OSS client init failed');
@@ -101,8 +106,24 @@ export class OssUploader {
     const key = `${this.object}${this.generateKey(file)}`;
     
     try {
-      // 简单上传，大文件可以后续扩展分片逻辑
-      const result = await client.put(key, file);
+      let result;
+
+      // 如果提供了进度回调，则使用分片上传以支持进度
+      if (typeof onProgress === 'function') {
+        result = await client.multipartUpload(key, file, {
+          progress: async (percent) => {
+            try {
+              onProgress(percent);
+            } catch (e) {
+              // 进度回调报错不影响上传本身
+              console.warn('OSS progress callback error:', e);
+            }
+          }
+        });
+      } else {
+        // 否则退回简单上传
+        result = await client.put(key, file);
+      }
       
       // 构造返回 URL
       // 注意：这里优先使用 bucketDomain，如果没有则使用 OSS 返回的 url

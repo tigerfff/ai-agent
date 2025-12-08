@@ -56,14 +56,15 @@ export default {
   },
   methods: {
     handleClick(item) {
-      // 如果有 text 属性，传 text，否则传 title
-      this.$emit('select', item.text || item.title);
+      // 传递整个 item 对象，以便父组件可以访问所有属性（如 needsFile）
+      // 同时保持向后兼容：如果父组件只期望字符串，可以通过 item.text || item.title 获取
+      this.$emit('select', item);
     }
   }
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ai-welcome {
   height: 100%;
   display: flex;
@@ -72,104 +73,106 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   overflow-y: auto;
-}
+  background: rgb(239, 247, 250);
+  max-width: 1200px;
 
-.welcome-content {
-  max-width: 680px;
-  width: 100%;
-  text-align: center;
-}
+  .welcome-content {
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+  }
 
-.welcome-icon {
-  margin-bottom: 24px;
-}
+  .welcome-icon {
+    margin-bottom: 24px;
 
-.default-icon {
-  font-size: 64px;
-  display: inline-block;
-  background: #f0f2f5;
-  width: 100px;
-  height: 100px;
-  line-height: 100px;
-  border-radius: 50%;
-}
+    .default-icon {
+      font-size: 64px;
+      display: inline-block;
+      background: #f0f2f5;
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      border-radius: 50%;
+    }
+  }
 
-.welcome-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0 0 12px 0;
-}
+  .welcome-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #303133;
+    margin: 0 0 12px 0;
+  }
 
-.welcome-desc {
-  font-size: 14px;
-  color: #909399;
-  margin: 0 0 40px 0;
-  line-height: 1.6;
-}
+  .welcome-desc {
+    font-size: 14px;
+    color: #909399;
+    margin: 0 0 40px 0;
+    line-height: 1.6;
+  }
 
-.welcome-prompts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  text-align: left;
-}
+  .welcome-prompts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    text-align: left;
 
-.prompt-card {
-  background: #fff;
-  border: 1px solid #e4e7ed;
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
+    .prompt-card {
+      background: #fff;
+      border: 1px solid #e4e7ed;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      display: flex;
+      flex-direction: column;
 
-.prompt-card:hover {
-  border-color: #c0c4cc;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
-}
+      &:hover {
+        border-color: #c0c4cc;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
 
-.prompt-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
+        .prompt-arrow {
+          opacity: 1;
+        }
+      }
 
-.prompt-icon {
-  font-size: 18px;
-}
+      .prompt-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
 
-.prompt-title {
-  font-weight: 500;
-  color: #303133;
-  font-size: 15px;
-}
+        .prompt-icon {
+          font-size: 18px;
+        }
 
-.prompt-desc {
-  font-size: 13px;
-  color: #909399;
-  line-height: 1.5;
-  margin-right: 24px; /* 为箭头留空间 */
-}
+        .prompt-title {
+          font-weight: 500;
+          color: #303133;
+          font-size: 15px;
+        }
+      }
 
-.prompt-arrow {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #c0c4cc;
-  font-family: monospace;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
+      .prompt-desc {
+        font-size: 13px;
+        color: #909399;
+        line-height: 1.5;
+        margin-right: 24px;
+      }
 
-.prompt-card:hover .prompt-arrow {
-  opacity: 1;
+      .prompt-arrow {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #c0c4cc;
+        font-family: monospace;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+    }
+  }
 }
 </style>
 

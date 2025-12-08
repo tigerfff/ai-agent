@@ -192,134 +192,146 @@ export default {
 };
 </script>
 
-<style scoped>
-/* 基础布局 */
+<style lang="scss" scoped>
 .ai-bubble {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
   max-width: 100%;
-}
 
-.ai-bubble.end {
-  flex-direction: row-reverse;
-}
+  &.end {
+    flex-direction: row-reverse;
 
-.bubble-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  max-width: 80%;
-  min-width: 0; /* 防止子元素撑破容器 */
-}
+    .bubble-content-wrapper {
+      align-items: flex-end;
+    }
 
-.ai-bubble.end .bubble-content-wrapper {
-  align-items: flex-end;
-}
+    .bubble-body.filled {
+      background: #dbefff;
+      color: #333;
+      border-radius: 12px 0px 12px 12px;
+    }
+  }
 
-.bubble-attachments {
-  margin-bottom: 8px;
-  max-width: 100%;
-  width: 100%; /* 确保能撑满最大宽度以触发滚动 */
-}
+  .bubble-avatar {
+    .avatar-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
 
-/* 当附件在 bubble-body 内部时，需要去除底部 margin，除非后面还有文本 */
-.bubble-body .bubble-attachments:last-child {
-  margin-bottom: 0;
-}
+  .bubble-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 80%;
+    min-width: 0;
 
-/* 头像 */
-.bubble-avatar .avatar-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
+    .bubble-attachments {
+      margin-bottom: 8px;
+      max-width: 100%;
+      width: 100%;
+    }
 
-/* 气泡主体 */
-.bubble-body {
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.6;
-  position: relative;
-  word-break: break-word;
-}
+    .bubble-body {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      position: relative;
+      word-break: break-word;
 
-/* 样式变体 */
-.bubble-body.filled {
-  background: #f4f6f8;
-  color: #333;
-  border-radius: 0px 12px 12px 12px;
-}
+      &.filled {
+        background: #f4f6f8;
+        color: #333;
+        border-radius: 0px 12px 12px 12px;
+      }
 
-.ai-bubble.end .bubble-body.filled {
-  background: #dbefff; /* 用户气泡色 */
-  color: #333;
-  border-radius: 12px 0px 12px 12px;
-}
+      .bubble-attachments:last-child {
+        margin-bottom: 0;
+      }
 
-/* Markdown 样式微调 (可选) */
-.markdown-body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-}
-.markdown-body :deep(p) {
-  margin-bottom: 0.5em;
-}
-.markdown-body :deep(p:last-child) {
-  margin-bottom: 0;
-}
-.markdown-body :deep(pre) {
-  background: #282c34;
-  color: #abb2bf;
-  padding: 10px;
-  border-radius: 4px;
-  overflow-x: auto;
-}
+      .markdown-body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
-/* 打字光标动画 */
-.cursor {
-  display: inline-block;
-  margin-left: 2px;
-  animation: blink 1s step-end infinite;
-  font-weight: bold;
+        :deep(p) {
+          margin-bottom: 0.5em;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+
+        :deep(pre) {
+          background: #282c34;
+          color: #abb2bf;
+          padding: 10px;
+          border-radius: 4px;
+          overflow-x: auto;
+        }
+      }
+
+      .cursor {
+        display: inline-block;
+        margin-left: 2px;
+        animation: blink 1s step-end infinite;
+        font-weight: bold;
+      }
+
+      .typing-indicator {
+        span {
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          background-color: #aaa;
+          border-radius: 50%;
+          margin: 0 2px;
+          animation: bounce 1.4s infinite ease-in-out both;
+
+          &:nth-child(1) {
+            animation-delay: -0.32s;
+          }
+
+          &:nth-child(2) {
+            animation-delay: -0.16s;
+          }
+        }
+      }
+
+      .widget-wrapper {
+        margin: 8px 0;
+        width: 100%;
+
+        .widget-fallback {
+          background: #f0f2f5;
+          color: #909399;
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 12px;
+          border: 1px dashed #dcdfe6;
+        }
+      }
+    }
+  }
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
-
-/* Loading 三点动画 */
-.typing-indicator span {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background-color: #aaa;
-  border-radius: 50%;
-  margin: 0 2px;
-  animation: bounce 1.4s infinite ease-in-out both;
-}
-.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
-}
-
-/* Widget Styles */
-.widget-wrapper {
-  margin: 8px 0;
-  width: 100%;
-}
-
-.widget-fallback {
-  background: #f0f2f5;
-  color: #909399;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-  border: 1px dashed #dcdfe6;
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 </style>
