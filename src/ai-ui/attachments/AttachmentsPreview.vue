@@ -72,11 +72,13 @@ export default {
   computed: {
     isImage() {
       if (!this.file) return false;
-      return this.file.type === 'image' || /\.(png|jpg|jpeg|gif|webp|bmp)$/i.test(this.file.name);
+      // file.type 已经被 normalizeFileType 规范化为 'image' | 'video' | 'file'
+      return this.file.type === 'image';
     },
     isVideo() {
       if (!this.file) return false;
-      return this.file.type === 'video' || /\.(mp4|webm|ogg|mov)$/i.test(this.file.name);
+      // file.type 已经被 normalizeFileType 规范化为 'image' | 'video' | 'file'
+      return this.file.type === 'video';
     }
   },
   watch: {

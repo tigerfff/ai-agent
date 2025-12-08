@@ -14,20 +14,27 @@
         <slot name="header"></slot>
       </div>
 
-      <!-- 气泡实体 -->
-      <div class="bubble-body" :class="variant" v-if="content || loading || (attachments && attachments.length > 0)">
-        
-        <!-- 附件列表 (移入气泡内部) -->
-        <div class="bubble-attachments" v-if="attachments && attachments.length > 0">
-          <AIAttachments 
-            :value="attachments" 
-            overflow="scrollY" 
-            card-mode="mini" 
-            iconSize="88px"
-            readonly 
-          />
-        </div>
+      <!-- 1. 附件气泡 (独立渲染) -->
+      <div 
+        v-if="attachments && attachments.length > 0"
+        class="bubble-body attachments-body"
+        :class="variant"
+      >
+        <AIAttachments 
+          :value="attachments" 
+          :card-mode="attachmentConfig.mode" 
+          :iconSize="attachmentConfig.iconSize"
+          :overflow="attachmentConfig.overflow"
+          readonly 
+        />
+      </div>
 
+      <!-- 2. 文本内容气泡 -->
+      <div 
+        v-if="content || loading"
+        class="bubble-body text-body" 
+        :class="variant"
+      >
         <!-- Loading 状态 -->
         <div v-if="loading" class="typing-indicator">
           <span></span><span></span><span></span>
@@ -131,6 +138,35 @@ export default {
     // 解析后的内容片段列表
     contentParts() {
       return this.parser.parse(this.displayContent || '');
+    },
+    
+    // 判断是否为单张图片
+    isSingleImage() {
+      if (!this.attachments || this.attachments.length !== 1) return false;
+      const file = this.attachments[0];
+      // 兼容 file.type 或根据文件名推断
+      if (file.type && file.type.startsWith('image')) return true;
+      if (file.name && /\.(png|jpg|jpeg|gif|webp|bmp)$/i.test(file.name)) return true;
+      return false;
+    },
+
+    // 计算附件展示配置
+    attachmentConfig() {
+      // 规则 1: 单张图片 -> 大图模式
+      if (this.isSingleImage) {
+        return {
+          mode: 'single-image',
+          iconSize: '', 
+          overflow: 'wrap'
+        };
+      }
+      
+      // 规则 2, 3, 4: 多图/视频/文件/混合 -> Mini Grid 模式
+      return {
+        mode: 'mini',
+        iconSize: '64px', // 需求：单个大小 64px
+        overflow: 'wrap'  // 自动换行
+      };
     }
   },
   watch: {
@@ -199,6 +235,7 @@ export default {
   margin-bottom: 16px;
   max-width: 100%;
 
+  // 右侧气泡（用户端）- 蓝色背景 + 白色文字
   &.end {
     flex-direction: row-reverse;
 
@@ -207,9 +244,44 @@ export default {
     }
 
     .bubble-body.filled {
-      background: #dbefff;
+      background: linear-gradient(90deg, rgba(53,172,255,1) 0%, rgba(22,122,255,1) 100%);
+      color: #fff;
+      border-radius: 16px 0px 16px 16px;
+      
+      // 确保所有子元素都是白色文字
+      .markdown-body {
+        color: #fff;
+        
+        :deep(*) {
+          color: inherit;
+        }
+      }
+      
+      .bubble-content-mix {
+        color: #fff;
+      }
+    }
+  }
+  
+  // 左侧气泡（机器人端）- 白色背景 + 黑色文字
+  &.start {
+    .bubble-body.filled {
+      background: #fff;
       color: #333;
-      border-radius: 12px 0px 12px 12px;
+      border-radius: 0px 16px 16px 16px;
+      
+      // 确保所有子元素都是黑色文字
+      .markdown-body {
+        color: #333;
+        
+        :deep(*) {
+          color: inherit;
+        }
+      }
+      
+      .bubble-content-mix {
+        color: #333;
+      }
     }
   }
 
@@ -228,30 +300,21 @@ export default {
     align-items: flex-start;
     max-width: 80%;
     min-width: 0;
+    gap: 8px; /* 增加气泡间距 */
 
     .bubble-attachments {
-      margin-bottom: 8px;
+      margin-bottom: 0;
       max-width: 100%;
       width: 100%;
     }
 
     .bubble-body {
       padding: 12px 16px;
-      border-radius: 12px;
+      border-radius: 16px;
       font-size: 14px;
       line-height: 1.6;
       position: relative;
       word-break: break-word;
-
-      &.filled {
-        background: #f4f6f8;
-        color: #333;
-        border-radius: 0px 12px 12px 12px;
-      }
-
-      .bubble-attachments:last-child {
-        margin-bottom: 0;
-      }
 
       .markdown-body {
         font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -270,6 +333,17 @@ export default {
           padding: 10px;
           border-radius: 4px;
           overflow-x: auto;
+        }
+
+        :deep(a) {
+          color: inherit;
+          text-decoration: underline;
+          opacity: 1;
+          font-weight: 500;
+          
+          &:hover {
+            opacity: 0.8;
+          }
         }
       }
 

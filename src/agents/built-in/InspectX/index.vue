@@ -511,7 +511,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgb(239, 247, 250);
+  background: #E2ECF9;
 
   .chat-area {
     flex: 1;

@@ -17,29 +17,35 @@
       @click="handlePreview"
     >
       <slot name="icon" :item="$props">
-        <!-- 图片类型 -->
-        <template v-if="isImage">
+        <!-- 图片类型 或 视频(有封面) -->
+        <template v-if="isImage || (isVideo && imgUrl)">
           <img 
             v-if="imgUrl" 
             :src="imgUrl" 
             class="files-card-image"
             :class="imgVariant"
           />
-          <span v-else class="files-card-file-icon">🖼️</span>
+          <!-- 视频播放标识 -->
+          <div v-if="isVideo" class="video-play-overlay">
+            <span class="play-icon">▶</span>
+          </div>
         </template>
+        
         <!-- 其他文件类型 (简化版图标) -->
         <span v-else class="files-card-file-icon" :style="{ color: iconColor }">
           {{ getFileEmoji(fileType || name) }}
         </span>
       </slot>
 
-      <!-- 遮罩层 (用于图片) -->
+      <!-- 遮罩层 (用于图片/视频预览) -->
       <div 
-        v-if="isImage && imgPreview && imgPreviewMask && status === 'done'" 
+        v-if="(isImage || isVideo) && imgPreview && imgPreviewMask && status === 'done'" 
         class="files-card-mask"
       >
         <slot name="image-preview-actions" :item="$props">
-          <span class="view-icon">👁️</span>
+          <span class="view-icon">
+            {{ isVideo ? '▶' : '👁️' }}
+          </span>
         </slot>
       </div>
 
@@ -103,6 +109,8 @@
 </template>
 
 <script>
+import { getVideoFrameUrl } from '@/utils';
+
 export default {
   name: 'FilesCard',
   props: {
@@ -147,12 +155,29 @@ export default {
       };
     },
     isImage() {
-      if (this.fileType === 'image') return true;
-      if (/\.(png|jpg|jpeg|gif|webp|bmp)$/i.test(this.name)) return true;
-      return false;
+      // fileType 应该已经是规范化的 'image' | 'video' | 'file'
+      return this.fileType === 'image';
+    },
+    isVideo() {
+      // fileType 应该已经是规范化的 'image' | 'video' | 'file'
+      return this.fileType === 'video';
     },
     imgUrl() {
-      return this.url || this.localImgUrl;
+      // 视频：只有上传完成且有 URL 时才返回封面，否则返回空（使用默认图标）
+      if (this.isVideo) {
+        if (this.status === 'done' && this.url) {
+          return getVideoFrameUrl(this.url);
+        }
+        return ''; // 上传中或无 URL 时，使用默认图标
+      }
+      
+      // 图片：使用远程 URL 或本地预览（base64）
+      if (this.isImage) {
+        return this.url || this.localImgUrl;
+      }
+      
+      // 文件类型（非图片、非视频）：始终返回空，使用默认图标
+      return '';
     },
     // mini 模式圆形进度条样式
     miniProgressStyle() {
@@ -167,12 +192,18 @@ export default {
     imgFile: {
       handler(val) {
         if (val && !this.url) {
-          // 生成本地预览
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.localImgUrl = e.target.result;
-          };
-          reader.readAsDataURL(val);
+          // 仅对图片生成本地预览
+          const isImg = val.type?.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp|bmp)$/i.test(val.name);
+          
+          if (isImg) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              this.localImgUrl = e.target.result;
+            };
+            reader.readAsDataURL(val);
+          } else {
+            this.localImgUrl = '';
+          }
         }
       },
       immediate: true
@@ -282,6 +313,21 @@ export default {
       object-fit: cover;
     }
 
+    .video-play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.1);
+      
+      .play-icon {
+        color: #fff;
+        font-size: 14px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      }
+    }
+
     .files-card-file-icon {
       font-size: 24px;
     }
@@ -299,6 +345,7 @@ export default {
       opacity: 0;
       transition: opacity 0.2s;
       cursor: pointer;
+      z-index: 1;
 
       .view-icon {
         color: #fff;
@@ -319,6 +366,7 @@ export default {
       align-items: center;
       justify-content: center;
       background: rgba(0, 0, 0, 0.25);
+      z-index: 2;
 
       .mini-progress-circle {
         width: 32px;

@@ -32,7 +32,7 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: rgb(239, 247, 250);
+  background: #E2ECF9;
   min-width: 1280px;
   overflow-x: auto;
 

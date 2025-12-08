@@ -13,6 +13,8 @@
               <AIAttachments 
                 ref="attachments"
                 v-model="fileList"
+                :card-mode="attachmentCardMode"
+                overflow="scrollY"
               />
             </div>
           </div>
@@ -306,6 +308,22 @@ export default {
         this.hasUploading ||
         (!this.inputValue.trim() && !this.hasAttachments)
       );
+    },
+    attachmentCardMode() {
+      if (!this.fileList || this.fileList.length === 0) return 'default';
+      
+      // 检查是否包含文件类型（非图片、非视频）
+      // 使用和 AIAttachments.normalizeFileType 相同的逻辑
+      const hasDocument = this.fileList.some(f => {
+        const fileType = this.getFileTypeFromItem(f);
+        return fileType === 'file';
+      });
+
+      // 如果有文件，强制默认模式 (完整卡片)
+      if (hasDocument) return 'default';
+
+      // 如果只有图片或视频，使用 mini 模式 (缩略图)
+      return 'mini';
     },
     /**
      * 解析 allowedTypes prop
@@ -658,6 +676,52 @@ export default {
     getFileType(file) {
       if (file.type.startsWith('image/')) return 'image';
       if (file.type.startsWith('video/')) return 'video';
+      return 'file';
+    },
+    
+    /**
+     * 从文件条目判断文件类型（用于 attachmentCardMode）
+     * 逻辑和 AIAttachments.normalizeFileType 保持一致
+     */
+    getFileTypeFromItem(fileItem) {
+      if (!fileItem) return 'file';
+      
+      // 1. 优先使用 rawFile 的 MIME type（最可靠）
+      if (fileItem.rawFile && fileItem.rawFile.type) {
+        const mimeType = fileItem.rawFile.type.toLowerCase();
+        if (mimeType.startsWith('image/')) return 'image';
+        if (mimeType.startsWith('video/')) return 'video';
+        return 'file';
+      }
+      
+      // 2. 根据文件名扩展名判断
+      const fileName = (fileItem.name || '').toLowerCase();
+      if (/\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(fileName)) {
+        return 'image';
+      }
+      if (/\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v)$/i.test(fileName)) {
+        return 'video';
+      }
+      // PDF 等文档类型
+      if (/\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip|rar)$/i.test(fileName)) {
+        return 'file';
+      }
+      
+      // 3. 如果 fileItem.type 是 MIME type，解析它
+      if (fileItem.type && typeof fileItem.type === 'string') {
+        const type = fileItem.type.toLowerCase();
+        if (type.startsWith('image/') || type.startsWith('image')) return 'image';
+        if (type.startsWith('video/') || type.startsWith('video')) return 'video';
+        // 其他 MIME type 都是文件
+        if (type.includes('/')) return 'file';
+      }
+      
+      // 4. 如果 fileItem.type 已经是规范的类型字符串
+      if (fileItem.type === 'image' || fileItem.type === 'video' || fileItem.type === 'file') {
+        return fileItem.type;
+      }
+      
+      // 5. 默认为文件类型
       return 'file';
     },
 

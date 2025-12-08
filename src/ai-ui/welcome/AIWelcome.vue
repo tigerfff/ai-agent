@@ -73,7 +73,7 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   overflow-y: auto;
-  background: rgb(239, 247, 250);
+  background: #E2ECF9;
   max-width: 1200px;
 
   .welcome-content {

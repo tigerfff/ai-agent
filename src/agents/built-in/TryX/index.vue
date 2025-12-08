@@ -37,7 +37,7 @@
         ref="aiInput"
         :loading="isStreaming || isUploading"
         placeholder="有问题尽管问我~"
-        :allowed-types="['image', 'video']"
+        :allowed-types="['image', 'video', 'document']"
         :max-size="200 * 1024 * 1024"
         :before-add-attachments="handlePreUpload"
         @send="handleSend" 

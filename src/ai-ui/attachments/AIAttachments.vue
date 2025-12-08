@@ -1,51 +1,63 @@
 <template>
   <div 
     class="ai-attachments" 
-    :class="[`overflow-${overflow}`]"
+    :class="[`overflow-${overflow}`, `mode-${cardMode}`]"
     v-if="value.length > 0"
   >
-    <!-- 左箭头 (仅 scrollX 且非起始位置显示) -->
-    <div 
-      v-if="overflow === 'scrollX' && showLeftArrow" 
-      class="scroll-arrow arrow-left"
-      @click="scrollPrev"
-    >
-      ‹
-    </div>
-
-    <!-- 列表容器 -->
-    <div 
-      ref="scrollContainer"
-      class="attachments-list"
-      @scroll="handleScroll"
-    > 
-      <FilesCard
-        v-for="(file, index) in value"
-        :key="file.uid || index"
-        :uid="file.uid"
-        :name="file.name"
-        :file-size="file.size"
-        :file-type="file.type"
-        :url="file.url"
-        :img-file="file.rawFile"
-        :status="file.status"
-        :percent="file.percent"
-        :show-del-icon="!readonly"
-        :icon-size="iconSize"
-        :mode="cardMode"
-        @delete="handleDelete(index)"
-        @preview="onPreview(index)"
+    <!-- 单张大图模式 -->
+    <div v-if="cardMode === 'single-image'" class="single-image-view">
+      <img 
+        :src="value[0].url || value[0].localUrl" 
+        class="limit-img"
+        @click="onPreview(0)"
       />
     </div>
 
-    <!-- 右箭头 (仅 scrollX 且非结束位置显示) -->
-    <div 
-      v-if="overflow === 'scrollX' && showRightArrow" 
-      class="scroll-arrow arrow-right"
-      @click="scrollNext"
-    >
-      ›
-    </div>
+    <!-- 列表模式 -->
+    <template v-else>
+      <!-- 左箭头 (仅 scrollX 且非起始位置显示) -->
+      <div 
+        v-if="overflow === 'scrollX' && showLeftArrow" 
+        class="scroll-arrow arrow-left"
+        @click="scrollPrev"
+      >
+        ‹
+      </div>
+
+      <!-- 列表容器 -->
+      <div 
+        ref="scrollContainer"
+        class="attachments-list"
+        @scroll="handleScroll"
+      > 
+        <FilesCard
+          v-for="(file, index) in value"
+          :key="file.uid || index"
+          :uid="file.uid"
+          :name="file.name"
+          :file-size="file.size"
+          :file-type="normalizeFileType(file)"
+          :url="file.url"
+          :img-file="file.rawFile"
+          :status="file.status"
+          :percent="file.percent"
+          :show-del-icon="!readonly"
+          :icon-size="iconSize"
+          :mode="cardMode === 'mini' ? 'mini' : 'default'"
+          @delete="handleDelete(index)"
+          @preview="onPreview(index)"
+        />
+      </div>
+
+      <!-- 右箭头 (仅 scrollX 且非结束位置显示) -->
+      <div 
+        v-if="overflow === 'scrollX' && showRightArrow" 
+        class="scroll-arrow arrow-right"
+        @click="scrollNext"
+      >
+        ›
+      </div>
+    </template>
 
     <!-- 预览弹窗 -->
     <AttachmentsPreview
@@ -85,7 +97,7 @@ export default {
       type: Boolean,
       default: false
     },
-    // 卡片展示模式：'default' (完整) | 'mini' (仅图标)
+    // 卡片展示模式：'default' (完整) | 'mini' (仅图标) | 'single-image'
     cardMode: {
       type: String,
       default: 'default'
@@ -105,7 +117,14 @@ export default {
   },
   computed: {
     currentPreviewFile() {
-      return this.value[this.previewIndex];
+      const file = this.value[this.previewIndex];
+      if (!file) return null;
+      
+      // 规范化文件类型，确保传递给 AttachmentsPreview 的类型是正确的
+      return {
+        ...file,
+        type: this.normalizeFileType(file)
+      };
     }
   },
   watch: {
@@ -158,6 +177,55 @@ export default {
     getFileType(file) {
       if (file.type.startsWith('image/')) return 'image';
       if (file.type.startsWith('video/')) return 'video';
+      return 'file';
+    },
+    
+    /**
+     * 规范化文件类型
+     * 场景1：上传中/刚上传 - 有 rawFile，使用其 MIME type
+     * 场景2：历史记录 - 只有 url/name，根据文件名扩展名判断
+     * 统一返回：'image' | 'video' | 'file'
+     */
+    normalizeFileType(file) {
+      if (!file) return 'file';
+      
+      // 1. 优先使用 rawFile 的 MIME type（上传中或刚上传的文件，最可靠）
+      if (file.rawFile && file.rawFile.type) {
+        const mimeType = file.rawFile.type.toLowerCase();
+        if (mimeType.startsWith('image/')) return 'image';
+        if (mimeType.startsWith('video/')) return 'video';
+        return 'file'; // 其他类型（如 application/pdf）都是文件
+      }
+      
+      // 2. 根据文件名扩展名判断（适用于历史记录，优先级高于 file.type）
+      const fileName = (file.name || '').toLowerCase();
+      if (/\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(fileName)) {
+        return 'image';
+      }
+      if (/\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v)$/i.test(fileName)) {
+        return 'video';
+      }
+      // PDF 等文档类型
+      if (/\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip|rar)$/i.test(fileName)) {
+        return 'file';
+      }
+      
+      // 3. 如果 file.type 是 MIME type，解析它
+      if (file.type && typeof file.type === 'string') {
+        const type = file.type.toLowerCase();
+        if (type.startsWith('image/') || type.startsWith('image')) return 'image';
+        if (type.startsWith('video/') || type.startsWith('video')) return 'video';
+        // 其他 MIME type 都是文件
+        if (type.includes('/')) return 'file';
+      }
+      
+      // 4. 如果 file.type 已经是规范的类型字符串，直接使用
+      // 注意：这一步放在最后，因为服务器可能返回错误的类型
+      if (file.type === 'image' || file.type === 'video' || file.type === 'file') {
+        return file.type;
+      }
+      
+      // 5. 默认为文件类型
       return 'file';
     },
 
@@ -218,15 +286,37 @@ export default {
   box-sizing: border-box;
   position: relative;
 
+  /* 单图模式样式 */
+  .single-image-view {
+    display: inline-block;
+    vertical-align: top;
+    
+    .limit-img {
+      max-width: 480px;
+      max-height: 480px;
+      width: auto;
+      height: auto;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      object-fit: contain;
+    }
+  }
+
   .attachments-list {
     display: flex;
-    gap: 8px;
+    gap: 8px; /* 默认间距 */
     scrollbar-width: none;
     -ms-overflow-style: none;
 
     &::-webkit-scrollbar {
       display: none;
     }
+  }
+
+  /* mini 模式强制 Grid 布局，并使用 8px 间距 */
+  &.mode-mini .attachments-list {
+    gap: 8px; 
   }
 
   &.overflow-wrap {
