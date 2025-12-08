@@ -50,6 +50,24 @@ export default defineConfig({
           return path.replace(/^\/api/, '/v1');
         },
         secure: false
+      },
+      // 4. 代理图片资源请求 (pbpic.hik-cloud.com)
+      '/pbpic': {
+        target: 'https://pbpic.hik-cloud.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/pbpic/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            // 设置请求头以绕过防盗链
+            proxyReq.setHeader('Referer', 'https://pbpic.hik-cloud.com');
+            proxyReq.setHeader('Origin', 'https://pbpic.hik-cloud.com');
+            proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+            // 移除可能被服务器拒绝的请求头
+            proxyReq.removeHeader('x-forwarded-host');
+            proxyReq.removeHeader('x-forwarded-proto');
+          });
+        }
       }
     }
   },
