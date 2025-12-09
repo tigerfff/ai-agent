@@ -21,16 +21,19 @@
       <!-- Label -->
       <div class="item-label">
         <slot name="label" :item="item">
-          <el-tooltip
-            v-if="showTooltip"
-            :content="item.label"
-            placement="top"
-            effect="dark"
-            :disabled="!isTextOverflow"
-          >
-            <span ref="labelRef" class="label-text">{{ item.label }}</span>
-          </el-tooltip>
-          <span v-else class="label-text">{{ item.label }}</span>
+          <div class="label-container">
+            <span v-if="item.isUnread" class="unread-dot"></span>
+            <el-tooltip
+              v-if="showTooltip"
+              :content="item.label"
+              placement="top"
+              effect="dark"
+              :disabled="!isTextOverflow"
+            >
+              <span ref="labelRef" class="label-text">{{ item.label }}</span>
+            </el-tooltip>
+            <span v-else class="label-text">{{ item.label }}</span>
+          </div>
         </slot>
       </div>
 
@@ -41,6 +44,7 @@
             <slot name="menu-icon">⋮</slot>
           </span>
           <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="pin" icon="el-icon-top">{{ item.top ? '取消置顶' : '置顶' }}</el-dropdown-item>
             <el-dropdown-item command="rename" icon="el-icon-edit">重命名</el-dropdown-item>
             <el-dropdown-item command="delete" icon="el-icon-delete" style="color: #f56c6c">删除</el-dropdown-item>
           </el-dropdown-menu>
@@ -142,9 +146,28 @@ export default {
     .item-label {
       flex: 1;
       overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-size: 14px;
+      
+      .label-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        
+        .unread-dot {
+          width: 6px;
+          height: 6px;
+          background-color: #f56c6c;
+          border-radius: 50%;
+          margin-right: 6px;
+          flex-shrink: 0;
+        }
+
+        .label-text {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-size: 14px;
+        }
+      }
     }
 
     .item-menu {

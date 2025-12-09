@@ -280,13 +280,31 @@ export default {
       }
     },
     handleMenuCommand(command, item) {
+      const agent = this.$refs.activeAgent;
+
       if (command === 'delete') {
         this.deleteConversation(item.id);
       } else if (command === 'rename') {
-        // 简单实现重命名
+        // TODO
         const newName = prompt('重命名会话', item.label);
         if (newName) {
-          item.label = newName;
+          if (agent && typeof agent.renameSession === 'function') {
+            agent.renameSession(item.id, newName);
+          } else {
+             // Fallback if agent doesn't support renameSession
+             item.label = newName;
+          }
+        }
+      } else if (command === 'pin') {
+        if (agent && typeof agent.pinSession === 'function') {
+          // Toggle pin state. Note: AIConversations passes processed item, 
+          // item.top or item._isTop should be available.
+          // Based on AIConversations logic, it preserves original fields.
+          // So we should check item.top (boolean).
+          agent.pinSession(item.id, !item.top);
+        } else {
+          // Fallback local toggle
+          this.$set(item, 'top', !item.top);
         }
       }
     },

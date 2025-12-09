@@ -1,30 +1,160 @@
-// TrainingX 智能体 API 定义
+// TryX 智能体 API 定义 (基于 api-培训 文档更新)
 
-export const TrainingApi = {
+const AGENT_ID = '2';
+
+export const TryApi = {
   /**
-   * 模拟获取欢迎语配置
+   * 获取 OSS 上传凭证
+   * @param {AIClient} client 
    */
-  getWelcomeConfig() {
-    return Promise.resolve({
-      icon: '🎓',
-      title: '你好，我是 Training-X 助手',
-      description: '我可以帮你制定学习计划、解答技术难题，或者只是陪你聊聊最新的技术趋势。',
-      prompts: [
-        { icon: '📅', title: '制定学习计划', desc: '根据我的基础定制 Python 学习路线', text: '请帮我制定一份 Python 学习计划' },
-        { icon: '🐍', title: 'Python 基础语法', desc: '讲解一下 Python 的装饰器', text: '请讲解 Python 装饰器的用法' },
-        { icon: '🐛', title: '代码调试助手', desc: '帮我查找这段代码的 bug', text: '帮我看看这段代码有什么问题' },
-        { icon: '📝', title: '生成表单演示', desc: '测试流式组件渲染能力', text: '请生成一个采购申请单表单' }
-      ]
+  getOssToken(client) {
+    // 文档中未提及 ossInfo 接口变更，暂时保留或需确认
+    return client.send({
+      url: '/v1/inspect/algorithm/models/upload/ossInfo',
+      method: 'get'
     });
   },
 
   /**
-   * 模拟 SSE 对话
-   * 这里只是演示 API 定义，实际 TrainingX 内部用 setTimeout 模拟了
+   * 获取会话列表
+   * @param {AIClient} client
+   * @param {Object} [data] - 查询参数
    */
-  chatStream(client, { prompt }) {
-    // 实际项目中会调用 client.send({ stream: true ... })
-    console.log('TrainingApi: sending prompt', prompt);
+  getConversationList(client, data = {}) {
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/list`,
+      method: 'get',
+      data
+    });
+  },
+
+  /**
+   * 获取会话历史记录
+   * @param {AIClient} client 
+   * @param {string} sessionId 
+   */
+  getHistory(client, sessionId) {
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/history`,
+      method: 'get',
+      headers: {
+        chatId: sessionId
+      }
+    });
+  },
+
+  /**
+   * 删除会话
+   * @param {AIClient} client
+   * @param {Object} data - { chatId }
+   */
+  deleteHistory(client, data) {
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/delete`,
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 创建会话
+   * @param {AIClient} client
+   * @param {Object} data - { mineType, source }
+   */
+  getChatId(client, data) {
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/add`,
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 评价消息
+   * @param {AIClient} client
+   * @param {Object} data - { chatId, msgId, userEvaluation: 'UPVOTE'|'DOWNVOTE' }
+   */
+  evaluateMessage(client, data) {
+    const { chatId, ...body } = data;
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`,
+      method: 'post',
+      data: body
+    });
+  },
+
+  /**
+   * 发起流式对话
+   * @param {AIClient} client 
+   * @param {Object} options
+   */
+  chatStream(client, { data, signal, onMessage, onComplete, onError, uploadType = 'img' }) {
+    // V2 接口统一使用 app/stream/completion
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/app/stream/completion`,
+      method: 'POST',
+      data,
+      stream: true,
+      signal,
+      onMessage,
+      onComplete,
+      onError
+    });
+  },
+
+  /**
+   * 重命名聊天
+   * @param {AIClient} client
+   * @param {Object} data - { chatId, title }
+   */
+  renameChatTitle(client, data) {
+    const { chatId, ...body } = data;
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`,
+      method: 'post',
+      data: body
+    });
+  },
+
+  /**
+   * 聊天置顶/取消置顶
+   * @param {AIClient} client
+   * @param {Object} data - { chatId, pinned: boolean }
+   * @note pinned 参数在 query 中传递
+   */
+  pinnedChat(client, data) {
+    const { chatId, pinned } = data;
+    // pinned 参数在 query 中，手动拼接 URL
+    const url = `/web/agentV2/${AGENT_ID}/chat/${chatId}/action/pinned?pinned=${pinned}`;
+    return client.send({
+      url,
+      method: 'put',
+      data: {}
+    });
+  },
+
+  /**
+   * 获取智能体推荐的提示词
+   * @param {AIClient} client
+   */
+  getSuggestions(client) {
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/suggestions`,
+      method: 'get'
+    });
+  },
+
+  /**
+   * 标记聊天已读
+   * @param {AIClient} client
+   * @param {Object} data - { chatId }
+   */
+  markAsRead(client, data) {
+    const { chatId } = data;
+    return client.send({
+      url: `/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
+      method: 'put',
+      data: {}
+    });
   }
 };
-
