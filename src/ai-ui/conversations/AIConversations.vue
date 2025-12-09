@@ -192,8 +192,8 @@ export default {
         };
       });
 
-      // 分组排序：置顶 > 今天 > 昨天 > 30天内 > 更多 > 其他
-      const sortOrder = ['pinned', 'today', 'yesterday', 'within30days', 'more', 'earlier'];
+      // 分组排序：置顶 > 今天 > 昨天 > 30天内 > 更多 
+      const sortOrder = ['pinned', 'today', 'yesterday', 'within30days', 'more'];
       return Object.values(groups).sort((a, b) => {
         const indexA = sortOrder.indexOf(a.key);
         const indexB = sortOrder.indexOf(b.key);
@@ -270,6 +270,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/style/mixins.scss' as *;
+
 .ai-conversations {
   height: 100%;
   display: flex;

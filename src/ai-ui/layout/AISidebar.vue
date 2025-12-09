@@ -1,13 +1,13 @@
 <template>
-  <div class="ai-sidebar" :class="{ 'collapsed': isCollapsed }">
+  <div class="ai-sidebar" :class="{ 'collapsed': collapsed }">
     <!-- Header -->
     <div class="sidebar-header">
       <div class="logo-area">
         <span class="logo-icon">🤖</span>
-        <span class="app-name" v-show="!isCollapsed">云小智</span>
+        <span class="app-name" v-show="!collapsed">云小智</span>
       </div>
-      <div class="toggle-btn" v-show="!isCollapsed" @click="toggleCollapse" :title="isCollapsed ? '展开' : '折叠'">
-        <i class="h-icon-menu_leftbar" :class="{ 'rotate-180': isCollapsed }"></i>
+      <div class="toggle-btn" v-show="!collapsed" @click="toggleCollapse" :title="collapsed ? '展开' : '折叠'">
+        <i class="h-icon-menu_leftbar" :class="{ 'rotate-180': collapsed }"></i>
       </div>
     </div>
 
@@ -30,22 +30,22 @@
 
     <!-- Conversations (会话历史列表) -->
     <div class="conversations-section">
-      <div class="section-header" v-if="!isCollapsed">
+      <div class="section-header" v-if="!collapsed">
         <div class="section-title">对话列表</div>
       </div>
       
       <!-- 新建会话按钮 (始终显示，折叠时变图标) -->
-      <div class="new-chat-wrapper" :class="{ 'collapsed': isCollapsed }" @click="$emit('new-chat')">
-        <div class="new-chat-btn" :title="isCollapsed ? '新建会话' : ''">
+      <div v-show="!collapsed" class="new-chat-wrapper" :class="{ 'collapsed': collapsed }" @click="$emit('new-chat')">
+        <div class="new-chat-btn" :title="collapsed ? '新建会话' : ''">
           <span class="icon">
             <i class="h-icon-add"></i>
           </span>
-          <span class="text" v-show="!isCollapsed">新建会话</span>
+          <span class="text" v-show="!collapsed">新建会话</span>
         </div>
       </div>
 
       <!-- 列表内容 (折叠时隐藏) -->
-      <div class="conversations-content" v-show="!isCollapsed">
+      <div class="conversations-content" v-show="!collapsed">
         <!-- 有数据时显示列表 -->
         <AIConversations
           v-if="displayConversations.length > 0"
@@ -75,7 +75,7 @@
 
     <!-- Bottom Slot & Toggle -->
     <div class="sidebar-bottom">
-      <slot name="bottom" v-if="!isCollapsed"></slot>
+      <slot name="bottom" v-if="!collapsed"></slot>
     </div>
   </div>
 </template>
@@ -87,6 +87,10 @@ export default {
     agents: {
       type: Array,
       default: () => []
+    },
+    collapsed: {
+      type: Boolean,
+      default: false
     },
     currentAgentId: {
       type: [String, Number],
@@ -105,7 +109,7 @@ export default {
   },
   data() {
     return {
-      isCollapsed: false,
+      // isCollapsed: false, // 移除内部状态，改用 props
       // 默认测试数据
       defaultConversations: [
         {
@@ -162,8 +166,8 @@ export default {
   },
   methods: {
     toggleCollapse() {
-      this.isCollapsed = !this.isCollapsed;
-      this.$emit('toggle', this.isCollapsed);
+      this.$emit('toggle', !this.collapsed);
+      this.$emit('update:collapsed', !this.collapsed);
     },
     handleConversationSelect(id) {
       console.log(id,'id')

@@ -1,17 +1,18 @@
 <template>
-  <AILayout class="ai-agent-container">
+  <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }">
     <!-- 左侧导航 -->
-    <template #sider v-if="!isHome" >
+    <template #sider>
       <AISidebar 
+        v-if="!isHome"
         :agents="allAgents" 
         :current-agent-id="currentAgentId"
         :conversations="filteredConversations"
         :active-conversation-id="currentConversationId"
+        :collapsed.sync="isCollapsed"
         @update:activeConversationId="handleSelectConversation"
         @select="handleSelectAgent"
         @new-chat="handleNewChat"
         @conversation-menu-command="handleMenuCommand"
-        @toggle="handleToggleCollapse"
       >
         <template #bottom>
           <slot name="sidebar-bottom"></slot>
@@ -32,29 +33,31 @@
       <div v-else class="agent-viewport">
 
         <div class="viewport-header">
-          <div class="toggle-btn" v-show="!isCollapsed" @click="toggleCollapse" :title="isCollapsed ? '展开' : '折叠'">
-            <i class="h-icon-menu_leftbar"></i>
+          <!-- 左侧：侧边栏收起时显示 -->
+          <div class="header-left">
+            <div class="toggle-btn" v-if="isCollapsed" @click="isCollapsed = false" title="展开侧边栏">
+              <img src="@/assets/svg/expand.svg" alt="展开" class="icon-svg" />
+            </div>
+            <div class="toggle-btn" v-if="isCollapsed" @click="handleNewChat" title="新建会话">
+              <img src="@/assets/svg/add.svg" alt="新建会话" class="icon-svg" />
+            </div>
           </div>
-          <div class="toggle-btn" v-show="!isCollapsed">
-            <i class="h-icon-add"></i>
+
+          <div class="header-title">
+            {{ currentConversationTitle }}
           </div>
-          <div class="toggle-btn" v-show="!isCollapsed">
-            <i class="h-icon-add"></i>
-          </div>
-          <div class="toggle-btn" v-show="!isCollapsed">
-            <i class="h-icon-add"></i>
+
+          <!-- 右侧：窗口控制 -->
+          <div class="header-right">
+            <div class="toggle-btn" @click="toggleWindowSize" :title="isMini ? '最大化' : '还原'">
+              <span class="icon-text">{{ isMini ? '□' : '❐' }}</span>
+            </div>
+            <div class="toggle-btn" title="关闭" @click="closeWindow">
+              <img src="@/assets/svg/close-window.svg" alt="关闭" class="icon-svg" />
+            </div>
           </div>
         </div>
        
-        <!-- 顶部简易导航条 (可选) -->
-        <!-- <div class="viewport-header">
-          <template v-if="allAgents.length > 1">
-            <span class="back-btn" @click="goHome">🏠 首页</span>
-            <span class="divider">/</span>
-          </template>
-          <span class="current-title">{{ currentAgent ? currentAgent.name : '' }}</span>
-        </div> -->
-
         <div class="viewport-content">
           <!-- A. 内置智能体 -->
           <component 
@@ -123,6 +126,11 @@ export default {
     businessLine: {
       type: String,
       default: null
+    },
+    // 是否为小窗模式
+    isMini: {
+      type: Boolean,
+      default: false
     }
   },
   provide() {
@@ -174,13 +182,18 @@ export default {
     filteredConversations() {
       if (!this.currentAgentId) return [];
       return this.conversations.filter(c => c.agentId === this.currentAgentId);
+    },
+    currentConversationTitle() {
+      const chat = this.conversations.find(c => c.id === this.currentConversationId);
+      return chat ? (chat.label || '新会话') : 'AI 助手';
     }
   },
   methods: {
-    toggleCollapse() {
+    toggleWindowSize() {
+      this.$emit('toggle-size');
     },
-    handleToggleCollapse(isCollapsed) {
-      this.isCollapsed = isCollapsed;
+    closeWindow() {
+      this.$emit('close');
     },
     async handleSelectAgent(agent) {
       this.currentAgentId = agent.id;
@@ -292,6 +305,14 @@ export default {
     this.checkSingleAgent();
   },
   watch: {
+    isMini: {
+      handler(val) {
+        if (val) {
+          this.isCollapsed = true;
+        }
+      },
+      immediate: true
+    },
     allAgents: {
       handler() {
         // 当智能体列表变化时（例如外部注入更新），再次检查
@@ -308,6 +329,13 @@ export default {
 <style lang="scss" scoped>
 .ai-agent-container {
   height: 100%;
+  --chat-max-width: 960px; // 默认全屏下的内容宽度限制
+
+  // 小窗模式适配：覆盖 AILayout 的 min-width
+  &.is-mini {
+    min-width: 0 !important;
+    --chat-max-width: 600px; // 小窗模式下的宽度
+  }
 
   .agent-viewport {
     display: flex;
@@ -315,31 +343,58 @@ export default {
     height: 100%;
 
     .viewport-header {
-      height: 40px;
+      flex-shrink: 0;
+      height: 48px;
       display: flex;
       align-items: center;
-      padding: 0 20px;
-      border-bottom: 1px solid #eee;
-      background: #fff;
-      font-size: 14px;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: transparent;
+      z-index: 10;
+      
+      .header-left, .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0; // 防止按钮被标题挤压
+      }
 
-      .back-btn {
+      .header-title {
+        flex: 1;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0 16px;
+      }
+
+      .toggle-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        color: #666;
+        border-radius: 4px;
+        transition: background-color 0.2s;
 
         &:hover {
-          color: #1890ff;
+          background-color: rgba(0, 0, 0, 0.05);
         }
-      }
 
-      .divider {
-        margin: 0 8px;
-        color: #ccc;
-      }
-
-      .current-title {
-        font-weight: bold;
-        color: #333;
+        .icon-svg {
+          width: 20px;
+          height: 20px;
+        }
+        
+        .icon-text {
+          font-size: 18px;
+          color: #606266;
+          line-height: 1;
+        }
       }
     }
 
@@ -371,4 +426,3 @@ export default {
   }
 }
 </style>
-

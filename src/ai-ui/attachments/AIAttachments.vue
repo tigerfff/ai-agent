@@ -292,8 +292,8 @@ export default {
     vertical-align: top;
     
     .limit-img {
-      max-width: 480px;
-      max-height: 480px;
+      max-width: calc(var(--chat-max-width, 960px) / 2);
+      max-height: calc(var(--chat-max-width, 960px) / 2);
       width: auto;
       height: auto;
       border-radius: 8px;
