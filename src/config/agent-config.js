@@ -23,6 +23,7 @@ export const ALL_AGENTS = {
   'inspect-x': {
     id: 'inspect-x',
     name: '智慧巡查',
+    miniName:'巡查',
     icon: inspectIcon,
     description: '智能巡查助手，帮助您高效完成巡查任务。',
     type: 'built-in',
@@ -32,6 +33,7 @@ export const ALL_AGENTS = {
   'data-analysis': {
     id: 'data-analysis',
     name: '数据分析',
+    miniName:'数据',
     icon: dataAnalysisIcon,
     description: '深度挖掘数据价值，辅助业务决策。',
     type: 'built-in',
@@ -41,6 +43,7 @@ export const ALL_AGENTS = {
   'try-x': {
     id: 'try-x',
     name: 'AI试用',
+    miniName:'AI试用',
     icon: tryXIcon,
     description: 'AI试用助手，可以帮你快速体验各种 AI 功能',
     tags: ['试用', 'AI'],
@@ -50,6 +53,7 @@ export const ALL_AGENTS = {
   'training-x': {
     id: 'training-x',
     name: '员工培训助手',
+    miniName:'培训',
     icon: trainingIcon,
     description: '专业的培训助手，帮助你快速学习。',
     type: 'built-in',
@@ -59,6 +63,7 @@ export const ALL_AGENTS = {
   'sop-generation': {
     id: 'sop-generation',
     name: 'SOP生成',
+    miniName:'SOP',
     icon: sopIcon,
     description: '标准化作业流程生成助手。',
     type: 'built-in',

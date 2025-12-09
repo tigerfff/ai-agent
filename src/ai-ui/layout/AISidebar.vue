@@ -3,11 +3,14 @@
     <!-- Header -->
     <div class="sidebar-header">
       <div class="logo-area">
-        <span class="logo-icon">🤖</span>
+        <span class="logo-icon">
+          <img src="@/assets/images/IP@3x.png" alt="" width="24px">
+        </span>
         <span class="app-name" v-show="!collapsed">云小智</span>
       </div>
       <div class="toggle-btn" v-show="!collapsed" @click="toggleCollapse" :title="collapsed ? '展开' : '折叠'">
-        <i class="h-icon-menu_leftbar" :class="{ 'rotate-180': collapsed }"></i>
+        <img src="@/assets/svg/history.svg" alt="menu_leftbar" width="24px">
+        <!-- <i class="h-icon-menu_leftbar" :class="{ 'rotate-180': collapsed }"></i> -->
       </div>
     </div>
 
@@ -24,7 +27,7 @@
         <span class="agent-icon">
           <img :src="agent.icon" :alt="agent.name" />
         </span>
-        <span class="agent-name">{{ agent.name }}</span>
+        <span class="agent-name">{{ collapsed ? agent.miniName : agent.name }}</span>
       </div>
     </div>
 
@@ -193,31 +196,7 @@ export default {
   flex-direction: column;
   transition: width 0.3s;
 
-  &.collapsed {
-    width: 60px;
-
-    .agent-list {
-      padding: 16px 8px;
-    }
-
-    .agent-item {
-      flex-direction: column;
-      justify-content: center;
-      padding: 8px 0;
-    }
-
-    .agent-icon {
-      margin-right: 0;
-      margin-bottom: 4px;
-    }
-
-    .agent-name {
-      font-size: 12px;
-      transform: scale(0.85);
-      text-align: center;
-      width: 100%;
-    }
-  }
+  
 
   .sidebar-header {
     height: 64px;
@@ -235,7 +214,8 @@ export default {
       font-size: 20px;
       line-height: 28px;
       letter-spacing: 0px;
-      text-align: left;
+      display: flex;
+      align-items: center;
 
       .app-name {
         margin-left: 6px;
@@ -456,6 +436,39 @@ export default {
     padding: 10px;
     border-top: 1px solid #ebeef5;
     flex-shrink: 0;
+  }
+
+  &.collapsed {
+    width: 60px;
+
+    .sidebar-header{
+      height: 56px;
+      padding: 0;;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .agent-list {
+      padding: 0px 8px 16px 8px;
+    }
+
+    .agent-item {
+      flex-direction: column;
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    .agent-icon {
+      margin-right: 0 !important;
+    }
+
+    .agent-name {
+      font-size: 12px;
+      transform: scale(0.85);
+      text-align: center;
+      width: 100%;
+    }
   }
 }
 </style>

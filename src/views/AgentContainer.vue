@@ -27,7 +27,9 @@
         v-if="isHome" 
         :agents="allAgents"
         :is-mini="isMini"
-        @select="handleSelectAgent" 
+        @select="handleSelectAgent"
+        @toggle-size="toggleWindowSize"
+        @close="closeWindow"
       />
 
       <!-- 场景 2: 具体智能体页面 -->
@@ -37,7 +39,7 @@
           <!-- 左侧：侧边栏收起时显示 -->
           <div class="header-left">
             <div class="toggle-btn" v-if="isCollapsed" @click="isCollapsed = false" title="展开侧边栏">
-              <img src="@/assets/svg/expand.svg" alt="展开" class="icon-svg" />
+              <img src="@/assets/svg/history.svg" alt="展开" class="icon-svg" />
             </div>
             <div class="toggle-btn" v-if="isCollapsed" @click="handleNewChat" title="新建会话">
               <img src="@/assets/svg/add.svg" alt="新建会话" class="icon-svg" />
@@ -51,7 +53,8 @@
           <!-- 右侧：窗口控制 -->
           <div class="header-right">
             <div class="toggle-btn" @click="toggleWindowSize" :title="isMini ? '最大化' : '还原'">
-              <span class="icon-text">{{ isMini ? '□' : '❐' }}</span>
+              <img v-if="isMini" src="@/assets/svg/expand.svg" alt="最大化" class="icon-svg" />
+              <img v-else src="@/assets/svg/collapse.svg" alt="还原" class="icon-svg" />
             </div>
             <div class="toggle-btn" title="关闭" @click="closeWindow">
               <img src="@/assets/svg/close-window.svg" alt="关闭" class="icon-svg" />
@@ -164,7 +167,7 @@ export default {
   computed: {
     // 当前业务线
     currentBusinessLine() {
-      return this.businessLine || getCurrentBusinessLine();
+      return getCurrentBusinessLine();
     },
     // 根据业务线过滤的内置智能体
     builtInAgents() {

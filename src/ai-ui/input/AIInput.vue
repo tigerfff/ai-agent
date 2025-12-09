@@ -22,26 +22,30 @@
 
         <!-- 内容容器 -->
         <div class="el-sender-content" @click="focusInput">
-          <!-- 前缀 -->
-          <div class="el-sender-prefix" v-if="$slots.prefix">
-            <slot name="prefix"></slot>
-          </div>
+          <div class="input-row">
+            <!-- 前缀 -->
+            <div class="el-sender-prefix">
+              <slot name="prefix">
+                <img v-show="!isFocused" :src="starIcon" alt="星星" class="prefix-star-icon" />
+              </slot>
+            </div>
 
-          <!-- 输入框 -->
-          <div class="el-sender-input">
-            <textarea
-              ref="textarea"
-              :value="inputValue"
-              class="ai-textarea"
-              :placeholder="placeholder"
-              :rows="1"
-              :disabled="disabled"
-              @input="handleInput"
-              @focus="handleFocus"
-              @blur="handleBlur"
-              @keydown="handleKeyDown"
-              @paste="handlePaste"
-            ></textarea>
+            <!-- 输入框 -->
+            <div class="el-sender-input">
+              <textarea
+                ref="textarea"
+                :value="inputValue"
+                class="ai-textarea"
+                :placeholder="placeholder"
+                :rows="1"
+                :disabled="disabled"
+                @input="handleInput"
+                @focus="handleFocus"
+                @blur="handleBlur"
+                @keydown="handleKeyDown"
+                @paste="handlePaste"
+              ></textarea>
+            </div>
           </div>
 
           <!-- 操作列表 -->
@@ -185,6 +189,7 @@ import sendIcon from '@images/send-msg.png';
 import sendDisabledIcon from '@images/send_msg_disabled.png';
 import imageIcon from '@svg/image.svg';
 import documentIcon from '@svg/document.svg';
+import starIcon from '@images/star@3x.png';
 
 export default {
   name: 'AIInput',
@@ -280,6 +285,7 @@ export default {
       sendDisabledIcon,
       imageIcon,
       documentIcon,
+      starIcon,
       // 上传菜单相关
       showUploadMenu: false, // 控制下拉菜单显示
       currentFileType: null // 当前已选择的文件类型（用于单一类型模式）
@@ -839,8 +845,26 @@ export default {
       padding: 12px 16px;
       box-sizing: border-box;
 
+      .input-row {
+        display: flex;
+        width: 100%;
+        flex: 1;
+        align-items: flex-start;
+      }
+
       .el-sender-prefix {
         flex: none;
+        margin-right: 8px;
+        margin-top: 2px; // Align with text
+        display: flex;
+        align-items: center;
+
+        .prefix-star-icon {
+          width: 20px;
+          height: 20px;
+          object-fit: contain;
+          display: block;
+        }
       }
 
       .el-sender-input {

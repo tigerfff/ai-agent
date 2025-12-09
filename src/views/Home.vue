@@ -1,10 +1,23 @@
 <template>
   <div class="ai-home" :class="{ 'is-mini': isMini }">
-    <div class="home-header">
-      <h2>海康云眸-AI试用</h2>
-      <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
+    <div class="home-header-bar">
+      <div class="header-right">
+        <div class="toggle-btn" @click="toggleWindowSize" :title="isMini ? '最大化' : '还原'">
+          <img v-if="isMini" src="@/assets/svg/expand.svg" alt="最大化" class="icon-svg" />
+          <img v-else src="@/assets/svg/collapse.svg" alt="还原" class="icon-svg" />
+        </div>
+        <div class="toggle-btn" title="关闭" @click="closeWindow">
+          <img src="@/assets/svg/close-window.svg" alt="关闭" class="icon-svg" />
+        </div>
+      </div>
     </div>
-    <div class="agent-grid">
+    
+    <div class="home-scrollable-content">
+      <div class="home-header">
+        <h2>海康云眸-AI试用</h2>
+        <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
+      </div>
+      <div class="agent-grid">
       <div 
         v-for="agent in agents" 
         :key="agent.id" 
@@ -27,6 +40,7 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
@@ -42,23 +56,86 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+  methods: {
+    toggleWindowSize() {
+      this.$emit('toggle-size');
+    },
+    closeWindow() {
+      this.$emit('close');
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+@use '@/style/mixins.scss' as *;
+
 .ai-home {
-  padding: 40px;
   height: 100%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   background: 
     radial-gradient(circle at 50% 50%, #C5CEFF 0%, rgba(255, 255, 255, 0) 100%),
     radial-gradient(circle at 50% 50%, #388EFF 0%, rgba(56, 142, 255, 0) 100%),
     #E2ECF9;
+  position: relative;
+  
+
+  .home-header-bar {
+    flex-shrink: 0;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 16px;
+    background: transparent;
+    z-index: 10;
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      .icon-svg {
+        width: 20px;
+        height: 20px;
+      }
+      
+      .icon-text {
+        font-size: 18px;
+        color: #606266;
+        line-height: 1;
+      }
+    }
+  }
+
+  .home-scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 32px;
+    @extend %scrollbar;
+  }
 
   .home-header {
+    margin-top: 18px;
     text-align: center;
-    margin-bottom: 40px;
 
     h2 {
       color: rgba(0, 0, 0, 0.9);
@@ -77,6 +154,10 @@ export default {
       text-align: center;
       margin-bottom: 40px;
     }
+  }
+  
+  &.is-mini .home-header {
+    margin-top: 18px;
   }
 
   .agent-grid {
@@ -201,6 +282,8 @@ export default {
         border: none;
         border-radius: 4px;
         font-size: 12px;
+        height: 20px;
+        line-height: 20px;
 
         &:nth-child(2n + 1) {
           background-color: rgba(#388EFF, 0.1);
