@@ -77,6 +77,7 @@ import AILayout from '@/ai-ui/layout/AILayout.vue';
 import AISidebar from '@/ai-ui/layout/AISidebar.vue';
 import Home from './Home.vue';
 import { getAgentsByBusinessLine, getCurrentBusinessLine } from '@/config/agent-config';
+import { formatConversationTime } from '@/utils';
 
 const MOCK_CONVERSATIONS = [
   { id: 'conv-1', agentId: 'training-x', label: '如何学习 Python 编程？', group: 'today', time: '15:30' },
@@ -174,10 +175,11 @@ export default {
       this.conversations = this.conversations.filter(c => c.agentId !== this.currentAgentId);
       
       // 2. 补全 agentId 并合并新会话
+      // 注意：不强制设置 group，让 AIConversations 组件内部自动按时间分组
       const formattedList = newList.map(item => ({
         ...item,
-        agentId: this.currentAgentId,
-        group: item.group || 'today'
+        agentId: this.currentAgentId
+        // group 字段由 AIConversations 组件内部根据时间自动计算
       }));
       
       this.conversations = [...this.conversations, ...formattedList];
@@ -211,12 +213,14 @@ export default {
       // 现有的逻辑里，handleSend 用的是 this.chatId。如果这里的 newId 是前端生成的，传给 API 可能会有问题
       // 除非 API 支持传空 chatId 创建新会话。
       // 先保持前端逻辑：
+      const now = new Date().toISOString();
       this.conversations.unshift({
         id: newId,
         agentId: this.currentAgentId,
         label: '新会话',
-        group: 'today',
-        time: '刚刚'
+        createTime: now,
+        updateTime: now,
+        time: formatConversationTime(now)
       });
       this.currentConversationId = newId;
       this.componentKey++; 

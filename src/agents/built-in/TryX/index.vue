@@ -51,6 +51,7 @@
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
+import { formatConversationTime } from '@/utils';
 
 export default {
   name: 'TryAgent',
@@ -217,7 +218,13 @@ export default {
                 id: chatId,
                 // 适配后端字段：title -> label
                 label: (item.title || item.userText || '新会话').slice(0, 20),
-                time: item.createTime ? new Date(item.createTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''
+                // 保留原始时间字段，供组件内部自动分组使用
+                createTime: item.createTime,
+                updateTime: item.updateTime,
+                // 保留置顶字段
+                top: item.top === true || item.top === 'true',
+                // 格式化显示时间（用于 label slot 中显示）
+                time: formatConversationTime(item.createTime)
               });
             }
           });

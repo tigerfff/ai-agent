@@ -20,16 +20,18 @@
 
       <!-- Label -->
       <div class="item-label">
-        <el-tooltip
-          v-if="showTooltip"
-          :content="item.label"
-          placement="top"
-          effect="dark"
-          :disabled="!isTextOverflow"
-        >
-          <span ref="labelRef" class="label-text">{{ item.label }}</span>
-        </el-tooltip>
-        <span class="label-text">{{ item.label }}</span>
+        <slot name="label" :item="item">
+          <el-tooltip
+            v-if="showTooltip"
+            :content="item.label"
+            placement="top"
+            effect="dark"
+            :disabled="!isTextOverflow"
+          >
+            <span ref="labelRef" class="label-text">{{ item.label }}</span>
+          </el-tooltip>
+          <span v-else class="label-text">{{ item.label }}</span>
+        </slot>
       </div>
 
       <!-- Menu / Suffix -->

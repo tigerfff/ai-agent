@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
+import '@/assets/reset.css'
 import '@hui/lib/hui.css'
 import Hui from '@hui/lib/hui.esm-browser.js'
 
@@ -7,6 +8,14 @@ import Hui from '@hui/lib/hui.esm-browser.js'
 import AIComponentLib from './index.js'
 // 简化版 http 封装，用来在本项目里模拟父项目的 this.$http / this.$aiClient 行为
 import http from './demo/httpStub'
+// 从 URL 参数同步 token 到 cookie
+import { syncTokenFromUrl } from './utils'
+
+// 在应用启动前，从 URL 参数中读取 token 并写入 cookie
+syncTokenFromUrl('token', 'accessToken', {
+  expires: 30, // 30 天过期
+  path: '/'
+});
 
 Vue.use(Hui)
 
