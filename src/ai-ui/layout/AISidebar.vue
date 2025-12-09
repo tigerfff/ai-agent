@@ -1,5 +1,13 @@
 <template>
-  <div class="ai-sidebar" :class="{ 'collapsed': collapsed }">
+  <div class="sidebar-wrapper">
+    <!-- 遮罩层：mini 模式下展开时显示 -->
+    <div 
+      v-if="isMini && !collapsed" 
+      class="sidebar-backdrop" 
+      @click="toggleCollapse"
+    ></div>
+    
+    <div class="ai-sidebar" :class="{ 'collapsed': collapsed, 'is-mini': isMini, 'is-mini-expanded': isMini && !collapsed }">
     <!-- Header -->
     <div class="sidebar-header">
       <div class="logo-area">
@@ -80,6 +88,7 @@
     <div class="sidebar-bottom">
       <slot name="bottom" v-if="!collapsed"></slot>
     </div>
+    </div>
   </div>
 </template>
 
@@ -108,6 +117,11 @@ export default {
     activeConversationId: {
       type: [String, Number],
       default: ''
+    },
+    // 是否为小窗模式
+    isMini: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -187,6 +201,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.sidebar-wrapper {
+  height: 100%;
+  position: relative;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .ai-sidebar {
   width: 240px;
   height: 100%;
@@ -195,6 +234,8 @@ export default {
   display: flex;
   flex-direction: column;
   transition: width 0.3s;
+  position: relative;
+  z-index: 1;
 
   
 
@@ -469,6 +510,29 @@ export default {
       text-align: center;
       width: 100%;
     }
+  }
+
+  // Mini 模式下的浮动展开
+  &.is-mini {
+    // 展开时浮动覆盖内容
+    &.is-mini-expanded {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 999;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease-out;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
 </style>

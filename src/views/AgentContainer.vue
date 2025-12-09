@@ -9,6 +9,7 @@
         :conversations="filteredConversations"
         :active-conversation-id="currentConversationId"
         :collapsed.sync="isCollapsed"
+        :is-mini="isMini"
         @update:activeConversationId="handleSelectConversation"
         @select="handleSelectAgent"
         @new-chat="handleNewChat"

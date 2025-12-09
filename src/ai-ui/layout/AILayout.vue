@@ -51,6 +51,12 @@ export default {
   .layout-sider {
     flex-shrink: 0;
     height: 100%;
+    position: relative; // 为 mini 模式下的绝对定位提供定位上下文
+
+    // Mini 模式下，当 sidebar 浮动时，sider 容器不占用空间
+    :deep(.ai-sidebar.is-mini.is-mini-expanded) {
+      // sidebar 使用绝对定位，不会影响布局
+    }
   }
 
   .layout-content {
