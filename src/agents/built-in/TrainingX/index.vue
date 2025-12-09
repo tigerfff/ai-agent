@@ -1,5 +1,5 @@
 <template>
-  <div class="try-agent">
+  <div class="try-agent" :class="{ 'is-mini': isMini }">
     <!-- 消息区域 -->
     <div class="chat-area">
       <AIWelcome
@@ -68,6 +68,10 @@ export default {
     conversationId: {
       type: String,
       default: ''
+    },
+    isMini: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -648,6 +652,15 @@ export default {
   flex-direction: column;
   height: 100%;
   width: 100%;
+
+  // 小窗模式适配
+  &.is-mini {
+    .chat-area .content-wrapper,
+    .footer .content-wrapper {
+      padding: 0 16px;
+      max-width: 100%;
+    }
+  }
 
   .chat-area {
     flex: 1;

@@ -1,5 +1,5 @@
 <template>
-  <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }">
+  <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }" :is-mini="isMini">
     <!-- 左侧导航 -->
     <template #sider>
       <AISidebar 
@@ -25,7 +25,8 @@
       <!-- 场景 1: 首页列表 -->
       <Home 
         v-if="isHome" 
-        :agents="allAgents" 
+        :agents="allAgents"
+        :is-mini="isMini"
         @select="handleSelectAgent" 
       />
 
@@ -66,6 +67,7 @@
             :is="currentAgent.component"
             :key="`builtin-${componentKey}`"
             :conversation-id="currentConversationId"
+            :is-mini="isMini"
             @update-list="handleUpdateConversationList"
             @select-conversation="handleSelectConversation"
           />

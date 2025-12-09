@@ -1,5 +1,5 @@
 <template>
-  <div class="ai-layout">
+  <div class="ai-layout" :class="{ 'is-mini': isMini }">
     <!-- 左侧边栏 -->
     <div class="layout-sider">
       <slot name="sider"></slot>
@@ -22,7 +22,13 @@
 
 <script>
 export default {
-  name: 'AILayout'
+  name: 'AILayout',
+  props: {
+    isMini: {
+      type: Boolean,
+      default: false
+    }
+  }
 };
 </script>
 
@@ -36,7 +42,8 @@ export default {
   min-width: 1280px;
   overflow-x: auto;
 
-  @media (max-width: 768px) {
+  // 小窗模式适配
+  &.is-mini {
     min-width: auto;
     overflow-x: visible;
   }

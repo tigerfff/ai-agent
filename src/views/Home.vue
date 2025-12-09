@@ -1,5 +1,5 @@
 <template>
-  <div class="ai-home">
+  <div class="ai-home" :class="{ 'is-mini': isMini }">
     <div class="home-header">
       <h2>海康云眸-AI试用</h2>
       <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
@@ -37,6 +37,10 @@ export default {
     agents: {
       type: Array,
       default: () => []
+    },
+    isMini: {
+      type: Boolean,
+      default: false
     }
   }
 };
@@ -83,12 +87,13 @@ export default {
     padding: 0 32px;
     margin: 0 auto;
     box-sizing: border-box;
+  }
 
-    @media (max-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 600px;
-      gap: 16px;
-    }
+  // 小窗模式适配
+  &.is-mini .agent-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 600px;
+    gap: 16px;
   }
 
   .agent-card {
@@ -102,13 +107,6 @@ export default {
     border: 1px solid #eee;
     display: flex;
     flex-direction: column;
-
-    @media (max-width: 768px) {
-      width: 100%;
-      max-width: 260px;
-      height: 196px;
-      min-width: 250px;
-    }
 
     &:hover {
       box-shadow: 0 8px 24px rgba(56, 142, 255, 0.2);
@@ -245,6 +243,14 @@ export default {
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+  }
+
+  // 小窗模式适配
+  &.is-mini .agent-card {
+    width: 100%;
+    max-width: 260px;
+    height: 196px;
+    min-width: 250px;
   }
 }
 </style>
