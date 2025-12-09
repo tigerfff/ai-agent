@@ -4,6 +4,7 @@
       ref="listRef" 
       class="ai-history-list" 
       @scroll="handleScroll"
+      @load.capture="handleImageLoad"
     >
       <div class="history-inner">
         <AIBubble
@@ -68,7 +69,8 @@ export default {
       showBackToBottom: false,
       hasNewMessage: false,
       userScrolledUp: false,
-      resizeObserver: null
+      resizeObserver: null,
+      isInitialLoading: false // 新增：标记是否处于初次加载阶段
     };
   },
   computed: {
@@ -77,8 +79,15 @@ export default {
     }
   },
   mounted() {
+    // 组件挂载时，视为初始加载，强制无动画滚动
+    this.isInitialLoading = true;
     this.scrollToBottom();
     this.initResizeObserver();
+    
+    // 2秒后关闭初始加载状态
+    setTimeout(() => {
+      this.isInitialLoading = false;
+    }, 2000);
   },
   beforeDestroy() {
     if (this.resizeObserver) {
@@ -86,25 +95,62 @@ export default {
     }
   },
   watch: {
-    'list.length'(newLen, oldLen) {
-      if (newLen > oldLen) {
-        this.$nextTick(() => {
-          if (this.userScrolledUp) {
-            this.hasNewMessage = true;
-          } else {
-            this.scrollToBottom();
-          }
-        });
-      }
+    list: {
+      handler(newVal, oldVal) {
+        const newLen = newVal ? newVal.length : 0;
+        const oldLen = oldVal ? oldVal.length : 0;
+
+        // 只要列表引用变化，或者从 0 开始加载，或者旧列表长度不为 0 但新列表长度与旧列表不一致（大幅变化）
+        // 都视为可能的“会话切换”或“初始化”
+        // 更严格的判断：如果新旧列表引用不同，就重置
+        
+        if (newVal !== oldVal || newLen === 0 || oldLen === 0) {
+          this.isInitialLoading = true;
+          // 重置用户滚动状态，确保新会话一定从底部开始
+          this.userScrolledUp = false;
+          
+          // 2秒后解除初始加载状态（给足够的时间加载图片）
+          setTimeout(() => {
+            this.isInitialLoading = false;
+          }, 2000);
+        }
+
+        if (newLen > oldLen) {
+          this.$nextTick(() => {
+            // 如果是初始加载，强制滚动（忽略 userScrolledUp）
+            // 否则才判断 userScrolledUp
+            if (this.isInitialLoading) {
+              this.scrollToBottom();
+            } else if (this.userScrolledUp) {
+              this.hasNewMessage = true;
+            } else {
+              this.scrollToBottom();
+            }
+          });
+        }
+      },
+      immediate: true // 确保组件挂载时也触发
     }
   },
   methods: {
+    // 监听图片加载事件
+    handleImageLoad(e) {
+      console.log(e,'e')
+      if (e.target && e.target.tagName === 'IMG') {
+        // 如果处于初始加载阶段，或者之前已经在底部，强制滚动
+        if (this.isInitialLoading || !this.userScrolledUp) {
+          this.scrollToBottom();
+        }
+      }
+    },
+
     initResizeObserver() {
       const inner = this.$el.querySelector('.history-inner');
       if (!inner) return;
 
       this.resizeObserver = new ResizeObserver(() => {
-        if (!this.userScrolledUp) {
+        // 如果处于初始加载阶段，强制滚动
+        if (this.isInitialLoading || !this.userScrolledUp) {
           this.scrollToBottom();
         }
       });
@@ -149,12 +195,18 @@ export default {
       this.$nextTick(() => {
         const el = this.$refs.listRef;
         if (el) {
+          // 如果是初始加载，使用 'auto' 瞬间跳转，避免动画干扰
+          const behavior = this.isInitialLoading ? 'auto' : 'smooth';
           el.scrollTo({
             top: el.scrollHeight,
-            behavior: 'smooth'
+            behavior
           });
           // 状态重置
-          this.userScrolledUp = false;
+          // 仅当非初始加载状态下，才重置 userScrolledUp
+          // 因为初始加载时图片可能还在撑开高度，此时不应认为用户已操作
+          if (!this.isInitialLoading) {
+            this.userScrolledUp = false;
+          }
           this.hasNewMessage = false;
           this.showBackToBottom = false; // 点击后立即隐藏
         }
@@ -172,23 +224,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/style/mixins.scss' as *;
 .ai-history-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 
   .ai-history-list {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
     position: relative;
     scroll-behavior: smooth;
+    width: 100%;
+    @extend %scrollbar;
 
     .history-inner {
       display: flex;
       flex-direction: column;
       min-height: min-content;
+      max-width: 960px; /* 限制内容宽度 */
+      margin: 0 auto;   /* 内容居中 */
+      padding: 20px;    /* 将 padding 移到这里 */
     }
   }
 

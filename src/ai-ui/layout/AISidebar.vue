@@ -4,7 +4,10 @@
     <div class="sidebar-header">
       <div class="logo-area">
         <span class="logo-icon">🤖</span>
-        <span class="app-name" v-show="!isCollapsed">AI 助手</span>
+        <span class="app-name" v-show="!isCollapsed">云小智</span>
+      </div>
+      <div class="toggle-btn" v-show="!isCollapsed" @click="toggleCollapse" :title="isCollapsed ? '展开' : '折叠'">
+        <i class="h-icon-menu_leftbar" :class="{ 'rotate-180': isCollapsed }"></i>
       </div>
     </div>
 
@@ -73,10 +76,6 @@
     <!-- Bottom Slot & Toggle -->
     <div class="sidebar-bottom">
       <slot name="bottom" v-if="!isCollapsed"></slot>
-      <div class="toggle-btn" @click="toggleCollapse" :title="isCollapsed ? '展开' : '折叠'">
-        <i class="h-icon-menu_leftbar" :class="{ 'rotate-180': isCollapsed }"></i>
-        <span class="toggle-text" v-show="!isCollapsed">折叠侧边栏</span>
-      </div>
     </div>
   </div>
 </template>
@@ -249,7 +248,7 @@ export default {
     height: 40px;
     border-radius: 4px;
     transition: all 0.2s;
-    margin-top: 8px;
+    font-size: 24px;
 
     &:hover {
       background: #e6e8eb;
@@ -326,6 +325,7 @@ export default {
   .new-chat-wrapper {
     padding: 0 12px;
     transition: padding 0.3s;
+    margin-bottom: 10px;
 
     &.collapsed {
       padding: 10px 8px 0 8px;

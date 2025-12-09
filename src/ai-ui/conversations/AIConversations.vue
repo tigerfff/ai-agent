@@ -3,7 +3,7 @@
     <slot name="header"></slot>
     
     <div class="conversations-list-wrapper">
-      <el-scrollbar ref="scrollbar" wrap-class="conversations-scrollbar">
+      <el-scrollbar ref="scrollbar" overflow-x="hidden" wrap-class="conversations-scrollbar">
         <div class="conversations-content">
           
           <!-- 模式 A: 分组展示 -->
@@ -279,9 +279,20 @@ export default {
   .conversations-list-wrapper {
     flex: 1;
     overflow: hidden;
+    
+    // 确保 el-scrollbar 组件占满高度
+    .el-scrollbar {
+      height: 100%;
+    }
+
+    // 确保 el-scrollbar 的 wrap 占满高度 (通过 wrap-class 传递的类)
+    :deep(.conversations-scrollbar) {
+      height: 100%;
+      overflow-x: hidden; // 防止水平滚动条
+    }
 
     .conversations-content {
-      padding: 10px;
+      padding: 0 10px;
 
       .conversation-group {
         margin-bottom: 16px;
@@ -305,6 +316,7 @@ export default {
             position: sticky;
             top: 0;
             z-index: 1;
+            background: rgb(246, 249, 253);
           }
 
           .group-toggle-icon {

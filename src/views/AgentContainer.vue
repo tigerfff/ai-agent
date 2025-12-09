@@ -11,6 +11,7 @@
         @select="handleSelectAgent"
         @new-chat="handleNewChat"
         @conversation-menu-command="handleMenuCommand"
+        @toggle="handleToggleCollapse"
       >
         <template #bottom>
           <slot name="sidebar-bottom"></slot>
@@ -29,6 +30,22 @@
 
       <!-- 场景 2: 具体智能体页面 -->
       <div v-else class="agent-viewport">
+
+        <div class="viewport-header">
+          <div class="toggle-btn" v-show="!isCollapsed" @click="toggleCollapse" :title="isCollapsed ? '展开' : '折叠'">
+            <i class="h-icon-menu_leftbar"></i>
+          </div>
+          <div class="toggle-btn" v-show="!isCollapsed">
+            <i class="h-icon-add"></i>
+          </div>
+          <div class="toggle-btn" v-show="!isCollapsed">
+            <i class="h-icon-add"></i>
+          </div>
+          <div class="toggle-btn" v-show="!isCollapsed">
+            <i class="h-icon-add"></i>
+          </div>
+        </div>
+       
         <!-- 顶部简易导航条 (可选) -->
         <!-- <div class="viewport-header">
           <template v-if="allAgents.length > 1">
@@ -130,7 +147,8 @@ export default {
       currentAgentId: null, // null 表示首页
       componentKey: 0, // 用于强制刷新组件的 key
       conversations: [...MOCK_CONVERSATIONS],
-      currentConversationId: ''
+      currentConversationId: '',
+      isCollapsed: false
     };
   },
   computed: {
@@ -159,6 +177,11 @@ export default {
     }
   },
   methods: {
+    toggleCollapse() {
+    },
+    handleToggleCollapse(isCollapsed) {
+      this.isCollapsed = isCollapsed;
+    },
     async handleSelectAgent(agent) {
       this.currentAgentId = agent.id;
       
@@ -325,25 +348,11 @@ export default {
       overflow: hidden;
       position: relative;
       display: flex;
-      justify-content: center;
+      width: 100%;
 
       > * {
         width: 100%;
-        max-width: 960px;
         height: 100%;
-        padding: 0 32px;
-        box-sizing: content-box;
-
-        @media (max-width: 1024px) {
-          padding: 0 16px;
-        }
-
-        @media (max-width: 768px) {
-          max-width: 600px;
-          width: 600px;
-          padding: 0 32px;
-          box-sizing: border-box;
-        }
       }
     }
   }

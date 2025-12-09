@@ -6,11 +6,10 @@
         v-if="messages.length === 0 && !loadingHistory"
         v-bind="welcomeConfig"
         @select="handleWelcomeSelect"
+        class="content-wrapper"
       />
       
-      <div v-else-if="loadingHistory" class="loading-history">
-        加载历史记录中...
-      </div>
+      <ChatSkeleton style="margin-top: 40px;" v-else-if="loadingHistory" class="content-wrapper" />
 
       <AIHistory 
         v-else
@@ -18,6 +17,7 @@
         :list="messages" 
         :back-button-threshold="50"
         @complete="handleFinish"
+        class="history-full-width"
       >
         <template #avatar="{ item }">
           <div class="custom-avatar" :class="item.role">
@@ -29,26 +29,29 @@
 
     <!-- 输入区域 -->
     <div class="footer">
-      <!-- 
-        mode="file" 开启文件上传支持
-        accepts 限制上传类型
-      -->
-      <AIInput 
-        ref="aiInput"
-        :loading="isStreaming || isUploading"
-        placeholder="有问题尽管问我~"
-        :allowed-types="['image', 'video', 'document']"
-        :max-size="200 * 1024 * 1024"
-        :before-add-attachments="handlePreUpload"
-        @send="handleSend" 
-        @stop="handleStop"
-      />
+      <div class="content-wrapper">
+        <!-- 
+          mode="file" 开启文件上传支持
+          accepts 限制上传类型
+        -->
+        <AIInput 
+          ref="aiInput"
+          :loading="isStreaming || isUploading"
+          placeholder="有问题尽管问我~"
+          :allowed-types="['image', 'video', 'document']"
+          :max-size="200 * 1024 * 1024"
+          :before-add-attachments="handlePreUpload"
+          @send="handleSend" 
+          @stop="handleStop"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
+import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
 import { formatConversationTime } from '@/utils';
@@ -57,7 +60,8 @@ export default {
   name: 'TryAgent',
   inject: ['sessionApi'],
   components: {
-    AIWelcome
+    AIWelcome,
+    ChatSkeleton
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
@@ -574,11 +578,29 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
 
   .chat-area {
     flex: 1;
     overflow: hidden;
     position: relative;
+    width: 100%;
+
+    .content-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      height: 100%;
+      padding: 0 32px;
+
+      @media (max-width: 1024px) {
+        padding: 0 16px;
+      }
+
+      @media (max-width: 768px) {
+        max-width: 600px;
+        padding: 0 32px;
+      }
+    }
 
     .loading-history {
       display: flex;
@@ -587,11 +609,32 @@ export default {
       height: 100%;
       color: #999;
     }
+
+    .history-full-width {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   .footer {
-    padding: 16px 16px 44px;
     flex-shrink: 0;
+    width: 100%;
+    padding: 16px 0 44px;
+
+    .content-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 32px;
+
+      @media (max-width: 1024px) {
+        padding: 0 16px;
+      }
+
+      @media (max-width: 768px) {
+        max-width: 600px;
+        padding: 0 32px;
+      }
+    }
   }
 
   .custom-avatar {
