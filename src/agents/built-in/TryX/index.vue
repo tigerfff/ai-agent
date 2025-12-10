@@ -7,7 +7,11 @@
         v-bind="welcomeConfig"
         @select="handleWelcomeSelect"
         class="content-wrapper"
-      />
+      >
+        <template #icon>
+          <img src="@/assets/images/training-square@3x-1.png" alt="" width="44px">
+        </template>
+    </AIWelcome>
       
       <ChatSkeleton style="margin-top: 40px;" v-else-if="loadingHistory" class="content-wrapper" />
 
@@ -17,13 +21,10 @@
         :list="messages" 
         :back-button-threshold="50"
         @complete="handleFinish"
+        @action-click="handleAction"
+        enableActions
         class="history-full-width"
       >
-        <template #avatar="{ item }">
-          <div class="custom-avatar" :class="item.role">
-            {{ item.role === 'user' ? '👤' : '🤖' }}
-          </div>
-        </template>
       </AIHistory>
     </div>
 
@@ -530,6 +531,19 @@ export default {
       }
     },
 
+    async renameSession(id, title) {
+      try {
+        const res = await TryApi.renameChatTitle(this.$aiClient, { chatId: id, title });
+        if (res.code === 0) {
+          this.$message.success('重命名成功');
+          this.fetchConversationList();
+        }
+      } catch (e) {
+        console.error('[TryAgent] renameSession failed', e);
+        this.$message.error('重命名失败');
+      }
+    },
+
     /**
      * 删除会话
      * @param {string} id 会话ID
@@ -559,6 +573,29 @@ export default {
       }
       this.isStreaming = false;
       this.isUploading = false;
+    },
+
+    /**
+     * 处理消息操作（复制、编辑、点赞等）
+     */
+    handleAction({ type, payload, index }) {
+      console.log('Action Clicked:', type, payload, index);
+      
+      if (type === 'edit') {
+        // 更新本地消息内容
+        if (this.messages[index]) {
+          this.$set(this.messages[index], 'content', payload.content);
+          this.$message.success('内容已更新');
+        }
+      } else if (type === 'like' || type === 'dislike' || type === 'cancel-like') {
+        // 更新点赞状态
+        if (this.messages[index]) {
+          // 注意：Payload 里的 item 是复制品，我们需要更新 this.messages 里的原对象
+          // BubbleFooter 内部维护了 localLikeStatus，这里我们更新数据源以保持一致
+          this.$set(this.messages[index], 'likeStatus', type === 'cancel-like' ? '' : type);
+          // TODO: 调用后端接口保存点赞状态
+        }
+      }
     },
 
     handleFinish({ index }) {

@@ -87,7 +87,7 @@
     <!-- Bottom Slot & Toggle -->
     <div class="sidebar-bottom">
       <slot name="bottom" v-if="!collapsed"></slot>
-    </div>
+      </div>
     </div>
   </div>
 </template>

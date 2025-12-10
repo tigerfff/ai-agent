@@ -22,7 +22,6 @@
       <div class="item-label">
         <slot name="label" :item="item">
           <div class="label-container">
-            <span v-if="item.isUnread" class="unread-dot"></span>
             <el-tooltip
               v-if="showTooltip"
               :content="item.label"
@@ -36,6 +35,9 @@
           </div>
         </slot>
       </div>
+      
+      <!-- 未读红点（右上角） -->
+      <span v-if="item.hasUnread" class="unread-dot"></span>
 
       <!-- Menu / Suffix -->
       <div class="item-menu" v-if="showMenu" @click.stop>
@@ -151,15 +153,6 @@ export default {
         display: flex;
         align-items: center;
         width: 100%;
-        
-        .unread-dot {
-          width: 6px;
-          height: 6px;
-          background-color: #f56c6c;
-          border-radius: 50%;
-          margin-right: 6px;
-          flex-shrink: 0;
-        }
 
         .label-text {
           overflow: hidden;
@@ -185,6 +178,19 @@ export default {
         }
       }
     }
+  }
+  
+  // 未读红点（右上角）
+  .unread-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background-color: #f56c6c;
+    border-radius: 50%;
+    flex-shrink: 0;
+    z-index: 1;
   }
 }
 </style>

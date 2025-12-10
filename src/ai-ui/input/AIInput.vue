@@ -26,7 +26,7 @@
             <!-- 前缀 -->
             <div class="el-sender-prefix">
               <slot name="prefix">
-                <img v-show="!isFocused" :src="starIcon" alt="星星" class="prefix-star-icon" />
+                <img v-show="!(isFocused || inputValue.length > 0)" :src="starIcon" alt="星星" class="prefix-star-icon" />
               </slot>
             </div>
 

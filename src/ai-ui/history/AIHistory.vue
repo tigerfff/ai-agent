@@ -13,10 +13,24 @@
           v-bind="item"
           @update="handleBubbleUpdate"
           @finish="(inst) => handleBubbleFinish(index, inst)"
+          class="bubble-item-wrapper" 
         >
-          <!-- 透传插槽 -->
+          <!-- 1. 透传作用域插槽 (header, widget, etc) -->
           <template v-for="(_, slotName) in $scopedSlots" v-slot:[slotName]="slotData">
             <slot :name="slotName" v-bind="slotData" :item="item" :index="index"></slot>
+          </template>
+
+          <!-- 2. 默认 Footer (操作栏) -->
+          <template #footer>
+            <!-- 优先使用父组件传入的 footer 插槽 -->
+            <slot name="footer" :item="item" :index="index">
+              <BubbleFooter 
+                v-if="enableActions"
+                :item="item" 
+                :actions="getActions(item)"
+                @action="(type, payload) => handleAction(type, payload, index)"
+              />
+            </slot>
           </template>
         </AIBubble>
       </div>
@@ -38,11 +52,13 @@
 
 <script>
 import AIBubble from '../bubble/AIBubble.vue';
+import BubbleFooter from './BubbleFooter.vue';
 
 export default {
   name: 'AIHistory',
   components: {
-    AIBubble
+    AIBubble,
+    BubbleFooter
   },
   props: {
     list: {
@@ -62,6 +78,20 @@ export default {
     autoScrollTolerance: {
       type: Number,
       default: 50
+    },
+    // 是否启用默认操作栏
+    enableActions: {
+      type: Boolean,
+      default: true
+    },
+    // 操作栏配置
+    actionConfig: {
+      type: Object,
+      default: () => ({
+        user: ['edit', 'copy'],
+        // 机器人：复制、点赞、踩、编辑
+        bot: ['copy', 'like', 'dislike', 'edit']
+      })
     }
   },
   data() {
@@ -218,6 +248,17 @@ export default {
       if (el) {
         el.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    },
+    
+    getActions(item) {
+      // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
+      const role = item.placement === 'end' ? 'user' : 'bot';
+      return this.actionConfig[role] || [];
+    },
+
+    handleAction(type, payload, index) {
+      // 统一向外抛出事件，父组件监听 @action-click
+      this.$emit('action-click', { type, payload, index });
     }
   }
 };
@@ -247,7 +288,7 @@ export default {
       min-height: min-content;
       max-width: 960px; /* 限制内容宽度 */
       margin: 0 auto;   /* 内容居中 */
-      padding: 20px;    /* 将 padding 移到这里 */
+      padding: 16px 32px;;
     }
   }
 

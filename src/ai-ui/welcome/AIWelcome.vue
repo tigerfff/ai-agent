@@ -4,7 +4,7 @@
       <!-- 图标区域 -->
       <div class="welcome-icon">
         <slot name="icon">
-          <span class="default-icon">{{ icon }}</span>
+          <img :src="icon" alt="icon" width="44px">
         </slot>
       </div>
 
@@ -20,25 +20,31 @@
           class="prompt-card"
           @click="handleClick(item)"
         >
-          <div class="prompt-header">
-            <span class="prompt-icon" v-if="item.icon">{{ item.icon }}</span>
-            <span class="prompt-title">{{ item.title }}</span>
-          </div>
           <div class="prompt-desc" v-if="item.desc">{{ item.desc }}</div>
-          <div class="prompt-arrow">→</div>
+        </div>
+        <div>
+          <span></span>
         </div>
       </div>
-    </div>
+
+      <div class="welcome-footer">
+        <slot name="footer">
+          <span>
+          </span>
+        </slot>
+      </div>
+    </div>  
   </div>
 </template>
 
 <script>
+import trainingSquareIcon from '@/assets/images/training-square@3x-1.png';
 export default {
   name: 'AIWelcome',
   props: {
     icon: {
       type: String,
-      default: '👋'
+      default: trainingSquareIcon
     },
     title: {
       type: String,
@@ -68,8 +74,6 @@ export default {
 .ai-welcome {
   height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 20px;
   box-sizing: border-box;
   overflow-y: auto;
@@ -78,12 +82,13 @@ export default {
 
   .welcome-content {
     max-width: 680px;
+    padding: 32px 0;
     width: 100%;
-    text-align: center;
+    text-align: left;
   }
 
   .welcome-icon {
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 
     .default-icon {
       font-size: 64px;
@@ -97,30 +102,33 @@ export default {
   }
 
   .welcome-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #303133;
-    margin: 0 0 12px 0;
+    color: rgba(0,0,0,0.7);
+    font-weight: bold;
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: 0px;
+    text-align: left;
+    margin-bottom: 8px;
   }
 
   .welcome-desc {
     font-size: 14px;
     color: #909399;
-    margin: 0 0 40px 0;
+    margin-bottom: 24px;
     line-height: 1.6;
   }
 
   .welcome-prompts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    
     gap: 16px;
     text-align: left;
 
     .prompt-card {
       background: #fff;
-      border: 1px solid #e4e7ed;
-      border-radius: 12px;
-      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
       cursor: pointer;
       transition: all 0.3s;
       position: relative;
@@ -137,39 +145,12 @@ export default {
         }
       }
 
-      .prompt-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-
-        .prompt-icon {
-          font-size: 18px;
-        }
-
-        .prompt-title {
-          font-weight: 500;
-          color: #303133;
-          font-size: 15px;
-        }
-      }
-
       .prompt-desc {
-        font-size: 13px;
-        color: #909399;
-        line-height: 1.5;
-        margin-right: 24px;
-      }
-
-      .prompt-arrow {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #c0c4cc;
-        font-family: monospace;
-        opacity: 0;
-        transition: opacity 0.2s;
+        color: rgba(0,0,0,0.7);
+        font-size: 14px;
+        line-height: 22px;
+        letter-spacing: 0px;
+        text-align: left;
       }
     }
   }

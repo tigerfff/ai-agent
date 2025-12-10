@@ -109,7 +109,7 @@ export default {
     },
     showAvatar: {
       type: Boolean,
-      default: true
+      default: false
     },
     loading: {
       type: Boolean,

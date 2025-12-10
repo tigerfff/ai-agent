@@ -1,5 +1,6 @@
 <template>
-  <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }" :is-mini="isMini">
+  <div class="agent-container-wrapper">
+    <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }" :is-mini="isMini">
     <!-- 左侧导航 -->
     <template #sider>
       <AISidebar 
@@ -95,7 +96,43 @@
         </div>
       </div>
     </template>
-  </AILayout>
+    </AILayout>
+
+    <!-- 重命名对话框 -->
+    <el-dialog
+      title="修改名称"
+      :visible.sync="renameDialogVisible"
+      :area="[480,320]"
+      :close-on-click-modal="false"
+      custom-class="ai-rename-dialog"
+      append-to-body
+    >
+      <el-form
+        ref="renameForm"
+        :model="renameForm"
+        :rules="renameRules"
+        label-position="top"
+        label-width="80px"
+        @submit.native.prevent="handleRenameConfirm"
+        style="padding: 50px 16px"
+      >
+        <el-form-item label="重命名" prop="name" >
+          <el-input
+            v-model="renameForm.name"
+            placeholder="请输入名称"
+            maxlength="32"
+            show-word-limit
+            autofocus
+            ref="renameInput"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleRenameCancel">取消</el-button>
+        <el-button type="primary" @click="handleRenameConfirm" :loading="renameLoading">确定</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -162,7 +199,20 @@ export default {
       componentKey: 0, // 用于强制刷新组件的 key
       conversations: [...MOCK_CONVERSATIONS],
       currentConversationId: '',
-      isCollapsed: false
+      isCollapsed: false,
+      // 重命名对话框相关
+      renameDialogVisible: false,
+      renameForm: {
+        name: ''
+      },
+      renameRules: {
+        name: [
+          { required: true, message: '请输入名称', trigger: 'blur' },
+          { min: 1, max: 32, message: '长度在 1 到 32 个字符', trigger: 'blur' }
+        ]
+      },
+      currentRenameItem: null,
+      renameLoading: false
     };
   },
   computed: {
@@ -285,22 +335,32 @@ export default {
         }
       }
     },
-    handleMenuCommand(command, item) {
+    async handleMenuCommand(command, item) {
       const agent = this.$refs.activeAgent;
 
       if (command === 'delete') {
-        this.deleteConversation(item.id);
-      } else if (command === 'rename') {
-        // TODO
-        const newName = prompt('重命名会话', item.label);
-        if (newName) {
-          if (agent && typeof agent.renameSession === 'function') {
-            agent.renameSession(item.id, newName);
-          } else {
-             // Fallback if agent doesn't support renameSession
-             item.label = newName;
-          }
+        const data = await this.$confirm('确定删除?', {
+          message: '该对话内容删除后将无法恢复',
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          customClass: 'ai-custom-message-box'
+        })
+        if (data === 'confirm') {
+          this.deleteConversation(item.id);
         }
+      } else if (command === 'rename') {
+        this.currentRenameItem = item;
+        this.renameForm.name = item.label || '';
+        this.renameDialogVisible = true;
+        this.$nextTick(() => {
+          if (this.$refs.renameForm) {
+            this.$refs.renameForm.clearValidate();
+          }
+          // 尝试聚焦输入框
+          if (this.$refs.renameInput) {
+            this.$refs.renameInput.focus();
+          }
+        });
       } else if (command === 'pin') {
         if (agent && typeof agent.pinSession === 'function') {
           // Toggle pin state. Note: AIConversations passes processed item, 
@@ -323,6 +383,45 @@ export default {
       if (this.allAgents.length === 1) {
         this.handleSelectAgent(this.allAgents[0]);
       }
+    },
+    // 重命名相关方法
+    async handleRenameConfirm() {
+      if (!this.$refs.renameForm) return;
+      
+      this.$refs.renameForm.validate(async (valid) => {
+        if (!valid) return;
+        
+        const newName = this.renameForm.name.trim();
+        if (!newName) return;
+        
+        if (!this.currentRenameItem) return;
+        
+        this.renameLoading = true;
+        try {
+          const agent = this.$refs.activeAgent;
+          if (agent && typeof agent.renameSession === 'function') {
+            await agent.renameSession(this.currentRenameItem.id, newName);
+          } else {
+            // Fallback
+            this.currentRenameItem.label = newName;
+          }
+          this.renameDialogVisible = false;
+        } catch (e) {
+          console.error('Rename failed:', e);
+          // 错误提示由 axios 拦截器或 agent 内部处理，这里也可以兜底
+          if (e.message) this.$message.error(e.message);
+        } finally {
+          this.renameLoading = false;
+        }
+      });
+    },
+    handleRenameCancel() {
+      this.renameDialogVisible = false;
+      this.currentRenameItem = null;
+      this.renameForm.name = '';
+      if (this.$refs.renameForm) {
+        this.$refs.renameForm.clearValidate();
+      }
     }
   },
   mounted() {
@@ -331,9 +430,7 @@ export default {
   watch: {
     isMini: {
       handler(val) {
-        if (val) {
-          this.isCollapsed = true;
-        }
+        this.isCollapsed = val;
       },
       immediate: true
     },
@@ -351,6 +448,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.agent-container-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
 .ai-agent-container {
   height: 100%;
   --chat-max-width: 960px; // 默认全屏下的内容宽度限制
@@ -447,6 +549,29 @@ export default {
 
   .slot-wrapper {
     height: 100%;
+  }
+}
+</style>
+
+<style lang="scss">
+.ai-rename-dialog {
+  .dialog-footer {
+    .el-button--primary {
+      background: rgba(56, 142, 255, 1) !important;
+      border-color: rgba(56, 142, 255, 1) !important;
+      color: #fff !important;
+      
+      &:hover {
+        background: rgba(56, 142, 255, 0.9) !important;
+        border-color: rgba(56, 142, 255, 0.9) !important;
+      }
+      
+      &:active,
+      &:focus {
+        background: rgba(56, 142, 255, 0.8) !important;
+        border-color: rgba(56, 142, 255, 0.8) !important;
+      }
+    }
   }
 }
 </style>

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import '@/assets/reset.css'
 import '@hui/lib/hui.css'
+import '@/style/message-box.scss'
 import Hui from '@hui/lib/hui.esm-browser.js'
 
 // 引入我们刚开发的组件库

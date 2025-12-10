@@ -1,0 +1,22 @@
+// AI 组件自定义 MessageBox 样式
+.ai-custom-message-box {
+  .el-message-box__btns {
+    .el-button--primary {
+      background: rgba(56,142,255,1) !important;
+      border-color: rgba(56,142,255,1) !important;
+      color: #FFF !important;
+      
+      &:hover {
+        background: rgba(56, 142, 255, 0.9) !important;
+        border-color: rgba(56, 142, 255, 0.9) !important;
+      }
+      
+      &:active,
+      &:focus {
+        background: rgba(56, 142, 255, 0.8) !important;
+        border-color: rgba(56, 142, 255, 0.8) !important;
+      }
+    }
+  }
+}
+
