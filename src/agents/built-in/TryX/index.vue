@@ -7,13 +7,8 @@
         v-bind="welcomeConfig"
         @select="handleWelcomeSelect"
         class="content-wrapper"
+        :icon="trainingSquareIcon"
       >
-        <template #icon>
-          <img src="@/assets/images/training-square@3x-1.png" alt="" width="44px">
-        </template>
-        <template >
-          <div class="card" @click="handleWelcomeSelect">上传 </div>
-        </template>
     </AIWelcome>
       
       <ChatSkeleton style="margin-top: 40px;" v-else-if="loadingHistory" class="content-wrapper" />
@@ -60,6 +55,7 @@ import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
 import { formatConversationTime } from '@/utils';
+import trainingSquareIcon from '@/assets/images/try.png';
 
 export default {
   name: 'TryAgent',
@@ -87,6 +83,7 @@ export default {
       isUploading: false,
       loadingHistory: false,
       abortController: null,
+      trainingSquareIcon,
       
       // OSS 上传器实例
       ossUploader: null,

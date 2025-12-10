@@ -53,6 +53,7 @@
 <script>
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
+import trainingSquareIcon from '@/assets/images/try.png';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from './api';
 import { formatConversationTime } from '@/utils';
@@ -91,12 +92,12 @@ export default {
       conversationsMap: new Map(),
 
       welcomeConfig: {
-        icon: '🔍',
-        title: 'AI试用',
-        description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。',
+        icon: trainingSquareIcon,
+        title: '员工培训助手',
+        description: '我可以帮你推荐培训内容、制定员工培训计划、检查培训结果，有培训问题随时找我哦～',
         prompts: [
-          { icon: '📸', title: '图片分析', desc: '上传图片并询问内容', text: '请帮我分析这张图片', needsFile: true },
-          { icon: '🎥', title: '视频检测', desc: '检测视频中的违规行为', text: '视频中是否有违规行为？', needsFile: true }
+          { desc: '帮我制定汉堡的培训计划',text: '帮我制定汉堡的培训计划', needsFile: false },
+          { desc: '针对315做一个食安培训',text: '针对315做一个食安培训', needsFile: false },
         ]
       }
     };

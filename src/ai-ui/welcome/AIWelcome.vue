@@ -39,13 +39,12 @@
 </template>
 
 <script>
-import trainingSquareIcon from '@/assets/images/training-square@3x-1.png';
 export default {
   name: 'AIWelcome',
   props: {
     icon: {
       type: String,
-      default: trainingSquareIcon
+      default: ''
     },
     title: {
       type: String,

@@ -26,7 +26,7 @@
       >
         <div class="card-header-row">
           <div class="card-icon">
-            <img :src="agent.icon" :alt="agent.name" />
+            <img :src="agent.homeIcon" :alt="agent.name" />
           </div>
           <div class="go-use-btn">去使用 ></div>
         </div>

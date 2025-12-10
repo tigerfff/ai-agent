@@ -838,7 +838,7 @@ export default {
 
     &.focused {
       box-shadow: 0 0 0 1px #409eff;
-      border-color: #409eff;
+      border-color: rgba(56,142,255,1);
     }
 
     &.el-sender-disabled {

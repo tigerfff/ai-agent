@@ -8,6 +8,12 @@ import tryXIcon from '@images/try-x@3x.png';
 import trainingIcon from '@images/training@3x.png';
 import sopIcon from '@images/sop@3x.png';
 
+import tryIcon from '@/assets/images/try.png';
+import sopHomeIcon from '@/assets/images/sop.png';
+import trainingHomeIcon from '@/assets/images/training.png';
+import inspectSquareIcon from '@/assets/images/inspect-square.png';
+import dataAnalysisHomeIcon from '@/assets/images/data-analysis-home.png';
+
 // 业务线枚举
 export const BUSINESS_LINES = {
   RETAIL: 'retail',      // 零售
@@ -25,6 +31,7 @@ export const ALL_AGENTS = {
     name: '智慧巡查',
     miniName:'巡查',
     icon: inspectIcon,
+    homeIcon: inspectSquareIcon,
     description: '智能巡查助手，帮助您高效完成巡查任务。',
     type: 'built-in',
     tags: ['巡查', '安防'],
@@ -35,6 +42,7 @@ export const ALL_AGENTS = {
     name: '数据分析',
     miniName:'数据',
     icon: dataAnalysisIcon,
+    homeIcon: dataAnalysisHomeIcon,
     description: '深度挖掘数据价值，辅助业务决策。',
     type: 'built-in',
     tags: ['数据', '分析'],
@@ -45,6 +53,7 @@ export const ALL_AGENTS = {
     name: 'AI试用',
     miniName:'AI试用',
     icon: tryXIcon,
+    homeIcon: tryIcon,
     description: 'AI试用助手，可以帮你快速体验各种 AI 功能',
     tags: ['试用', 'AI'],
     type: 'built-in',
@@ -55,6 +64,7 @@ export const ALL_AGENTS = {
     name: '员工培训助手',
     miniName:'培训',
     icon: trainingIcon,
+    homeIcon: trainingHomeIcon,
     description: '专业的培训助手，帮助你快速学习。',
     type: 'built-in',
     tags: ['培训', '学习'],
@@ -65,6 +75,7 @@ export const ALL_AGENTS = {
     name: 'SOP生成',
     miniName:'SOP',
     icon: sopIcon,
+    homeIcon: sopHomeIcon,
     description: '标准化作业流程生成助手。',
     type: 'built-in',
     tags: ['SOP', '效率'],
