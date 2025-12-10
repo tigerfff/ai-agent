@@ -125,60 +125,11 @@ export default {
     }
   },
   data() {
-    return {
-      // isCollapsed: false, // 移除内部状态，改用 props
-      // 默认测试数据
-      defaultConversations: [
-        {
-          id: 'conv-1',
-          label: '如何学习 Python 编程？',
-          group: 'today',
-          time: '15:30'
-        },
-        {
-          id: 'conv-2',
-          label: 'Vue 组件设计最佳实践',
-          group: 'today',
-          time: '14:20'
-        },
-        {
-          id: 'conv-3',
-          label: '前端性能优化方案',
-          group: 'today',
-          time: '10:15'
-        },
-        {
-          id: 'conv-4',
-          label: 'React vs Vue 对比分析',
-          group: 'yesterday',
-          time: '昨天 18:45'
-        },
-        {
-          id: 'conv-5',
-          label: 'TypeScript 类型系统详解',
-          group: 'yesterday',
-          time: '昨天 16:30'
-        },
-        {
-          id: 'conv-6',
-          label: '微前端架构设计',
-          group: 'earlier',
-          time: '2025/01/15'
-        },
-        {
-          id: 'conv-7',
-          label: 'Node.js 后端开发指南',
-          group: 'earlier',
-          time: '2025/01/10'
-        }
-      ]
-    };
+    return {};
   },
   computed: {
-    // 合并外部传入的 conversations 和默认数据
-    // 如果外部传入了数据，优先使用外部的；否则使用默认数据
     displayConversations() {
-      return this.conversations.length > 0 ? this.conversations : this.defaultConversations;
+      return this.conversations;
     }
   },
   methods: {

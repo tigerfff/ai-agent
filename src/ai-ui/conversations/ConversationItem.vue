@@ -40,8 +40,8 @@
       <span v-if="item.hasUnread" class="unread-dot"></span>
 
       <!-- Menu / Suffix -->
-      <div class="item-menu" v-if="showMenu" @click.stop>
-        <el-dropdown trigger="click" @command="handleCommand">
+      <div class="item-menu" v-if="showMenu" @click.stop @mouseenter="menuVisible = true" @mouseleave="handleMenuMouseLeave">
+        <el-dropdown trigger="hover" @command="handleCommand" @visible-change="handleDropdownVisibleChange">
           <span class="menu-trigger">
             <slot name="menu-icon">⋮</slot>
           </span>
@@ -76,12 +76,13 @@ export default {
   data() {
     return {
       isHovered: false,
-      isTextOverflow: false
+      isTextOverflow: false,
+      menuVisible: false // 菜单是否应该显示（点击后保持显示）
     };
   },
   computed: {
     showMenu() {
-      return !this.item.disabled && (this.active || this.isHovered);
+      return !this.item.disabled;
     }
   },
   mounted() {
@@ -98,6 +99,41 @@ export default {
     },
     handleCommand(command) {
       this.$emit('menu-command', command, this.item);
+      // 执行命令后，保持菜单按钮显示一段时间，确保对话框能正常打开
+      // 特别是重命名操作，需要保持菜单按钮可见直到对话框打开
+      this.menuVisible = true;
+      this.$nextTick(() => {
+        // 延迟关闭，给对话框时间打开
+        setTimeout(() => {
+          if (!this.isHovered && !this.active) {
+            this.menuVisible = false;
+          }
+        }, 300);
+      });
+    },
+    handleDropdownVisibleChange(visible) {
+      // 当下拉菜单打开时，保持菜单按钮显示
+      if (visible) {
+        this.menuVisible = true;
+      } else {
+        // 下拉菜单关闭后，如果不是 active 或 hover 状态，延迟关闭菜单按钮
+        setTimeout(() => {
+          if (!this.isHovered && !this.active) {
+            this.menuVisible = false;
+          }
+        }, 150);
+      }
+    },
+    handleMenuMouseLeave() {
+      // 鼠标离开菜单区域时，如果不是 active 状态，延迟关闭
+      // 给用户时间移动到下拉菜单或对话框
+      if (!this.active) {
+        setTimeout(() => {
+          if (!this.isHovered) {
+            this.menuVisible = false;
+          }
+        }, 200);
+      }
     },
     checkOverflow() {
       if (!this.showTooltip) return;

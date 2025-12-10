@@ -908,6 +908,8 @@ export default {
 
         .upload-btn-wrapper {
           position: relative;
+          border: 1px solid #dcdfe6;
+          border-radius: 8px;;
 
           .upload-menu {
             position: absolute;

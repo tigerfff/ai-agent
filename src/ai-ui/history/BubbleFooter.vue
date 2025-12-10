@@ -11,31 +11,50 @@
     </div>
 
     <!-- 2. 编辑 -->
-    <el-popover
+    <div 
       v-if="actions.includes('edit')"
-      v-model="editVisible"
-      placement="top"
-      width="300"
-      trigger="click"
-      @show="initEdit"
+      class="action-item" 
+      title="编辑"
+      @click="openEditDialog"
     >
-      <div class="edit-popover-content">
-        <el-input
-          type="textarea"
-          :rows="4"
-          placeholder="请输入内容"
-          v-model="editContent"
-          resize="none"
-        ></el-input>
-        <div class="edit-footer">
-          <el-button size="mini" @click="editVisible = false">取消</el-button>
-          <el-button type="info" size="mini" @click="handleEditConfirm">确定</el-button>
-        </div>
+      <i class="h-icon-edit" style="font-size: 20px;color: #333;"></i>
+    </div>
+
+    <!-- 编辑对话框 -->
+    <el-dialog
+      title="编辑"
+      :visible.sync="editVisible"
+      :area=[680,480]
+      :close-on-click-modal="false"
+      custom-class="ai-edit-dialog"
+      append-to-body
+    >
+      <el-form
+        ref="editForm"
+        :model="editForm"
+        :rules="editRules"
+        label-width="0"
+        style="margin-top: 20px;"
+        @submit.native.prevent="handleEditConfirm"
+      >
+        <el-form-item prop="content">
+          <el-input
+            type="textarea"
+            :rows="14"
+            placeholder="请输入内容"
+            v-model="editForm.content"
+            resize="none"
+            :maxlength="2000"
+            :count="2000"
+            autofocus
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleEditCancel">取消</el-button>
+        <el-button type="primary" @click="handleEditConfirm">确定</el-button>
       </div>
-      <div slot="reference" class="action-item" title="编辑">
-        <i class="h-icon-edit" style="font-size: 20px;color: #333;"></i>
-      </div>
-    </el-popover>
+    </el-dialog>
 
     <!-- 3. 点赞 -->
     <div 
@@ -93,7 +112,14 @@ export default {
   data() {
     return {
       editVisible: false,
-      editContent: '',
+      editForm: {
+        content: ''
+      },
+      editRules: {
+        content: [
+          { required: true, message: '请输入内容', trigger: 'blur' }
+        ]
+      },
       localLikeStatus: '', // '' | 'like' | 'dislike'
       // 图标路径
       likeNormalIcon,
@@ -154,13 +180,39 @@ export default {
       }
     },
     
-    initEdit() {
-      this.editContent = this.item.content || '';
+    openEditDialog() {
+      this.editForm.content = this.item.content || '';
+      this.editVisible = true;
+      this.$nextTick(() => {
+        if (this.$refs.editForm) {
+          this.$refs.editForm.clearValidate();
+        }
+      });
     },
 
     handleEditConfirm() {
-      this.$emit('action', 'edit', { ...this.item, content: this.editContent });
+      if (!this.$refs.editForm) return;
+      
+      this.$refs.editForm.validate((valid) => {
+        if (!valid) return;
+        
+        const content = this.editForm.content.trim();
+        if (!content) {
+          this.$message.warning('请输入内容');
+          return;
+        }
+        
+        this.$emit('action', 'edit', { ...this.item, content });
+        this.editVisible = false;
+      });
+    },
+
+    handleEditCancel() {
       this.editVisible = false;
+      this.editForm.content = '';
+      if (this.$refs.editForm) {
+        this.$refs.editForm.clearValidate();
+      }
     },
 
     handleLike(type) {
@@ -204,21 +256,31 @@ export default {
   }
 }
 
-::v-deep .el-popover{
-  border-radius: 8px;
-}
-
 // 配合 AIBubble 的 hover 显示
 // 注意：这需要 AIBubble 或 AIHistory 的 CSS 支持
 // 这里我们假设父级 .ai-bubble:hover 时显示
 </style>
 
-<style lang="scss" >
-.edit-popover-content {
-  border-radius: 8px;
-  .edit-footer {
-    text-align: right;
-    margin-top: 10px;
+<style lang="scss">
+.ai-edit-dialog {
+   padding: 0 16px;
+  .dialog-footer {
+    .el-button--primary {
+      background: rgba(56, 142, 255, 1) !important;
+      border-color: rgba(56, 142, 255, 1) !important;
+      color: #fff !important;
+      
+      &:hover {
+        background: rgba(56, 142, 255, 0.9) !important;
+        border-color: rgba(56, 142, 255, 0.9) !important;
+      }
+      
+      &:active,
+      &:focus {
+        background: rgba(56, 142, 255, 0.8) !important;
+        border-color: rgba(56, 142, 255, 0.8) !important;
+      }
+    }
   }
 }
 </style>

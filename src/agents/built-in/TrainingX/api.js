@@ -22,8 +22,8 @@ export const TryApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/list`,
-      method: 'get',
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`,
+      method: 'post',
       data
     });
   },
@@ -35,7 +35,7 @@ export const TryApi = {
    */
   getHistory(client, sessionId) {
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/history`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`,
       method: 'get',
       headers: {
         chatId: sessionId
@@ -50,8 +50,8 @@ export const TryApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/delete`,
-      method: 'post',
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`,
+      method: 'get',
       data
     });
   },
@@ -63,7 +63,7 @@ export const TryApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/add`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`,
       method: 'post',
       data
     });
@@ -77,7 +77,7 @@ export const TryApi = {
   evaluateMessage(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`,
       method: 'post',
       data: body
     });
@@ -91,7 +91,7 @@ export const TryApi = {
   chatStream(client, { data, signal, onMessage, onComplete, onError, uploadType = 'img' }) {
     // V2 接口统一使用 app/stream/completion
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/app/stream/completion`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`,
       method: 'POST',
       data,
       stream: true,
@@ -110,7 +110,7 @@ export const TryApi = {
   renameChatTitle(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`,
       method: 'post',
       data: body
     });
@@ -125,7 +125,7 @@ export const TryApi = {
   pinnedChat(client, data) {
     const { chatId, pinned } = data;
     // pinned 参数在 query 中，手动拼接 URL
-    const url = `/web/agentV2/${AGENT_ID}/chat/${chatId}/action/pinned?pinned=${pinned}`;
+    const url = `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/action/pinned?pinned=${pinned}`;
     return client.send({
       url,
       method: 'put',
@@ -139,7 +139,7 @@ export const TryApi = {
    */
   getSuggestions(client) {
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/suggestions`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`,
       method: 'get'
     });
   },
@@ -152,7 +152,7 @@ export const TryApi = {
   markAsRead(client, data) {
     const { chatId } = data;
     return client.send({
-      url: `/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
+      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
       method: 'put',
       data: {}
     });

@@ -142,15 +142,6 @@ import Home from './Home.vue';
 import { getAgentsByBusinessLine, getCurrentBusinessLine } from '@/config/agent-config';
 import { formatConversationTime } from '@/utils';
 
-const MOCK_CONVERSATIONS = [
-  { id: 'conv-1', agentId: 'training-x', label: '如何学习 Python 编程？', group: 'today', time: '15:30' },
-  { id: 'conv-2', agentId: 'training-x', label: 'Vue 组件设计最佳实践', group: 'today', time: '14:20' },
-  { id: 'conv-3', agentId: 'training-x', label: '前端性能优化方案', group: 'today', time: '10:15' },
-  { id: 'conv-4', agentId: 'other-agent', label: 'React vs Vue 对比分析', group: 'yesterday', time: '昨天 18:45' },
-  // 模拟数据参考后端返回结构
-  { id: '455d0eb28a4e44c0bcceeee56d94f3df', agentId: 'try-x', label: 'AI试用', group: 'today', time: '14:43' }
-];
-
 export default {
   name: 'AIAgentContainer',
   components: {
@@ -197,7 +188,7 @@ export default {
     return {
       currentAgentId: null, // null 表示首页
       componentKey: 0, // 用于强制刷新组件的 key
-      conversations: [...MOCK_CONVERSATIONS],
+      conversations: [],
       currentConversationId: '',
       isCollapsed: false,
       // 重命名对话框相关
