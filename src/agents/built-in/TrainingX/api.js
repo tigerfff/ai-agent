@@ -2,7 +2,7 @@
 
 const AGENT_ID = '2';
 
-export const TryApi = {
+export const TrainingXApi = {
   /**
    * 获取 OSS 上传凭证
    * @param {AIClient} client 
@@ -155,6 +155,19 @@ export const TryApi = {
       url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
       method: 'put',
       data: {}
+    });
+  },
+
+  /**
+   * 获取 ASR 签名
+   * @param {AIClient} client
+   * @param {Object} [data] - 可选参数，如 { body: '待签名字符串' }
+   */
+  getAsrSign(client, data = {}) {
+    return client.send({
+      url: '/web/asr/actions/getSign',
+      method: 'post',
+      data
     });
   }
 };

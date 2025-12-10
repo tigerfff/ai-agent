@@ -276,6 +276,8 @@ export default {
       isFocused: false,
       isRecording: false,
       recognizer: null,
+      tempRecognitionText: '', // 临时存储实时识别的文本
+      confirmedText: '', // 已确认的文本（句子结束后）
       // 图标资源
       attachmentIcon,
       deleteIcon,
@@ -408,22 +410,44 @@ export default {
     // 初始化录音实例
     this.recognizer = new SpeechRecognizerWrapper({
       onText: (text, isFinal) => {
+        console.log('[AIInput] onText:', { text, isFinal });
         if (isFinal) {
-           this.inputValue += text;
-           // 保持焦点在最后
-           this.$nextTick(() => {
-             this.adjustHeight();
-             this.focusToEnd();
-           });
+          // 句子结束，确认文本
+          this.confirmedText += text;
+          this.tempRecognitionText = '';
+          this.inputValue = this.confirmedText;
+        } else {
+          // 实时识别结果
+          this.tempRecognitionText = text;
+          this.inputValue = this.confirmedText + text;
         }
+        
+        // 保持焦点在最后
+        this.$nextTick(() => {
+          this.adjustHeight();
+          this.focusToEnd();
+        });
+      },
+      onStart: () => {
+        console.log('[AIInput] ASR started');
+        // 录音开始时，保存当前输入框内容
+        this.confirmedText = this.inputValue || '';
+        this.tempRecognitionText = '';
       },
       onStop: () => {
+        console.log('[AIInput] ASR stopped');
         this.isRecording = false;
+        // 停止时，确认所有临时文本
+        if (this.tempRecognitionText) {
+          this.confirmedText += this.tempRecognitionText;
+          this.inputValue = this.confirmedText;
+          this.tempRecognitionText = '';
+        }
       },
       onError: (err) => {
-        console.error('ASR Error:', err);
+        console.error('[AIInput] ASR Error:', err);
         this.isRecording = false;
-        // 这里可以触发一个 $message.error
+        this.$message && this.$message.error('语音识别失败：' + err.message);
       }
     });
     
@@ -737,9 +761,6 @@ export default {
         this.recognizer.stop();
       } else {
         if (!this.speechConfigProvider) {
-          console.warn('No speechConfigProvider provided. Please pass keys to test ASR.');
-          // 可以在这里加个 alert 提示用户
-          alert('请配置 speechConfigProvider 以启用语音功能 (需要腾讯云 ASR 密钥)');
           return;
         }
         
@@ -750,13 +771,11 @@ export default {
           this.isRecording = true;
           this.recognizer.start(config);
         } catch (e) {
-          console.error('Failed to start recording:', e);
           this.isRecording = false;
         }
       }
     },
 
-    /* --- 提交与停止 --- */
     submit() {
       if (this.isSubmitDisabled) return;
 

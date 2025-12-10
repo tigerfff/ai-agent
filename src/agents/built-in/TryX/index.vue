@@ -11,6 +11,9 @@
         <template #icon>
           <img src="@/assets/images/training-square@3x-1.png" alt="" width="44px">
         </template>
+        <template >
+          <div class="card" @click="handleWelcomeSelect">上传 </div>
+        </template>
     </AIWelcome>
       
       <ChatSkeleton style="margin-top: 40px;" v-else-if="loadingHistory" class="content-wrapper" />
@@ -42,6 +45,7 @@
           :allowed-types="['image', 'video', 'document']"
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
+          :speech-config-provider="getAsrConfig"
           @send="handleSend" 
           @stop="handleStop"
         />
@@ -91,10 +95,6 @@ export default {
         icon: '🔍',
         title: 'AI试用',
         description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。',
-        prompts: [
-          { icon: '📸', title: '图片分析', desc: '上传图片并询问内容', text: '请帮我分析这张图片', needsFile: true },
-          { icon: '🎥', title: '视频检测', desc: '检测视频中的违规行为', text: '视频中是否有违规行为？', needsFile: true }
-        ]
       }
     };
   },
@@ -573,6 +573,47 @@ export default {
       }
       this.isStreaming = false;
       this.isUploading = false;
+    },
+
+    /**
+     * 获取 ASR 配置（用于语音识别）
+     * 优先使用 window.config 中的测试密钥，否则调用后端接口获取签名
+     */
+    async getAsrConfig() {
+      // 生产环境：调用后端接口获取签名
+      try {
+        const res = await TryApi.getAsrSign(this.$aiClient, {});
+        
+        if (res.code === 0 && res.data) {
+          const { appId, sign } = res.data;
+          
+          if (!appId || !sign) {
+            console.error('ASR config missing appId or sign');
+            return null;
+          }
+
+          // 返回配置，使用签名回调方式
+          return {
+            appId,
+            sign, // 直接使用后端返回的签名
+            signCallback: async () => {
+              // 如果需要动态获取签名，可以在这里调用后端接口
+              const refreshRes = await TryApi.getAsrSign(this.$aiClient, {});
+              if (refreshRes.code === 0 && refreshRes.data) {
+                return refreshRes.data.sign;
+              }
+              return sign; // 降级使用初始签名
+            },
+            engineModelType: '16k_zh' // 默认使用中文16k
+          };
+        }
+        
+        console.error('Failed to get ASR config:', res);
+        return null;
+      } catch (e) {
+        console.error('[TryAgent] getAsrConfig failed', e);
+        return null;
+      }
     },
 
     /**

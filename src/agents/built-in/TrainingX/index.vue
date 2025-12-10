@@ -41,6 +41,7 @@
           :allowed-types="['image', 'video', 'document']"
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
+          :speech-config-provider="getAsrConfig"
           @send="handleSend" 
           @stop="handleStop"
         />
@@ -53,7 +54,7 @@
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
-import { TryApi } from './api';
+import { TrainingXApi } from './api';
 import { formatConversationTime } from '@/utils';
 
 export default {
@@ -137,7 +138,7 @@ export default {
       this.ossUploader = new OssUploader({
         tokenProvider: async () => {
           try {
-            const res = await TryApi.getOssToken(this.$aiClient);
+            const res = await TrainingXApi.getOssToken(this.$aiClient);
             // 适配后端返回结构: { code: 0, data: { ... } }
             if (res.code === 0) {
               return res.data;
@@ -222,7 +223,7 @@ export default {
      */
     async fetchConversationList() {
       try {
-        const res = await TryApi.getConversationList(this.$aiClient);
+        const res = await TrainingXApi.getConversationList(this.$aiClient);
         if (res.code === 0 && Array.isArray(res.data)) {
           const map = new Map();
           
@@ -268,7 +269,7 @@ export default {
     async markAsRead(id) {
       if (!id) return;
       try {
-        const res = await TryApi.markAsRead(this.$aiClient, { chatId: id });
+        const res = await TrainingXApi.markAsRead(this.$aiClient, { chatId: id });
         if (res.code === 0) {
            const conv = this.conversationsMap.get(id);
            if (conv) {
@@ -287,7 +288,7 @@ export default {
      */
     async pinSession(id, pinned) {
       try {
-        const res = await TryApi.pinnedChat(this.$aiClient, { chatId: id, pinned });
+        const res = await TrainingXApi.pinnedChat(this.$aiClient, { chatId: id, pinned });
         if (res.code === 0) {
           this.$message.success(pinned ? '置顶成功' : '已取消置顶');
           this.fetchConversationList();
@@ -303,7 +304,7 @@ export default {
      */
     async renameSession(id, title) {
       try {
-        const res = await TryApi.renameChatTitle(this.$aiClient, { chatId: id, title });
+        const res = await TrainingXApi.renameChatTitle(this.$aiClient, { chatId: id, title });
         if (res.code === 0) {
           this.$message.success('重命名成功');
           this.fetchConversationList();
@@ -388,7 +389,7 @@ export default {
       this.messages = [];
 
       try {
-        const res = await TryApi.getHistory(this.$aiClient, this.chatId);
+        const res = await TrainingXApi.getHistory(this.$aiClient, this.chatId);
 
         if (res && res.code === 0 && Array.isArray(res.data)) {
           // 如果后端返回的是按时间倒序的（最新的在前面），需要反转
@@ -488,7 +489,7 @@ export default {
       if (!this.chatId || this.chatId.startsWith('conv-')) {
         try {
           // 创建新会话
-          const res = await TryApi.getChatId(this.$aiClient, {
+          const res = await TrainingXApi.getChatId(this.$aiClient, {
             mineType: 'image'
           });
           if (res.code === 0 && res.data) {
@@ -564,7 +565,7 @@ export default {
       };
 
       try {
-        await TryApi.chatStream(this.$aiClient, {
+        await TrainingXApi.chatStream(this.$aiClient, {
           data: requestBody,
           signal: this.abortController.signal,
           uploadType,
@@ -605,7 +606,7 @@ export default {
      */
     async deleteSession(id) {
       try {
-        const res = await TryApi.deleteHistory(this.$aiClient, { chatId: id });
+        const res = await TrainingXApi.deleteHistory(this.$aiClient, { chatId: id });
         if (res.code === 0) {
           // 如果删除的是当前会话，清空显示
           if (id === this.chatId) {
@@ -628,6 +629,47 @@ export default {
       }
       this.isStreaming = false;
       this.isUploading = false;
+    },
+
+    /**
+     * 获取 ASR 配置（用于语音识别）
+     * 调用后端接口获取签名，使用签名方式连接腾讯云 ASR
+     */
+    async getAsrConfig() {
+      // 生产环境：调用后端接口获取签名
+      try {
+        const res = await TrainingXApi.getAsrSign(this.$aiClient, {});
+        
+        if (res.code === 0 && res.data) {
+          const { appId, sign } = res.data;
+          
+          if (!appId || !sign) {
+            console.error('ASR config missing appId or sign');
+            return null;
+          }
+
+          // 返回配置，使用签名回调方式
+          return {
+            appId,
+            sign, // 直接使用后端返回的签名
+            signCallback: async () => {
+              // 如果需要动态获取签名，可以在这里调用后端接口
+              const refreshRes = await TrainingXApi.getAsrSign(this.$aiClient, {});
+              if (refreshRes.code === 0 && refreshRes.data) {
+                return refreshRes.data.sign;
+              }
+              return sign; // 降级使用初始签名
+            },
+            engineModelType: '16k_zh' // 默认使用中文16k
+          };
+        }
+        
+        console.error('Failed to get ASR config:', res);
+        return null;
+      } catch (e) {
+        console.error('[TrainingX] getAsrConfig failed', e);
+        return null;
+      }
     },
 
     handleFinish({ index }) {

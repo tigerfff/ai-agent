@@ -11,9 +11,9 @@
       <!-- 标题区域 -->
       <h2 class="welcome-title">{{ title }}</h2>
       <p class="welcome-desc" v-if="description">{{ description }}</p>
-
-      <!-- 快捷指令区域 -->
-      <div class="welcome-prompts" v-if="prompts.length > 0">
+      <!-- 默认值 -->
+      <slot>
+        <div class="welcome-prompts" v-if="prompts.length > 0">
         <div 
           v-for="(item, index) in prompts" 
           :key="index"
@@ -26,7 +26,8 @@
           <span></span>
         </div>
       </div>
-
+      </slot>
+      <!-- 快捷指令区域 -->
       <div class="welcome-footer">
         <slot name="footer">
           <span>
@@ -58,7 +59,7 @@ export default {
     prompts: {
       type: Array,
       default: () => []
-    }
+    } 
   },
   methods: {
     handleClick(item) {
