@@ -53,18 +53,19 @@
             <!-- 左侧操作区：上传 & 计数 -->
             <div class="action-left">
               <!-- 上传按钮（带下拉菜单） -->
-              <div class="upload-btn-wrapper">
+              <div v-if="showUploadButton" class="upload-btn-wrapper">
                 <div 
                   class="action-btn upload-btn" 
-                  @click="handleUploadClick" 
+                  :class="{ 'disabled': disableUploadButton }"
+                  @click="!disableUploadButton && handleUploadClick()" 
                   title="上传文件"
                 >
                   <img :src="attachmentIcon" alt="上传文件" class="icon-img" />
                 </div>
                 
-                <!-- 下拉菜单（仅在支持多种类型时显示） -->
+                <!-- 下拉菜单（仅在支持多种类型时显示，或有自定义菜单项时显示） -->
                 <div 
-                  v-if="!isSingleTypeOnly && showUploadMenu" 
+                  v-if="(!isSingleTypeOnly || visibleCustomMenuItems.length > 0) && showUploadMenu" 
                   class="upload-menu"
                   @click.stop
                 >
@@ -92,6 +93,24 @@
                     <img :src="documentIcon" alt="文档" class="menu-icon" />
                     <span>文档</span>
                   </div>
+                  
+                  <!-- 分隔线（如果有文件类型选项和自定义菜单项） -->
+                  <div 
+                    v-if="hasFileTypeOptions && visibleCustomMenuItems.length > 0"
+                    class="menu-divider"
+                  ></div>
+                  
+                  <!-- 自定义菜单项 -->
+                  <div
+                    v-for="item in visibleCustomMenuItems"
+                    :key="item.key"
+                    class="menu-item"
+                    :class="{ 'disabled': item.disabled }"
+                    @click="!item.disabled && handleCustomMenuItemClick(item)"
+                  >
+                    <img v-if="item.iconSrc" :src="item.iconSrc" alt="" class="menu-icon" />
+                    <span>{{ item.label }}</span>
+                  </div>
                 </div>
               </div>
               
@@ -109,21 +128,25 @@
               </div>
             </div>
 
-            <!-- 右侧操作区：清空 & 语音 & 发送 -->
+            <!-- 右侧操作区：清空 & 语音 & 发送 & 自定义按钮 -->
             <div class="action-right">
+              <!-- 清空按钮 -->
               <div 
+                v-if="showClearButton"
                 class="action-btn clear-btn" 
-                v-if="inputValue || hasAttachments"
-                @click="clear"
+                :class="{ 'disabled': disableClearButton }"
+                @click="!disableClearButton && clear()"
                 title="清空"
               >
                 <i class="h-icon-close_f" style="font-size: 32px;"></i>
               </div>
 
+              <!-- 语音按钮 -->
               <div 
+                v-if="showSpeechButton"
                 class="action-btn speech-btn" 
-                :class="{ 'recording': isRecording }"
-                @click="toggleRecord"
+                :class="{ 'recording': isRecording, 'disabled': disableSpeechButton }"
+                @click="!disableSpeechButton && toggleRecord()"
                 title="语音输入"
               >
                 <img 
@@ -140,28 +163,32 @@
                 />
               </div>
 
+              <!-- 停止按钮 -->
               <div 
-                v-if="loading"
+                v-if="showStopButton"
                 class="action-btn stop-btn"
-                @click="stopGeneration"
+                :class="{ 'disabled': disableStopButton }"
+                @click="!disableStopButton && stopGeneration()"
                 title="停止生成"
               >
                 <img :src="pauseIcon" alt="停止生成" class="icon-img" />
               </div>
               
+              <!-- 发送按钮 -->
               <div 
-                v-else
+                v-if="showSendButton"
                 class="action-btn send-btn" 
-                :class="{ 'disabled': isSubmitDisabled }"
-                @click="submit"
+                :class="{ 'disabled': disableSendButton }"
+                @click="!disableSendButton && submit()"
                 title="发送"
               >
                 <img 
-                  :src="isSubmitDisabled ? sendDisabledIcon : sendIcon" 
+                  :src="disableSendButton ? sendDisabledIcon : sendIcon" 
                   alt="发送" 
                   class="icon-img" 
                 />
               </div>
+
             </div>
           </div>
         </div>
@@ -267,6 +294,44 @@ export default {
     maxSize: {
       type: Number,
       default: null
+    },
+    /**
+     * 按钮配置对象，控制按钮的显示/隐藏和禁用
+     * {
+     *   upload: { visible: true, disabled: false },
+     *   clear: { visible: true, disabled: false },
+     *   speech: { visible: true, disabled: false },
+     *   stop: { visible: true, disabled: false },
+     *   send: { visible: true, disabled: false }
+     * }
+     */
+    buttonConfig: {
+      type: Object,
+      default: () => ({})
+    },
+    /**
+     * 发送按钮是否禁用（快速控制，优先级高于 buttonConfig）
+     */
+    sendDisabled: {
+      type: Boolean,
+      default: null
+    },
+    /**
+     * 自定义菜单项数组（添加到上传按钮的下拉菜单中）
+     * [
+     *   {
+     *     key: 'custom1',
+     *     label: '自定义菜单',
+     *     iconSrc: '/path/to/icon.svg', // 可选：图标路径
+     *     visible: true,
+     *     disabled: false,
+     *     onClick: () => {} // 点击回调
+     *   }
+     * ]
+     */
+    customMenuItems: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -404,6 +469,107 @@ export default {
     lockedFileType() {
       if (!this.singleTypeMode || !this.currentFileType) return null;
       return this.currentFileType;
+    },
+    /**
+     * 合并后的按钮配置（默认值 + 用户配置）
+     */
+    mergedButtonConfig() {
+      const defaultConfig = {
+        upload: { visible: true, disabled: false },
+        clear: { visible: true, disabled: false },
+        speech: { visible: true, disabled: false },
+        stop: { visible: true, disabled: false },
+        send: { visible: true, disabled: false }
+      };
+      
+      // 合并用户配置
+      const merged = { ...defaultConfig };
+      Object.keys(this.buttonConfig).forEach(key => {
+        if (merged[key]) {
+          merged[key] = { ...merged[key], ...this.buttonConfig[key] };
+        }
+      });
+      
+      // sendDisabled 优先级最高
+      if (this.sendDisabled !== null) {
+        merged.send.disabled = this.sendDisabled;
+      }
+      
+      return merged;
+    },
+    /**
+     * 上传按钮是否可见
+     */
+    showUploadButton() {
+      return this.mergedButtonConfig.upload.visible;
+    },
+    /**
+     * 上传按钮是否禁用
+     */
+    disableUploadButton() {
+      return this.mergedButtonConfig.upload.disabled;
+    },
+    /**
+     * 清空按钮是否可见
+     */
+    showClearButton() {
+      return this.mergedButtonConfig.clear.visible && (this.inputValue || this.hasAttachments);
+    },
+    /**
+     * 清空按钮是否禁用
+     */
+    disableClearButton() {
+      return this.mergedButtonConfig.clear.disabled;
+    },
+    /**
+     * 语音按钮是否可见
+     */
+    showSpeechButton() {
+      return this.mergedButtonConfig.speech.visible;
+    },
+    /**
+     * 语音按钮是否禁用
+     */
+    disableSpeechButton() {
+      return this.mergedButtonConfig.speech.disabled || !this.speechConfigProvider;
+    },
+    /**
+     * 停止按钮是否可见
+     */
+    showStopButton() {
+      return this.mergedButtonConfig.stop.visible && this.loading;
+    },
+    /**
+     * 停止按钮是否禁用
+     */
+    disableStopButton() {
+      return this.mergedButtonConfig.stop.disabled;
+    },
+    /**
+     * 发送按钮是否可见
+     */
+    showSendButton() {
+      return this.mergedButtonConfig.send.visible && !this.loading;
+    },
+    /**
+     * 发送按钮是否禁用（合并内部逻辑和外部配置）
+     */
+    disableSendButton() {
+      return this.mergedButtonConfig.send.disabled || this.isSubmitDisabled;
+    },
+    /**
+     * 是否有文件类型选项（图片/视频/文档）
+     */
+    hasFileTypeOptions() {
+      return this.parsedAllowedTypes.image || 
+             this.parsedAllowedTypes.video || 
+             this.parsedAllowedTypes.document;
+    },
+    /**
+     * 可见的自定义菜单项（过滤掉不可见的）
+     */
+    visibleCustomMenuItems() {
+      return (this.customMenuItems || []).filter(item => item.visible !== false);
     }
   },
   mounted() {
@@ -540,11 +706,12 @@ export default {
         return;
       }
       
-      if (this.isSingleTypeOnly) {
-        // 只支持一种类型，直接触发文件选择
+      // 如果有自定义菜单项，即使只有一种文件类型也显示菜单
+      if (this.isSingleTypeOnly && this.visibleCustomMenuItems.length === 0) {
+        // 只支持一种类型且没有自定义菜单项，直接触发文件选择
         this.triggerFileSelect(this.supportedTypes[0]);
       } else {
-        // 支持多种类型，显示下拉菜单
+        // 支持多种类型或有自定义菜单项，显示下拉菜单
         this.showUploadMenu = !this.showUploadMenu;
       }
     },
@@ -809,6 +976,31 @@ export default {
      */
     setText(text) {
       this.inputValue = text || '';
+    },
+    /**
+     * 处理自定义菜单项点击
+     */
+    handleCustomMenuItemClick(item) {
+      if (item.disabled) return;
+      
+      // 关闭菜单
+      this.showUploadMenu = false;
+      
+      if (typeof item.onClick === 'function') {
+        item.onClick({
+          inputValue: this.inputValue,
+          fileList: this.fileList,
+          hasAttachments: this.hasAttachments
+        });
+      }
+      
+      // 触发事件，让父组件可以监听
+      this.$emit('custom-menu-item-click', {
+        key: item.key,
+        item: item,
+        inputValue: this.inputValue,
+        fileList: this.fileList
+      });
     }
   }
 };
@@ -952,12 +1144,18 @@ export default {
               font-size: 14px;
               color: #606266;
 
-              &:hover {
+              &:hover:not(.disabled) {
                 background-color: #f5f7fa;
               }
 
               &:not(:last-child) {
                 border-bottom: 1px solid #ebeef5;
+              }
+
+              &.disabled {
+                cursor: not-allowed;
+                opacity: 0.6;
+                color: #c0c4cc;
               }
 
               .menu-icon {
@@ -967,6 +1165,12 @@ export default {
                 object-fit: contain;
                 flex-shrink: 0;
               }
+            }
+
+            .menu-divider {
+              height: 1px;
+              background-color: #ebeef5;
+              margin: 4px 0;
             }
           }
         }
@@ -1003,13 +1207,13 @@ export default {
               color: #fff;
             }
 
-            &.disabled {
-              cursor: not-allowed;
-              opacity: 0.7;
-            }
+          &.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
           }
+        }
 
-          &.stop-btn {
+        &.stop-btn {
             color: #fff;
             border-radius: 8px;
             font-size: 12px;

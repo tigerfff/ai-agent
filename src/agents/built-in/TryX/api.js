@@ -20,7 +20,7 @@ export const TryApi = {
   getConversationList(client, data = {}) {
     return client.send({
       url: '/v1/inspect/chat/web/agent/chat/list',
-      method: 'get',
+      method: 'post',
       data
     });
   },
@@ -48,7 +48,7 @@ export const TryApi = {
   deleteHistory(client, data) {
     return client.send({
       url: '/v1/inspect/chat/web/agent/chat/delete',
-      method: 'delete',
+      method: 'get',
       data
     });
   },

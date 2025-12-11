@@ -24,6 +24,16 @@
             {{ item.role === 'user' ? '👤' : '🤖' }}
           </div>
         </template>
+
+        <!-- 自定义 Widget 渲染 -->
+        <template #widget="{ info, item, index }">
+          <TrainPlanForm
+            v-if="info.widgetType === 'ymform:train_plan'"
+            :data="info.data"
+            :is-history-disabled="index < messages.length - 1" 
+            @send-message="handleWidgetSend"
+          />
+        </template>
       </AIHistory>
     </div>
 
@@ -42,6 +52,20 @@
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"
+          :button-config="{
+              upload: { visible: true, disabled: false },
+              speech: { visible: false }, // 隐藏语音按钮
+              send: { disabled: false }
+            }"
+            :send-disabled="false"
+          :custom-menu-items="[
+            {
+              key: 'emoji',
+              label: '表情',
+              iconSrc: '/path/to/emoji.svg',
+              onClick: () => this.demo()
+            }
+          ]"
           @send="handleSend" 
           @stop="handleStop"
         />
@@ -57,13 +81,15 @@ import trainingSquareIcon from '@/assets/images/try.png';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from './api';
 import { formatConversationTime } from '@/utils';
+import TrainPlanForm from './widgets/TrainPlanForm.vue';
 
 export default {
   name: 'TryAgent',
   inject: ['sessionApi'],
   components: {
     AIWelcome,
-    ChatSkeleton
+    ChatSkeleton,
+    TrainPlanForm
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
@@ -132,9 +158,17 @@ export default {
   created() {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
-    this.fetchConversationList();
+    // this.fetchConversationList();
+    
+    // ========== 临时 Mock 数据（测试用，可随时删除） ==========
+    // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
+    // 或者取消下面的注释，自动添加测试消息
+    this.mockTrainPlanForm();
   },
   methods: {
+    demo() {
+      console.log('demo');
+    },
     initUploader() {
       this.ossUploader = new OssUploader({
         tokenProvider: async () => {
@@ -672,6 +706,37 @@ export default {
         console.error('[TrainingX] getAsrConfig failed', e);
         return null;
       }
+    },
+
+    handleWidgetSend(text) {
+      this.handleSend({ text });
+    },
+
+    /**
+     * 临时 Mock 方法：添加测试培训计划表单消息（可随时删除）
+     */
+    mockTrainPlanForm() {
+      const mockContent = `<ymform:train_plan>
+{
+  "courseProjectId": "43dbb90d1ba94f4f844ea71b89b4438a",
+  "type": "项目",
+  "questionId": "123",
+  "storeId": "123",
+  "userIds": ["aaaa", "bbbb"]
+}
+</ymform:train_plan>`;
+
+      const mockMsg = {
+        key: 'mock-train-plan-' + Date.now(),
+        role: 'ai',
+        content: mockContent,
+        attachments: [],
+        variant: 'filled',
+        placement: 'start'
+      };
+      
+      this.messages.push(mockMsg);
+      console.log('[Mock] 已添加测试培训计划表单消息');
     },
 
     handleFinish({ index }) {

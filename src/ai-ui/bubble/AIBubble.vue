@@ -375,7 +375,6 @@ export default {
       }
 
       .widget-wrapper {
-        margin: 8px 0;
         width: 100%;
 
         .widget-fallback {

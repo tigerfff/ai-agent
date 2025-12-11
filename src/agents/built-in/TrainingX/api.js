@@ -168,5 +168,87 @@ export const TrainingXApi = {
       method: 'post',
       data
     });
+  },
+
+  /**
+   * 获取项目详情
+   * @param {AIClient} client
+   * @param {string} projectId
+   */
+  getProjectDetail(client, projectId) {
+    return client.send({
+      url: `/v1/enterprise/training/projects/${projectId}`,
+      method: 'get',
+      baseURL: 'https://pbchain.hik-cloud.com' // 使用完整 URL
+    });
+  },
+
+  /**
+   * 获取课程详情
+   * @param {AIClient} client
+   * @param {string} courseId
+   */
+  getCourseDetail(client, courseId) {
+    return client.send({
+      url: `/v1/enterprise/training/course`,
+      method: 'get',
+      data: { courseId },
+      baseURL: 'https://pbchain.hik-cloud.com' // 使用完整 URL
+    });
+  },
+
+  /**
+   * 获取人员信息 (Mock)
+   * @param {AIClient} client
+   * @param {Array<string>} userIds
+   */
+  getPersonnelInfo(client, userIds) {
+    // 模拟异步请求
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const mockUsers = userIds.map(id => ({
+          id,
+          name: id === 'aaaa' ? '张三' : (id === 'bbbb' ? '李四' : `用户${id.slice(0, 4)}`)
+        }));
+        resolve({
+          code: 0,
+          data: mockUsers,
+          msg: 'success'
+        });
+      }, 500);
+    });
+  },
+
+  /**
+   * 获取项目列表（支持搜索和分页）
+   * @param {AIClient} client
+   * @param {Object} params - { projectName, pageNo, pageSize, containSub, projectStatus, projectType }
+   */
+  getProjectList(client, params = {}) {
+    const {
+      projectName = '',
+      pageNo = 1,
+      pageSize = 20,
+      containSub = true,
+      projectStatus = 1,
+      projectType = 0
+    } = params;
+
+    // 构建查询字符串
+    const queryParams = new URLSearchParams({
+      projectName: String(projectName),
+      pageNo: String(pageNo),
+      pageSize: String(pageSize),
+      containSub: String(containSub),
+      projectStatus: String(projectStatus),
+      projectType: String(projectType)
+    });
+
+    return client.send({
+      url: `/v1/enterprise/training/projects?${queryParams.toString()}`,
+      method: 'get',
+      baseURL: 'https://pbchain.hik-cloud.com', // 使用完整 URL
+      data: {} // GET 请求的 data 可能不会被使用，但为了兼容性保留
+    });
   }
 };

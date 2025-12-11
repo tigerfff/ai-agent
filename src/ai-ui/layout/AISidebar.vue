@@ -23,7 +23,7 @@
     </div>
 
     <!-- Agent List (智能体选择) -->
-    <div class="agent-list">
+    <div class="agent-list" v-if="agents.length > 1">
       <div 
         v-for="agent in agents" 
         :key="agent.id"
@@ -38,6 +38,9 @@
         <span class="agent-name">{{ collapsed ? agent.miniName : agent.name }}</span>
       </div>
     </div>
+
+    <p style="height: 1px; "></p>
+
 
     <!-- Conversations (会话历史列表) -->
     <div class="conversations-section">
