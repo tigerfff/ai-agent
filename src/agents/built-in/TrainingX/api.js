@@ -23,7 +23,7 @@ export const TrainingXApi = {
   getConversationList(client, data = {}) {
     return client.send({
       url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`,
-      method: 'post',
+      method: 'get',
       data
     });
   },
@@ -34,12 +34,11 @@ export const TrainingXApi = {
    * @param {string} sessionId 
    */
   getHistory(client, sessionId) {
+    console.log('sessionId', sessionId)
     return client.send({
       url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`,
       method: 'get',
-      headers: {
-        chatId: sessionId
-      }
+      data: { chatId: sessionId }
     });
   },
 
@@ -51,7 +50,7 @@ export const TrainingXApi = {
   deleteHistory(client, data) {
     return client.send({
       url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`,
-      method: 'get',
+      method: 'delete',
       data
     });
   },

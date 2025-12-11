@@ -377,6 +377,7 @@ export default {
      * 加载当前 chatId 的历史记录
      */
     async loadHistory() {
+      console.log('loadHistory', this.chatId);
       if (!this.chatId) return;
 
       // 如果是临时会话ID（AgentContainer 生成的），则不加载历史，直接显示欢迎页

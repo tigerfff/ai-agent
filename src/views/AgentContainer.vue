@@ -231,6 +231,9 @@ export default {
       return this.conversations.filter(c => c.agentId === this.currentAgentId);
     },
     currentConversationTitle() {
+      if (this.currentConversationId && this.currentConversationId.startsWith('conv-')) {
+        return '新会话';
+      }
       const chat = this.conversations.find(c => c.id === this.currentConversationId);
       return chat ? (chat.label || '新会话') : 'AI 助手';
     }
@@ -258,27 +261,27 @@ export default {
       this.conversations = this.conversations.filter(c => c.agentId !== this.currentAgentId);
       
       // 2. 补全 agentId 并合并新会话
-      // 注意：不强制设置 group，让 AIConversations 组件内部自动按时间分组
       const formattedList = newList.map(item => ({
         ...item,
         agentId: this.currentAgentId
-        // group 字段由 AIConversations 组件内部根据时间自动计算
       }));
       
       this.conversations = [...this.conversations, ...formattedList];
 
       // 3. 检查当前选中的 ID 是否在新列表中
-      // 注意：如果是临时 ID (conv-开头)，可能不在新列表中，但我们需要保留它
       const currentExists = formattedList.some(item => item.id === this.currentConversationId);
       const isTempId = this.currentConversationId && this.currentConversationId.startsWith('conv-');
 
-      if (!isTempId && (!this.currentConversationId || !currentExists) && formattedList.length > 0) {
-        // 如果不是临时 ID，且当前没有选中或选中的 ID 已失效，则选中第一个
-        this.currentConversationId = formattedList[0].id;
-      } else if (!isTempId && !currentExists && formattedList.length === 0) {
-        // 如果列表为空且不是临时 ID，清空选中
-        this.currentConversationId = null;
+      if (!isTempId && (!this.currentConversationId || !currentExists)) {
+        if (formattedList.length > 0) {
+          // 如果不是临时 ID，且当前没有选中或选中的 ID 已失效，则选中第一个
+          this.currentConversationId = formattedList[0].id;
+        } else {
+          // 如果列表为空，自动进入新建会话状态
+          this.handleNewChat();
+        }
       }
+      // 如果是临时 ID，即使不在列表中也保留选中状态（虚拟会话）
     },
 
     handleSelectConversation(id) {
@@ -289,24 +292,16 @@ export default {
       console.log('User clicked new chat');
       if (!this.currentAgentId) return;
 
+      // 如果当前已经是新会话（虚拟ID），则不再重复创建
+      if (this.currentConversationId && this.currentConversationId.startsWith('conv-')) {
+        return;
+      }
+
+      // 生成新ID，但 *不添加到 conversations 列表*
+      // 虚拟会话只在内存中维护，直到发送第一条消息后后端返回真实会话
       const newId = 'conv-' + Date.now();
-      // 这里对于 TryAgent 应该调接口创建新会话？
-      // 暂时只在前端创建，等发消息时后端可能会返回新 ID
-      // 但 TryAgent 的逻辑通常是需要先有 chatId (或者发消息时生成)
-      // 现有的逻辑里，handleSend 用的是 this.chatId。如果这里的 newId 是前端生成的，传给 API 可能会有问题
-      // 除非 API 支持传空 chatId 创建新会话。
-      // 先保持前端逻辑：
-      const now = new Date().toISOString();
-      this.conversations.unshift({
-        id: newId,
-        agentId: this.currentAgentId,
-        label: '新会话',
-        createTime: now,
-        updateTime: now,
-        time: formatConversationTime(now)
-      });
+      
       this.currentConversationId = newId;
-      this.componentKey++; 
     },
     deleteConversation(id) {
       // 1. 调用子组件的删除方法（如果存在）
