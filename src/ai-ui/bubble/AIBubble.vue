@@ -29,9 +29,9 @@
         />
       </div>
 
-      <!-- 2. 文本内容气泡 -->
+      <!-- 2. 文本内容气泡（独立渲染） -->
       <div 
-        v-if="content || loading"
+        v-if="(content || loading) && (textParts.length > 0 || loading)"
         class="bubble-body text-body" 
         :class="variant"
       >
@@ -40,34 +40,35 @@
           <span></span><span></span><span></span>
         </div>
 
-        <!-- 混合内容渲染 (Markdown + Widgets) -->
+        <!-- 文本内容渲染 -->
         <div v-else class="bubble-content-mix">
-          <template v-for="(part, idx) in contentParts">
-            <!-- 文本片段 -->
+          <template v-for="(part, idx) in textParts" >
             <div 
-              v-if="part.type === 'text'"
               :key="'text-' + idx"
               class="markdown-body" 
               v-html="renderMarkdown(part.content)"
             ></div>
-
-            <!-- 组件片段 (Loading 或 Done) -->
-            <div 
-              v-else-if="part.type === 'widget'"
-              :key="'widget-' + idx"
-              class="widget-wrapper"
-            >
-              <slot name="widget" :info="part">
-                <div class="widget-fallback">
-                  [Unknown Widget: {{ part.widgetType }}]
-                </div>
-              </slot>
-            </div>
           </template>
         </div>
 
         <!-- 光标 (打字时显示) -->
         <span v-if="isTyping" class="cursor">|</span>
+      </div>
+
+      <!-- 3. Widget 气泡（独立渲染，每个 widget 一个气泡） -->
+      <div 
+        v-for="(widget, idx) in filteredWidgetParts"
+        :key="'widget-' + idx"
+        class="bubble-body widget-body" 
+        :class="variant"
+      >
+        <div class="widget-wrapper">
+          <slot name="widget" :info="widget">
+            <div class="widget-fallback">
+              [Unknown Widget: {{ widget.widgetType }}]
+            </div>
+          </slot>
+        </div>
       </div>
 
       <!-- Footer -->
@@ -124,6 +125,14 @@ export default {
     variant: {
       type: String,
       default: 'filled'
+    },
+    /**
+     * 不渲染的 widget 类型列表，例如 ['ymform:train_confirm']
+     * 父组件可传入以禁用特定 widget 冒泡
+     */
+    ignoreWidgetTypes: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -138,6 +147,23 @@ export default {
     // 解析后的内容片段列表
     contentParts() {
       return this.parser.parse(this.displayContent || '');
+    },
+    
+    // 文本片段（所有 type === 'text' 的部分）
+    textParts() {
+      return this.contentParts.filter(part => part.type === 'text');
+    },
+    
+    // Widget 片段（所有 type === 'widget' 的部分）
+    widgetParts() {
+      return this.contentParts.filter(part => part.type === 'widget');
+    },
+    
+    // 经过过滤后需要渲染的 widget（排除 ignoreWidgetTypes）
+    filteredWidgetParts() {
+      if (!this.ignoreWidgetTypes || this.ignoreWidgetTypes.length === 0) return this.widgetParts;
+      const ignoreSet = new Set(this.ignoreWidgetTypes);
+      return this.widgetParts.filter(part => !ignoreSet.has(part.widgetType));
     },
     
     // 判断是否为单张图片
@@ -260,6 +286,12 @@ export default {
       .bubble-content-mix {
         color: #fff;
       }
+      
+      // Widget 气泡也使用相同的样式
+      &.widget-body {
+        background: linear-gradient(90deg, rgba(53,172,255,1) 0%, rgba(22,122,255,1) 100%);
+        color: #fff;
+      }
     }
   }
   
@@ -280,6 +312,12 @@ export default {
       }
       
       .bubble-content-mix {
+        color: #333;
+      }
+      
+      // Widget 气泡也使用相同的样式
+      &.widget-body {
+        background: #fff;
         color: #333;
       }
     }

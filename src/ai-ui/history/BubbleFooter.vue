@@ -1,5 +1,6 @@
 <template>
   <div class="bubble-footer-actions">
+    <slot name="before-custom-actions"></slot>
     <!-- 1. 复制 -->
     <div 
       v-if="actions.includes('copy')" 
@@ -85,6 +86,8 @@
         class="action-icon" 
       />
     </div>
+
+    <slot name="after-custom-actions"></slot>
   </div>
 </template>
 

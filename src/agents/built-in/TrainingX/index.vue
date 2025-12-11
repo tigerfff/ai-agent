@@ -18,6 +18,7 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         class="history-full-width"
+        :ignoreWidgetTypes="['ymform:train_confirm','ymForm:train_plan_result']"
       >
         <template #avatar="{ item }">
           <div class="custom-avatar" :class="item.role">
@@ -33,6 +34,24 @@
             :is-history-disabled="index < messages.length - 1" 
             @send-message="handleWidgetSend"
           />
+
+        </template>
+
+        <template  #footer="{ item, index }" >
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <div class="stop-task" v-if="item.content.includes('ymForm:train_plan_result')" @click="handleCancelTask(item)">
+              <i class="h-icon-close_f"></i>
+              <span>停止任务</span>
+            </div>
+            <span  v-if="item.content.includes('ymForm:train_plan_result')" style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
+            <BubbleFooter 
+              :item="item" 
+              :actions="getActions(item)"
+            >
+            </BubbleFooter>
+          </div>
+          <!-- {{ item }} -->
+         
         </template>
       </AIHistory>
     </div>
@@ -53,19 +72,11 @@
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"
           :button-config="{
-              upload: { visible: true, disabled: false },
-              speech: { visible: false }, // 隐藏语音按钮
-              send: { disabled: false }
-            }"
-            :send-disabled="false"
-          :custom-menu-items="[
-            {
-              key: 'emoji',
-              label: '表情',
-              iconSrc: '/path/to/emoji.svg',
-              onClick: () => this.demo()
-            }
-          ]"
+            upload: { visible: true, disabled: false },
+            speech: { visible: false }, // 隐藏语音按钮
+            send: { disabled: false }
+          }"
+          :send-disabled="sendBtnDisabled"
           @send="handleSend" 
           @stop="handleStop"
         />
@@ -82,6 +93,7 @@ import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from './api';
 import { formatConversationTime } from '@/utils';
 import TrainPlanForm from './widgets/TrainPlanForm.vue';
+import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 
 export default {
   name: 'TryAgent',
@@ -89,7 +101,8 @@ export default {
   components: {
     AIWelcome,
     ChatSkeleton,
-    TrainPlanForm
+    TrainPlanForm,
+    BubbleFooter
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
@@ -110,6 +123,15 @@ export default {
       isUploading: false,
       loadingHistory: false,
       abortController: null,
+
+      // 操作栏配置
+      actionConfig: {
+        user: ['edit', 'copy'],
+        bot: ['copy', 'like', 'dislike', 'edit']
+      },
+
+      // 控制什么时候可以发送
+      sendBtnDisabled: false,
       
       // OSS 上传器实例
       ossUploader: null,
@@ -166,8 +188,11 @@ export default {
     this.mockTrainPlanForm();
   },
   methods: {
-    demo() {
-      console.log('demo');
+
+    getActions(item) {
+      // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
+      const role = item.placement === 'end' ? 'user' : 'bot';
+      return this.actionConfig[role] || [];
     },
     initUploader() {
       this.ossUploader = new OssUploader({
@@ -606,7 +631,6 @@ export default {
           signal: this.abortController.signal,
           uploadType,
           onMessage: (msgData) => {
-            aiMsg.loading = false;
             if (!msgData) return;
 
             if (msgData.text) {
@@ -614,11 +638,14 @@ export default {
             }
 
             if (msgData.status !== 0) {
+              aiMsg.loading = false;
               this.isStreaming = false;
               this.handleFinish({ index: this.messages.indexOf(aiMsg) });
             }
           },
           onComplete: () => {
+            aiMsg.loading = false;
+            this.isStreaming = false;
             this.handleFinish({ index: this.messages.indexOf(aiMsg) });
           },
           onError: (err) => {
@@ -804,6 +831,21 @@ export default {
     .history-full-width {
       width: 100%;
       height: 100%;
+    }
+
+    .stop-task {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,1);
+      color: rgba($color: #000000, $alpha: .7);
+      cursor: pointer;
+      &:hover {
+        color: #666;
+      }
     }
   }
 

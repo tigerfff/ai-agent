@@ -11,6 +11,7 @@
           v-for="(item, index) in list"
           :key="item.key || index"
           v-bind="item"
+          :ignoreWidgetTypes="ignoreWidgetTypes"
           @update="handleBubbleUpdate"
           @finish="(inst) => handleBubbleFinish(index, inst)"
           class="bubble-item-wrapper" 
@@ -29,7 +30,14 @@
                 :item="item" 
                 :actions="getActions(item)"
                 @action="(type, payload) => handleAction(type, payload, index)"
-              />
+              >
+                <template #before-custom-actions>
+                  <slot name="before-custom-actions"></slot>
+                </template>
+                <template #after-custom-actions>
+                  <slot name="after-custom-actions"></slot>
+                </template>
+              </BubbleFooter>
             </slot>
           </template>
         </AIBubble>
@@ -62,6 +70,11 @@ export default {
   },
   props: {
     list: {
+      type: Array,
+      default: () => []
+    },
+    // 需要忽略渲染的 widget 类型列表，透传给 AIBubble
+    ignoreWidgetTypes: {
       type: Array,
       default: () => []
     },

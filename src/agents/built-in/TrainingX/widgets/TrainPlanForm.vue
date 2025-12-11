@@ -12,16 +12,16 @@
             v-model="formData.courseProjectId"
             :remote-method="handleProjectSearch"
             :selected-options="selectedProjectOptions"
-            :get-option-key="(item) => item.projectId"
-            :get-option-label="(item) => item.projectName"
-            :get-option-value="(item) => item.projectId"
-            placeholder="请选择学习项目"
+            :get-option-key="getOptionKey"
+            :get-option-label="getOptionLabel"
+            :get-option-value="getOptionValue"
+            :placeholder="formData.type === '项目' ? '请选择学习项目' : '请选择学习课程'"
             :disabled="isDisabled"
             style="width: 50%"
             @change="handleProjectChange"
             @input="handleProjectInput"
           />
-          <div v-else class="text-display">{{ detailInfo.name || selectedProjectName || '未知项目' }}</div>
+          <div v-else class="text-display">{{ detailInfo.name || selectedProjectName || (formData.type === '项目' ? '未知项目' : '未知课程') }}</div>
         </div>
       </div>
 
@@ -141,10 +141,55 @@ export default {
     },
     selectedProjectName() {
       if (!this.formData.courseProjectId) return '';
-      const selected = this.selectedProjectOptions.find(
-        opt => opt.projectId === this.formData.courseProjectId
-      );
-      return selected ? selected.projectName : '';
+      const selected = this.selectedProjectOptions.find(opt => {
+        if (this.formData.type === '项目') {
+          return opt.projectId === this.formData.courseProjectId;
+        } else {
+          return (opt.courseId === this.formData.courseProjectId || opt.id === this.formData.courseProjectId);
+        }
+      });
+      
+      if (this.formData.type === '项目') {
+        return selected ? selected.projectName : '';
+      } else {
+        return selected ? (selected.courseName || selected.name) : '';
+      }
+    },
+    /**
+     * 获取选项的 key（用于 v-for :key）
+     */
+    getOptionKey() {
+      return (item) => {
+        if (this.formData.type === '项目') {
+          return item.projectId;
+        } else {
+          return item.courseId || item.id;
+        }
+      };
+    },
+    /**
+     * 获取选项的 label（显示文本）
+     */
+    getOptionLabel() {
+      return (item) => {
+        if (this.formData.type === '项目') {
+          return item.projectName;
+        } else {
+          return item.name;
+        }
+      };
+    },
+    /**
+     * 获取选项的 value（实际值）
+     */
+    getOptionValue() {
+      return (item) => {
+        if (this.formData.type === '项目') {
+          return item.projectId;
+        } else {
+          return item.courseId || item.id;
+        }
+      };
     }
   },
   created() {
@@ -215,31 +260,87 @@ export default {
       }
     },
     /**
-     * 处理项目搜索（AILoadSelect 的 remoteMethod）
+     * 处理项目/课程搜索（AILoadSelect 的 remoteMethod）
      */
     async handleProjectSearch(query, page, pageSize) {
       try {
-        const {data} = await TrainingXApi.getProjectList(this.$aiClient, {
-          projectName: query || '',
-          pageNo: page,
-          pageSize: pageSize,
-          containSub: true,
-          projectStatus: 1,
-          projectType: 0
-        });
+        let result;
+        
+        // 根据 type 判断是项目还是课程
+        if (this.formData.type === '项目') {
+          // 项目列表
+          const { data } = await TrainingXApi.getProjectList(this.$aiClient, {
+            projectName: query || '',
+            pageNo: page,
+            pageSize: pageSize,
+            containSub: true,
+            projectStatus: 1,
+            projectType: 0
+          });
 
-        const list = data.rows || [];
-          if(!query && page === 1 && !list.find(item => item.projectId === this.data.courseProjectId)) {
-            list.unshift({
-              projectId: this.detailInfo.courseProjectId,
-              projectName: this.detailInfo.courseProjectName
-            });
+          const list = data.rows || [];
+          // 如果是第一页且没有搜索关键词，且当前项目不在列表中，添加到列表开头
+          if (!query && page === 1 && this.formData.courseProjectId && 
+              !list.find(item => item.projectId === this.formData.courseProjectId)) {
+            // 尝试从 detailInfo 或 selectedProjectOptions 获取项目信息
+            const currentProject = this.selectedProjectOptions.find(
+              p => p.projectId === this.formData.courseProjectId
+            );
+            if (currentProject) {
+              list.unshift(currentProject);
+            } else if (this.detailInfo && this.detailInfo.projectId) {
+              list.unshift({
+                projectId: this.detailInfo.projectId,
+                projectName: this.detailInfo.name || this.detailInfo.projectName
+              });
+            }
           }
-          return {
+          
+          result = {
             list: list,
             hasMore: data.hasNextPage === true
           };
+        } else {
+          // 课程列表（默认或 type === '课程'）
+          const { data } = await TrainingXApi.getCourseList(this.$aiClient, {
+            name: query || '',
+            pageNo: page,
+            pageSize: pageSize,
+            state: 2,
+            classId: '',
+            orderName: 'updateTime',
+            orderType: 'desc',
+            subClass: true,
+            type: 0
+          });
+
+          const list = data.rows || [];
+          // 如果是第一页且没有搜索关键词，且当前课程不在列表中，添加到列表开头
+          if (!query && page === 1 && this.formData.courseProjectId && 
+              !list.find(item => item.courseId === this.formData.courseProjectId || item.id === this.formData.courseProjectId)) {
+            // 尝试从 detailInfo 或 selectedProjectOptions 获取课程信息
+            const currentCourse = this.selectedProjectOptions.find(
+              c => (c.courseId === this.formData.courseProjectId || c.id === this.formData.courseProjectId)
+            );
+            if (currentCourse) {
+              list.unshift(currentCourse);
+            } else if (this.detailInfo && (this.detailInfo.courseId || this.detailInfo.id)) {
+              list.unshift({
+                courseId: this.detailInfo.courseId,
+                courseName: this.detailInfo.name,
+              });
+            }
+          }
+          
+          result = {
+            list: list,
+            hasMore: data.hasNextPage === true
+          };
+        }
+        
+        return result;
       } catch (e) {
+        console.error('[TrainPlanForm] Search failed:', e);
         return { list: [], hasMore: false };
       }
     },
@@ -253,68 +354,110 @@ export default {
         // 从 allOptions 中查找对应的项目（如果下拉框已加载）
         // 或者通过 change 事件来更新
       }
-    },
+    },      
     /**
-     * 处理项目选择变化
+     * 处理项目/课程选择变化
      */
-    handleProjectChange(projectId, projectItem) {
-      console.log('[TrainPlanForm] handleProjectChange:', { projectId, projectItem });
-      if (projectItem) {
+    handleProjectChange(selectedId, selectedItem) {
+      if (selectedItem) {
         // 更新选中选项列表
-        this.selectedProjectOptions = [projectItem];
+        this.selectedProjectOptions = [selectedItem];
         // 更新详情信息
-        this.detailInfo = {
-          name: projectItem.projectName,
-          projectId: projectItem.projectId
-        };
-        // formData.courseProjectId 已经通过 v-model 自动更新了
-        // 如果类型是项目，可以调用详情接口获取更多信息
         if (this.formData.type === '项目') {
-          this.fetchDetail();
+          this.detailInfo = {
+            name: selectedItem.projectName,
+            projectId: selectedItem.projectId
+          };
+        } else {
+          this.detailInfo = {
+            name: selectedItem.courseName || selectedItem.name,
+            courseId: selectedItem.courseId || selectedItem.id,
+          };
         }
-      } else if (projectId) {
-        // 如果没有 projectItem，说明可能是直接设置的值，需要查找对应的项目
-        const foundProject = this.selectedProjectOptions.find(
-          p => p.projectId === projectId
-        );
-        if (!foundProject) {
+        // formData.courseProjectId 已经通过 v-model 自动更新了
+        // 调用详情接口获取更多信息
+        this.fetchDetail();
+      } else if (selectedId) {
+        // 如果没有 selectedItem，说明可能是直接设置的值，需要查找对应的项目/课程
+        const found = this.selectedProjectOptions.find(item => {
+          if (this.formData.type === '项目') {
+            return item.projectId === selectedId;
+          } else {
+            return (item.courseId === selectedId);
+          }
+        });
+        if (!found) {
           // 如果找不到，尝试从已加载的选项中查找
-          // 这里可以触发一次搜索来获取项目信息
+          // 这里可以触发一次搜索来获取项目/课程信息
         }
       }
     },
     /**
-     * 加载初始项目信息（用于显示已选中的项目）
+     * 加载初始项目/课程信息（用于显示已选中的项目/课程）
      */
     async loadInitialProject() {
       if (!this.formData.courseProjectId) return;
       
       try {
-        const res = await TrainingXApi.getProjectList(this.$aiClient, {
-          projectName: '',
-          pageNo: 1,
-          pageSize: 100, // 获取更多数据以便找到当前项目
-          containSub: true,
-          projectStatus: 1,
-          projectType: 0
-        });
+        let res;
+        let currentItem;
+        
+        if (this.formData.type === '项目') {
+          // 加载项目列表
+          res = await TrainingXApi.getProjectList(this.$aiClient, {
+            projectName: '',
+            pageNo: 1,
+            pageSize: 100, // 获取更多数据以便找到当前项目
+            containSub: true,
+            projectStatus: 1,
+            projectType: 0
+          });
 
-        if (res && res.code === 0 && res.data && Array.isArray(res.data.rows)) {
-          const currentProject = res.data.rows.find(
-            p => p.projectId === this.formData.courseProjectId
-          );
-          if (currentProject) {
-            this.selectedProjectOptions = [currentProject];
-            this.detailInfo = {
-              name: currentProject.projectName,
-              projectId: currentProject.projectId
-            };
+          if (res && res.code === 0 && res.data && Array.isArray(res.data.rows)) {
+            currentItem = res.data.rows.find(
+              p => p.projectId === this.formData.courseProjectId
+            );
+            if (currentItem) {
+              this.selectedProjectOptions = [currentItem];
+              this.detailInfo = {
+                name: currentItem.projectName,
+                projectId: currentItem.projectId
+              };
+            }
+          }
+        } else {
+          // 加载课程列表
+          res = await TrainingXApi.getCourseList(this.$aiClient, {
+            name: '',
+            pageNo: 1,
+            pageSize: 100, // 获取更多数据以便找到当前课程
+            state: 2,
+            classId: '',
+            orderName: 'updateTime',
+            orderType: 'desc',
+            subClass: true,
+            type: 0
+          });
+
+          if (res && res.code === 0 && res.data && Array.isArray(res.data.rows)) {
+            currentItem = res.data.rows.find(
+              c => (c.courseId === this.formData.courseProjectId || c.id === this.formData.courseProjectId)
+            );
+            if (currentItem) {
+              this.selectedProjectOptions = [currentItem];
+              this.detailInfo = {
+                name: currentItem.courseName || currentItem.name,
+                courseId: currentItem.courseId || currentItem.id,
+                id: currentItem.courseId || currentItem.id
+              };
+            }
           }
         }
       } catch (e) {
-        console.error('[TrainPlanForm] Load initial project failed:', e);
+        console.error('[TrainPlanForm] Load initial project/course failed:', e);
       }
     },
+   // TrainPlanForm.vue - handleConfirm 方法
     handleConfirm() {
       this.isConfirmed = true;
       
@@ -322,16 +465,23 @@ export default {
       const isModified = 
         this.formData.courseProjectId !== this.initialData.courseProjectId ||
         JSON.stringify(this.formData.userIds.sort()) !== JSON.stringify((this.initialData.userIds || []).sort());
-        // 日期范围对比省略，因为初始数据没给日期
 
-      let message = '确认';
-      if (isModified) {
-        // 如果修改过，构造修改后的信息文本
-        message = `已确认调整培训计划：
-项目：${this.detailInfo.name || this.formData.courseProjectId}
-人员：${this.userNames}
-时间：${this.dateRangeDisplay}`;
-      }
+      // 构造确认数据
+      const confirmData = {
+        courseProjectId: this.formData.courseProjectId,
+        type: this.formData.type,
+        questionId: this.initialData.questionId || '',
+        storeId: this.initialData.storeId || '',
+        userIds: this.formData.userIds || []
+      };
+
+      // 构造描述文本
+      let desc = `以下是用户确认的${this.formData.type}内容`;
+
+      // 构造消息格式
+      const message = `确认执行 <ymform:train_confirm desc="${desc}">
+    ${JSON.stringify(confirmData, null, 2)}
+    </ymform:train_confirm>`;
 
       // 触发事件通知父组件发送消息
       this.$emit('send-message', message);

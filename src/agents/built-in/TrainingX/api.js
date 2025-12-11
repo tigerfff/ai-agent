@@ -179,7 +179,7 @@ export const TrainingXApi = {
     return client.send({
       url: `/v1/enterprise/training/projects/${projectId}`,
       method: 'get',
-      baseURL: 'https://pbchain.hik-cloud.com' // 使用完整 URL
+      baseURL: '' // 使用完整 URL
     });
   },
 
@@ -193,7 +193,7 @@ export const TrainingXApi = {
       url: `/v1/enterprise/training/course`,
       method: 'get',
       data: { courseId },
-      baseURL: 'https://pbchain.hik-cloud.com' // 使用完整 URL
+      baseURL: '' // 使用完整 URL
     });
   },
 
@@ -224,31 +224,24 @@ export const TrainingXApi = {
    * @param {AIClient} client
    * @param {Object} params - { projectName, pageNo, pageSize, containSub, projectStatus, projectType }
    */
-  getProjectList(client, params = {}) {
-    const {
-      projectName = '',
-      pageNo = 1,
-      pageSize = 20,
-      containSub = true,
-      projectStatus = 1,
-      projectType = 0
-    } = params;
-
-    // 构建查询字符串
-    const queryParams = new URLSearchParams({
-      projectName: String(projectName),
-      pageNo: String(pageNo),
-      pageSize: String(pageSize),
-      containSub: String(containSub),
-      projectStatus: String(projectStatus),
-      projectType: String(projectType)
-    });
-
+  getProjectList(client, data = {}) {
     return client.send({
-      url: `/v1/enterprise/training/projects?${queryParams.toString()}`,
+      url: `v1/enterprise/training/projects`,
       method: 'get',
-      baseURL: 'https://pbchain.hik-cloud.com', // 使用完整 URL
-      data: {} // GET 请求的 data 可能不会被使用，但为了兼容性保留
+      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
+    });
+  },
+
+  /**
+   * 获取课程列表（支持搜索和分页）
+   * @param {AIClient} client
+   * @param {Object} params - { name, pageNo, pageSize, state, classId, orderName, orderType, subClass, type }
+   */
+  getCourseList(client, data = {}) {
+    return client.send({
+      url: `/v1/enterprise/training/course/list`,
+      method: 'get',
+      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
   }
 };
