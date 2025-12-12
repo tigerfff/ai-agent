@@ -64,7 +64,7 @@
         <span>确认执行</span>
       </div>
 
-      <div class="confirmed-badge" v-if="isConfirmed">
+      <div class="confirmed-badge" v-if="isConfirmed || isHistoryDisabled">
         <span class="icon">✔</span>
         <span>确认执行</span>
       </div>
@@ -216,8 +216,7 @@ export default {
     }
   },
   created() {
-    // 初始化白名单用户列表（不依赖 data）
-    this.getListLearnersByStore();
+   
     
     // 如果 data 已有值，立即初始化
     if (this.data && Object.keys(this.data).length > 0) {
@@ -251,6 +250,9 @@ export default {
       this.formData.storeId = this.data.storeId || '';
       this.formData.period = 0;
       this.formData.dateRange = [];
+
+      // 初始化白名单用户列表（不依赖 data）
+      this.getListLearnersByStore();
       
       // 初始化选中的用户（临时使用 userIds，后续会通过接口获取完整用户信息）
       this.selectedUsers = this.data.userIds || [];
@@ -263,10 +265,6 @@ export default {
         this.loadInitialProject();
       }
       
-      // 如果有初始 userIds，加载用户信息
-      if (this.formData.userIds && this.formData.userIds.length > 0) {
-        this.loadInitialUsers();
-      }
     },
 
     selectable (row, index) {
@@ -274,8 +272,9 @@ export default {
     },
     // TOOD 等后端给个新接口查人名,这个是全量数据，用于去
     async getListLearnersByStore() {
-      // const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient)
-      this.whiteUserIds = ["313ea95002324f69b14e3669ac8ff6c9", "a05f44efe0474cfc82c16b4c109ae079", "2bcb0ca877fb4123b9f9c359f769c343"]
+      const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { storeId: this.formData.storeId })
+      this.formData.userIds = data
+      this.loadInitialUsers()
     },
     formatDate(stringDate) {
       const date = new Date(stringDate);
@@ -288,7 +287,6 @@ export default {
       this.loading = true;
       try {
         let res;
-
         if (+this.formData.type === 1) {
           res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
           this.formData.period = res.data.period;

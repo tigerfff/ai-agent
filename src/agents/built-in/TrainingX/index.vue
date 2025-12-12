@@ -165,10 +165,7 @@ export default {
         icon: trainingSquareIcon,
         title: '员工培训助手',
         description: '我可以帮你推荐培训内容、制定员工培训计划、检查培训结果，有培训问题随时找我哦～',
-        prompts: [
-          { desc: '帮我制定汉堡的培训计划',text: '帮我制定汉堡的培训计划', needsFile: false },
-          { desc: '针对315做一个食安培训',text: '针对315做一个食安培训', needsFile: false },
-        ]
+        prompts: [] // 从接口获取
       }
     };
   },
@@ -202,7 +199,10 @@ export default {
   created() {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
-    this.fetchConversationList();
+    // this.fetchConversationList();
+    
+    // 获取推荐的提示词
+    this.fetchSuggestions();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
@@ -212,7 +212,24 @@ export default {
     // this.mockUserTrainFinish();
   },
   methods: {
-
+    /**
+     * 获取智能体推荐的提示词
+     */
+    async fetchSuggestions() {
+      try {
+        const res = await TrainingXApi.getSuggestions(this.$aiClient);
+        if (res && res.code === 0 && Array.isArray(res.data)) {
+          // 将接口返回的字符串数组转换为 prompts 格式
+          this.welcomeConfig.prompts = res.data.map(text => ({
+            desc: text,
+            text: text,
+            needsFile: false
+          }));
+        } 
+      } catch (e) {
+        console.error('[TrainingX] Fetch suggestions failed:', e);
+      }
+    },
 
     getActions(item) {
       // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
