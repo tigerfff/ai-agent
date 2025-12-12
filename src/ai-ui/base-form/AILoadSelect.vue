@@ -395,7 +395,20 @@ export default {
           if (page === 1) {
             this.allOptions = result.list;
           } else {
-            this.allOptions = [...this.allOptions, ...result.list];
+            // 加载更多时，需要去重
+            // 使用 Set 存储已存在的 key，避免重复添加
+            const existingKeys = new Set(
+              this.allOptions.map(item => this.getOptionKey(item))
+            );
+            
+            // 过滤掉已存在的项
+            const newItems = result.list.filter(item => {
+              const key = this.getOptionKey(item);
+              return !existingKeys.has(key);
+            });
+            
+            // 追加新数据
+            this.allOptions = [...this.allOptions, ...newItems];
           }
           
           this.hasMore = result.hasMore !== false && result.list.length >= this.pageSize;

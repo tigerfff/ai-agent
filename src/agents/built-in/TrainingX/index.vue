@@ -202,14 +202,14 @@ export default {
   created() {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
-    // this.fetchConversationList();
+    this.fetchConversationList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
     // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
-    this.mockUserTrainFinish();
+    // this.mockUserTrainFinish();
   },
   methods: {
 
@@ -778,8 +778,8 @@ export default {
     mockTrainPlanForm() {
       const mockContent = `<ymform:train_plan>
 {
-  "courseProjectId": "32a0373b23884fd2aca7778db9ce18e4",
-  "type": "项目",
+  "courseProjectId": "5ec869365a2e4337b5a48b97f7d9a595",
+  "type": "1",
   "questionId": "123",
   "storeId": "70070670a8ed430497b15e70e5eb8763",
   "userIds": ["4649d25a7be14f7bb1106219b3bec89c"]

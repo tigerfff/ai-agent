@@ -1,6 +1,7 @@
 <template>
   <div class="train-plan-form" :class="{ 'is-disabled': isDisabled }">
     <div class="title">请确认培训任务</div>
+
     
     <div class="form-body">
       <!-- 学习项目 -->
@@ -15,13 +16,13 @@
             :get-option-key="getOptionKey"
             :get-option-label="getOptionLabel"
             :get-option-value="getOptionValue"
-            :placeholder="formData.type === '项目' ? '请选择学习项目' : '请选择学习课程'"
+            :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
             :disabled="isDisabled"
             style="width: 50%"
             @change="handleProjectChange"
             @input="handleProjectInput"
           />
-          <div v-else class="text-display">{{ detailInfo.name || selectedProjectName || (formData.type === '项目' ? '未知项目' : '未知课程') }}</div>
+          <div v-else class="text-display">{{ detailInfo.name || selectedProjectName || (isProject ? '未知项目' : '未知课程') }}</div>
         </div>
       </div>
 
@@ -77,6 +78,10 @@ import { TrainingXApi } from '../api';
 import AILoadSelect from '@/ai-ui/base-form/AILoadSelect.vue';
 import PersonSelect from '@/ai-ui/base-form/orgPersonPagedPicker/index.vue';
 
+// 类型常量定义：1=项目，2=课程
+const TYPE_PROJECT = '1'; // 项目
+const TYPE_COURSE = '2';  // 课程
+
 export default {
   name: 'TrainPlanForm',
   components: {
@@ -101,19 +106,29 @@ export default {
       initialData: {}, // 保存初始数据用于对比
       formData: {
         courseProjectId: '',
-        type: '',
+        type: '', // '1' = 项目, '2' = 课程
         userIds: [],
         period: 0,
         dateRange: [] // [start, end]
       },
       detailInfo: {}, // 课程/项目详情
       selectedUsers: [], // 选中的用户对象数组
-      selectedProjectOptions: [] // 已选中的项目选项（用于 AILoadSelect 显示）
+      selectedProjectOptions: [], // 已选中的项目选项（用于 AILoadSelect 显示）
+      whiteUserIds: [], // 白名单用户ID列表（用于 selectable）
+      _lastInitKey: '' // 用于防止重复初始化的标记
     };
   },
   computed: {
     isDisabled() {
       return this.isHistoryDisabled || this.isConfirmed;
+    },
+    // 是否为项目类型
+    isProject() {
+      return this.formData.type === TYPE_PROJECT;
+    },
+    // 是否为课程类型
+    isCourse() {
+      return this.formData.type === TYPE_COURSE;
     },
     userNames() {
       if (!this.selectedUsers || this.selectedUsers.length === 0) return '';
@@ -133,14 +148,16 @@ export default {
     selectedProjectName() {
       if (!this.formData.courseProjectId) return '';
       const selected = this.selectedProjectOptions.find(opt => {
-        if (this.formData.type === '项目') {
+        // type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           return opt.projectId === this.formData.courseProjectId;
         } else {
           return (opt.courseId === this.formData.courseProjectId || opt.id === this.formData.courseProjectId);
         }
       });
       
-      if (this.formData.type === '项目') {
+      // type="1" 代表项目，type="2" 代表课程
+      if (this.isProject) {
         return selected ? selected.projectName : '';
       } else {
         return selected ? (selected.courseName || selected.name) : '';
@@ -151,7 +168,8 @@ export default {
      */
     getOptionKey() {
       return (item) => {
-        if (this.formData.type === '项目') {
+        // type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           return item.projectId;
         } else {
           return item.courseId || item.id;
@@ -163,7 +181,8 @@ export default {
      */
     getOptionLabel() {
       return (item) => {
-        if (this.formData.type === '项目') {
+        // type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           return item.projectName;
         } else {
           return item.name;
@@ -175,7 +194,8 @@ export default {
      */
     getOptionValue() {
       return (item) => {
-        if (this.formData.type === '项目') {
+        // type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           return item.projectId;
         } else {
           return item.courseId || item.id;
@@ -183,47 +203,72 @@ export default {
       };
     }
   },
-  created() {
-    // 初始化数据
-    this.initialData = { ...this.data };
-    this.formData.courseProjectId = this.data.courseProjectId;
-    this.formData.type = this.data.type;
-    this.formData.userIds = [...(this.data.userIds || [])];
-    this.formData.storeId = this.data.storeId
-    
-    // 初始化选中的用户（如果有初始 userIds，需要转换为用户对象数组）
-    // 由于 PersonSelect 需要用户对象数组，这里先初始化为空，后续可以通过接口获取用户信息
-    this.selectedUsers = this.data.userIds;
-
-    this.formData.period = 0;
-    
-    this.formData.dateRange = [];
-    
-    // 默认给一个时间范围示例 (需求未明确，这里暂且默认三天后)
-    // const today = new Date();
-    // const threeDaysLater = new Date(today);
-    // threeDaysLater.setDate(today.getDate() + 3);
-    // this.formData.dateRange = [
-    //   this.formatDate(today),
-    //   this.formatDate(threeDaysLater)
-    // ];
-
-    this.fetchDetail();
-    
-    this.getListLearnersByStore()
-    
-    // 如果有初始 userIds，加载用户信息
-    if (this.formData.userIds && this.formData.userIds.length > 0) {
-      this.loadInitialUsers();
+  watch: {
+    data: {
+      handler(newVal) {
+        // 当 data prop 变化时，重新初始化
+        if (newVal && Object.keys(newVal).length > 0) {
+          this.initFormData();
+        }
+      },
+      deep: true,
+      immediate: false // 不在 watch 中立即执行，避免和 created 重复
     }
+  },
+  created() {
+    // 初始化白名单用户列表（不依赖 data）
+    this.getListLearnersByStore();
     
-    
-    // 如果有初始项目ID，加载项目信息用于显示
-    if (this.formData.courseProjectId && this.formData.type === '项目') {
-      this.loadInitialProject();
+    // 如果 data 已有值，立即初始化
+    if (this.data && Object.keys(this.data).length > 0) {
+      this.initFormData();
     }
   },
   methods: {
+    /**
+     * 初始化表单数据
+     * 从 data prop 中提取并初始化所有表单字段
+     */
+    async initFormData() {
+      if (!this.data || Object.keys(this.data).length === 0) {
+        return;
+      }
+
+      // 防止重复初始化（如果数据没有变化）
+      const currentKey = `${this.data.courseProjectId}-${this.data.type}-${JSON.stringify(this.data.userIds || [])}`;
+      if (this._lastInitKey === currentKey) {
+        return; // 数据没有变化，跳过初始化
+      }
+      this._lastInitKey = currentKey;
+
+      // 保存初始数据用于对比
+      this.initialData = { ...this.data };
+      
+      // 初始化表单字段
+      this.formData.courseProjectId = this.data?.courseProjectId || '';
+      this.formData.type = this.data.type || '';
+      this.formData.userIds = [...(this.data.userIds || [])];
+      this.formData.storeId = this.data.storeId || '';
+      this.formData.period = 0;
+      this.formData.dateRange = [];
+      
+      // 初始化选中的用户（临时使用 userIds，后续会通过接口获取完整用户信息）
+      this.selectedUsers = this.data.userIds || [];
+
+      // 如果有项目/课程ID，加载详情
+      if (this.formData.courseProjectId) {
+        await this.fetchDetail();
+        
+        // type="1" 代表项目，type="2" 代表课程
+        this.loadInitialProject();
+      }
+      
+      // 如果有初始 userIds，加载用户信息
+      if (this.formData.userIds && this.formData.userIds.length > 0) {
+        this.loadInitialUsers();
+      }
+    },
+
     selectable (row, index) {
       return this.whiteUserIds.includes(row.userId)
     },
@@ -244,7 +289,7 @@ export default {
       try {
         let res;
 
-        if (this.formData.type === '项目') {
+        if (+this.formData.type === 1) {
           res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
           this.formData.period = res.data.period;
           this.formData.dateRange = [
@@ -271,7 +316,9 @@ export default {
      */
     async loadInitialUsers() {
       try {
-        const res = await TrainingXApi.getPersonnelInfo(this.$aiClient, this.formData.userIds);
+        const res = await TrainingXApi.getPersonnelInfo(this.$aiClient, {
+          userIds: this.formData.userIds.join(',')
+        });
         if (res && res.data && Array.isArray(res.data)) {
           // 将接口返回的用户信息转换为 PersonSelect 需要的格式
           this.selectedUsers = res.data.map(user => ({
@@ -301,8 +348,8 @@ export default {
       try {
         let result;
         
-        // 根据 type 判断是项目还是课程
-        if (this.formData.type === '项目') {
+        // 根据 type 判断是项目还是课程：type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           // 项目列表
           const { data } = await TrainingXApi.getProjectList(this.$aiClient, {
             projectName: query || '',
@@ -314,19 +361,22 @@ export default {
           });
 
           const list = data.rows || [];
-          // 如果是第一页且没有搜索关键词，且当前项目不在列表中，添加到列表开头
+          
+          // 如果是第一页且没有搜索关键词，且当前项目不在列表中，需要添加
+          // 因为列表是分页的，可能没有加载到当前项目
           if (!query && page === 1 && this.formData.courseProjectId && 
               !list.find(item => item.projectId === this.formData.courseProjectId)) {
-            // 尝试从 detailInfo 或 selectedProjectOptions 获取项目信息
+            // 从 selectedProjectOptions 或 detailInfo 获取当前项目信息
             const currentProject = this.selectedProjectOptions.find(
               p => p.projectId === this.formData.courseProjectId
             );
             if (currentProject) {
               list.unshift(currentProject);
             } else if (this.detailInfo && this.detailInfo.projectId) {
+              // 从 detailInfo 构造项目信息
               list.unshift({
-                projectId: this.detailInfo.projectId,
-                projectName: this.detailInfo.name || this.detailInfo.projectName
+                projectId: this.detailInfo.projectId || this.formData.courseProjectId,
+                projectName: this.detailInfo.projectName || this.detailInfo.name
               });
             }
           }
@@ -350,19 +400,24 @@ export default {
           });
 
           const list = data.rows || [];
-          // 如果是第一页且没有搜索关键词，且当前课程不在列表中，添加到列表开头
+          
+          // 如果是第一页且没有搜索关键词，且当前课程不在列表中，需要添加
+          // 因为列表是分页的，可能没有加载到当前课程
           if (!query && page === 1 && this.formData.courseProjectId && 
-              !list.find(item => item.courseId === this.formData.courseProjectId || item.id === this.formData.courseProjectId)) {
-            // 尝试从 detailInfo 或 selectedProjectOptions 获取课程信息
+              !list.find(item => (item.courseId === this.formData.courseProjectId || item.id === this.formData.courseProjectId))) {
+            // 从 selectedProjectOptions 或 detailInfo 获取当前课程信息
             const currentCourse = this.selectedProjectOptions.find(
               c => (c.courseId === this.formData.courseProjectId || c.id === this.formData.courseProjectId)
             );
             if (currentCourse) {
               list.unshift(currentCourse);
             } else if (this.detailInfo && (this.detailInfo.courseId || this.detailInfo.id)) {
+              // 从 detailInfo 构造课程信息
               list.unshift({
-                courseId: this.detailInfo.courseId,
+                courseId: this.detailInfo.courseId || this.detailInfo.id || this.formData.courseProjectId,
                 courseName: this.detailInfo.name,
+                name: this.detailInfo.name,
+                id: this.detailInfo.courseId || this.detailInfo.id || this.formData.courseProjectId
               });
             }
           }
@@ -397,8 +452,8 @@ export default {
       if (selectedItem) {
         // 更新选中选项列表
         this.selectedProjectOptions = [selectedItem];
-        // 更新详情信息
-        if (this.formData.type === '项目') {
+        // 更新详情信息：type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           this.detailInfo = {
             name: selectedItem.projectName,
             projectId: selectedItem.projectId
@@ -415,7 +470,8 @@ export default {
       } else if (selectedId) {
         // 如果没有 selectedItem，说明可能是直接设置的值，需要查找对应的项目/课程
         const found = this.selectedProjectOptions.find(item => {
-          if (this.formData.type === '项目') {
+          // type="1" 代表项目，type="2" 代表课程
+          if (this.isProject) {
             return item.projectId === selectedId;
           } else {
             return (item.courseId === selectedId);
@@ -429,63 +485,32 @@ export default {
     },
     /**
      * 加载初始项目/课程信息（用于显示已选中的项目/课程）
+     * 从 detailInfo 构造 selectedProjectOptions，供 AILoadSelect 显示
      */
-    async loadInitialProject() {
-      if (!this.formData.courseProjectId) return;
+    loadInitialProject() {
+      if (!this.formData.courseProjectId || !this.detailInfo) return;
       
       try {
-        let res;
-        let currentItem;
-        
-        if (this.formData.type === '项目') {
-          // 加载项目列表
-          res = await TrainingXApi.getProjectList(this.$aiClient, {
-            projectName: '',
-            pageNo: 1,
-            pageSize: 100, // 获取更多数据以便找到当前项目
-            containSub: true,
-            projectStatus: 1,
-            projectType: 0
-          });
-
-          if (res && res.code === 0 && res.data && Array.isArray(res.data.rows)) {
-            currentItem = res.data.rows.find(
-              p => p.projectId === this.formData.courseProjectId
-            );
-            if (currentItem) {
-              this.selectedProjectOptions = [currentItem];
-              this.detailInfo = {
-                name: currentItem.projectName,
-                projectId: currentItem.projectId
-              };
-            }
+        // type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
+          // 从 detailInfo 构造项目信息
+          if (this.detailInfo.projectId || this.detailInfo.projectName || this.detailInfo.name) {
+            const projectInfo = {
+              projectId: this.detailInfo.projectId || this.formData.courseProjectId,
+              projectName: this.detailInfo.projectName || this.detailInfo.name
+            };
+            this.selectedProjectOptions = [projectInfo];
           }
         } else {
-          // 加载课程列表
-          res = await TrainingXApi.getCourseList(this.$aiClient, {
-            name: '',
-            pageNo: 1,
-            pageSize: 100, // 获取更多数据以便找到当前课程
-            state: 2,
-            classId: '',
-            orderName: 'updateTime',
-            orderType: 'desc',
-            subClass: true,
-            type: 0
-          });
-
-          if (res && res.code === 0 && res.data && Array.isArray(res.data.rows)) {
-            currentItem = res.data.rows.find(
-              c => (c.courseId === this.formData.courseProjectId || c.id === this.formData.courseProjectId)
-            );
-            if (currentItem) {
-              this.selectedProjectOptions = [currentItem];
-              this.detailInfo = {
-                name: currentItem.courseName || currentItem.name,
-                courseId: currentItem.courseId || currentItem.id,
-                id: currentItem.courseId || currentItem.id
-              };
-            }
+          // 从 detailInfo 构造课程信息
+          if (this.detailInfo.courseId || this.detailInfo.id || this.detailInfo.name) {
+            const courseInfo = {
+              courseId: this.detailInfo.courseId || this.detailInfo.id || this.formData.courseProjectId,
+              courseName: this.detailInfo.name,
+              name: this.detailInfo.name,
+              id: this.detailInfo.courseId || this.detailInfo.id || this.formData.courseProjectId
+            };
+            this.selectedProjectOptions = [courseInfo];
           }
         }
       } catch (e) {

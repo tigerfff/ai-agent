@@ -86,9 +86,27 @@ export class StreamMessageParser {
       }
 
       // 5. 是合法的 Widget 标签，寻找闭合标签
-      // 闭合标签格式: </tagName>
-      const closingTag = `</${tagName}>`;
-      const closingTagIndex = fullText.indexOf(closingTag, tagNameEndIndex);
+      // 闭合标签格式: </tagName> 或错误的格式 <tagName>（缺少 /）
+      const correctClosingTag = `</${tagName}>`;
+      const wrongClosingTag = `<${tagName}>`; // 错误的闭合标签（缺少 /）
+      
+      // 先查找正确的闭合标签
+      let closingTagIndex = fullText.indexOf(correctClosingTag, tagNameEndIndex);
+      let closingTag = correctClosingTag;
+      
+      // 如果找不到正确的闭合标签，尝试查找错误的闭合标签
+      if (closingTagIndex === -1) {
+        // 从后往前查找最后一个错误的闭合标签（应该是真正的闭合标签）
+        const lastWrongIndex = fullText.lastIndexOf(wrongClosingTag);
+        if (lastWrongIndex > tagNameEndIndex) {
+          // 检查这个错误的闭合标签是否在开始标签之后
+          const openingTagCloseIndex = fullText.indexOf('>', tagStartIndex);
+          if (openingTagCloseIndex !== -1 && lastWrongIndex > openingTagCloseIndex) {
+            closingTagIndex = lastWrongIndex;
+            closingTag = wrongClosingTag;
+          }
+        }
+      }
 
       if (closingTagIndex === -1) {
         // --- 情况 A: 标签未闭合 (Loading 状态) ---

@@ -11,7 +11,7 @@
         />
         <div v-else class="cover-placeholder">
           <div class="placeholder-text">
-            <div>{{ formData.type === '项目' ? '这里是培训项目' : '这里是培训课程' }}</div>
+            <div>{{ isProject ? '这里是培训项目' : '这里是培训课程' }}</div>
             <div class="placeholder-name">{{ title || '名称示例' }}</div>
           </div>
         </div>
@@ -37,6 +37,10 @@
 <script>
 import { TrainingXApi } from '../api';
 
+// 类型常量定义：1=项目，2=课程
+const TYPE_PROJECT = '1'; // 项目
+const TYPE_COURSE = '2';  // 课程
+
 export default {
   name: 'UserStudyForm',
   props: {
@@ -51,14 +55,22 @@ export default {
       detailInfo: {}, // 课程/项目详情
       formData: {
         courseProjectId: '',
-        type: '' // '项目' 或 '课程'
+        type: '' // '1' = 项目, '2' = 课程
       }
     };
   },
   computed: {
+    // 是否为项目类型
+    isProject() {
+      return this.formData.type === TYPE_PROJECT;
+    },
+    // 是否为课程类型
+    isCourse() {
+      return this.formData.type === TYPE_COURSE;
+    },
     // 标题
     title() {
-      if (this.formData.type === '项目') {
+      if (this.isProject) {
         return this.detailInfo.projectName || '未知项目';
       } else {
         return this.detailInfo.name || '未知课程';
@@ -66,7 +78,7 @@ export default {
     },
     // 封面图片
     coverImage() {
-      if (this.formData.type === '项目') {
+      if (this.isProject) {
         return this.detailInfo.coverImage?.url || null;
       } else {
         return this.detailInfo.coverImg?.url || null;
@@ -74,7 +86,7 @@ export default {
     },
     // 时长/周期文本
     durationText() {
-      if (this.formData.type === '项目') {
+      if (this.isProject) {
         // 项目显示周期
         if (this.detailInfo.period) {
           return `培训周期: ${this.detailInfo.period}天`;
@@ -114,10 +126,11 @@ export default {
       try {
         let res;
 
-        if (this.formData.type === '项目') {
+        // type="1" 代表项目，type="2" 代表课程
+        if (this.isProject) {
           res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
         } else {
-          // 默认课程
+          // 默认课程（type="2"）
           res = await TrainingXApi.getCourseDetail(this.$aiClient, this.formData.courseProjectId);
         }
 

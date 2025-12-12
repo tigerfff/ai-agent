@@ -202,21 +202,13 @@ export const TrainingXApi = {
    * @param {AIClient} client
    * @param {Array<string>} userIds
    */
-  getPersonnelInfo(client, userIds) {
-    // 模拟异步请求
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUsers = userIds.map(id => ({
-          id,
-          name: id === '4649d25a7be14f7bb1106219b3bec89c' ? '张三' : (id === 'bbbb' ? '李四' : `用户${id.slice(0, 4)}`)
-        }));
-        resolve({
-          code: 0,
-          data: mockUsers,
-          msg: 'success'
-        });
-      }, 500);
+  getPersonnelInfo(client, data) {
+    return client.send({
+      url: `/v1/chain/patrol/patrolAgent/actions/findAgentUserByIds`,
+      method: 'get',
+      data
     });
+    
   },
 
   /**
