@@ -1,6 +1,10 @@
 {
   "name": "ai-aa",
   "version": "1.0.0",
+  "description": "AI Assistant Component Library for Vue 2",
+  "keywords": ["vue", "vue2", "ai", "chat", "component-library"],
+  "author": "",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -9,11 +13,25 @@
   },
   "main": "dist/ai-aa.umd.js",
   "module": "dist/ai-aa.es.js",
+  "style": "dist/style.css",
+  "sass": "src/style/index.scss",
+  "files": [
+    "dist",
+    "src/style"
+  ],
   "exports": {
     ".": {
       "import": "./dist/ai-aa.es.js",
-      "require": "./dist/ai-aa.umd.js"
+      "require": "./dist/ai-aa.umd.js",
+      "style": "./dist/style.css"
+    },
+    "./style": {
+      "import": "./src/style/index.scss",
+      "require": "./src/style/index.scss"
     }
+  },
+  "peerDependencies": {
+    "vue": "^2.7.0"
   },
   "dependencies": {
     "ali-oss": "^6.23.0",

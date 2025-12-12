@@ -1,0 +1,51 @@
+# 源码目录（不发布）
+src/
+!src/style/
+
+# 开发文件
+node_modules/
+*.config.js
+*.config.ts
+vite.config.js
+index.html
+
+# 测试文件
+**/__tests__/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+**/*.snap
+
+# 开发工具
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# 文档和说明
+*.md
+!README.md
+ARCHITECTURE_DESIGN.md
+
+# 公共资源（Hui UI 等，由外部项目提供）
+public/
+dist/hui2.43.2/
+dist/hui-pro/
+
+# 临时文件
+*.log
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# 构建产物中的开发文件
+dist/vite.svg
+

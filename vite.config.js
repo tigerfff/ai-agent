@@ -102,12 +102,21 @@ export default defineConfig({
       name: 'AIAA',
       fileName: (format) => `ai-aa.${format}.js`
     },
+    // 样式处理：将所有样式打包到一个文件
+    cssCodeSplit: false,
     rollupOptions: {
       // 外部依赖：由父项目提供，不打进库里
       external: ['vue', '@hui/lib/hui.esm-browser.js', '@hui/lib/hui.css'],
       output: {
         globals: {
           vue: 'Vue'
+        },
+        // 样式文件命名
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'style.css') {
+            return 'style.css';
+          }
+          return assetInfo.name;
         }
       }
     }
