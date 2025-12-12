@@ -44,13 +44,13 @@ export class SpeechRecognizerWrapper {
 
       // 根据官方示例配置参数
       const params = {
-        secretid: config.secretId,
-        secretkey: config.secretKey,
-        appid: config.appId,
+          secretid: config.secretId,
+          secretkey: config.secretKey,
+          appid: config.appId,
         engine_model_type: config.engineModelType || '16k_zh',
         // 以下为可选参数
         voice_format: config.voice_format || 1,
-        hotword_id: config.hotwordId || '',
+          hotword_id: config.hotwordId || '',
         needvad: config.needvad !== undefined ? config.needvad : 1,
         filter_dirty: config.filter_dirty !== undefined ? config.filter_dirty : 1,
         filter_modal: config.filter_modal !== undefined ? config.filter_modal : 1,
@@ -118,7 +118,7 @@ export class SpeechRecognizerWrapper {
     if (this.recognizer) {
       try {
         // WebAudioSpeechRecognizer 会自动停止录音和识别
-        this.recognizer.stop();
+      this.recognizer.stop();
         console.log('[ASR] 已停止识别');
       } catch (e) {
         console.warn('[ASR] Stop error:', e);

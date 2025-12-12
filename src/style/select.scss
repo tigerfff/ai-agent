@@ -64,5 +64,24 @@
         color: rgba(56,142,255,1);
     }
   }
+
+  .el-select-dropdown__item.hover {
+    background-color: #FFF;
+  }
+}
+
+
+.ai-select-popper {
+  .el-select-dropdown__item.hover {
+    background-color: rgba(232,246,255,1) !important;
+    
+  }
+
+  .el-select-dropdown__item {
+    color: rgb(56, 142, 255) !important;
+  }
+  .el-checkbox__inner .h-svg-icon-wrapper .el-checkbox__tick {
+    fill: rgb(56, 142, 255) !important;
+  }
 }
 

@@ -208,7 +208,7 @@ export const TrainingXApi = {
       setTimeout(() => {
         const mockUsers = userIds.map(id => ({
           id,
-          name: id === 'aaaa' ? '张三' : (id === 'bbbb' ? '李四' : `用户${id.slice(0, 4)}`)
+          name: id === '4649d25a7be14f7bb1106219b3bec89c' ? '张三' : (id === 'bbbb' ? '李四' : `用户${id.slice(0, 4)}`)
         }));
         resolve({
           code: 0,
@@ -226,7 +226,7 @@ export const TrainingXApi = {
    */
   getProjectList(client, data = {}) {
     return client.send({
-      url: `v1/enterprise/training/projects`,
+      url: `/v1/enterprise/training/projects`,
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -243,5 +243,37 @@ export const TrainingXApi = {
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
-  }
+  },
+
+  getCourseList(client, data = {}) {
+    return client.send({
+      url: `/v1/enterprise/training/course/list`,
+      method: 'get',
+      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
+    });
+  },
+
+  // 通过storeId查询人
+  listLearnersByStore(client, data = {}) {
+    return client.send({
+      url: `/v1/chain/patrol/patrolAgent/action/listLearnersByStore`,
+      method: 'get',
+      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
+    });
+  },
+
+  /**
+   * 提交实操
+   * @param {AIClient} client
+   * @param {Object} data - 实操提交参数
+   */
+  submitOperation(client, data) {
+    return client.send({
+      url: '/v1/enterprise/training/userProjects/actions/addOperation',
+      method: 'post',
+      data,
+      baseURL: '' // 使用完整 URL
+    });
+  },
+  
 };

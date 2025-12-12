@@ -29,23 +29,17 @@
       <div class="form-item">
         <div class="label">培训学员</div>
         <div class="content">
-          <div v-if="loadingUsers" class="loading-placeholder">加载中...</div>
-          <el-select 
-            v-else-if="!isConfirmed && !isDisabled" 
-            v-model="formData.userIds" 
-            multiple
-            collapse-tags
+          <PersonSelect
+            v-if="!isConfirmed && !isDisabled"
+            v-model="selectedUsers"
+            dialogTitle="选择学员"
             placeholder="请选择"
-            size="small"
+            collapseTags
+            :disabled="isDisabled"
+            :selectable="selectable"
             style="width: 50%"
-          >
-            <el-option 
-              v-for="user in userList" 
-              :key="user.id" 
-              :label="user.name" 
-              :value="user.id"
-            ></el-option>
-          </el-select>
+            @change="handleUsersChange"
+          />
           <div v-else class="text-display">{{ userNames }}</div>
         </div>
       </div>
@@ -59,10 +53,13 @@
       </div>
     </div>
 
+    <!-- TODO YFCH 修改图标 -->
     <!-- 底部按钮 -->
     <div class="form-footer" >
       <div class="confirm-btn" @click="handleConfirm" v-if="!isConfirmed && !isDisabled">
-        <span class="icon">✨</span>
+        <span class="icon">
+          <img src="@/assets/images/star@3x.png" alt="" width="24px">
+        </span>
         <span>确认执行</span>
       </div>
 
@@ -71,17 +68,20 @@
         <span>确认执行</span>
       </div>
     </div>
+
   </div>
 </template>
 
 <script>
 import { TrainingXApi } from '../api';
 import AILoadSelect from '@/ai-ui/base-form/AILoadSelect.vue';
+import PersonSelect from '@/ai-ui/base-form/orgPersonPagedPicker/index.vue';
 
 export default {
   name: 'TrainPlanForm',
   components: {
-    AILoadSelect
+    AILoadSelect,
+    PersonSelect
   },
   props: {
     data: {
@@ -97,17 +97,17 @@ export default {
   data() {
     return {
       loading: false,
-      loadingUsers: false,
       isConfirmed: false,
       initialData: {}, // 保存初始数据用于对比
       formData: {
         courseProjectId: '',
         type: '',
         userIds: [],
+        period: 0,
         dateRange: [] // [start, end]
       },
       detailInfo: {}, // 课程/项目详情
-      userList: [], // 学员列表
+      selectedUsers: [], // 选中的用户对象数组
       selectedProjectOptions: [] // 已选中的项目选项（用于 AILoadSelect 显示）
     };
   },
@@ -116,28 +116,19 @@ export default {
       return this.isHistoryDisabled || this.isConfirmed;
     },
     userNames() {
-      if (!this.formData.userIds || this.formData.userIds.length === 0) return '';
-      const names = this.formData.userIds.map(id => {
-        const user = this.userList.find(u => u.id === id);
-        return user ? user.name : id;
-      });
-      return names.join('、');
+      if (!this.selectedUsers || this.selectedUsers.length === 0) return '';
+      return this.selectedUsers.map(user => {
+        return user?.userName || user?.roleName || user?.name || '';
+      }).filter(Boolean).join('、');
     },
     dateRangeDisplay() {
-      if (!this.formData.dateRange || this.formData.dateRange.length < 2) return '未设置';
+      if (!this.formData.dateRange || this.formData.dateRange.length < 2) {
+        return this.formDate?.period || 0
+      }
       const start = this.formData.dateRange[0];
       const end = this.formData.dateRange[1];
       
-      // 计算天数
-      const s = new Date(start);
-      const e = new Date(end);
-      const diffTime = Math.abs(e - s);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      
-      const numMap = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-      const dayStr = diffDays <= 10 ? numMap[diffDays] : diffDays;
-      
-      return `${dayStr}天(${start}-${end})`;
+      return this.formData.period ? `${this.formData.period}天` : `${start}-${end}`;
     },
     selectedProjectName() {
       if (!this.formData.courseProjectId) return '';
@@ -198,18 +189,33 @@ export default {
     this.formData.courseProjectId = this.data.courseProjectId;
     this.formData.type = this.data.type;
     this.formData.userIds = [...(this.data.userIds || [])];
+    this.formData.storeId = this.data.storeId
+    
+    // 初始化选中的用户（如果有初始 userIds，需要转换为用户对象数组）
+    // 由于 PersonSelect 需要用户对象数组，这里先初始化为空，后续可以通过接口获取用户信息
+    this.selectedUsers = this.data.userIds;
+
+    this.formData.period = 0;
+    
+    this.formData.dateRange = [];
     
     // 默认给一个时间范围示例 (需求未明确，这里暂且默认三天后)
-    const today = new Date();
-    const threeDaysLater = new Date(today);
-    threeDaysLater.setDate(today.getDate() + 3);
-    this.formData.dateRange = [
-      this.formatDate(today),
-      this.formatDate(threeDaysLater)
-    ];
+    // const today = new Date();
+    // const threeDaysLater = new Date(today);
+    // threeDaysLater.setDate(today.getDate() + 3);
+    // this.formData.dateRange = [
+    //   this.formatDate(today),
+    //   this.formatDate(threeDaysLater)
+    // ];
 
     this.fetchDetail();
-    this.fetchUsers();
+    
+    this.getListLearnersByStore()
+    
+    // 如果有初始 userIds，加载用户信息
+    if (this.formData.userIds && this.formData.userIds.length > 0) {
+      this.loadInitialUsers();
+    }
     
     
     // 如果有初始项目ID，加载项目信息用于显示
@@ -218,7 +224,16 @@ export default {
     }
   },
   methods: {
-    formatDate(date) {
+    selectable (row, index) {
+      return this.whiteUserIds.includes(row.userId)
+    },
+    // TOOD 等后端给个新接口查人名,这个是全量数据，用于去
+    async getListLearnersByStore() {
+      // const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient)
+      this.whiteUserIds = ["313ea95002324f69b14e3669ac8ff6c9", "a05f44efe0474cfc82c16b4c109ae079", "2bcb0ca877fb4123b9f9c359f769c343"]
+    },
+    formatDate(stringDate) {
+      const date = new Date(stringDate);
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
       const d = String(date.getDate()).padStart(2, '0');
@@ -231,6 +246,11 @@ export default {
 
         if (this.formData.type === '项目') {
           res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
+          this.formData.period = res.data.period;
+          this.formData.dateRange = [
+            this.formatDate(res.data.startDate),
+            this.formatDate(res.data.endDate)
+          ];
         } else {
           // 默认课程
           res = await TrainingXApi.getCourseDetail(this.$aiClient, this.formData.courseProjectId);
@@ -246,18 +266,33 @@ export default {
         this.loading = false;
       }
     },
-    async fetchUsers() {
-      this.loadingUsers = true;
+    /**
+     * 加载初始用户信息（用于显示已选中的用户）
+     */
+    async loadInitialUsers() {
       try {
         const res = await TrainingXApi.getPersonnelInfo(this.$aiClient, this.formData.userIds);
-        if (res && res.data) {
-          this.userList = res.data;
+        if (res && res.data && Array.isArray(res.data)) {
+          // 将接口返回的用户信息转换为 PersonSelect 需要的格式
+          this.selectedUsers = res.data.map(user => ({
+            userId: user.id || user.userId,
+            userName: user.name || user.userName,
+            ...user // 保留其他字段
+          }));
         }
       } catch (e) {
-        console.error('Fetch users failed:', e);
-      } finally {
-        this.loadingUsers = false;
+        console.error('Load initial users failed:', e);
       }
+    },
+    
+    /**
+     * 处理用户选择变化
+     */
+    handleUsersChange(users) {
+      // 从用户对象数组中提取 userIds
+      this.formData.userIds = users.map(user => {
+        return user?.userId || user?.roleId || user?.id || '';
+      }).filter(Boolean);
     },
     /**
      * 处理项目/课程搜索（AILoadSelect 的 remoteMethod）
@@ -462,9 +497,11 @@ export default {
       this.isConfirmed = true;
       
       // 检查是否修改过
+      const currentUserIds = this.formData.userIds.sort();
+      const initialUserIds = (this.initialData.userIds || []).sort();
       const isModified = 
         this.formData.courseProjectId !== this.initialData.courseProjectId ||
-        JSON.stringify(this.formData.userIds.sort()) !== JSON.stringify((this.initialData.userIds || []).sort());
+        JSON.stringify(currentUserIds) !== JSON.stringify(initialUserIds);
 
       // 构造确认数据
       const confirmData = {
@@ -514,6 +551,7 @@ export default {
   }
 
   .form-body {
+    border-bottom: 1px solid rgba(0,0,0,0.08);
     .form-item {
       margin-bottom: 12px;
       display: flex;
@@ -551,13 +589,14 @@ export default {
   }
 
   .form-footer {
+    margin-top: 12px;
     display: flex;
     justify-content: flex-end;
 
     .confirm-btn {
       background: linear-gradient(90deg, #6c9dfa 0%, #409eff 100%);
       color: #fff;
-      border-radius: 4px;
+      border-radius: 8px;
       padding: 6px 16px;
       font-size: 12px;
       cursor: pointer;
@@ -572,6 +611,7 @@ export default {
 
       .icon {
         font-size: 14px;
+        margin-right: 4px;
       }
     }
   }

@@ -68,6 +68,16 @@ export default defineConfig({
             proxyReq.removeHeader('x-forwarded-proto');
           });
         }
+      },
+      // 5. 代理 /safe-center 开头的请求到 pbnissan.hik-cloud.com
+      '/safe-center': {
+        target: 'https://pbnissan.hik-cloud.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/safe-center/, '/v1'),
+        headers: {
+          Referer: 'https://pbnissan.hik-cloud.com'
+        }
       }
     }
   },

@@ -525,6 +525,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/style/mixins.scss' as ai;
 .ai-load-select {
   position: relative;
   display: inline-block;
@@ -558,7 +559,7 @@ export default {
 
     .select-input-inner {
       flex: 1;
-      padding: 0 30px 0 12px;
+      padding: 0 30px 0 4px;
       min-height: 32px;
       display: flex;
       align-items: center;
@@ -576,6 +577,8 @@ export default {
         color: rgba(56, 142, 255, 1);
         font-size: 14px;
         line-height: 32px;
+        word-break: break-all;
+        @include ai.ellipsis(1);
       }
 
       .placeholder {
@@ -629,9 +632,9 @@ export default {
 
       .search-input {
         .el-input__inner {
-          background-color: rgba(232, 246, 255, 1);
-          border-color: rgba(232, 246, 255, 1);
-          color: rgba(56, 142, 255, 1);
+          background-color: val(--ym-ai-light-primary-color);
+          border-color: val(--ym-ai-primary-color);
+          color: val(--ym-ai-primary-color);
           border-radius: 4px;
 
           &:focus {

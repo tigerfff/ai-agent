@@ -23,28 +23,28 @@
         <!-- 内容容器 -->
         <div class="el-sender-content" @click="focusInput">
           <div class="input-row">
-            <!-- 前缀 -->
+          <!-- 前缀 -->
             <div class="el-sender-prefix">
               <slot name="prefix">
                 <img v-show="!(isFocused || inputValue.length > 0)" :src="starIcon" alt="星星" class="prefix-star-icon" />
               </slot>
-            </div>
+          </div>
 
-            <!-- 输入框 -->
-            <div class="el-sender-input">
-              <textarea
-                ref="textarea"
-                :value="inputValue"
-                class="ai-textarea"
-                :placeholder="placeholder"
-                :rows="1"
-                :disabled="disabled"
-                @input="handleInput"
-                @focus="handleFocus"
-                @blur="handleBlur"
-                @keydown="handleKeyDown"
-                @paste="handlePaste"
-              ></textarea>
+          <!-- 输入框 -->
+          <div class="el-sender-input">
+            <textarea
+              ref="textarea"
+              :value="inputValue"
+              class="ai-textarea"
+              :placeholder="placeholder"
+              :rows="1"
+              :disabled="disabled"
+              @input="handleInput"
+              @focus="handleFocus"
+              @blur="handleBlur"
+              @keydown="handleKeyDown"
+              @paste="handlePaste"
+            ></textarea>
             </div>
           </div>
 
@@ -588,11 +588,11 @@ export default {
           this.inputValue = this.confirmedText + text;
         }
         
-        // 保持焦点在最后
-        this.$nextTick(() => {
-          this.adjustHeight();
-          this.focusToEnd();
-        });
+           // 保持焦点在最后
+           this.$nextTick(() => {
+             this.adjustHeight();
+             this.focusToEnd();
+           });
       },
       onStart: () => {
         console.log('[AIInput] ASR started');
@@ -1207,13 +1207,13 @@ export default {
               color: #fff;
             }
 
-          &.disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
+            &.disabled {
+              cursor: not-allowed;
+              opacity: 0.7;
+            }
           }
-        }
 
-        &.stop-btn {
+          &.stop-btn {
             color: #fff;
             border-radius: 8px;
             font-size: 12px;

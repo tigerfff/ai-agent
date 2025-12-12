@@ -18,14 +18,8 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         class="history-full-width"
-        :ignoreWidgetTypes="['ymform:train_confirm','ymForm:train_plan_result']"
+        :ignoreWidgetTypes="['ymform:train_confirm','ymForm:train_plan_result','ymform:user_train_finish']"
       >
-        <template #avatar="{ item }">
-          <div class="custom-avatar" :class="item.role">
-            {{ item.role === 'user' ? '👤' : '🤖' }}
-          </div>
-        </template>
-
         <!-- 自定义 Widget 渲染 -->
         <template #widget="{ info, item, index }">
           <TrainPlanForm
@@ -35,15 +29,37 @@
             @send-message="handleWidgetSend"
           />
 
+          <UserStudyForm
+            v-else-if="info.widgetType === 'ymform:user_study'"
+            :data="info.data"
+            @learn="handleUserStudyLearn"
+          />
+         
+          <TrainVideoCard
+            v-if="info.widgetType === 'ymform:train_video_upload'"
+            :data="info.data"
+          />
         </template>
 
         <template  #footer="{ item, index }" >
           <div style="display: flex; align-items: center; gap: 4px;">
-            <div class="stop-task" v-if="item.content.includes('ymForm:train_plan_result')" @click="handleCancelTask(item)">
-              <i class="h-icon-close_f"></i>
-              <span>停止任务</span>
-            </div>
-            <span  v-if="item.content.includes('ymForm:train_plan_result')" style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
+            <!-- 停止任务 ymForm:train_plan_result-->
+            <template v-if="item.content.includes('ymForm:train_plan_result')" >
+              <div class="stop-task" @click="handleCancelTask(item)">
+                <i class="h-icon-close_f"></i>
+                <span>停止任务</span>
+              </div>
+              <span style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
+            </template>
+
+            <template v-else-if="item.content.includes('ymform:user_train_finish')">
+              <UserTrainFinish
+                :data="item"
+                :is-history-disabled="index < messages.length - 1"
+                @send-message="handleWidgetSend"
+              />
+            </template>
+           
             <BubbleFooter 
               :item="item" 
               :actions="getActions(item)"
@@ -93,6 +109,9 @@ import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from './api';
 import { formatConversationTime } from '@/utils';
 import TrainPlanForm from './widgets/TrainPlanForm.vue';
+import UserStudyForm from './widgets/UserStudyForm.vue';
+import UserTrainFinish from './widgets/UserTrainFinish.vue';
+import TrainVideoCard from './widgets/TrainVideoCard.vue';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 
 export default {
@@ -102,6 +121,9 @@ export default {
     AIWelcome,
     ChatSkeleton,
     TrainPlanForm,
+    UserStudyForm,
+    UserTrainFinish,
+    TrainVideoCard,
     BubbleFooter
   },
   props: {
@@ -161,7 +183,7 @@ export default {
           if (this.chatId === val) return;
 
           this.chatId = val;
-          // 当外部传入新的会话 ID 时，加载对应的历史记录
+          // 当外部传入新的会话 ID 时，加载对应的历史记录 
           this.loadHistory();
           
           // 检查未读状态并标记已读
@@ -185,9 +207,12 @@ export default {
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
-    this.mockTrainPlanForm();
+    // this.mockTrainPlanForm();
+    // this.mockUserStudyForm();
+    this.mockUserTrainFinish();
   },
   methods: {
+
 
     getActions(item) {
       // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
@@ -739,17 +764,25 @@ export default {
       this.handleSend({ text });
     },
 
+    handleUserStudyLearn(data) {
+      // 处理用户学习按钮点击
+      // data 包含 courseProjectId, type, detailInfo
+      console.log('[TrainingX] User study learn:', data);
+      // 可以在这里跳转到学习页面，或者触发其他业务逻辑
+      // 例如：window.open(`/training/learn?type=${data.type}&id=${data.courseProjectId}`);
+    },
+
     /**
      * 临时 Mock 方法：添加测试培训计划表单消息（可随时删除）
      */
     mockTrainPlanForm() {
       const mockContent = `<ymform:train_plan>
 {
-  "courseProjectId": "43dbb90d1ba94f4f844ea71b89b4438a",
+  "courseProjectId": "32a0373b23884fd2aca7778db9ce18e4",
   "type": "项目",
   "questionId": "123",
-  "storeId": "123",
-  "userIds": ["aaaa", "bbbb"]
+  "storeId": "70070670a8ed430497b15e70e5eb8763",
+  "userIds": ["4649d25a7be14f7bb1106219b3bec89c"]
 }
 </ymform:train_plan>`;
 
@@ -764,6 +797,55 @@ export default {
       
       this.messages.push(mockMsg);
       console.log('[Mock] 已添加测试培训计划表单消息');
+    },
+
+    /**
+     * 临时 Mock 方法：添加测试用户学习表单消息（可随时删除）
+     */
+    mockUserStudyForm() {
+      const mockContent = `<ymform:user_study desc="以下是用户需要学习的内容">
+{
+  "courseProjectId": "43dbb90d1ba94f4f844ea71b89b4438a",
+  "type": "项目"
+}
+</ymform:user_study>`;
+
+      const mockMsg = {
+        key: 'mock-user-study-' + Date.now(),
+        role: 'ai',
+        content: mockContent,
+        attachments: [],
+        variant: 'filled',
+        placement: 'start'
+      };
+      
+      this.messages.push(mockMsg);
+      console.log('[Mock] 已添加测试用户学习表单消息');
+    },
+
+    /**
+     * 临时 Mock 方法：添加测试用户培训完成（上传视频）消息（可随时删除）
+     */
+    mockUserTrainFinish() {
+      const mockContent = `<ymform:user_train_finish desc="提醒用户上传实操视频">
+{
+  "projectId": "32a0373b23884fd2aca7778db9ce18e4",
+  "taskId": "8eceeb944abc479fa1eb0cdbf6f0e711",
+  "storeId": "0250675552214029823f83fede40671e"
+}
+</ymform:user_train_finish>`;
+
+      const mockMsg = {
+        key: 'mock-user-train-finish-' + Date.now(),
+        role: 'ai',
+        content: mockContent,
+        attachments: [],
+        variant: 'filled',
+        placement: 'start'
+      };
+      
+      this.messages.push(mockMsg);
+      console.log('[Mock] 已添加测试用户培训完成（上传视频）消息');
     },
 
     handleFinish({ index }) {
