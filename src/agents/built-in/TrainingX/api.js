@@ -2,15 +2,16 @@
 
 const AGENT_ID = '2';
 
+import { buildUrl } from '@/utils/api-prefix';
+
 export const TrainingXApi = {
   /**
    * 获取 OSS 上传凭证
    * @param {AIClient} client 
    */
   getOssToken(client) {
-    // 文档中未提及 ossInfo 接口变更，暂时保留或需确认
     return client.send({
-      url: '/api/inspect/algorithm/models/upload/ossInfo',
+      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'sse', '/api'),
       method: 'get'
     });
   },
@@ -22,7 +23,7 @@ export const TrainingXApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`, 'sse', '/api'),
       method: 'get',
       data
     });
@@ -36,7 +37,7 @@ export const TrainingXApi = {
   getHistory(client, sessionId) {
     console.log('sessionId', sessionId)
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`, 'sse', '/api'),
       method: 'get',
       data: { chatId: sessionId }
     });
@@ -49,7 +50,7 @@ export const TrainingXApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`, 'sse', '/api'),
       method: 'delete',
       data
     });
@@ -62,7 +63,7 @@ export const TrainingXApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`, 'sse', '/api'),
       method: 'post',
       data
     });
@@ -76,7 +77,7 @@ export const TrainingXApi = {
   evaluateMessage(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'sse', '/api'),
       method: 'post',
       data: body
     });
@@ -90,7 +91,7 @@ export const TrainingXApi = {
   chatStream(client, { data, signal, onMessage, onComplete, onError, uploadType = 'img' }) {
     // V2 接口统一使用 app/stream/completion
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`, 'sse', '/api'),
       method: 'POST',
       data,
       stream: true,
@@ -109,7 +110,7 @@ export const TrainingXApi = {
   renameChatTitle(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'sse', '/api'),
       method: 'post',
       data: body
     });
@@ -124,7 +125,7 @@ export const TrainingXApi = {
   pinnedChat(client, data) {
     const { chatId, pinned } = data;
     // pinned 参数在 query 中，手动拼接 URL
-    const url = `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/action/pinned?pinned=${pinned}`;
+    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'sse', '/api')}?pinned=${pinned}`;
     return client.send({
       url,
       method: 'put',
@@ -138,7 +139,7 @@ export const TrainingXApi = {
    */
   getSuggestions(client) {
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`, 'sse', '/api'),
       method: 'get'
     });
   },
@@ -151,7 +152,7 @@ export const TrainingXApi = {
   markAsRead(client, data) {
     const { chatId } = data;
     return client.send({
-      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`, 'sse', '/api'),
       method: 'put',
       data: {}
     });
@@ -177,7 +178,7 @@ export const TrainingXApi = {
    */
   getProjectDetail(client, projectId) {
     return client.send({
-      url: `/api/enterprise/training/projects/${projectId}`,
+      url: buildUrl(client, `/enterprise/training/projects/${projectId}`, 'chain', '/api'),
       method: 'get',
       baseURL: '' // 使用完整 URL
     });
@@ -190,7 +191,7 @@ export const TrainingXApi = {
    */
   getCourseDetail(client, courseId) {
     return client.send({
-      url: `/api/enterprise/training/course`,
+      url: buildUrl(client, `/enterprise/training/course`, 'chain', '/api'),
       method: 'get',
       data: { courseId },
       baseURL: '' // 使用完整 URL
@@ -204,7 +205,7 @@ export const TrainingXApi = {
    */
   getPersonnelInfo(client, data) {
     return client.send({
-      url: `/api/chain/patrol/patrolAgent/actions/findAgentUserByIds`,
+      url: buildUrl(client, `/chain/patrol/patrolAgent/actions/findAgentUserByIds`, 'chain', '/api'),
       method: 'get',
       data
     });
@@ -217,7 +218,7 @@ export const TrainingXApi = {
    */
   getProjectList(client, data = {}) {
     return client.send({
-      url: `/api/enterprise/training/projects`,
+      url: buildUrl(client, `/enterprise/training/projects`, 'chain', '/api'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -230,7 +231,7 @@ export const TrainingXApi = {
    */
   getCourseList(client, data = {}) {
     return client.send({
-      url: `/api/enterprise/training/course/list`,
+      url: buildUrl(client, `/enterprise/training/course/list`, 'chain', '/api'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -238,7 +239,7 @@ export const TrainingXApi = {
 
   getCourseList(client, data = {}) {
     return client.send({
-      url: `/api/enterprise/training/course/list`,
+      url: buildUrl(client, `/enterprise/training/course/list`, 'chain', '/api'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -247,7 +248,7 @@ export const TrainingXApi = {
   // 通过storeId查询人
   listLearnersByStore(client, data = {}) {
     return client.send({
-      url: `/api/chain/patrol/patrolAgent/action/listLearnersByStore`,
+      url: buildUrl(client, `/chain/patrol/patrolAgent/action/listLearnersByStore`, 'chain', '/api'),
       method: 'get',
       data
     });
@@ -260,7 +261,7 @@ export const TrainingXApi = {
    */
   submitOperation(client, data) {
     return client.send({
-      url: '/api/enterprise/training/userProjects/actions/addOperation',
+      url: buildUrl(client, `/enterprise/training/userProjects/actions/addOperation`, 'chain', '/api'),
       method: 'post',
       data
     });
@@ -273,7 +274,7 @@ export const TrainingXApi = {
    */
   getProjectTasks(client, projectId) {
     return client.send({
-      url: `/api/enterprise/training/userProjects/actions/getProjectTasks/${projectId}`,
+      url: buildUrl(client, `/enterprise/training/userProjects/actions/getProjectTasks/${projectId}`, 'chain', '/api'),
       method: 'get',
     });
   },

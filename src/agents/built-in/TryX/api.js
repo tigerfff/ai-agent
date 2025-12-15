@@ -1,4 +1,5 @@
 // TryX 智能体 API 定义
+import { buildUrl } from '@/utils/api-prefix';
 
 export const TryApi = {
   /**
@@ -7,7 +8,7 @@ export const TryApi = {
    */
   getOssToken(client) {
     return client.send({
-      url: '/v1/inspect/algorithm/models/upload/ossInfo',
+      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'sse'),
       method: 'get'
     });
   },
@@ -19,7 +20,7 @@ export const TryApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: '/v1/inspect/chat/web/agent/chat/list',
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/list', 'sse'),
       method: 'post',
       data
     });
@@ -32,7 +33,7 @@ export const TryApi = {
    */
   getHistory(client, sessionId) {
     return client.send({
-      url: '/v1/inspect/chat/web/agent/chat/history',
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/history', 'sse'),
       method: 'get',
       // 注意：AIClient.send 目前只会把 data 传给 httpAdapter，
       // 所以这里用 data，由 httpStub 在 GET 场景下自动转成 query string
@@ -47,7 +48,7 @@ export const TryApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: '/v1/inspect/chat/web/agent/chat/delete',
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/delete', 'sse'),
       method: 'get',
       data
     });
@@ -60,7 +61,7 @@ export const TryApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: '/v1/inspect/chat/web/agent/chat/add',
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/add', 'sse'),
       method: 'post',
       data
     });
@@ -74,7 +75,7 @@ export const TryApi = {
    */
   evaluateMessage(client, data) {
     return client.send({
-      url: '/v1/inspect/chat/web/agent/chat/evaluate',
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/evaluate', 'sse'),
       method: 'post',
       data
     });
@@ -95,11 +96,11 @@ export const TryApi = {
     // 根据环境或类型选择 URL
     // 注意：这里保留了之前的 URL 选择逻辑
     const apiPath = uploadType === 'img' 
-      ? '/v1/inspect/chat/web/agent/chat/app/stream/completion'
-      : '/v1/inspect/chat/web/agent/chat/multimodal/stream/completion';
+      ? '/inspect/chat/web/agent/chat/app/stream/completion'
+      : '/inspect/chat/web/agent/chat/multimodal/stream/completion';
 
     return client.send({
-      url: apiPath,
+      url: buildUrl(client, apiPath, 'sse'),
       method: 'POST',
       data,
       stream: true,

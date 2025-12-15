@@ -1,6 +1,5 @@
 // TryX 智能体 API 定义 (基于 api-培训 文档更新)
-
-const AGENT_ID = '2';
+import { buildUrl } from '@/utils/api-prefix';
 
 export const orgPersonPagedPickerApi = {
   /**
@@ -10,7 +9,7 @@ export const orgPersonPagedPickerApi = {
    */
   findUserListAdminAuthority(client,data = {}) {
     return client.send({
-      url: '/v1/chain/basic/users/actions/findUserListAdminAuthority',
+      url: buildUrl(client, '/chain/basic/users/actions/findUserListAdminAuthority', 'chain', '/api'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -20,7 +19,7 @@ export const orgPersonPagedPickerApi = {
   // 获取职位列表
   getRoleList(client,data = {}) {
     return client.send({
-      url: '/safe-center/auth/centerRole/actions/list',
+      url: buildUrl(client, '/safe-center/auth/centerRole/actions/list', 'chain', '/api'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -30,7 +29,7 @@ export const orgPersonPagedPickerApi = {
   async findOrgTreeByParentId(client,data = {}) {
     const { data: departmentList } = await client.send({
       method: 'get',
-      url: '/v1/chain/basic/organizations/actions/findOrgTreeByParentId',
+      url: buildUrl(client, '/chain/basic/organizations/actions/findOrgTreeByParentId', 'chain', '/api'),
       data
     })
     return {
