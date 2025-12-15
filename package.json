@@ -53,6 +53,7 @@
     "node-uuid": "^1.4.8",
     "pako": "^2.1.0",
     "qrcode": "^1.5.4",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "tencentcloud-speech-sdk-js": "^1.0.0",
     "typed.js": "^2.1.0",
     "underscore": "^1.13.7",
