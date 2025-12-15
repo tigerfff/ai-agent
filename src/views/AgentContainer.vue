@@ -4,13 +4,14 @@
     <!-- 左侧导航 -->
     <template #sider>
       <AISidebar 
-        v-if="!isHome && !shouldHideConversations"
+        v-if="!isHome"
         :agents="allAgents" 
         :current-agent-id="currentAgentId"
         :conversations="filteredConversations"
         :active-conversation-id="currentConversationId"
         :collapsed.sync="isCollapsed"
         :is-mini="isMini"
+        :hide-conversations="shouldHideConversations"
         @update:activeConversationId="handleSelectConversation"
         @select="handleSelectAgent"
         @new-chat="handleNewChat"
@@ -39,7 +40,7 @@
 
         <div class="viewport-header">
           <!-- 左侧：侧边栏收起时显示 -->
-          <div class="header-left" v-if="!shouldHideConversations">
+          <div class="header-left">
             <div class="toggle-btn" v-if="isCollapsed" @click="isCollapsed = false" title="展开侧边栏">
               <img src="@/assets/svg/history.svg" alt="展开" class="icon-svg" />
             </div>
@@ -384,9 +385,6 @@ export default {
     handleNewChat() {
       console.log('User clicked new chat');
       if (!this.currentAgentId) return;
-
-      // 对于配置了 hideConversations 的 slot 智能体，不创建会话
-      if (this.shouldHideConversations) return;
 
       // 如果当前已经是新会话（虚拟ID），则不再重复创建
       if (this.currentConversationId && this.currentConversationId.startsWith('conv-')) {

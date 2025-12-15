@@ -37,17 +37,17 @@ export const ALL_AGENTS = {
     tags: ['巡查', '安防'],
     component: TryAgent // 暂时复用 TryAgent，实际应为 InspectAgent
   },
-  'data-analysis': {
-    id: 'data-analysis',
-    name: '数据分析',
-    miniName:'数据',
-    icon: dataAnalysisIcon,
-    homeIcon: dataAnalysisHomeIcon,
-    description: '深度挖掘数据价值，辅助业务决策。',
-    type: 'built-in',
-    tags: ['数据', '分析'],
-    component: TryAgent // 暂时复用
-  },
+  // 'data-analysis': {
+  //   id: 'data-analysis',
+  //   name: '数据分析',
+  //   miniName:'数据',
+  //   icon: dataAnalysisIcon,
+  //   homeIcon: dataAnalysisHomeIcon,
+  //   description: '深度挖掘数据价值，辅助业务决策。',
+  //   type: 'built-in',
+  //   tags: ['数据', '分析'],
+  //   component: TryAgent // 暂时复用
+  // },
   'try-x': {
     id: 'try-x',
     name: 'AI试用',

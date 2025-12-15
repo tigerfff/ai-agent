@@ -43,7 +43,7 @@
 
 
     <!-- Conversations (会话历史列表) -->
-    <div class="conversations-section">
+    <div class="conversations-section" v-if="!hideConversations">
       <div class="section-header" v-if="!collapsed">
         <div class="section-title">对话列表</div>
       </div>
@@ -123,6 +123,11 @@ export default {
     },
     // 是否为小窗模式
     isMini: {
+      type: Boolean,
+      default: false
+    },
+    // 是否隐藏会话历史区域（由外部控制）
+    hideConversations: {
       type: Boolean,
       default: false
     }
