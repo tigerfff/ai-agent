@@ -4,7 +4,7 @@
     <!-- 左侧导航 -->
     <template #sider>
       <AISidebar 
-        v-if="!isHome"
+        v-if="!isHome && !shouldHideConversations"
         :agents="allAgents" 
         :current-agent-id="currentAgentId"
         :conversations="filteredConversations"
@@ -39,7 +39,7 @@
 
         <div class="viewport-header">
           <!-- 左侧：侧边栏收起时显示 -->
-          <div class="header-left">
+          <div class="header-left" v-if="!shouldHideConversations">
             <div class="toggle-btn" v-if="isCollapsed" @click="isCollapsed = false" title="展开侧边栏">
               <img src="@/assets/svg/history.svg" alt="展开" class="icon-svg" />
             </div>
@@ -100,6 +100,7 @@
             <slot 
               name="agent-view" 
               :agent="currentAgent"
+              :is-mini="isMini"
             >
               <div class="empty-tip">
                 请在父组件通过 slot="agent-view" 渲染内容<br>
@@ -258,6 +259,15 @@ export default {
       }
       const chat = this.conversations.find(c => c.id === this.currentConversationId);
       return chat ? (chat.label || '新会话') : 'AI 助手';
+    },
+    /**
+     * 是否隐藏会话列表和相关 UI（由智能体配置控制）
+     * 场景：自定义 slot 智能体，不需要左侧历史和新建会话按钮
+     */
+    shouldHideConversations() {
+      if (!this.currentAgent) return false;
+      // 仅当为 slot 类型，且配置了 hideConversations=true 时隐藏
+      return this.currentAgent.type === 'slot' && this.currentAgent.hideConversations === true;
     }
   },
   methods: {
@@ -374,6 +384,9 @@ export default {
     handleNewChat() {
       console.log('User clicked new chat');
       if (!this.currentAgentId) return;
+
+      // 对于配置了 hideConversations 的 slot 智能体，不创建会话
+      if (this.shouldHideConversations) return;
 
       // 如果当前已经是新会话（虚拟ID），则不再重复创建
       if (this.currentConversationId && this.currentConversationId.startsWith('conv-')) {
