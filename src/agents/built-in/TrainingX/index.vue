@@ -59,6 +59,13 @@
                 @send-message="handleWidgetSend"
               />
             </template>
+
+            <template v-else-if="item.content.includes('ymform:train_result_upload')">
+              <TrainResultUpload
+                :data="item"
+                :is-history-disabled="index < messages.length - 1"
+              />
+            </template>
            
             <BubbleFooter 
               :item="item" 
@@ -112,6 +119,7 @@ import TrainPlanForm from './widgets/TrainPlanForm.vue';
 import UserStudyForm from './widgets/UserStudyForm.vue';
 import UserTrainFinish from './widgets/UserTrainFinish.vue';
 import TrainVideoCard from './widgets/TrainVideoCard.vue';
+import TrainResultUpload from './widgets/TrainResultUpload.vue';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 
 export default {
@@ -124,6 +132,7 @@ export default {
     UserStudyForm,
     UserTrainFinish,
     TrainVideoCard,
+    TrainResultUpload,
     BubbleFooter
   },
   props: {

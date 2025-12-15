@@ -30,6 +30,7 @@ export class AIClient {
    * @param {Object} params.data - 请求数据
    * @param {string} [params.method='POST'] - 请求方法
    * @param {boolean} [params.stream=false] - 是否开启 SSE 流式模式
+   * @param {Object} [params.httpConfig] - 传递给父项目 http 函数的额外配置（如 showLoading、hideErrorMsg 等）
    * @param {Function} [params.onMessage] - (SSE) 接收消息回调
    * @param {Function} [params.onComplete] - (SSE) 完成回调
    * @param {Function} [params.onError] - 错误回调
@@ -42,6 +43,7 @@ export class AIClient {
       data, 
       method = 'POST', 
       stream = false,
+      httpConfig,  // 父项目的额外配置
       onMessage, 
       onComplete, 
       onError,
@@ -59,9 +61,10 @@ export class AIClient {
     }
 
     // 场景 2: 普通 HTTP 请求
-    // 直接委托给 httpAdapter (即父项目的 axios)
-    // 注意：这里假设 httpAdapter 返回的是一个 Promise
-    return this.httpAdapter(method, url, data)
+    const methodUpper = method.toUpperCase();
+
+    // POST/PUT/PATCH 请求：data 作为请求体，httpConfig 作为第四个参数传递给父项目
+    return this.httpAdapter(method, url, data, httpConfig)
       .catch(err => {
         if (onError) onError(err);
         throw err;

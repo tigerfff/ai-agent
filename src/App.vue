@@ -39,13 +39,40 @@ export default {
       visible: false,
       // 父项目定义的额外智能体
       customAgents: [
-        // {
-        //   id: 'order-helper',
-        //   name: '订单助手',
-        //   icon: '📦',  
-        //   description: '查询订单状态和物流信息',
-        //   type: 'slot' // 标记为 slot 类型
-        // },
+        {
+          // 基础参数
+          id: 'order-helper',
+          name: '订单助手',
+          miniName: '订单',
+          icon: '📦',  // 或图片 URL
+          homeIcon: '/path/to/icon.png',
+          description: '查询订单状态和物流信息',
+          tags: ['订单', '物流'],
+          
+          // 类型
+          type: 'slot',  // 或 'external'
+          
+          // 如果是外部链接
+          getUrl: () => {
+            const origin = window.location.origin;
+            return `${origin}/order/index.html`;
+          },
+          
+          // 权限配置（可选）
+          permission: {
+            serviceName: '订单服务',
+            permissionName: '订单权限码',
+            checkService: true,
+            checkPermission: true,
+            permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
+            permissionCode: 'ORDER',           // 要检查的具体权限码
+            serviceCheckApi: {
+              url: '/api/order/service/check',
+              method: 'get',
+              data: {}
+            }
+          }
+        }
       ]
     };
   },

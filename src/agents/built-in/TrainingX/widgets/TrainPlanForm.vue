@@ -59,13 +59,15 @@
     <div class="form-footer" >
       <div class="confirm-btn" @click="handleConfirm" v-if="!isConfirmed && !isDisabled">
         <span class="icon">
-          <img src="@/assets/images/star@3x.png" alt="" width="24px">
+          <img src="@/assets/svg/star-white.svg" alt="" width="24px">
         </span>
         <span>确认执行</span>
       </div>
 
       <div class="confirmed-badge" v-if="isConfirmed || isHistoryDisabled">
-        <span class="icon">✔</span>
+        <span class="icon">
+          <img src="@/assets/svg/sure.svg" alt="" width="24px">
+        </span>
         <span>确认执行</span>
       </div>
     </div>

@@ -68,7 +68,22 @@ export const ALL_AGENTS = {
     description: '专业的培训助手，帮助你快速学习。',
     type: 'built-in',
     tags: ['培训', '学习'],
-    component: TrainingXAgent
+    component: TrainingXAgent,
+    // 权限配置
+    permission: {
+      serviceName: '培训服务',        // 服务名称（用于提示）
+      permissionName: '培训权限码',   // 权限名称（用于提示）
+      checkService: false,             // 是否需要检查服务购买
+      checkPermission: false,          // 是否需要检查权限码
+      permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
+      permissionCode: '21001',         // 要检查的具体权限码
+      // 服务检查接口配置
+      serviceCheckApi: {
+        url: '/api/enterprise/training/service/actions/enableTrainService', // 检查培训服务的接口
+        method: 'get',
+        data: {}
+      }
+    }
   },
   'sop-generation': {
     id: 'sop-generation',
@@ -77,9 +92,29 @@ export const ALL_AGENTS = {
     icon: sopIcon,
     homeIcon: sopHomeIcon,
     description: '标准化作业流程生成助手。',
-    type: 'built-in',
+    type: 'external', // 外部链接类型
     tags: ['SOP', '效率'],
-    component: TryAgent // 暂时复用
+    // 外部链接地址（使用当前域名）
+    getUrl: () => {
+      // 根据当前域名动态构建 URL
+      const origin = window.location.origin;
+      return `${origin}/chain/index.html#/inspect/config/template`;
+    },
+    // 权限配置
+    permission: {
+      serviceName: '巡查服务',        // 服务名称（用于提示）
+      permissionName: 'SOP权限码',     // 权限名称（用于提示）
+      checkService: false,              // 是否需要检查服务购买
+      checkPermission: false,           // 是否需要检查权限码
+      permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
+      permissionCode: '04007',          // 要检查的具体权限码
+      // 服务检查接口配置
+      serviceCheckApi: {
+        url: '/api/inspect/checkService', // 检查巡查服务的接口
+        method: 'get',
+        data: {}
+      }
+    } 
   }
 };
 

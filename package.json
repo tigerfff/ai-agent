@@ -2,7 +2,13 @@
   "name": "ai-aa",
   "version": "1.0.0",
   "description": "AI Assistant Component Library for Vue 2",
-  "keywords": ["vue", "vue2", "ai", "chat", "component-library"],
+  "keywords": [
+    "vue",
+    "vue2",
+    "ai",
+    "chat",
+    "component-library"
+  ],
   "author": "",
   "license": "MIT",
   "scripts": {
@@ -46,6 +52,7 @@
     "moment": "^2.30.1",
     "node-uuid": "^1.4.8",
     "pako": "^2.1.0",
+    "qrcode": "^1.5.4",
     "tencentcloud-speech-sdk-js": "^1.0.0",
     "typed.js": "^2.1.0",
     "underscore": "^1.13.7",

@@ -23,6 +23,7 @@ import PersonSelect from './ai-ui/base-form/orgPersonPagedPicker/index.vue';
 
 // 辅助组件
 import ChatSkeleton from './ai-ui/skeleton/ChatSkeleton.vue';
+import AIEmpty from './ai-ui/empty/AIEmpty.vue';
 
 // 核心功能
 import { setAdapter } from './ai-core/adapter';
@@ -59,6 +60,7 @@ const install = (Vue, options = {}) => {
 
   // 5. 注册全局组件 - 辅助
   Vue.component('ChatSkeleton', ChatSkeleton);
+  Vue.component('AIEmpty', AIEmpty);
 
   // 6. 处理适配器注入
   setAdapter(options);
@@ -96,6 +98,7 @@ export {
   PersonSelect,
   // 辅助
   ChatSkeleton,
+  AIEmpty,
   // 核心功能
   AIClient,
   EventBus

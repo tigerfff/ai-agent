@@ -35,7 +35,7 @@ Vue.use(AIComponentLib, {
   
   // 2. 注入配置提供者
   configProvider: () => ({
-    baseUrl: '/api', // 父项目 API 地址
+    baseUrl: '/AiApi', // 父项目 API 地址
     headers: {}
   })
 });

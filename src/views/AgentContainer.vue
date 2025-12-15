@@ -65,9 +65,23 @@
         </div>
        
         <div class="viewport-content">
-          <!-- A. 内置智能体 -->
+          <!-- 权限检查中 -->
+          <div v-if="checkingPermission" class="permission-checking">
+            <ChatSkeleton />
+          </div>
+
+          <!-- 无权限状态 -->
+          <AIEmpty
+            v-else-if="currentAgent && permissionStatus && permissionStatus.status !== 'has_permission'"
+            :type="permissionStatus.status === 'no_service' ? 'no-service' : 'default'"
+            :title="permissionStatus.status === 'no_service' ? '未购买服务' : '暂无权限'"
+            :description="getPermissionDescription()"
+            :is-mini="isMini"
+          />  
+
+          <!-- A. 内置智能体（有权限时显示） -->
           <component 
-            v-if="currentAgent && currentAgent.type === 'built-in'"
+            v-else-if="currentAgent && currentAgent.type === 'built-in' && (!permissionStatus || permissionStatus.status === 'has_permission')"
             ref="activeAgent"
             :is="currentAgent.component"
             :key="`builtin-${componentKey}`"
@@ -79,7 +93,7 @@
 
           <!-- B. 外部注入智能体 (Slot) -->
           <div 
-            v-else-if="currentAgent && currentAgent.type === 'slot'"
+            v-else-if="currentAgent && currentAgent.type === 'slot' && (!permissionStatus || permissionStatus.status === 'has_permission')"
             class="slot-wrapper"
             :key="`slot-${componentKey}`"
           >
@@ -141,13 +155,18 @@ import AISidebar from '@/ai-ui/layout/AISidebar.vue';
 import Home from './Home.vue';
 import { getAgentsByBusinessLine, getCurrentBusinessLine } from '@/config/agent-config';
 import { formatConversationTime } from '@/utils';
+import { checkAgentPermission, PERMISSION_STATUS } from '@/utils/permission-checker';
+import AIEmpty from '@/ai-ui/empty/AIEmpty.vue';
+import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 
 export default {
   name: 'AIAgentContainer',
   components: {
     AILayout,
     AISidebar,
-    Home
+    Home,
+    AIEmpty,
+    ChatSkeleton
   },
   props: {
     // 外部注入的智能体列表
@@ -203,7 +222,10 @@ export default {
         ]
       },
       currentRenameItem: null,
-      renameLoading: false
+      renameLoading: false,
+      // 权限相关
+      permissionStatus: null,      // 当前智能体的权限状态
+      checkingPermission: false    // 是否正在检查权限
     };
   },
   computed: {
@@ -246,13 +268,74 @@ export default {
       this.$emit('close');
     },
     async handleSelectAgent(agent) {
+      // 如果是外部链接类型，先检查权限再跳转
+      if (agent.type === 'external' && agent.getUrl) {
+        // 检查权限
+        if (agent.permission) {
+          this.checkingPermission = true;
+          try {
+            const permissionResult = await checkAgentPermission(this.$aiClient, agent.id, agent.permission);
+            if (permissionResult.status !== PERMISSION_STATUS.HAS_PERMISSION) {
+              // 无权限，不跳转，显示权限状态
+              this.currentAgentId = agent.id;
+              this.permissionStatus = permissionResult;
+              this.checkingPermission = false;
+              return;
+            }
+          } catch (e) {
+            console.error('[AgentContainer] Permission check failed:', e);
+            this.checkingPermission = false;
+            return;
+          }
+          this.checkingPermission = false;
+        }
+        // 有权限，新开窗口跳转
+        const url = typeof agent.getUrl === 'function' ? agent.getUrl() : agent.getUrl;
+        window.open(url, '_blank');
+        return;
+      }
+      
       this.currentAgentId = agent.id;
+      this.permissionStatus = null;
+      
+      // 检查权限（如果智能体配置了权限检查）
+      if (agent.permission) {
+        this.checkingPermission = true;
+        try {
+          const permissionResult = await checkAgentPermission(this.$aiClient, agent.id, agent.permission);
+          this.permissionStatus = permissionResult;
+        } catch (e) {
+          console.error('[AgentContainer] Permission check failed:', e);
+          // 权限检查失败，默认允许访问（降级处理）
+          this.permissionStatus = { status: PERMISSION_STATUS.HAS_PERMISSION };
+        } finally {
+          this.checkingPermission = false;
+        }
+      }
       
       // 切换智能体后，尝试选中该智能体的最新会话
       // 如果是 TryAgent，列表可能是空的，等待组件 emit update-list 后再选中
       const firstConv = this.conversations.find(c => c.agentId === agent.id);
       this.currentConversationId = firstConv ? firstConv.id : null;
       this.componentKey++; 
+    },
+    
+    /**
+     * 获取权限描述信息
+     */
+    getPermissionDescription() {
+      if (!this.currentAgent || !this.permissionStatus) return '';
+      
+      const { permission } = this.currentAgent;
+      if (!permission) return this.permissionStatus.message || '';
+      
+      if (this.permissionStatus.status === PERMISSION_STATUS.NO_SERVICE) {
+        return `您尚未购买${permission.serviceName}，请联系管理员开通`;
+      } else if (this.permissionStatus.status === PERMISSION_STATUS.NO_PERMISSION) {
+        return `您已购买${permission.serviceName}，但暂无${permission.permissionName}，请联系管理员开通`;
+      }
+      
+      return this.permissionStatus.message || '';
     },
     
     // 由子组件 (TryAgent) 触发，更新会话列表
@@ -338,14 +421,18 @@ export default {
         this.currentRenameItem = item;
         this.renameForm.name = item.label || '';
         this.renameDialogVisible = true;
+        // 等待 dialog 完全打开后再操作
         this.$nextTick(() => {
-          if (this.$refs.renameForm) {
-            this.$refs.renameForm.clearValidate();
-          }
-          // 尝试聚焦输入框
-          if (this.$refs.renameInput) {
-            this.$refs.renameInput.focus();
-          }
+          // 使用双重 nextTick 确保 el-form 已经渲染
+          this.$nextTick(() => {
+            if (this.$refs.renameForm && typeof this.$refs.renameForm.clearValidate === 'function') {
+              this.$refs.renameForm.clearValidate();
+            }
+            // 尝试聚焦输入框
+            if (this.$refs.renameInput && typeof this.$refs.renameInput.focus === 'function') {
+              this.$refs.renameInput.focus();
+            }
+          });
         });
       } else if (command === 'pin') {
         if (agent && typeof agent.pinSession === 'function') {
@@ -405,9 +492,11 @@ export default {
       this.renameDialogVisible = false;
       this.currentRenameItem = null;
       this.renameForm.name = '';
-      if (this.$refs.renameForm) {
-        this.$refs.renameForm.clearValidate();
-      }
+      this.$nextTick(() => {
+        if (this.$refs.renameForm && typeof this.$refs.renameForm.clearValidate === 'function') {
+          this.$refs.renameForm.clearValidate();
+        }
+      });
     }
   },
   mounted() {

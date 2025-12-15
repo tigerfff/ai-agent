@@ -10,7 +10,7 @@ export const TrainingXApi = {
   getOssToken(client) {
     // 文档中未提及 ossInfo 接口变更，暂时保留或需确认
     return client.send({
-      url: '/v1/inspect/algorithm/models/upload/ossInfo',
+      url: '/api/inspect/algorithm/models/upload/ossInfo',
       method: 'get'
     });
   },
@@ -22,7 +22,7 @@ export const TrainingXApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`,
       method: 'get',
       data
     });
@@ -36,7 +36,7 @@ export const TrainingXApi = {
   getHistory(client, sessionId) {
     console.log('sessionId', sessionId)
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`,
       method: 'get',
       data: { chatId: sessionId }
     });
@@ -49,7 +49,7 @@ export const TrainingXApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`,
       method: 'delete',
       data
     });
@@ -62,7 +62,7 @@ export const TrainingXApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`,
       method: 'post',
       data
     });
@@ -76,7 +76,7 @@ export const TrainingXApi = {
   evaluateMessage(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`,
       method: 'post',
       data: body
     });
@@ -90,7 +90,7 @@ export const TrainingXApi = {
   chatStream(client, { data, signal, onMessage, onComplete, onError, uploadType = 'img' }) {
     // V2 接口统一使用 app/stream/completion
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`,
       method: 'POST',
       data,
       stream: true,
@@ -109,7 +109,7 @@ export const TrainingXApi = {
   renameChatTitle(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`,
       method: 'post',
       data: body
     });
@@ -124,7 +124,7 @@ export const TrainingXApi = {
   pinnedChat(client, data) {
     const { chatId, pinned } = data;
     // pinned 参数在 query 中，手动拼接 URL
-    const url = `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/action/pinned?pinned=${pinned}`;
+    const url = `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/action/pinned?pinned=${pinned}`;
     return client.send({
       url,
       method: 'put',
@@ -138,7 +138,7 @@ export const TrainingXApi = {
    */
   getSuggestions(client) {
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`,
       method: 'get'
     });
   },
@@ -151,7 +151,7 @@ export const TrainingXApi = {
   markAsRead(client, data) {
     const { chatId } = data;
     return client.send({
-      url: `/v1/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
+      url: `/api/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`,
       method: 'put',
       data: {}
     });
@@ -177,7 +177,7 @@ export const TrainingXApi = {
    */
   getProjectDetail(client, projectId) {
     return client.send({
-      url: `/v1/enterprise/training/projects/${projectId}`,
+      url: `/api/enterprise/training/projects/${projectId}`,
       method: 'get',
       baseURL: '' // 使用完整 URL
     });
@@ -190,7 +190,7 @@ export const TrainingXApi = {
    */
   getCourseDetail(client, courseId) {
     return client.send({
-      url: `/v1/enterprise/training/course`,
+      url: `/api/enterprise/training/course`,
       method: 'get',
       data: { courseId },
       baseURL: '' // 使用完整 URL
@@ -204,11 +204,10 @@ export const TrainingXApi = {
    */
   getPersonnelInfo(client, data) {
     return client.send({
-      url: `/v1/chain/patrol/patrolAgent/actions/findAgentUserByIds`,
+      url: `/api/chain/patrol/patrolAgent/actions/findAgentUserByIds`,
       method: 'get',
       data
     });
-    
   },
 
   /**
@@ -218,7 +217,7 @@ export const TrainingXApi = {
    */
   getProjectList(client, data = {}) {
     return client.send({
-      url: `/v1/enterprise/training/projects`,
+      url: `/api/enterprise/training/projects`,
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -231,7 +230,7 @@ export const TrainingXApi = {
    */
   getCourseList(client, data = {}) {
     return client.send({
-      url: `/v1/enterprise/training/course/list`,
+      url: `/api/enterprise/training/course/list`,
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -239,7 +238,7 @@ export const TrainingXApi = {
 
   getCourseList(client, data = {}) {
     return client.send({
-      url: `/v1/enterprise/training/course/list`,
+      url: `/api/enterprise/training/course/list`,
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -248,9 +247,9 @@ export const TrainingXApi = {
   // 通过storeId查询人
   listLearnersByStore(client, data = {}) {
     return client.send({
-      url: `/v1/chain/patrol/patrolAgent/action/listLearnersByStore`,
+      url: `/api/chain/patrol/patrolAgent/action/listLearnersByStore`,
       method: 'get',
-      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
+      data
     });
   },
 
@@ -261,10 +260,9 @@ export const TrainingXApi = {
    */
   submitOperation(client, data) {
     return client.send({
-      url: '/v1/enterprise/training/userProjects/actions/addOperation',
+      url: '/api/enterprise/training/userProjects/actions/addOperation',
       method: 'post',
-      data,
-      baseURL: '' // 使用完整 URL
+      data
     });
   },
   
