@@ -1,16 +1,30 @@
 <template>
   <div class="user-train-finish">
-    <div class="upload-btn" @click="handleUploadClick" :class="{ 'is-uploading': isUploading, 'is-disabled': isDisabled }">
-      <i class="h-icon-upload"></i>
-      <span>{{ isUploading ? '上传中...' : '上传培训视频' }}</span>
+    <div 
+      v-for="task in taskList" 
+      :key="task.taskId"
+      class="upload-btn-wrapper"
+    >
+      <div 
+        class="upload-btn" 
+        @click="handleUploadClick(task)"
+        :class="{ 
+          'is-uploading': task.isUploading, 
+          'is-disabled': isTaskDisabled(task),
+          'is-uploaded': task.uploaded
+        }"
+      >
+        <i class="h-icon-upload"></i>
+        <span>{{ getButtonText(task) }}</span>
+      </div>
+      <input
+        :ref="`fileInput-${task.taskId}`"
+        type="file"
+        accept="video/*"
+        style="display: none"
+        @change="(e) => handleFileChange(e, task)"
+      />
     </div>
-    <input
-      ref="fileInput"
-      type="file"
-      accept="video/*"
-      style="display: none"
-      @change="handleFileChange"
-    />
   </div>
 </template>
 
@@ -34,20 +48,24 @@ export default {
   },
   data() {
     return {
-      isUploading: false,
       ossUploader: null,
-      parsedData: {}
+      parsedData: {},
+      taskList: [], // 任务列表，包含 taskId, taskName, status, isUploading, uploaded
+      loading: false
     };
   },
   computed: {
-    isDisabled() {
-      return this.isHistoryDisabled || this.isUploading;
-    },
     projectId() {
       return this.parsedData.projectId || '';
     },
-    taskId() {
-      return this.parsedData.taskId || '';
+    taskIds() {
+      // 兼容旧格式：如果存在 taskId，转换为数组
+      if (this.parsedData.taskIds && Array.isArray(this.parsedData.taskIds)) {
+        return this.parsedData.taskIds;
+      } else if (this.parsedData.taskId) {
+        return [this.parsedData.taskId];
+      }
+      return [];
     },
     storeId() {
       return this.parsedData.storeId || '';
@@ -57,9 +75,9 @@ export default {
     // 解析 widget 数据
     this.parsedData = parseWidgetData(this.data, 'ymform:user_train_finish');
     this.initUploader();
+    this.loadTaskInfo();
   },
   methods: {
-
     /**
      * 初始化 OSS 上传器
      */
@@ -80,19 +98,113 @@ export default {
     },
 
     /**
+     * 加载任务信息
+     */
+    async loadTaskInfo() {
+      if (!this.projectId || this.taskIds.length === 0) {
+        console.warn('[UserTrainFinish] Missing projectId or taskIds');
+        return;
+      }
+
+      this.loading = true;
+      try {
+        const res = await TrainingXApi.getProjectTasks(this.$aiClient, this.projectId);
+        
+        if (res.code === 0 && res.data && res.data.length > 0) {
+          // 从返回的数据中提取所有任务
+          const allTasks = [];
+          res.data.forEach(stage => {
+            if (stage.taskList && Array.isArray(stage.taskList)) {
+              allTasks.push(...stage.taskList);
+            }
+          });
+
+          // 根据 taskIds 过滤并构建任务列表
+          this.taskList = this.taskIds.map(taskId => {
+            const taskInfo = allTasks.find(t => t.taskId === taskId);
+            return {
+              taskId: taskId,
+              taskName: taskInfo ? taskInfo.taskName : `任务 ${taskId.substring(0, 8)}`,
+              status: taskInfo ? taskInfo.status : null,
+              isUploading: false,
+              uploaded: false
+            };
+          });
+        } else {
+          // 如果接口返回失败，至少显示任务ID
+          this.taskList = this.taskIds.map(taskId => ({
+            taskId: taskId,
+            taskName: `任务 ${taskId.substring(0, 8)}`,
+            status: null,
+            isUploading: false,
+            uploaded: false
+          }));
+        }
+      } catch (e) {
+        console.error('[UserTrainFinish] Load task info failed:', e);
+        // 失败时至少显示任务ID
+        this.taskList = this.taskIds.map(taskId => ({
+          taskId: taskId,
+          taskName: `任务 ${taskId.substring(0, 8)}`,
+          status: null,
+          isUploading: false,
+          uploaded: false
+        }));
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /**
+     * 判断任务是否禁用
+     */
+    isTaskDisabled(task) {
+      // 历史消息禁用
+      if (this.isHistoryDisabled) return true;
+      // 正在上传
+      if (task.isUploading) return true;
+      // 已上传
+      if (task.uploaded) return true;
+      // status 不为 -1 时禁用
+      if (task.status !== null && task.status !== -1) return true;
+      return false;
+    },
+
+    /**
+     * 获取按钮文本
+     */
+    getButtonText(task) {
+      if (task.isUploading) {
+        return '上传中...';
+      }
+      if (task.uploaded) {
+        return `${task.taskName} 已上传`;
+      }
+      if (task.status !== null && task.status !== -1) {
+        return `${task.taskName}`;
+      }
+      return `上传 ${task.taskName}`;
+    },
+
+    /**
      * 点击上传按钮
      */
-    handleUploadClick() {
-      if (this.isDisabled) return;
+    handleUploadClick(task) {
+      if (this.isTaskDisabled(task)) return;
       
       // 触发文件选择
-      this.$refs.fileInput?.click();
+      const fileInput = this.$refs[`fileInput-${task.taskId}`];
+      if (fileInput && fileInput[0]) {
+        fileInput[0].click();
+      } else if (fileInput) {
+        fileInput.click();
+      }
     },
 
     /**
      * 文件选择变化
      */
-    async handleFileChange(e) {
+    async handleFileChange(e, task) {
       const file = e.target.files?.[0];
       if (!file) return;
 
@@ -113,50 +225,54 @@ export default {
       e.target.value = '';
 
       // 开始上传
-      await this.uploadVideo(file);
+      await this.uploadVideo(file, task);
     },
 
     /**
      * 上传视频
      */
-    async uploadVideo(file) {
+    async uploadVideo(file, task) {
       if (!this.ossUploader) {
         this.$message?.error('上传器未初始化');
         return;
       }
 
-      if (!this.projectId || !this.taskId || !this.storeId) {
+      if (!this.projectId || !task.taskId || !this.storeId) {
         this.$message?.error('缺少必要参数：projectId、taskId 或 storeId');
         return;
       }
 
-      this.isUploading = true;
+      // 设置上传状态
+      task.isUploading = true;
 
       try {
         // 1. 上传视频到 OSS
         const uploadResult = await this.ossUploader.upload(file, (percent) => {
           // 可以在这里更新进度
-          console.log('[UserTrainFinish] Upload progress:', Math.round(percent * 100) + '%');
+          console.log(`[UserTrainFinish] Upload progress for ${task.taskName}:`, Math.round(percent * 100) + '%');
         });
 
         const videoUrl = uploadResult.url;
-        console.log('[UserTrainFinish] Video uploaded:', videoUrl);
+        console.log(`[UserTrainFinish] Video uploaded for ${task.taskName}:`, videoUrl);
 
         // 2. 获取视频时长（如果可能）
         const duration = await this.getVideoDuration(file);
 
         // 3. 调用实操提交接口
-        await this.submitOperation(videoUrl, file, duration);
+        await this.submitOperation(videoUrl, file, duration, task.taskId);
 
-        // 4. 发送成功消息
-        this.sendVideoUploadMessage(videoUrl);
+        // 4. 标记为已上传
+        task.uploaded = true;
 
-        this.$message?.success('视频上传成功');
+        // 5. 发送成功消息
+        this.sendVideoUploadMessage(videoUrl, task.taskId);
+
+        this.$message?.success(`${task.taskName} 视频上传成功`);
       } catch (e) {
-        console.error('[UserTrainFinish] Upload failed:', e);
-        this.$message?.error('视频上传失败：' + (e.message || '未知错误'));
+        console.error(`[UserTrainFinish] Upload failed for ${task.taskName}:`, e);
+        this.$message?.error(`${task.taskName} 视频上传失败：` + (e.message || '未知错误'));
       } finally {
-        this.isUploading = false;
+        task.isUploading = false;
       }
     },
 
@@ -181,14 +297,14 @@ export default {
     /**
      * 提交实操
      */
-    async submitOperation(videoUrl, file, duration) {
+    async submitOperation(videoUrl, file, duration, taskId) {
       const startTime = Date.now();
       const endTime = startTime + (duration * 1000);
 
       // 根据 traing.md 的接口文档构造参数
       const params = {
         mode: 2,
-        taskId: this.taskId,
+        taskId: taskId,
         loading: true,
         startTime: startTime,
         endTime: endTime,
@@ -215,7 +331,7 @@ export default {
         throw new Error(res.message || '提交实操失败');
       }
 
-      console.log('[UserTrainFinish] Operation submitted:', res);
+      console.log(`[UserTrainFinish] Operation submitted for task ${taskId}:`, res);
     },
 
     /**
@@ -241,11 +357,12 @@ export default {
     /**
      * 发送视频上传消息
      */
-    sendVideoUploadMessage(videoUrl) {
+    sendVideoUploadMessage(videoUrl, taskId) {
       const message = `<ymform:train_video_upload desc="以下是用户上传的视频内容和课程信息">
 {
-  "taskId": "${this.taskId}",
-  "videoUrl": "${videoUrl}"
+  "taskId": "${taskId}",
+  "videoUrl": "${videoUrl}",
+  "projectId": "${this.projectId}"
 }
 </ymform:train_video_upload>`;
 
@@ -257,15 +374,23 @@ export default {
 
 <style lang="scss" scoped>
 .user-train-finish {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .upload-btn-wrapper {
+    display: inline-block;
+  }
+
   .upload-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    background: rgba(232, 246, 255, 1);
-    border: 1px solid rgba(232, 246, 255, 1);
-    border-radius: 4px;
-    color: rgba(56, 142, 255, 1);
+    padding: 4px 12px;
+    background: #FFF;
+    border: none;
+    border-radius: 8px;
+    color: rgba($color: #000000, $alpha: 0.9);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
@@ -286,10 +411,16 @@ export default {
       cursor: not-allowed;
     }
 
+    &.is-uploaded {
+      background: #d4ffe6;
+      border-color: rgba(183, 223, 85, 1);
+      color: rgba(82, 196, 26, 1);
+      cursor: default;
+    }
+
     i {
       font-size: 16px;
     }
   }
 }
 </style>
-

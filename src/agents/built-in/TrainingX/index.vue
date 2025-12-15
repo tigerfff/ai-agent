@@ -68,6 +68,7 @@
             </template>
            
             <BubbleFooter 
+              v-show="shouldShowFooter(item)"
               :item="item" 
               :actions="getActions(item)"
             >
@@ -211,14 +212,14 @@ export default {
     // this.fetchConversationList();
     
     // 获取推荐的提示词
-    this.fetchSuggestions();
+    // this.fetchSuggestions();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
     // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
-    // this.mockUserTrainFinish();
+    this.mockUserTrainFinish();
   },
   methods: {
     /**
@@ -244,6 +245,29 @@ export default {
       // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
       const role = item.placement === 'end' ? 'user' : 'bot';
       return this.actionConfig[role] || [];
+    },
+
+    /**
+     * 判断是否应该显示 BubbleFooter
+     * @param {Object} item - 消息项
+     * @returns {boolean} 是否显示 footer
+     */
+    shouldShowFooter(item) {
+      if (!item || !item.content) {
+        return true;
+      }
+
+      // 需要隐藏 footer 的 widget 类型列表
+      const hideFooterWidgetTypes = [
+        'ymform:user_train_finish',
+        // 'ymform:train_result_upload'
+        // 可以在这里添加更多需要隐藏 footer 的 widget 类型
+      ];
+
+      // 检查消息内容中是否包含需要隐藏 footer 的 widget
+      return !hideFooterWidgetTypes.some(widgetType => 
+        item.content.includes(widgetType)
+      );
     },
     initUploader() {
       this.ossUploader = new OssUploader({
@@ -856,7 +880,7 @@ export default {
       const mockContent = `<ymform:user_train_finish desc="提醒用户上传实操视频">
 {
   "projectId": "32a0373b23884fd2aca7778db9ce18e4",
-  "taskId": "8eceeb944abc479fa1eb0cdbf6f0e711",
+  "taskIds": ["8eceeb944abc479fa1eb0cdbf6f0e711", "7842d76cc91947d4968664723729b5e8", "cee4a639fdfe4a9fbb7ac696e2340a1c"],
   "storeId": "0250675552214029823f83fede40671e"
 }
 </ymform:user_train_finish>`;

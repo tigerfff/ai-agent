@@ -265,5 +265,17 @@ export const TrainingXApi = {
       data
     });
   },
+
+  /**
+   * 获取项目任务列表
+   * @param {AIClient} client
+   * @param {string} projectId - 项目ID
+   */
+  getProjectTasks(client, projectId) {
+    return client.send({
+      url: `/api/enterprise/training/userProjects/actions/getProjectTasks/${projectId}`,
+      method: 'get',
+    });
+  },
   
 };
