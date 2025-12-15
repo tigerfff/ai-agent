@@ -309,11 +309,36 @@ export default {
       this.currentAgentId = agent.id;
       this.permissionStatus = null;
       
-      // 检查权限（如果智能体配置了权限检查）
-      if (agent.permission) {
+      const permCfg = agent.permission;
+
+      /**
+       * 优先使用配置中的显式权限结果（主要给自定义 / slot 智能体使用）
+       * - hasService: 是否已开通/购买该服务（false -> NO_SERVICE）
+       * - hasAuth:    是否具备使用权限（false -> NO_PERMISSION）
+       * 如果这两个字段任意一个被显式设置为 boolean，则不再走通用的 checkAgentPermission 逻辑。
+       */
+      if (permCfg && (typeof permCfg.hasService === 'boolean' || typeof permCfg.hasAuth === 'boolean')) {
+        let status = PERMISSION_STATUS.HAS_PERMISSION;
+        let message = '';
+
+        if (permCfg.hasService === false) {
+          status = PERMISSION_STATUS.NO_SERVICE;
+          message = permCfg.noServiceMessage 
+            || (permCfg.serviceName ? `您尚未购买${permCfg.serviceName}，请联系管理员开通` : '您尚未购买相关服务，请联系管理员开通');
+        } else if (permCfg.hasAuth === false) {
+          status = PERMISSION_STATUS.NO_PERMISSION;
+          message = permCfg.noPermissionMessage 
+            || (permCfg.permissionName && permCfg.serviceName
+              ? `您已购买${permCfg.serviceName}，但暂无${permCfg.permissionName}，请联系管理员开通`
+              : '您暂无使用该功能的权限，请联系管理员开通');
+        }
+
+        this.permissionStatus = { status, message };
+      } else if (permCfg) {
+        // 否则，如果配置了 permission，但未提供显式结果，则走内置的权限检查逻辑（适用于内置智能体）
         this.checkingPermission = true;
         try {
-          const permissionResult = await checkAgentPermission(this.$aiClient, agent.id, agent.permission);
+          const permissionResult = await checkAgentPermission(this.$aiClient, agent.id, permCfg);
           this.permissionStatus = permissionResult;
         } catch (e) {
           console.error('[AgentContainer] Permission check failed:', e);
