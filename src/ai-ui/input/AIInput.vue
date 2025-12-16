@@ -317,6 +317,15 @@ export default {
       default: null
     },
     /**
+     * 发送前钩子，用于校验或拦截
+     * 返回 false 或 Promise.reject 则中断发送流程（不清空输入框）
+     * (data: { text, attachments }) => boolean | Promise<boolean>
+     */
+    beforeSend: {
+      type: Function,
+      default: null
+    },
+    /**
      * 自定义菜单项数组（添加到上传按钮的下拉菜单中）
      * [
      *   {
@@ -943,13 +952,24 @@ export default {
       }
     },
 
-    submit() {
+    async submit() {
       if (this.isSubmitDisabled) return;
 
       const data = {
         text: this.inputValue,
         attachments: this.fileList // 直接使用 AIAttachments 同步过来的列表
       };
+
+      // 调用 beforeSend 钩子
+      if (this.beforeSend) {
+        try {
+          const shouldContinue = await this.beforeSend(data);
+          if (shouldContinue === false) return;
+        } catch (e) {
+          console.error('[AIInput] beforeSend failed:', e);
+          return;
+        }
+      }
 
       this.$emit('send', data); 
       this.$emit('submit', data.text);

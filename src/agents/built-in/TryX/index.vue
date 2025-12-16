@@ -41,6 +41,7 @@
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"
+          :before-send="handleBeforeSend"
           @send="handleSend" 
           @stop="handleStop"
         />
@@ -56,6 +57,7 @@ import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
 import { formatConversationTime } from '@/utils';
 import trainingSquareIcon from '@/assets/images/try.png';
+import { handleAgentPreUpload } from '@/utils/agent-upload';
 
 export default {
   name: 'TryAgent',
@@ -139,6 +141,26 @@ export default {
         }
       });
     },
+    
+    // 执行之前
+    handleBeforeSend(data) {
+      console.log(data,'data')
+      // 检查是否有上传失败的文件
+      const hasError = data.attachments && data.attachments.some(f => f.status === 'error');
+      if (hasError) {
+        this.$message.warning('存在上传失败的文件，请删除或重试后再发送');
+        return false; // 阻止发送，不清空输入框
+      }
+      
+      // 检查是否有正在上传的文件（可选，通常 AIInput 已经禁用了发送按钮）
+      const isUploading = data.attachments && data.attachments.some(f => f.status === 'uploading');
+      if (isUploading) {
+        this.$message.warning('文件正在上传中，请稍候');
+        return false;
+      }
+
+      return true; // 允许发送
+    },
 
     /**
      * 预上传钩子：在文件进入附件栏前先上传到 OSS
@@ -147,63 +169,9 @@ export default {
      *  - updateItem(index, patch): 由 AIInput 提供，用于更新对应附件的 status / percent / url 等
      */
     async handlePreUpload(rawFiles, context = {}) {
-      const { updateItem } = context;
-
-      if (!this.ossUploader) {
-        // 没有配置 OSS 上传器时，直接走本地模式，由 AIInput 保留本地文件信息
-        if (typeof updateItem === 'function') {
-          rawFiles.forEach((file, i) => {
-            updateItem(i, {
-              type: file.type.startsWith('video') ? 'video' : 'image',
-              status: 'done',
-              percent: 100
-            });
-          });
-        }
-        return;
-      }
-
-      this.isUploading = true;
-      try {
-        await Promise.all(
-          rawFiles.map(async (file, index) => {
-            // 使用带进度回调的 OSS 上传
-            const res = await this.ossUploader.upload(file, (percent) => {
-              if (typeof updateItem === 'function') {
-                updateItem(index, {
-                  status: 'uploading',
-                  percent: Math.round(percent * 100)
-                });
-              }
-            });
-
-            if (typeof updateItem === 'function') {
-              updateItem(index, {
-                url: res.url,
-                name: res.name || file.name,
-                size: file.size,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                rawFile: null,
-                status: 'done',
-                percent: 100
-              });
-            }
-          })
-        );
-      } catch (e) {
-        console.error('[TryAgent] OSS pre-upload failed:', e);
-        // 失败时，将状态标记为 error，但仍保留本地文件，方便用户重试或删除
-        if (typeof updateItem === 'function') {
-          rawFiles.forEach((file, i) => {
-            updateItem(i, {
-              status: 'error',
-              percent: 0
-            });
-          });
-        }
-      } finally {
-        this.isUploading = false;
-      }
+      return handleAgentPreUpload(rawFiles, context, this.ossUploader, (val) => {
+        this.isUploading = val;
+      });
     },
 
     /**
@@ -391,7 +359,8 @@ export default {
         content: msg.userText || '',
         attachments: userAttachments,
         variant: 'filled',
-        placement: 'end'
+        placement: 'end',
+        time: msg.createTime
       };
 
       const ai = {
@@ -400,7 +369,8 @@ export default {
         content: msg.assistantText || '',
         attachments: [], // 目前后端没给出 AI 侧附件，就先留空
         variant: 'filled',
-        placement: 'start'
+        placement: 'start',
+        time: msg.createTime
       };
 
       return { user, ai };
@@ -449,7 +419,8 @@ export default {
         content: data.text,
         attachments: attachments,
         placement: 'end',
-        variant: 'filled'
+        variant: 'filled',
+        time: userMsgKey
       };
       this.messages.push(userMsg);
 
@@ -475,7 +446,8 @@ export default {
         loading: true,
         typing: true,
         placement: 'start',
-        variant: 'filled'
+        variant: 'filled',
+        time: Date.now()
       };
       this.messages.push(aiMsg);
 

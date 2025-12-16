@@ -47,6 +47,7 @@
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
+import { handleAgentPreUpload } from '@/utils/agent-upload';
 
 export default {
   name: 'TryAgent',
@@ -136,63 +137,9 @@ export default {
      *  - updateItem(index, patch): 由 AIInput 提供，用于更新对应附件的 status / percent / url 等
      */
     async handlePreUpload(rawFiles, context = {}) {
-      const { updateItem } = context;
-
-      if (!this.ossUploader) {
-        // 没有配置 OSS 上传器时，直接走本地模式，由 AIInput 保留本地文件信息
-        if (typeof updateItem === 'function') {
-          rawFiles.forEach((file, i) => {
-            updateItem(i, {
-              type: file.type.startsWith('video') ? 'video' : 'image',
-              status: 'done',
-              percent: 100
-            });
-          });
-        }
-        return;
-      }
-
-      this.isUploading = true;
-      try {
-        await Promise.all(
-          rawFiles.map(async (file, index) => {
-            // 使用带进度回调的 OSS 上传
-            const res = await this.ossUploader.upload(file, (percent) => {
-              if (typeof updateItem === 'function') {
-                updateItem(index, {
-                  status: 'uploading',
-                  percent: Math.round(percent * 100)
-                });
-              }
-            });
-
-            if (typeof updateItem === 'function') {
-              updateItem(index, {
-                url: res.url,
-                name: res.name || file.name,
-                size: file.size,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                rawFile: null,
-                status: 'done',
-                percent: 100
-              });
-            }
-          })
-        );
-      } catch (e) {
-        console.error('[TryAgent] OSS pre-upload failed:', e);
-        // 失败时，将状态标记为 error，但仍保留本地文件，方便用户重试或删除
-        if (typeof updateItem === 'function') {
-          rawFiles.forEach((file, i) => {
-            updateItem(i, {
-              status: 'error',
-              percent: 0
-            });
-          });
-        }
-      } finally {
-        this.isUploading = false;
-      }
+      return handleAgentPreUpload(rawFiles, context, this.ossUploader, (val) => {
+        this.isUploading = val;
+      });
     },
 
     /**
@@ -368,7 +315,8 @@ export default {
         content: msg.userText || '',
         attachments: userAttachments,
         variant: 'filled',
-        placement: 'end'
+        placement: 'end',
+        time: msg.createTime
       };
 
       const ai = {
@@ -377,7 +325,8 @@ export default {
         content: msg.assistantText || '',
         attachments: [], // 目前后端没给出 AI 侧附件，就先留空
         variant: 'filled',
-        placement: 'start'
+        placement: 'start',
+        time: msg.createTime
       };
 
       return { user, ai };
@@ -396,7 +345,8 @@ export default {
         content: data.text,
         attachments: attachments,
         placement: 'end',
-        variant: 'filled'
+        variant: 'filled',
+        time: userMsgKey
       };
       this.messages.push(userMsg);
 
@@ -422,7 +372,8 @@ export default {
         loading: true,
         typing: true,
         placement: 'start',
-        variant: 'filled'
+        variant: 'filled',
+        time: Date.now()
       };
       this.messages.push(aiMsg);
 

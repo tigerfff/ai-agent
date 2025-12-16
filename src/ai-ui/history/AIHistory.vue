@@ -7,40 +7,46 @@
       @load.capture="handleImageLoad"
     >
       <div class="history-inner">
-        <AIBubble
-          v-for="(item, index) in list"
-          :key="item.key || index"
-          v-bind="item"
-          :ignoreWidgetTypes="ignoreWidgetTypes"
-          @update="handleBubbleUpdate"
-          @finish="(inst) => handleBubbleFinish(index, inst)"
-          class="bubble-item-wrapper" 
-        >
-          <!-- 1. 透传作用域插槽 (header, widget, etc) -->
-          <template v-for="(_, slotName) in $scopedSlots" v-slot:[slotName]="slotData">
-            <slot :name="slotName" v-bind="slotData" :item="item" :index="index"></slot>
-          </template>
+        <div v-for="(item, index) in list" :key="item.key || index" class="bubble-wrapper">
+          <div 
+            v-if="shouldShowTime(index)" 
+            class="history-time-divider"
+          >
+            {{ formatTime(item.time || item.createTime) }}
+          </div>
+          <AIBubble
+            v-bind="item"
+            :ignoreWidgetTypes="ignoreWidgetTypes"
+            @update="handleBubbleUpdate"
+            @finish="(inst) => handleBubbleFinish(index, inst)"
+            class="bubble-item-wrapper" 
+          >
+            <!-- 1. 透传作用域插槽 (header, widget, etc) -->
+            <template v-for="(_, slotName) in $scopedSlots" v-slot:[slotName]="slotData">
+              <slot :name="slotName" v-bind="slotData" :item="item" :index="index"></slot>
+            </template>
 
-          <!-- 2. 默认 Footer (操作栏) -->
-          <template #footer>
-            <!-- 优先使用父组件传入的 footer 插槽 -->
-            <slot name="footer" :item="item" :index="index">
-              <BubbleFooter 
-                v-if="enableActions"
-                :item="item" 
-                :actions="getActions(item)"
-                @action="(type, payload) => handleAction(type, payload, index)"
-              >
-                <template #before-custom-actions>
-                  <slot name="before-custom-actions"></slot>
-                </template>
-                <template #after-custom-actions>
-                  <slot name="after-custom-actions"></slot>
-                </template>
-              </BubbleFooter>
-            </slot>
-          </template>
-        </AIBubble>
+            <!-- 2. 默认 Footer (操作栏) -->
+            <template #footer>
+              <!-- 优先使用父组件传入的 footer 插槽 -->
+              <slot name="footer" :item="item" :index="index">
+                <BubbleFooter 
+                  v-if="enableActions"
+                  :item="item" 
+                  :actions="getActions(item)"
+                  @action="(type, payload) => handleAction(type, payload, index)"
+                >
+                  <template #before-custom-actions>
+                    <slot name="before-custom-actions"></slot>
+                  </template>
+                  <template #after-custom-actions>
+                    <slot name="after-custom-actions"></slot>
+                  </template>
+                </BubbleFooter>
+              </slot>
+            </template>
+          </AIBubble>
+        </div>
       </div>
     </div>
 
@@ -187,6 +193,52 @@ export default {
       }
     },
 
+    shouldShowTime(index) {
+      if (index === 0) return true;
+      const currentItem = this.list[index];
+      const prevItem = this.list[index - 1];
+      
+      const currentTimeStr = currentItem.time || currentItem.createTime;
+      const prevTimeStr = prevItem.time || prevItem.createTime;
+
+      if (!currentTimeStr || !prevTimeStr) return false;
+
+      // 兼容 ISO 8601 和其他常见格式
+      // "2025-12-07T22:44:58.051+08:00" 是标准的 ISO 格式，new Date() 原生支持
+      const currentTime = new Date(currentTimeStr).getTime();
+      const prevTime = new Date(prevTimeStr).getTime();
+      
+      if (isNaN(currentTime) || isNaN(prevTime)) return false;
+      
+      // 1 hour = 3600000 ms
+      return (currentTime - prevTime) > 3600000;
+    },
+
+    formatTime(timeStr) {
+      if (!timeStr) return '';
+      const date = new Date(timeStr);
+      if (isNaN(date.getTime())) return '';
+      
+      const now = new Date();
+      // 判断是否是今天：需要注意时区问题，简单起见用本地时间判断
+      const isToday = date.getFullYear() === now.getFullYear() &&
+                      date.getMonth() === now.getMonth() &&
+                      date.getDate() === now.getDate();
+                      
+      const pad = n => n.toString().padStart(2, '0');
+      const timePart = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      
+      if (isToday) {
+        return timePart;
+      } else {
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        // 按照用户要求的格式：YYYY/MM/DD HH:mm:ss
+        return `${year}/${month}/${day} ${timePart}`;
+      }
+    },
+
     initResizeObserver() {
       const inner = this.$el.querySelector('.history-inner');
       if (!inner) return;
@@ -302,6 +354,20 @@ export default {
       max-width: 960px; /* 限制内容宽度 */
       margin: 0 auto;   /* 内容居中 */
       padding: 16px 32px;;
+      
+      .bubble-wrapper {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+    }
+
+    .history-time-divider {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin: 16px 0;
+      user-select: none;
     }
   }
 
