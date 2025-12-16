@@ -30,7 +30,7 @@
       :close-on-click-modal="false"
       append-to-body
     >
-      <orgPersonPagedPicker
+      <OrgPersonPagedPicker
         ref="pickerRef"
         :value="tempSelectedUsers"
         :select-limit="selectLimit"
@@ -51,12 +51,12 @@
 </template>
 
 <script>
-import orgPersonPagedPicker from './orgPersonPagedPicker.vue';
+import OrgPersonPagedPicker from './OrgPersonPagedPicker.vue';
 
 export default {
   name: 'PersonSelect',
   components: {
-    orgPersonPagedPicker
+    OrgPersonPagedPicker
   },
   props: {
     // v-model 绑定的值，数组格式

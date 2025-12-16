@@ -25,7 +25,6 @@
       >
       </AIHistory>
     </div>
-
     <!-- 输入区域 -->
     <div class="footer">
       <div class="content-wrapper">
@@ -39,6 +38,8 @@
           placeholder="有问题尽管问我~"
           :allowed-types="['image', 'video', 'document']"
           :max-size="200 * 1024 * 1024"
+          :singleTypeMode="true"
+          :maxCount="5"
           :file-limit="{
             image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png'] },
             video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] }
@@ -83,6 +84,7 @@ export default {
   },
   data() {
     return {
+      demoText:'',
       messages: [],
       chatId: '', // 当前会话的真实 chatId，用于 SSE 请求
       isStreaming: false,
@@ -173,8 +175,6 @@ export default {
      *  - updateItem(index, patch): 由 AIInput 提供，用于更新对应附件的 status / percent / url 等
      */
     async handlePreUpload(rawFiles, context = {}) {
-      console.log(this.$refs.aiInput.fileList,'rawFiles')
-      
       return handleAgentPreUpload(rawFiles, context, this.ossUploader, (val) => {
         this.isUploading = val;
       });

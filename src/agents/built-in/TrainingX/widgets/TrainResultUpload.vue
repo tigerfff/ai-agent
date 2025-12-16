@@ -3,15 +3,18 @@
     <el-popover
       ref="qrPopover"
       placement="top"
-      width="320"
-      trigger="click"
-      popper-class="qr-code-popover"
+      width="120"
+      trigger="hover"
+      popper-class="qr2-code-popover"
       :disabled="isDisabled"
     >
       <div class="qr-code-content" slot="reference">
         <div class="qr-btn" :class="{ 'is-disabled': isDisabled }">
-          <span class="qr-icon">📱</span>
+          <span class="qr-icon">
+            <i class="h-icon-details" style="font-size: 24px; color: rgba(0, 0, 0, 0.7)"></i>
+          </span>
           <span>查看实操流程</span>
+         
         </div>
       </div>
       
@@ -25,10 +28,11 @@
         </div>
         <div class="qr-code-tip">
           <p>使用手机扫描二维码</p>
-          <p>查看实操流程详情</p>
+          <p>查看实操审核流程</p>
         </div>
       </div>
     </el-popover>
+    <span class="divider">|</span>
   </div>
 </template>
 
@@ -65,35 +69,35 @@ export default {
     taskId() {
       return this.parsedData.taskId || '';
     },
-    id() {
-      // id 字段，如果数据中没有 id，则使用 projectId
-      return this.parsedData.id || this.parsedData.projectId || '';
-    },
     /**
      * 生成二维码链接地址
      */
     qrCodeLink() {
-      if (!this.projectId || !this.taskId || !this.id) {
+      if (!this.projectId || !this.taskId) {
         return '';
       }
       
       // 根据当前域名动态构建 URL
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://pb.hik-cloud.com';
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.hik-cloud.com';
       // subId 就是 projectId
-      return `${origin}/training-h5/index.html#/handOnWork/endWork?subId=${this.projectId}&id=${this.id}&taskId=${this.taskId}`;
+      return `${origin}/training-h5/index.html#/?canType=operation&id=${this.projectId}&taskId=${this.taskId}`;
     }
   },
   watch: {
-    // 监听 popover 显示，生成二维码
-    '$refs.qrPopover.visible'(visible) {
-      if (visible && !this.qrCodeUrl && this.qrCodeLink) {
+    // 监听 parsedData 变化（如果是异步解析的话）
+    'parsedData.projectId'() {
+      if (this.qrCodeLink && !this.qrCodeUrl) {
         this.generateQRCode();
       }
     }
   },
   created() {
     // 解析 widget 数据
-    this.parsedData = parseWidgetData(this.data, 'ymform:train_result_upload');
+    this.parsedData = parseWidgetData(this.data, 'ymform:train_video_process_check');
+    // 如果解析后的数据足够生成链接，立即生成二维码
+    if (this.qrCodeLink) {
+      this.generateQRCode();
+    }
   },
   methods: {
     /**
@@ -129,15 +133,24 @@ export default {
 
 <style lang="scss" scoped>
 .train-result-upload {
+  display: inline-flex;
+  align-items: center;
+
+  .divider {
+    margin: 0 12px;
+    color: rgba(0, 0, 0, 0.1);
+    line-height: 1;
+  }
+
   .qr-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(232, 246, 255, 1);
-    border: 1px solid rgba(232, 246, 255, 1);
-    border-radius: 4px;
-    color: rgba(56, 142, 255, 1);
+    gap: 4px;
+    padding: 4px 12px;
+    background: #FFF;
+    // border: 1px solid rgba(232, 246, 255, 1);
+    border-radius: 8px;
+    color: rgba($color: #000000, $alpha: .7);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
@@ -161,7 +174,12 @@ export default {
 }
 
 // 二维码 Popover 样式
-::v-deep .qr-code-popover {
+ 
+</style>
+
+<style lang="scss">
+
+.qr2-code-popover {
   padding: 16px;
 
   .qr-code-popover-content {
@@ -171,8 +189,8 @@ export default {
     gap: 12px;
 
     .qr-code-wrapper {
-      width: 280px;
-      height: 280px;
+      width: 120px;
+      height: 120px;
       padding: 10px;
       background: #fff;
       border: 1px solid #e4e7ed;

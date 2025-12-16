@@ -18,7 +18,7 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         class="history-full-width"
-        :ignoreWidgetTypes="['ymform:train_confirm','ymform:train_plan_result','ymform:user_train_finish','ymform:train_cancel']"
+        :ignoreWidgetTypes="['ymform:train_confirm','ymform:train_plan_result','ymform:user_train_finish','ymform:train_cancel','ymform:train_video_process_check']"
       >
         <!-- 自定义 Widget 渲染 -->
         <template #widget="{ info, item, index }">
@@ -64,7 +64,7 @@
               />
             </template>
 
-            <template v-else-if="item.content.includes('ymform:train_result_upload')">
+            <template v-else-if="item.content.includes('ymform:train_video_process_check')">
               <TrainResultUpload
                 :data="item"
                 :is-history-disabled="index < messages.length - 1"
@@ -88,10 +88,6 @@
     <!-- 输入区域 -->
     <div class="footer">
       <div class="content-wrapper">
-        <!-- 
-          mode="file" 开启文件上传支持
-          accepts 限制上传类型
-        -->
         <AIInput 
           ref="aiInput"
           :loading="isStreaming || isUploading"
@@ -217,7 +213,7 @@ export default {
   created() {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
-    this.fetchConversationList();
+    // this.fetchConversationList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
@@ -225,6 +221,7 @@ export default {
     // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
     // this.mockUserTrainFinish();
+    this.mockTrainResultUpload();
   },
   methods: {
 
@@ -855,6 +852,28 @@ export default {
       console.log('[TrainingX] User study learn:', data);
       // 可以在这里跳转到学习页面，或者触发其他业务逻辑
       // 例如：window.open(`/training/learn?type=${data.type}&id=${data.courseProjectId}`);
+    },
+
+    mockTrainResultUpload() {
+      const mockContent = `<ymform:train_video_process_check>
+{
+  "projectId": "32a0373b23884fd2aca7778db9ce18e4",
+  "taskId": "8eceeb944abc479fa1eb0cdbf6f0e711"
+}
+</ymform:train_video_process_check>`;
+
+      const mockMsg = {
+        key: 'mock-train-plan-' + Date.now(),
+        role: 'ai',
+        content: mockContent,
+        attachments: [],
+        variant: 'filled',
+        placement: 'start',
+        time: Date.now()
+      };
+      
+      this.messages.push(mockMsg);
+      console.log('[Mock] 已添加测试培训计划表单消息');
     },
 
     /**

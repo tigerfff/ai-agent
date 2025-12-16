@@ -19,7 +19,7 @@ import FilesCard from './ai-ui/file-card/FilesCard.vue';
 import AIAttachments from './ai-ui/attachments/AIAttachments.vue';
 import AttachmentsPreview from './ai-ui/attachments/AttachmentsPreview.vue';
 import AILoadSelect from './ai-ui/base-form/AILoadSelect.vue';
-import PersonSelect from './ai-ui/base-form/orgPersonPagedPicker/index.vue';
+import PersonSelect from './ai-ui/base-form/OrgPersonPagedPicker/index.vue';
 
 // 辅助组件
 import ChatSkeleton from './ai-ui/skeleton/ChatSkeleton.vue';

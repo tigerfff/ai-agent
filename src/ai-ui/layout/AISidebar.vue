@@ -442,8 +442,7 @@ export default {
   }
 
   .sidebar-bottom {
-    padding: 10px;
-    border-top: 1px solid #ebeef5;
+    padding: 12px;
     flex-shrink: 0;
   }
 

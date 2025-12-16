@@ -94,12 +94,11 @@
                     <span>文档</span>
                   </div>
                   
-                  <!-- 分隔线（如果有文件类型选项和自定义菜单项） -->
-                  <div 
+                  <!-- <div 
                     v-if="hasFileTypeOptions && visibleCustomMenuItems.length > 0"
                     class="menu-divider"
                   ></div>
-                  
+                   -->
                   <!-- 自定义菜单项 -->
                   <div
                     v-for="item in visibleCustomMenuItems"
@@ -195,6 +194,7 @@
 
         <!-- 底部容器 -->
         <div v-if="$slots.footer" class="el-sender-footer">
+          
           <slot name="footer"></slot>
         </div>
       </div>
@@ -296,6 +296,15 @@ export default {
       default: null
     },
     /**
+     * 最大文件数量限制
+     * @type {Number}
+     * @default null - 不限制
+     */
+    maxCount: {
+      type: Number,
+      default: null
+    },
+    /**
      * 按钮配置对象，控制按钮的显示/隐藏和禁用
      * {
      *   upload: { visible: true, disabled: false },
@@ -391,6 +400,10 @@ export default {
     fileList: {
       handler(newList) {
         this.$emit('file-list-change', newList);
+        // 如果列表为空，重置单一类型锁定
+        if (newList.length === 0) {
+          this.currentFileType = null;
+        }
       },
       deep: true
     }
@@ -781,37 +794,71 @@ export default {
       
       input.accept = accept;
       input.click();
-      
-      // 如果是单一类型模式，记录当前类型
-      if (this.singleTypeMode) {
-        this.currentFileType = type;
-      }
     },
 
     async handleFileChange(e) {
+
       const files = Array.from(e.target.files || []);
       if (files.length === 0) {
         e.target.value = '';
         return;
       }
-      
-      // 检查单一类型模式限制
-      if (this.lockedFileType) {
-        const firstFileType = this.getFileType(files[0]);
-        if (firstFileType !== this.lockedFileType) {
-          const typeLabel = this.getTypeLabel(this.lockedFileType);
-          // 尝试使用 $message，如果没有则使用 alert
+
+      // [新增] 检查文件数量限制
+      if (this.maxCount !== null && this.maxCount !== undefined) {
+        const currentCount = this.fileList.length;
+        const newCount = currentCount + files.length;
+        
+        if (newCount > this.maxCount) {
+          const remaining = Math.max(0, this.maxCount - currentCount);
+          const msg = remaining > 0 
+            ? `最多只能上传 ${this.maxCount} 个文件，还可以上传 ${remaining} 个`
+            : `最多只能上传 ${this.maxCount} 个文件，请先删除一些文件`;
+          
           if (this.$message) {
-            this.$message.warning(`当前只能上传${typeLabel}类型文件`);
+            this.$message.warning(msg);
           } else {
-            alert(`当前只能上传${typeLabel}类型文件`);
+            alert(msg);
           }
           e.target.value = '';
           return;
         }
-      } else if (this.singleTypeMode && files.length > 0) {
-        // 首次选择文件时，记录类型
-        this.currentFileType = this.getFileType(files[0]);
+      }
+      
+      // 检查单一类型模式限制
+      if (this.singleTypeMode && files.length > 0) {
+
+      
+        // 1. 确定目标类型
+        let targetType = this.lockedFileType;
+
+        console.log(targetType,'targetType')
+        
+        // 如果还没有锁定类型，以第一个文件的类型为准
+        if (!targetType) {
+          targetType = this.getFileType(files[0]);
+        }
+        
+        // 2. 检查所有新文件是否符合目标类型
+        const hasInvalidType = files.some(file => this.getFileType(file) !== targetType);
+        
+        if (hasInvalidType) {
+          const typeLabel = this.getTypeLabel(targetType);
+          const msg = `当前模式下只能上传 ${typeLabel} 类型文件`;
+          
+          if (this.$message) {
+            this.$message.warning(msg);
+          } else {
+            alert(msg);
+          }
+          e.target.value = '';
+          return;
+        }
+        
+        // 3. 如果是首次上传，锁定类型
+        if (!this.lockedFileType) {
+          this.currentFileType = targetType;
+        }
       }
       
       // [新增] 详细校验逻辑 (大小 & 后缀)
@@ -879,7 +926,8 @@ export default {
       const labels = {
         image: '图片',
         video: '视频',
-        document: '文档'
+        document: '文档',
+        file: '文档'
       };
       return labels[type] || '文件';
     },
