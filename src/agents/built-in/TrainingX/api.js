@@ -139,7 +139,7 @@ export const TrainingXApi = {
    */
   getSuggestions(client) {
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/suggestions`, 'chain', '/api'),
       method: 'get'
     });
   },
