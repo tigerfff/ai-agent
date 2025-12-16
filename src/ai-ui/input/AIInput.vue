@@ -37,6 +37,7 @@
               :value="inputValue"
               class="ai-textarea"
               :placeholder="placeholder"
+              :maxlength="maxLength"
               :rows="1"
               :disabled="disabled"
               @input="handleInput"
@@ -300,7 +301,7 @@ export default {
      * @type {Number}
      * @default null - 不限制
      */
-    maxCount: {
+    maxFileCount: {
       type: Number,
       default: null
     },
@@ -805,15 +806,15 @@ export default {
       }
 
       // [新增] 检查文件数量限制
-      if (this.maxCount !== null && this.maxCount !== undefined) {
+      if (this.maxFileCount !== null && this.maxFileCount !== undefined) {
         const currentCount = this.fileList.length;
         const newCount = currentCount + files.length;
         
-        if (newCount > this.maxCount) {
-          const remaining = Math.max(0, this.maxCount - currentCount);
+        if (newCount > this.maxFileCount) {
+          const remaining = Math.max(0, this.maxFileCount - currentCount);
           const msg = remaining > 0 
-            ? `最多只能上传 ${this.maxCount} 个文件，还可以上传 ${remaining} 个`
-            : `最多只能上传 ${this.maxCount} 个文件，请先删除一些文件`;
+            ? `最多只能上传 ${this.maxFileCount} 个文件，还可以上传 ${remaining} 个`
+            : `最多只能上传 ${this.maxFileCount} 个文件，请先删除一些文件`;
           
           if (this.$message) {
             this.$message.warning(msg);
