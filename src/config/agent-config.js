@@ -35,6 +35,7 @@ export const ALL_AGENTS = {
     description: '智能巡查助手，帮助您高效完成巡查任务。',
     type: 'built-in',
     tags: ['巡查', '安防'],
+    hideConversations: true,
     component: TryAgent, // 暂时复用 TryAgent，实际应为 InspectAgent
     permission: {
       underConstruction: true, // 建设中

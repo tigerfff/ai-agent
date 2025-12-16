@@ -2,6 +2,7 @@
   <div class="agent-container-wrapper">
     <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }" :is-mini="isMini">
     <!-- 左侧导航 -->
+    
     <template #sider>
       <AISidebar 
         v-if="!isHome"
@@ -284,9 +285,10 @@ export default {
      * 场景：自定义 slot 智能体，不需要左侧历史和新建会话按钮
      */
     shouldHideConversations() {
+      console.log(this.currentAgent,'this.currentAgent')
       if (!this.currentAgent) return false;
       // 仅当为 slot 类型，且配置了 hideConversations=true 时隐藏
-      return this.currentAgent.type === 'slot' && this.currentAgent.hideConversations === true;
+      return this.currentAgent.hideConversations === true;
     }
   },
   methods: {

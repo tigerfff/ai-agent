@@ -43,49 +43,55 @@
 
 
     <!-- Conversations (会话历史列表) -->
-    <div class="conversations-section" v-if="!hideConversations">
-      <div class="section-header" v-if="!collapsed">
-        <div class="section-title">对话列表</div>
-      </div>
-      
-      <!-- 新建会话按钮 (始终显示，折叠时变图标) -->
-      <div v-show="!collapsed" class="new-chat-wrapper" :class="{ 'collapsed': collapsed }" @click="$emit('new-chat')">
-        <div class="new-chat-btn" :title="collapsed ? '新建会话' : ''">
-          <span class="icon">
-            <i class="h-icon-add"></i>
-          </span>
-          <span class="text" v-show="!collapsed">新建会话</span>
+    <template v-if="!hideConversations">
+      <div class="conversations-section">
+        <div class="section-header" v-if="!collapsed">
+          <div class="section-title">对话列表</div>
+        </div>
+        
+        <!-- 新建会话按钮 (始终显示，折叠时变图标) -->
+        <div v-show="!collapsed" class="new-chat-wrapper" :class="{ 'collapsed': collapsed }" @click="$emit('new-chat')">
+          <div class="new-chat-btn" :title="collapsed ? '新建会话' : ''">
+            <span class="icon">
+              <i class="h-icon-add"></i>
+            </span>
+            <span class="text" v-show="!collapsed">新建会话</span>
+          </div>
+        </div>
+
+        <!-- 列表内容 (折叠时隐藏) -->
+        <div class="conversations-content" v-show="!collapsed">
+          <!-- 有数据时显示列表 -->
+          <AIConversations
+            v-if="displayConversations.length > 0"
+            :items="displayConversations"
+            :active-key="activeConversationId"
+            :groupable="true"
+            @update:activeKey="handleConversationSelect"
+            @change="handleConversationChange"
+            @menu-command="handleMenuCommand"
+          >
+            <template #label="{ item }">
+              <div class="conversation-label">
+                <span class="label-text">{{ item.label }}</span>               
+                <span class="label-time" >{{ item.time }}</span>
+              </div>
+            </template>
+          </AIConversations>
+
+          <!-- 无数据时显示空状态 -->
+          <div v-else class="empty-conversations">
+            <!-- <div class="empty-icon">💬</div> -->
+            <div class="empty-text">暂无对话</div>
+            <!-- <div class="empty-hint">开始新的对话吧~</div> -->
+          </div>
         </div>
       </div>
-
-      <!-- 列表内容 (折叠时隐藏) -->
-      <div class="conversations-content" v-show="!collapsed">
-        <!-- 有数据时显示列表 -->
-        <AIConversations
-          v-if="displayConversations.length > 0"
-          :items="displayConversations"
-          :active-key="activeConversationId"
-          :groupable="true"
-          @update:activeKey="handleConversationSelect"
-          @change="handleConversationChange"
-          @menu-command="handleMenuCommand"
-        >
-          <template #label="{ item }">
-            <div class="conversation-label">
-              <span class="label-text">{{ item.label }}</span>               
-              <span class="label-time" >{{ item.time }}</span>
-            </div>
-          </template>
-        </AIConversations>
-
-        <!-- 无数据时显示空状态 -->
-        <div v-else class="empty-conversations">
-          <div class="empty-icon">💬</div>
-          <div class="empty-text">暂无对话记录</div>
-          <div class="empty-hint">开始新的对话吧~</div>
-        </div>
-      </div>
-    </div>
+    </template>
+    <template v-else>
+      <!-- 当会话区域被隐藏时，使用占位元素撑开中间空间，确保底部 slot 固定在底部 -->
+      <div class="conversations-spacer"></div>
+    </template>
 
     <!-- Bottom Slot & Toggle -->
     <div class="sidebar-bottom">
@@ -336,9 +342,7 @@ export default {
       background: linear-gradient(90deg, rgba(53, 172, 255, 1) 0%, rgba(22, 122, 255, 1) 100%);
 
       &:hover {
-        border-color: #409eff;
-        color: #409eff;
-        background: #ecf5ff;
+        opacity: 0.8;
       }
 
       .icon {
@@ -430,6 +434,11 @@ export default {
         margin-top: 2px;
       }
     }
+  }
+
+  // 当会话区域被隐藏时，用于撑开中间空间，保证底部始终在底部
+  .conversations-spacer {
+    flex: 1;
   }
 
   .sidebar-bottom {

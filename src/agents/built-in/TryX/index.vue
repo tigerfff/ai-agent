@@ -173,6 +173,8 @@ export default {
      *  - updateItem(index, patch): 由 AIInput 提供，用于更新对应附件的 status / percent / url 等
      */
     async handlePreUpload(rawFiles, context = {}) {
+      console.log(this.$refs.aiInput.fileList,'rawFiles')
+      
       return handleAgentPreUpload(rawFiles, context, this.ossUploader, (val) => {
         this.isUploading = val;
       });

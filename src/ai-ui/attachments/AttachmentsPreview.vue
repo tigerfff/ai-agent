@@ -13,18 +13,18 @@
     
     <!-- 内容区域 -->
     <div class="preview-content">
-      <template v-if="file">
+      <template v-if="currentFile">
         <!-- 图片 -->
         <img 
           v-if="isImage" 
-          :src="file.url || getLocalUrl(file.rawFile)" 
+          :src="currentFile.url || getLocalUrl(currentFile.rawFile)" 
           class="preview-image"
         />
         
         <!-- 视频 -->
         <video 
           v-else-if="isVideo"
-          :src="file.url || getLocalUrl(file.rawFile)"
+          :src="currentFile.url || getLocalUrl(currentFile.rawFile)"
           class="preview-video"
           controls
           autoplay
@@ -33,8 +33,8 @@
         <!-- 其他文件 -->
         <div v-else class="preview-file">
           <div class="file-icon">📄</div>
-          <div class="file-name">{{ file.name }}</div>
-          <div class="file-size">{{ formatFileSize(file.size) }}</div>
+          <div class="file-name">{{ currentFile.name }}</div>
+          <div class="file-size">{{ formatFileSize(currentFile.size) }}</div>
         </div>
       </template>
     </div>
@@ -58,35 +58,62 @@ export default {
       type: Boolean,
       default: false
     },
-    // 当前预览的文件对象
-    file: {
-      type: Object,
-      default: () => null
+    // 文件列表
+    fileList: {
+      type: Array,
+      default: () => []
     },
-    // 是否显示切换箭头
-    showNav: {
-      type: Boolean,
-      default: false
+    // 初始预览的文件索引
+    initialIndex: {
+      type: Number,
+      default: 0
     }
   },
+  data() {
+    return {
+      currentIndex: 0
+    };
+  },
   computed: {
+    // 当前预览的文件对象
+    currentFile() {
+      if (!this.fileList || this.fileList.length === 0) return null;
+      const file = this.fileList[this.currentIndex];
+      if (!file) return null;
+      
+      // 规范化文件类型
+      return {
+        ...file,
+        type: this.normalizeFileType(file)
+      };
+    },
+    // 是否显示导航箭头（文件数量大于1时显示）
+    showNav() {
+      return this.fileList && this.fileList.length > 1;
+    },
     isImage() {
-      if (!this.file) return false;
-      // file.type 已经被 normalizeFileType 规范化为 'image' | 'video' | 'file'
-      return this.file.type === 'image';
+      if (!this.currentFile) return false;
+      return this.currentFile.type === 'image';
     },
     isVideo() {
-      if (!this.file) return false;
-      // file.type 已经被 normalizeFileType 规范化为 'image' | 'video' | 'file'
-      return this.file.type === 'video';
+      if (!this.currentFile) return false;
+      return this.currentFile.type === 'video';
     }
   },
   watch: {
     visible(val) {
       if (val) {
+        // 打开预览时，重置为初始索引
+        this.currentIndex = Math.max(0, Math.min(this.initialIndex, (this.fileList?.length || 1) - 1));
         window.addEventListener('keydown', this.handleKeydown);
       } else {
         window.removeEventListener('keydown', this.handleKeydown);
+      }
+    },
+    initialIndex(val) {
+      // 当初始索引变化时，更新当前索引（仅在预览可见时）
+      if (this.visible && this.fileList && this.fileList.length > 0) {
+        this.currentIndex = Math.max(0, Math.min(val, this.fileList.length - 1));
       }
     }
   },
@@ -98,10 +125,53 @@ export default {
       this.$emit('close');
     },
     handlePrev() {
-      this.$emit('prev');
+      if (!this.showNav) return;
+      this.currentIndex = (this.currentIndex - 1 + this.fileList.length) % this.fileList.length;
     },
     handleNext() {
-      this.$emit('next');
+      if (!this.showNav) return;
+      this.currentIndex = (this.currentIndex + 1) % this.fileList.length;
+    },
+    /**
+     * 规范化文件类型
+     * @param {Object} file - 文件对象
+     * @returns {string} 'image' | 'video' | 'file'
+     */
+    normalizeFileType(file) {
+      if (!file) return 'file';
+      
+      // 1. 优先使用 rawFile 的 MIME type
+      if (file.rawFile && file.rawFile.type) {
+        const mimeType = file.rawFile.type.toLowerCase();
+        if (mimeType.startsWith('image/')) return 'image';
+        if (mimeType.startsWith('video/')) return 'video';
+        return 'file';
+      }
+      
+      // 2. 根据文件名扩展名判断
+      const fileName = (file.name || '').toLowerCase();
+      if (/\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(fileName)) {
+        return 'image';
+      }
+      if (/\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v)$/i.test(fileName)) {
+        return 'video';
+      }
+      
+      // 3. 如果 file.type 是 MIME type，解析它
+      if (file.type && typeof file.type === 'string') {
+        const type = file.type.toLowerCase();
+        if (type.startsWith('image/') || type.startsWith('image')) return 'image';
+        if (type.startsWith('video/') || type.startsWith('video')) return 'video';
+        if (type.includes('/')) return 'file';
+      }
+      
+      // 4. 如果 file.type 已经是规范的类型字符串，直接使用
+      if (file.type === 'image' || file.type === 'video' || file.type === 'file') {
+        return file.type;
+      }
+      
+      // 5. 默认为文件类型
+      return 'file';
     },
     handleKeydown(e) {
       if (!this.visible) return;

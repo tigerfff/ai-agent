@@ -62,11 +62,9 @@
     <!-- 预览弹窗 -->
     <AttachmentsPreview
       :visible="previewVisible"
-      :file="currentPreviewFile"
-      :show-nav="value.length > 1"
+      :file-list="normalizedFileList"
+      :initial-index="previewIndex"
       @close="closePreview"
-      @prev="prevPreview"
-      @next="nextPreview"
     />
   </div>
 </template>
@@ -116,15 +114,12 @@ export default {
     };
   },
   computed: {
-    currentPreviewFile() {
-      const file = this.value[this.previewIndex];
-      if (!file) return null;
-      
-      // 规范化文件类型，确保传递给 AttachmentsPreview 的类型是正确的
-      return {
+    // 规范化文件列表，确保每个文件都有正确的 type 字段
+    normalizedFileList() {
+      return this.value.map(file => ({
         ...file,
         type: this.normalizeFileType(file)
-      };
+      }));
     }
   },
   watch: {
@@ -267,14 +262,6 @@ export default {
     
     closePreview() {
       this.previewVisible = false;
-    },
-    
-    prevPreview() {
-      this.previewIndex = (this.previewIndex - 1 + this.value.length) % this.value.length;
-    },
-    
-    nextPreview() {
-      this.previewIndex = (this.previewIndex + 1) % this.value.length;
     }
   }
 };

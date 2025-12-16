@@ -386,6 +386,13 @@ export default {
     inputValue(val) {
       this.$emit('input', val);
       this.$nextTick(this.adjustHeight);
+    },
+    // 监听文件列表变化
+    fileList: {
+      handler(newList) {
+        this.$emit('file-list-change', newList);
+      },
+      deep: true
     }
   },
   computed: {
