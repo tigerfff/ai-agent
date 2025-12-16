@@ -940,8 +940,6 @@ export default {
           return;
         }
       }
-
-      // 3. 没有提供预上传钩子时，默认本地模式已经在占位条目里完成（status: 'done'）
     },
 
     getFileType(file) {

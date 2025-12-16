@@ -26,17 +26,25 @@ export const BUSINESS_LINES = {
 
 // 所有可用的智能体定义
 export const ALL_AGENTS = {
-  // 'inspect-x': {
-  //   id: 'inspect-x',
-  //   name: '智慧巡查',
-  //   miniName:'巡查',
-  //   icon: inspectIcon,
-  //   homeIcon: inspectSquareIcon,
-  //   description: '智能巡查助手，帮助您高效完成巡查任务。',
-  //   type: 'built-in',
-  //   tags: ['巡查', '安防'],
-  //   component: TryAgent // 暂时复用 TryAgent，实际应为 InspectAgent
-  // },
+  'inspect-x': {
+    id: 'inspect-x',
+    name: '智慧巡查',
+    miniName:'巡查',
+    icon: inspectIcon,
+    homeIcon: inspectSquareIcon,
+    description: '智能巡查助手，帮助您高效完成巡查任务。',
+    type: 'built-in',
+    tags: ['巡查', '安防'],
+    component: TryAgent, // 暂时复用 TryAgent，实际应为 InspectAgent
+    permission: {
+      underConstruction: true, // 建设中
+      serviceName: '巡查服务',
+      permissionName: '巡查权限',
+      // 将来开发完成后开启
+      // checkService: true,
+      // serviceCheckConfig: { url: '...', method: 'get' }
+    }
+  },
   // 'data-analysis': {
   //   id: 'data-analysis',
   //   name: '数据分析',
@@ -46,7 +54,34 @@ export const ALL_AGENTS = {
   //   description: '深度挖掘数据价值，辅助业务决策。',
   //   type: 'built-in',
   //   tags: ['数据', '分析'],
-  //   component: TryAgent // 暂时复用
+  //   component: TryAgent, // 暂时复用
+  //   permission: {
+  //     serviceName: '数据服务',
+  //     permissionName: '数据分析权限',
+  //     checkService: false, 
+  //     checkAuth: false,
+  //     // 自定义外部接口检查
+  //     customCheck: async ({ client, userId }) => {
+  //       try {
+  //         // 假设接口是 /api/external/check_access (需根据实际接口修改)
+  //         // 这里仅为示例，实际请替换为真实接口
+  //         // const res = await client.send({
+  //         //   url: '/api/external/check_access',
+  //         //   method: 'GET',
+  //         //   data: { uid: userId }
+  //         // });
+  //         // if (res.code === 0 && res.data === true) {
+  //         //   return { status: 'has_permission' };
+  //         // }
+  //         // return { status: 'no_permission', message: '暂无数据分析权限' };
+          
+  //         // 暂时放行，方便演示
+  //         return { status: 'has_permission' };
+  //       } catch (e) {
+  //         return { status: 'no_permission', message: '权限检查服务异常' };
+  //       }
+  //     }
+  //   }
   // },
   'try-x': {
     id: 'try-x',
@@ -57,7 +92,9 @@ export const ALL_AGENTS = {
     description: 'AI试用助手，可以帮你快速体验各种 AI 功能',
     tags: ['试用', 'AI'],
     type: 'built-in',
-    component: TryAgent
+    component: TryAgent,
+    // AI试用通常对所有人开放，无需特殊权限
+    permission: null 
   },
   'training-x': {
     id: 'training-x',
@@ -73,16 +110,19 @@ export const ALL_AGENTS = {
     permission: {
       serviceName: '培训服务',        // 服务名称（用于提示）
       permissionName: '培训权限码',   // 权限名称（用于提示）
-      checkService: false,             // 是否需要检查服务购买
-      checkPermission: false,          // 是否需要检查权限码
-      permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
-      permissionCode: '21001',         // 要检查的具体权限码
-      // 服务检查接口配置
-      serviceCheckApi: {
-        url: '/api/enterprise/training/service/actions/enableTrainService', // 检查培训服务的接口
+      
+      // 1. 检查服务购买 (白名单)
+      checkService: true,
+      serviceCheckConfig: {
+        url: '/v1/chain/patrol/patrolAgent/action/listLearnersByStore', // 白名单接口
         method: 'get',
         data: {}
-      }
+      },
+
+      // 2. 检查权限码 (LocalStorage)
+      checkAuth: true,
+      permissionCodeKey: 'authorities', // localStorage 中权限码的 key
+      permissionCode: 'RETAIL_AUTH_21',         // 要检查的具体权限码
     }
   },
   'sop-generation': {
@@ -104,16 +144,17 @@ export const ALL_AGENTS = {
     permission: {
       serviceName: '巡查服务',        // 服务名称（用于提示）
       permissionName: 'SOP权限码',     // 权限名称（用于提示）
-      checkService: false,              // 是否需要检查服务购买
-      checkPermission: false,           // 是否需要检查权限码
-      permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
-      permissionCode: '04007',          // 要检查的具体权限码
-      // 服务检查接口配置
-      serviceCheckApi: {
-        url: '/api/inspect/checkService', // 检查巡查服务的接口
+      
+      checkService: true,
+      serviceCheckConfig: {
+        url: '/inspect/checkService', // 检查巡查服务的接口 (待确认是否也需要替换为白名单接口)
         method: 'get',
         data: {}
-      }
+      },
+
+      checkAuth: true,
+      permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
+      permissionCode: '04007',          // 要检查的具体权限码
     } 
   }
 };

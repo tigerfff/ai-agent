@@ -239,6 +239,7 @@ export default {
     },
 
     handleLike(type) {
+      console.log(type,'type')
       // 如果已经是当前状态，则取消（设为 null 或 ''）
       const newStatus = this.localLikeStatus === type ? '' : type;
       this.localLikeStatus = newStatus;

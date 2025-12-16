@@ -75,6 +75,7 @@
               v-show="shouldShowFooter(item)"
               :item="item" 
               :actions="getActions(item)"
+              @action="handleAction($event, item, index)"
             >
             </BubbleFooter>
           </div>
@@ -263,6 +264,53 @@ export default {
         } 
       } catch (e) {
         console.error('[TrainingX] Fetch suggestions failed:', e);
+      }
+    },
+
+    async handleAction(type, payload, index) {
+     if (type === 'like' || type === 'dislike' || type === 'cancel-like') {
+        const message = this.messages[index];
+        if (!message) return;
+        // 只有 AI 的消息才能评价（placement === 'start' 表示 AI 消息）
+        if (message.placement !== 'start') {
+          return;
+        }
+        // 更新本地点赞状态
+        this.$set(message, 'likeStatus', type === 'cancel-like' ? '' : type);
+        // 调用评价接口
+        if (this.chatId && message.msgId) {
+          try {
+            if (type === 'cancel-like') {
+              const res = await TrainingXApi.evaluateMessage(this.$aiClient, {
+                chatId: this.chatId,
+                msgId: message.msgId,
+                userEvaluation: 'NO_EVAL'
+              });
+              // 取消评价：可能需要调用接口取消，这里先不调用，保持本地状态
+              return;
+            }
+
+            const userEvaluation = type === 'like' ? 'UPVOTE' : 'DOWNVOTE';
+            const res = await TrainingXApi.evaluateMessage(this.$aiClient, {
+              chatId: this.chatId,
+              msgId: message.msgId,
+              userEvaluation
+            });
+
+            if (res.code === 0) {
+              // this.$message.success('评价成功');
+            } else {
+              // 评价失败，回滚本地状态
+              this.$set(message, 'likeStatus', '');
+              this.$message.error('评价失败，请重试');
+            }
+          } catch (e) {
+            // 评价失败，回滚本地状态
+            this.$set(message, 'likeStatus', '');
+            this.$message.error('评价失败，请重试');
+          }
+        } else {
+        }
       }
     },
 
@@ -574,6 +622,16 @@ export default {
         time: msg.createTime
       };
 
+      // 将后端的 userEvaluation 映射为前端的 likeStatus
+      // 后端: "UPVOTE" | "DOWNVOTE" | "NO_EVAL"
+      // 前端: "like" | "dislike" | ""
+      let likeStatus = '';
+      if (msg.userEvaluation === 'UPVOTE') {
+        likeStatus = 'like';
+      } else if (msg.userEvaluation === 'DOWNVOTE') {
+        likeStatus = 'dislike';
+      }
+
       const ai = {
         key: `${msg.msgId || msg.chatId || 'ai'}-a`,
         role: 'ai',
@@ -581,7 +639,9 @@ export default {
         attachments: [], // 目前后端没给出 AI 侧附件，就先留空
         variant: 'filled',
         placement: 'start',
-        time: msg.createTime
+        time: msg.createTime,
+        msgId: msg.msgId, // 保存 msgId，用于评价接口
+        likeStatus // 保存点赞状态
       };
 
       return { user, ai };

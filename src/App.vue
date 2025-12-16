@@ -11,6 +11,7 @@
       ref="chatWindow"
       business-line="retail"
       :visible.sync="visible"
+      userId="4649d25a7be14f7bb1106219b3bec89c1"
     >
       <!-- 处理自定义智能体的渲染 -->
       <template #agent-view="{ agent }">
@@ -21,6 +22,10 @@
           <button @click="testRequest">测试父项目网络请求</button>
         </div>
       </template>
+
+      <!-- <template #sidebar-bottom>
+        111
+      </template> -->
     </AIChatWindow>
   </div>
 </template>
@@ -80,8 +85,8 @@ export default {
       console.log('openChat clicked');
       // this.visible = true;
       this.$refs.chatWindow.open({
-        agentId: 'try-x',
-        chatId: '55ab6cc0e64449e8af7e06b0f4267f72'
+        agentId: '',
+        chatId: ''
       });
       // this.$refs.chatWindow.open();
     },

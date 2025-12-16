@@ -13,24 +13,17 @@
           <el-popover
             v-if="type === 'no-service'"
             ref="qrPopover"
-            placement="top"
-            width="320"
-            trigger="click"
+            placement="right"
+            width="120"
+            trigger="hover"
             popper-class="qr-code-popover"
-          >
-            <el-button 
-              slot="reference"
-              type="primary"
-            >
+          > 
+            <div slot="reference" class="scan-contact-btn">
               {{ actionText || '扫码联系' }}
-            </el-button>
+            </div>
             <div class="qr-code-popover-content">
               <div class="qr-code-wrapper">
                 <img :src="scanContactImage" alt="扫码联系" class="qr-code-image" />
-              </div>
-              <div class="qr-code-tip">
-                <p>使用手机扫描二维码</p>
-                <p>联系商务咨询</p>
               </div>
             </div>
           </el-popover>
@@ -122,7 +115,8 @@ export default {
      */
     displayTitle() {
       if (this.type === 'building') {
-        return '该智能体正在建设中...';
+        // 建设中状态：优先使用传入的 title（智能体名称），否则使用默认文案
+        return this.title || '该智能体正在建设中...';
       } else if (this.type === 'no-service') {
         return this.title || '未购买服务';
       }
@@ -133,7 +127,8 @@ export default {
      */
     displayDescription() {
       if (this.type === 'building') {
-        return this.description || '';
+        // 建设中状态：优先使用传入的 description，否则使用默认文案
+        return this.description || '该智能体正在建设中,敬请期待...';
       } else if (this.type === 'no-service') {
         return this.description || '您尚未购买相关服务，请联系管理员开通';
       }
@@ -197,11 +192,25 @@ export default {
     font-size: 14px;
     color: rgba(0, 0, 0, 0.5);
     line-height: 20px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
   }
 
   .empty-action {
-    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+
+    .scan-contact-btn {
+      background: linear-gradient(-82.01deg, rgba(161,75,254,1) 0%, rgba(5,189,254,1) 100%);
+      width: 108px;
+      height: 32px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 32px;
+      text-align: center;
+      cursor: pointer;
+    }
   }
 
   &.is-mini {
@@ -225,25 +234,27 @@ export default {
 
     .empty-description {
       font-size: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
   }
 }
 
-// 二维码弹窗样式
-::v-deep .qr-code-popover {
-  padding: 16px;
+
+</style>
+
+<style lang="scss">
+  // 二维码弹窗样式
+.qr-code-popover {
+  padding: 0 !important;
+  border-radius: 8px !important;;
+  min-width: 0 !important;
+  box-shadow: none !important;
 
   .qr-code-popover-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-
     .qr-code-wrapper {
-      width: 280px;
-      height: 280px;
-      padding: 10px;
+      width: 120px;
+      height: 120px;
+      padding: 0;;
       background: #fff;
       border: 1px solid #e4e7ed;
       border-radius: 8px;
@@ -271,4 +282,3 @@ export default {
   }
 }
 </style>
-

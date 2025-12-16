@@ -18,7 +18,20 @@
         @conversation-menu-command="handleMenuCommand"
       >
         <template #bottom>
-          <slot name="sidebar-bottom"></slot>
+          <slot name="sidebar-bottom">
+            <el-popover
+              placement="top-start"
+              width="auto"
+              trigger="hover"
+              popper-class="ai-contact-popover"
+            >
+              <img src="@/assets/images/scan-contact@3x.png" alt="扫码咨询" class="qrcode-img" />
+              <div slot="reference" class="contact-btn">
+                <img v-if="!isCollapsed" src="@/assets/images/business-contact@3x.png" alt="商务接洽" class="contact-img-full" />
+                <img v-else src="@/assets/images/business-contact@3x-1.png" alt="商务接洽" class="contact-img-mini" />
+              </div>
+            </el-popover>
+          </slot>
         </template>
       </AISidebar>
     </template>
@@ -70,13 +83,13 @@
           <div v-if="checkingPermission" class="permission-checking">
             <ChatSkeleton />
           </div>
-
-          <!-- 无权限状态 -->
+        
+          <!-- 无权限状态 / 建设中状态 -->
           <AIEmpty
             v-else-if="currentAgent && permissionStatus && permissionStatus.status !== 'has_permission'"
-            :type="permissionStatus.status === 'no_service' ? 'no-service' : 'default'"
-            :title="permissionStatus.status === 'no_service' ? '未购买服务' : '暂无权限'"
-            :description="getPermissionDescription()"
+            :type="getEmptyType()"
+            :title="getEmptyTitle()"
+            :description="getEmptyDescription()"
             :is-mini="isMini"
           />  
 
@@ -186,6 +199,11 @@ export default {
     isMini: {
       type: Boolean,
       default: false
+    },
+    // 当前用户 ID (用于权限检查)
+    userId: {
+      type: String,
+      default: ''
     }
   },
   provide() {
@@ -324,25 +342,23 @@ export default {
     async handleSelectAgent(agent) {
       // 如果是外部链接类型，先检查权限再跳转
       if (agent.type === 'external' && agent.getUrl) {
-        // 检查权限
-        if (agent.permission) {
-          this.checkingPermission = true;
-          try {
-            const permissionResult = await checkAgentPermission(this.$aiClient, agent.id, agent.permission);
-            if (permissionResult.status !== PERMISSION_STATUS.HAS_PERMISSION) {
-              // 无权限，不跳转，显示权限状态
-              this.currentAgentId = agent.id;
-              this.permissionStatus = permissionResult;
-              this.checkingPermission = false;
-              return;
-            }
-          } catch (e) {
-            console.error('[AgentContainer] Permission check failed:', e);
+        this.checkingPermission = true;
+        try {
+          const permissionResult = await checkAgentPermission(this.$aiClient, this.userId, agent);
+          if (permissionResult.status !== PERMISSION_STATUS.HAS_PERMISSION) {
+            // 无权限，不跳转，显示权限状态
+            this.currentAgentId = agent.id;
+            this.permissionStatus = permissionResult;
             this.checkingPermission = false;
             return;
           }
+        } catch (e) {
+          console.error('[AgentContainer] Permission check failed:', e);
           this.checkingPermission = false;
+          return;
         }
+        this.checkingPermission = false;
+        
         // 有权限，新开窗口跳转
         const url = typeof agent.getUrl === 'function' ? agent.getUrl() : agent.getUrl;
         window.open(url, '_blank');
@@ -352,44 +368,18 @@ export default {
       this.currentAgentId = agent.id;
       this.permissionStatus = null;
       
-      const permCfg = agent.permission;
-
-      /**
-       * 优先使用配置中的显式权限结果（主要给自定义 / slot 智能体使用）
-       * - hasService: 是否已开通/购买该服务（false -> NO_SERVICE）
-       * - hasAuth:    是否具备使用权限（false -> NO_PERMISSION）
-       * 如果这两个字段任意一个被显式设置为 boolean，则不再走通用的 checkAgentPermission 逻辑。
-       */
-      if (permCfg && (typeof permCfg.hasService === 'boolean' || typeof permCfg.hasAuth === 'boolean')) {
-        let status = PERMISSION_STATUS.HAS_PERMISSION;
-        let message = '';
-
-        if (permCfg.hasService === false) {
-          status = PERMISSION_STATUS.NO_SERVICE;
-          message = permCfg.noServiceMessage 
-            || (permCfg.serviceName ? `您尚未购买${permCfg.serviceName}，请联系管理员开通` : '您尚未购买相关服务，请联系管理员开通');
-        } else if (permCfg.hasAuth === false) {
-          status = PERMISSION_STATUS.NO_PERMISSION;
-          message = permCfg.noPermissionMessage 
-            || (permCfg.permissionName && permCfg.serviceName
-              ? `您已购买${permCfg.serviceName}，但暂无${permCfg.permissionName}，请联系管理员开通`
-              : '您暂无使用该功能的权限，请联系管理员开通');
-        }
-
-        this.permissionStatus = { status, message };
-      } else if (permCfg) {
-        // 否则，如果配置了 permission，但未提供显式结果，则走内置的权限检查逻辑（适用于内置智能体）
-        this.checkingPermission = true;
-        try {
-          const permissionResult = await checkAgentPermission(this.$aiClient, agent.id, permCfg);
-          this.permissionStatus = permissionResult;
-        } catch (e) {
-          console.error('[AgentContainer] Permission check failed:', e);
-          // 权限检查失败，默认允许访问（降级处理）
-          this.permissionStatus = { status: PERMISSION_STATUS.HAS_PERMISSION };
-        } finally {
-          this.checkingPermission = false;
-        }
+      // 检查内置智能体权限
+      this.checkingPermission = true;
+      try {
+        const permissionResult = await checkAgentPermission(this.$aiClient, this.userId, agent);
+        console.log(permissionResult,'permissionResult')
+        this.permissionStatus = permissionResult;
+      } catch (e) {
+        console.error('[AgentContainer] Permission check failed:', e);
+        // 权限检查失败，默认允许访问（降级处理）
+        this.permissionStatus = { status: PERMISSION_STATUS.HAS_PERMISSION };
+      } finally {
+        this.checkingPermission = false;
       }
       
       // 切换智能体后，尝试选中该智能体的最新会话
@@ -408,13 +398,62 @@ export default {
       const { permission } = this.currentAgent;
       if (!permission) return this.permissionStatus.message || '';
       
+      // 优先使用 checkAgentPermission 返回的 message
+      if (this.permissionStatus.message) {
+        return this.permissionStatus.message;
+      }
+      
       if (this.permissionStatus.status === PERMISSION_STATUS.NO_SERVICE) {
-        return `您尚未购买${permission.serviceName}，请联系管理员开通`;
+        return `请联系管理员扫码添加销售人员进行购买`;
       } else if (this.permissionStatus.status === PERMISSION_STATUS.NO_PERMISSION) {
-        return `您已购买${permission.serviceName}，但暂无${permission.permissionName}，请联系管理员开通`;
+        return `请联系管理员开通对应的模块权限`;
       }
       
       return this.permissionStatus.message || '';
+    },
+    
+    /**
+     * 获取 AIEmpty 的 type
+     */
+    getEmptyType() {
+      if (!this.permissionStatus) return 'default';
+      
+      if (this.permissionStatus.status === PERMISSION_STATUS.UNDER_CONSTRUCTION) {
+        return 'building';
+      } else if (this.permissionStatus.status === PERMISSION_STATUS.NO_SERVICE) {
+        return 'no-service';
+      }
+      return 'default';
+    },
+    
+    /**
+     * 获取 AIEmpty 的 title
+     */
+    getEmptyTitle() {
+      if (!this.currentAgent || !this.permissionStatus) return '';
+      
+      if (this.permissionStatus.status === PERMISSION_STATUS.UNDER_CONSTRUCTION) {
+        return this.currentAgent.name || '智能体';
+      } else if (this.permissionStatus.status === PERMISSION_STATUS.NO_SERVICE) {
+        return `你还未购买「${this.currentAgent?.permission?.serviceName || '该服务'}」`;
+      } else if (this.permissionStatus.status === PERMISSION_STATUS.NO_PERMISSION) {
+        return `无「${this.currentAgent?.permission?.permissionName || '使用'}」权限`;
+      }
+      
+      return '';
+    },
+    
+    /**
+     * 获取 AIEmpty 的 description
+     */
+    getEmptyDescription() {
+      if (!this.permissionStatus) return '';
+      
+      if (this.permissionStatus.status === PERMISSION_STATUS.UNDER_CONSTRUCTION) {
+        return '该智能体正在建设中,敬请期待...';
+      }
+      
+      return this.getPermissionDescription();
     },
     
     // 由子组件 (TryAgent) 触发，更新会话列表
@@ -710,6 +749,29 @@ export default {
     height: 100%;
   }
 }
+
+.qrcode-img {
+  display: block;
+  width: 120px;
+  height: 120px;
+}
+
+.contact-btn {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  
+  .contact-img-full {
+    height: 56px;
+    width: auto;
+    max-width: 100%;
+  }
+  
+  .contact-img-mini {
+    width: 32px;
+    height: 32px;
+  }
+}
 </style>
 
 <style lang="scss">
@@ -732,5 +794,12 @@ export default {
       }
     }
   }
+}
+
+.ai-contact-popover {
+  padding: 0 !important;
+  border-radius: 8px !important;;
+  min-width: 0 !important;
+  box-shadow: none !important;
 }
 </style>
