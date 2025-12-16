@@ -218,8 +218,6 @@ export default {
     }
   },
   created() {
-   
-    
     // 如果 data 已有值，立即初始化
     if (this.data && Object.keys(this.data).length > 0) {
       this.initFormData();
@@ -642,7 +640,7 @@ export default {
   }
 
   .confirmed-badge {
-    width: 107px;
+    width: 112px;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -764,11 +764,11 @@ export default {
         if (type === 'video') accept = 'video/*,' + accept;
       } else {
         // 2. 降级使用默认映射
-        const acceptMap = {
-          image: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
-          video: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
-          document: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv'
-        };
+      const acceptMap = {
+        image: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
+        video: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
+        document: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv'
+      };
         accept = acceptMap[type] || '*/*';
       }
       

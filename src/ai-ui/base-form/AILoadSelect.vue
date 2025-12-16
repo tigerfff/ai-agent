@@ -43,7 +43,7 @@
       placement="bottom-start"
       :width="popoverWidth"
       trigger="manual"
-      popper-class="ai-load-select-popover"
+      popper-class="ver"
       :reference="referenceElement"
       :append-to-body="true"
       @show="handlePopoverShow"
@@ -629,12 +629,13 @@ export default {
 
 <style lang="scss">
 // 下拉框样式（需要全局样式，因为 popover 是 append-to-body 的）
-.ai-load-select-popover {
+.ver {
   width: 250px;
   padding: 0 !important;
   position: fixed !important;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  margin-top: 0px !important;
 
   .select-dropdown {
     .search-input-wrapper {

@@ -152,9 +152,29 @@ export default {
     }
   },
   methods: {
+    /**
+     * 清理文本，移除所有 widget 标签（如 <ymform:...>...</ymform:...>）
+     */
+    cleanTextFromWidgets(text) {
+      if (!text) return '';
+      // 匹配所有 <ymform:xxx>...</ymform:xxx> 标签（包括多行内容）
+      // [\s\S]*? 非贪婪匹配任意字符（包括换行）
+      return text.replace(/<ymform:[^>]*>[\s\S]*?<\/ymform:[^>]*>/gi, '').trim();
+    },
+    
     handleCopy() {
-      const text = this.item.content || '';
-      if (!text) return;
+      let text = this.item.content || '';
+      if (!text) {
+        // 如果没有原始内容，静默返回（可能是只有附件的情况）
+        return;
+      }
+      
+      // 过滤掉 widget 标签内容
+      text = this.cleanTextFromWidgets(text);
+      if (!text) {
+        // 如果过滤后没有文本内容，静默返回（不显示提示，因为可能用户只是想复制文本）
+        return;
+      }
       
       // 使用 navigator.clipboard
       if (navigator.clipboard && window.isSecureContext) {

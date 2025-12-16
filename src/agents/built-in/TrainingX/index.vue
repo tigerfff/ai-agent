@@ -18,7 +18,7 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         class="history-full-width"
-        :ignoreWidgetTypes="['ymform:train_confirm','ymForm:train_plan_result','ymform:user_train_finish']"
+        :ignoreWidgetTypes="['ymform:train_confirm','ymform:train_plan_result','ymform:user_train_finish','ymform:train_cancel']"
       >
         <!-- 自定义 Widget 渲染 -->
         <template #widget="{ info, item, index }">
@@ -44,8 +44,12 @@
         <template  #footer="{ item, index }" >
           <div style="display: flex; align-items: center; gap: 4px;">
             <!-- 停止任务 ymForm:train_plan_result-->
-            <template v-if="item.content.includes('ymForm:train_plan_result')" >
-              <div class="stop-task" @click="handleCancelTask(item)">
+            <template v-if="item.content.includes('ymform:train_plan_result')" >
+              <div 
+                class="stop-task" 
+                :class="{ 'disabled': item.taskCancelled }"
+                @click="handleCancelTask(item)"
+              >
                 <i class="h-icon-close_f"></i>
                 <span>停止任务</span>
               </div>
@@ -122,6 +126,7 @@ import TrainVideoCard from './widgets/TrainVideoCard.vue';
 import TrainResultUpload from './widgets/TrainResultUpload.vue';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
+import { parseWidgetData } from './widgets/widgetParser';
 
 export default {
   name: 'TryAgent',
@@ -158,8 +163,8 @@ export default {
 
       // 操作栏配置
       actionConfig: {
-        user: ['edit', 'copy'],
-        bot: ['copy', 'like', 'dislike', 'edit']
+        user: ['copy'],
+        bot: ['copy', 'like', 'dislike']
       },
 
       // 控制什么时候可以发送
@@ -221,6 +226,27 @@ export default {
     // this.mockUserTrainFinish();
   },
   methods: {
+
+    handleCancelTask(item) {
+      // 如果已经取消过，直接返回
+      if (item.taskCancelled) {
+        return;
+      }
+
+      // 标记为已取消，禁用按钮
+      this.$set(item, 'taskCancelled', true);
+
+      const cancelData = parseWidgetData(item, 'ymform:train_plan_result');
+      const cancelDataObj = {
+        trainCreateKey: cancelData.trainCreateKey
+      };
+      // // 构造消息格式
+      const message = `确认取消 <ymform:train_cancel desc="以下是取消内容">
+      ${JSON.stringify(cancelDataObj, null, 2)}
+      </ymform:train_cancel>`;
+
+      this.handleWidgetSend(message);
+    },
     /**
      * 获取智能体推荐的提示词
      */
@@ -927,8 +953,14 @@ export default {
       background: rgba(255,255,255,1);
       color: rgba($color: #000000, $alpha: .7);
       cursor: pointer;
-      &:hover {
+      transition: opacity 0.2s, color 0.2s;
+      &:hover:not(.disabled) {
         color: #666;
+      }
+      &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        color: rgba($color: #000000, $alpha: .4);
       }
     }
   }
