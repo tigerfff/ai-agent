@@ -26,17 +26,17 @@ export const BUSINESS_LINES = {
 
 // 所有可用的智能体定义
 export const ALL_AGENTS = {
-  'inspect-x': {
-    id: 'inspect-x',
-    name: '智慧巡查',
-    miniName:'巡查',
-    icon: inspectIcon,
-    homeIcon: inspectSquareIcon,
-    description: '智能巡查助手，帮助您高效完成巡查任务。',
-    type: 'built-in',
-    tags: ['巡查', '安防'],
-    component: TryAgent // 暂时复用 TryAgent，实际应为 InspectAgent
-  },
+  // 'inspect-x': {
+  //   id: 'inspect-x',
+  //   name: '智慧巡查',
+  //   miniName:'巡查',
+  //   icon: inspectIcon,
+  //   homeIcon: inspectSquareIcon,
+  //   description: '智能巡查助手，帮助您高效完成巡查任务。',
+  //   type: 'built-in',
+  //   tags: ['巡查', '安防'],
+  //   component: TryAgent // 暂时复用 TryAgent，实际应为 InspectAgent
+  // },
   // 'data-analysis': {
   //   id: 'data-analysis',
   //   name: '数据分析',

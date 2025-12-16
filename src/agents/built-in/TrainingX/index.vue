@@ -96,9 +96,8 @@
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"
           :button-config="{
-            upload: { visible: true, disabled: false },
+            upload: { visible: false, disabled: false },
             speech: { visible: false }, // 隐藏语音按钮
-            send: { disabled: false }
           }"
           :send-disabled="sendBtnDisabled"
           @send="handleSend" 

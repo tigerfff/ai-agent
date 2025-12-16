@@ -326,6 +326,18 @@ export default {
       default: null
     },
     /**
+     * 分类型的限制配置
+     * 格式示例：
+     * {
+     *   image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
+     *   video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] }
+     * }
+     */
+    fileLimit: {
+      type: Object,
+      default: () => ({})
+    },
+    /**
      * 自定义菜单项数组（添加到上传按钮的下拉菜单中）
      * [
      *   {
@@ -739,14 +751,28 @@ export default {
     triggerFileSelect(type) {
       const input = this.$refs.fileInput;
       
-      // 根据类型设置 accept 属性
-      const acceptMap = {
-        image: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
-        video: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
-        document: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv'
-      };
+      let accept = '*/*';
+
+      // 1. 优先读取 fileLimit 配置
+      if (this.fileLimit && this.fileLimit[type] && this.fileLimit[type].extensions) {
+        const exts = this.fileLimit[type].extensions;
+        // 转换为 .jpg,.png 格式
+        accept = exts.map(ext => ext.startsWith('.') ? ext : `.${ext}`).join(',');
+        
+        // 为了兼容性和移动端体验，追加大类通配符
+        if (type === 'image') accept = 'image/*,' + accept;
+        if (type === 'video') accept = 'video/*,' + accept;
+      } else {
+        // 2. 降级使用默认映射
+        const acceptMap = {
+          image: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
+          video: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
+          document: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv'
+        };
+        accept = acceptMap[type] || '*/*';
+      }
       
-      input.accept = acceptMap[type] || '*/*';
+      input.accept = accept;
       input.click();
       
       // 如果是单一类型模式，记录当前类型
@@ -781,7 +807,46 @@ export default {
         this.currentFileType = this.getFileType(files[0]);
       }
       
-      // 检查文件大小限制
+      // [新增] 详细校验逻辑 (大小 & 后缀)
+      if (this.fileLimit) {
+        for (const file of files) {
+          const fileType = this.getFileType(file); // 'image' | 'video' | 'file'
+          const limitConfig = this.fileLimit[fileType];
+
+          if (limitConfig) {
+            // A. 校验大小
+            if (limitConfig.maxSize && file.size > limitConfig.maxSize) {
+              const limitMB = (limitConfig.maxSize / 1024 / 1024).toFixed(0);
+              const msg = `文件 ${file.name} 超过大小限制 (${limitMB}MB)`;
+              if (this.$message) this.$message.warning(msg);
+              else alert(msg);
+              
+              e.target.value = '';
+              return;
+            }
+
+            // B. 校验后缀 (extensions)
+            if (limitConfig.extensions && limitConfig.extensions.length > 0) {
+              const fileName = file.name.toLowerCase();
+              const isValidExt = limitConfig.extensions.some(ext => {
+                const cleanExt = ext.startsWith('.') ? ext : `.${ext}`;
+                return fileName.endsWith(cleanExt.toLowerCase());
+              });
+
+              if (!isValidExt) {
+                const msg = `文件 ${file.name} 格式不正确，仅支持: ${limitConfig.extensions.join(', ')}`;
+                if (this.$message) this.$message.warning(msg);
+                else alert(msg);
+
+                e.target.value = '';
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      // 检查文件大小限制 (全局 maxSize)
       if (this.maxSize) {
         const oversizedFiles = files.filter(file => file.size > this.maxSize);
         if (oversizedFiles.length > 0) {

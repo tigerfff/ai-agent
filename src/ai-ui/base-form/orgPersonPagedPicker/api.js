@@ -9,7 +9,7 @@ export const orgPersonPagedPickerApi = {
    */
   findUserListAdminAuthority(client,data = {}) {
     return client.send({
-      url: buildUrl(client, '/chain/basic/users/actions/findUserListAdminAuthority', 'chain', '/api'),
+      url: buildUrl(client, '/chain/basic/users/actions/findUserListAdminAuthority', 'chain'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -19,7 +19,7 @@ export const orgPersonPagedPickerApi = {
   // 获取职位列表
   getRoleList(client,data = {}) {
     return client.send({
-      url: buildUrl(client, '/safe-center/auth/centerRole/actions/list', 'chain', '/api'),
+      url: buildUrl(client, '/auth/centerRole/actions/list', 'nissan'),
       method: 'get',
       data // GET 请求的 data 可能不会被使用，但为了兼容性保留
     });
@@ -29,7 +29,7 @@ export const orgPersonPagedPickerApi = {
   async findOrgTreeByParentId(client,data = {}) {
     const { data: departmentList } = await client.send({
       method: 'get',
-      url: buildUrl(client, '/chain/basic/organizations/actions/findOrgTreeByParentId', 'chain', '/api'),
+      url: buildUrl(client, '/chain/basic/organizations/actions/findOrgTreeByParentId', 'chain'),
       data
     })
     return {

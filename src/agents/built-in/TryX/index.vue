@@ -39,6 +39,10 @@
           placeholder="有问题尽管问我~"
           :allowed-types="['image', 'video', 'document']"
           :max-size="200 * 1024 * 1024"
+          :file-limit="{
+            image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png'] },
+            video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] }
+          }"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"
           :before-send="handleBeforeSend"

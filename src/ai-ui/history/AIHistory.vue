@@ -14,38 +14,38 @@
           >
             {{ formatTime(item.time || item.createTime) }}
           </div>
-          <AIBubble
-            v-bind="item"
-            :ignoreWidgetTypes="ignoreWidgetTypes"
-            @update="handleBubbleUpdate"
-            @finish="(inst) => handleBubbleFinish(index, inst)"
-            class="bubble-item-wrapper" 
-          >
-            <!-- 1. 透传作用域插槽 (header, widget, etc) -->
-            <template v-for="(_, slotName) in $scopedSlots" v-slot:[slotName]="slotData">
-              <slot :name="slotName" v-bind="slotData" :item="item" :index="index"></slot>
-            </template>
+        <AIBubble
+          v-bind="item"
+          :ignoreWidgetTypes="ignoreWidgetTypes"
+          @update="handleBubbleUpdate"
+          @finish="(inst) => handleBubbleFinish(index, inst)"
+          class="bubble-item-wrapper" 
+        >
+          <!-- 1. 透传作用域插槽 (header, widget, etc) -->
+          <template v-for="(_, slotName) in $scopedSlots" v-slot:[slotName]="slotData">
+            <slot :name="slotName" v-bind="slotData" :item="item" :index="index"></slot>
+          </template>
 
-            <!-- 2. 默认 Footer (操作栏) -->
-            <template #footer>
-              <!-- 优先使用父组件传入的 footer 插槽 -->
-              <slot name="footer" :item="item" :index="index">
-                <BubbleFooter 
-                  v-if="enableActions"
-                  :item="item" 
-                  :actions="getActions(item)"
-                  @action="(type, payload) => handleAction(type, payload, index)"
-                >
-                  <template #before-custom-actions>
-                    <slot name="before-custom-actions"></slot>
-                  </template>
-                  <template #after-custom-actions>
-                    <slot name="after-custom-actions"></slot>
-                  </template>
-                </BubbleFooter>
-              </slot>
-            </template>
-          </AIBubble>
+          <!-- 2. 默认 Footer (操作栏) -->
+          <template #footer>
+            <!-- 优先使用父组件传入的 footer 插槽 -->
+            <slot name="footer" :item="item" :index="index">
+              <BubbleFooter 
+                v-if="enableActions"
+                :item="item" 
+                :actions="getActions(item)"
+                @action="(type, payload) => handleAction(type, payload, index)"
+              >
+                <template #before-custom-actions>
+                  <slot name="before-custom-actions"></slot>
+                </template>
+                <template #after-custom-actions>
+                  <slot name="after-custom-actions"></slot>
+                </template>
+              </BubbleFooter>
+            </slot>
+          </template>
+        </AIBubble>
         </div>
       </div>
     </div>

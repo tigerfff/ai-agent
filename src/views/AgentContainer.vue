@@ -278,6 +278,49 @@ export default {
     closeWindow() {
       this.$emit('close');
     },
+
+    /**
+     * 初始化状态（支持 Deep Link）
+     * @param {Object} params - { agentId, chatId }
+     */
+    async initializeState(params) {
+      const { agentId, chatId } = params || {};
+
+      // 1. 如果没有传参数，或者 agentId 为空 -> 回到首页
+      if (!agentId) {
+        this.currentAgentId = null;
+        this.currentConversationId = null;
+        return;
+      }
+
+      // 2. 尝试查找目标智能体
+      let targetAgent = this.allAgents.find(a => a.id === agentId);
+      let targetChatId = chatId;
+
+      // 3. 如果没找到，降级为第一个智能体
+      if (!targetAgent) {
+        if (this.allAgents.length > 0) {
+          targetAgent = this.allAgents[0];
+          // 既然 Agent 都不对，传入的 chatId 也就没有意义了，直接丢弃，让 handleSelectAgent 自动选第一个会话
+          targetChatId = null; 
+        } else {
+          // 没有任何智能体，无法操作
+          return;
+        }
+      }
+
+      // 4. 选中智能体
+      await this.handleSelectAgent(targetAgent);
+
+      // 5. 如果指定了会话 ID，尝试选中它
+      // 注意：handleSelectAgent 会默认选中第一个会话，这里进行覆盖
+      if (targetChatId) {
+        // 这里不需要判断 chatId 是否在 conversations 列表中
+        // 因为 handleUpdateConversationList 会在组件加载后再次校验
+        this.currentConversationId = targetChatId;
+      }
+    },
+
     async handleSelectAgent(agent) {
       // 如果是外部链接类型，先检查权限再跳转
       if (agent.type === 'external' && agent.getUrl) {
@@ -485,13 +528,16 @@ export default {
     },
     goHome() {
       // 如果只有一个智能体，不允许返回首页
-      if (this.allAgents.length === 1) return;
+      // if (this.allAgents.length === 1) return; // 根据需求，如果只有一个智能体，也允许返回 Home (unselect logic)
       this.currentAgentId = null;
     },
     checkSingleAgent() {
+      // 禁用自动选中逻辑，因为需求要求默认显示 Home
+      /*
       if (this.allAgents.length === 1) {
         this.handleSelectAgent(this.allAgents[0]);
       }
+      */
     },
     // 重命名相关方法
     async handleRenameConfirm() {
@@ -536,7 +582,7 @@ export default {
     }
   },
   mounted() {
-    this.checkSingleAgent();
+    // this.checkSingleAgent(); // 移除默认自动选中
   },
   watch: {
     isMini: {
@@ -548,9 +594,11 @@ export default {
     allAgents: {
       handler() {
         // 当智能体列表变化时（例如外部注入更新），再次检查
+        /* 移除自动选中
         if (!this.currentAgentId) {
           this.checkSingleAgent();
         }
+        */
       },
       deep: true
     }

@@ -9,6 +9,7 @@
     @close="handleClose"
   >
     <AgentContainer
+      ref="agentContainer"
       :is-mini="isMini"
       v-bind="$attrs"
       v-on="$listeners"
@@ -69,8 +70,14 @@ export default {
       this.isMini = !this.isMini;
     },
     // 对外暴露的 open 方法
-    open() {
+    open(params) {
       this.$emit('update:visible', true);
+      // 等待 DOM 更新后调用子组件的初始化方法
+      this.$nextTick(() => {
+        if (this.$refs.agentContainer) {
+          this.$refs.agentContainer.initializeState(params);
+        }
+      });
     }
   }
 };
