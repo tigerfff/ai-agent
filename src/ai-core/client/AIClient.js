@@ -63,8 +63,39 @@ export class AIClient {
     // 场景 2: 普通 HTTP 请求
     const methodUpper = method.toUpperCase();
 
+    let finalUrl = url;
+    let finalData = data;
+
+    // 【兼容性增强】对于 GET/DELETE 等请求，手动将 data 拼接到 URL 上
+    // 目的：兼容那些不支持 params 参数或错误地将 data 当作 config 处理的 adapter
+    const isGetLike = ['GET', 'DELETE', 'HEAD', 'OPTIONS'].includes(methodUpper);
+    
+    if (isGetLike && data && typeof data === 'object') {
+      const params = new URLSearchParams();
+      Object.keys(data).forEach(key => {
+        const value = data[key];
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            value.forEach(v => params.append(key, v));
+          } else {
+            params.append(key, value);
+          }
+        }
+      });
+      
+      const queryString = params.toString();
+      if (queryString) {
+        finalUrl = finalUrl.includes('?') 
+          ? `${finalUrl}&${queryString}` 
+          : `${finalUrl}?${queryString}`;
+      }
+      
+      // 重要：清空 data，防止 adapter 误将其作为 body 或 config 传入
+      finalData = undefined;
+    }
+
     // POST/PUT/PATCH 请求：data 作为请求体，httpConfig 作为第四个参数传递给父项目
-    return this.httpAdapter(method, url, data, httpConfig)
+    return this.httpAdapter(method, finalUrl, finalData, httpConfig)
       .catch(err => {
         if (onError) onError(err);
         throw err;

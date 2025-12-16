@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <div class="header-title">
+          <div class="header-title" v-show="shouldHideConversations">
             {{ currentConversationTitle }}
           </div>
 
