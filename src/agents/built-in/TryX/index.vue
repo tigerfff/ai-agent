@@ -199,8 +199,8 @@ export default {
                 // 保留原始时间字段，供组件内部自动分组使用
                 createTime: item.createTime,
                 updateTime: item.updateTime,
-                // 保留置顶字段
-                top: item.top === true || item.top === 'true',
+                // 保留置顶字段（兼容 pinned 和 top 字段）
+                top: item.pinned === true || item.pinned === 'true' || item.top === true || item.top === 'true',
                 // 格式化显示时间（用于 label slot 中显示）
                 time: formatConversationTime(item.createTime)
               });
@@ -367,6 +367,16 @@ export default {
         time: msg.createTime
       };
 
+      // 将后端的 userEvaluation 映射为前端的 likeStatus
+      // 后端: "UPVOTE" | "DOWNVOTE" | "NO_EVAL"
+      // 前端: "like" | "dislike" | ""
+      let likeStatus = '';
+      if (msg.userEvaluation === 'UPVOTE') {
+        likeStatus = 'like';
+      } else if (msg.userEvaluation === 'DOWNVOTE') {
+        likeStatus = 'dislike';
+      }
+
       const ai = {
         key: `${msg.msgId || msg.chatId || 'ai'}-a`,
         role: 'ai',
@@ -374,7 +384,9 @@ export default {
         attachments: [], // 目前后端没给出 AI 侧附件，就先留空
         variant: 'filled',
         placement: 'start',
-        time: msg.createTime
+        time: msg.createTime,
+        msgId: msg.msgId, // 保存 msgId，用于评价接口
+        likeStatus // 保存点赞状态
       };
 
       return { user, ai };
@@ -504,6 +516,25 @@ export default {
       }
     },
 
+    /**
+     * 置顶/取消置顶会话
+     */
+    async pinSession(id, pinned) {
+      try {
+        const res = await TryApi.pinnedChat(this.$aiClient, { chatId: id, pinned });
+        if (res.code === 0) {
+          this.$message.success(pinned ? '置顶成功' : '已取消置顶');
+          this.fetchConversationList();
+        }
+      } catch (e) {
+        console.error('[TryAgent] pinSession failed', e);
+        this.$message.error('操作失败');
+      }
+    },
+
+    /**
+     * 重命名会话
+     */
     async renameSession(id, title) {
       try {
         const res = await TryApi.renameChatTitle(this.$aiClient, { chatId: id, title });
@@ -592,7 +623,8 @@ export default {
     /**
      * 处理消息操作（复制、编辑、点赞等）
      */
-    handleAction({ type, payload, index }) {
+    async handleAction({ type, payload, index }) {
+      
       console.log('Action Clicked:', type, payload, index);
       
       if (type === 'edit') {
@@ -602,12 +634,65 @@ export default {
           this.$message.success('内容已更新');
         }
       } else if (type === 'like' || type === 'dislike' || type === 'cancel-like') {
-        // 更新点赞状态
-        if (this.messages[index]) {
-          // 注意：Payload 里的 item 是复制品，我们需要更新 this.messages 里的原对象
-          // BubbleFooter 内部维护了 localLikeStatus，这里我们更新数据源以保持一致
-          this.$set(this.messages[index], 'likeStatus', type === 'cancel-like' ? '' : type);
-          // TODO: 调用后端接口保存点赞状态
+        const message = this.messages[index];
+        if (!message) return;
+        
+        // 只有 AI 的消息才能评价（placement === 'start' 表示 AI 消息）
+        if (message.placement !== 'start') {
+          return;
+        }
+
+        // 更新本地点赞状态
+        this.$set(message, 'likeStatus', type === 'cancel-like' ? '' : type);
+        console.log(this.chatId,message.msgId,'this.chatId,message.msgId')
+        // 调用评价接口
+        if (this.chatId && message.msgId) {
+         
+          try {
+            if (type === 'cancel-like') {
+              const res = await TryApi.evaluateMessage(this.$aiClient, {
+                chatId: this.chatId,
+                msgId: message.msgId,
+                userEvaluation: 'NO_EVAL'
+              });
+              if (res.code === 0) {
+                // 取消评价成功
+                console.log('[TryX] Cancel evaluation success');
+              } else {
+                // 取消评价失败，回滚本地状态
+                this.$set(message, 'likeStatus', '');
+                this.$message.error('取消评价失败，请重试');
+              }
+              return;
+            }
+            console.log(type,'typ111e')
+            const userEvaluation = type === 'like' ? 'UPVOTE' : 'DOWNVOTE';
+            const res = await TryApi.evaluateMessage(this.$aiClient, {
+              chatId: this.chatId,
+              msgId: message.msgId,
+              userEvaluation
+            });
+
+            if (res.code === 0) {
+              // 评价成功
+              console.log('[TryX] Evaluate message success:', res);
+            } else {
+              // 评价失败，回滚本地状态
+              this.$set(message, 'likeStatus', '');
+              this.$message.error('评价失败，请重试');
+            }
+          } catch (e) {
+            console.error('[TryX] Evaluate message failed:', e);
+            // 评价失败，回滚本地状态
+            this.$set(message, 'likeStatus', '');
+            this.$message.error('评价失败，请重试');
+          }
+        } else {
+          // 没有 chatId 或 msgId，可能是新消息，只更新本地状态
+          console.warn('[TryX] Cannot evaluate message: missing chatId or msgId', {
+            chatId: this.chatId,
+            msgId: message.msgId
+          });
         }
       }
     },

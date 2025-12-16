@@ -1,6 +1,6 @@
 // TryX 智能体 API 定义
 import { buildUrl } from '@/utils/api-prefix';
-
+const AGENT_ID = '1';
 export const TryApi = {
   /**
    * 获取 OSS 上传凭证
@@ -70,14 +70,45 @@ export const TryApi = {
   /**
    * 评价消息
    * @param {AIClient} client
-   * @param {Object} data - 评价参数
-   * @note URL 在 proxy.js 中为空，需要确认实际接口地址
+   * @param {Object} data - { chatId, msgId, userEvaluation: 'UPVOTE'|'DOWNVOTE'|'NO_EVAL' }
    */
   evaluateMessage(client, data) {
+    const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/evaluate', 'sse'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'sse', '/api'),
       method: 'post',
-      data
+      data: body
+    });
+  },
+
+  /**
+   * 重命名聊天
+   * @param {AIClient} client
+   * @param {Object} data - { chatId, title }
+   */
+  renameChatTitle(client, data) {
+    const { chatId, ...body } = data;
+    return client.send({
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'sse', '/api'),
+      method: 'post',
+      data: body
+    });
+  },
+
+  /**
+   * 聊天置顶/取消置顶
+   * @param {AIClient} client
+   * @param {Object} data - { chatId, pinned: boolean }
+   * @note pinned 参数在 query 中传递
+   */
+  pinnedChat(client, data) {
+    const { chatId, pinned } = data;
+    // pinned 参数在 query 中，手动拼接 URL
+    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'sse', '/api')}?pinned=${pinned}`;
+    return client.send({
+      url,
+      method: 'put',
+      data: {}
     });
   },
 

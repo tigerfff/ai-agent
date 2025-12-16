@@ -11,7 +11,7 @@
       ref="chatWindow"
       business-line="retail"
       :visible.sync="visible"
-      userId="4649d25a7be14f7bb1106219b3bec89c1"
+      userId="4649d25a7be14f7bb1106219b3bec89c"
     >
       <!-- 处理自定义智能体的渲染 -->
       <template #agent-view="{ agent }">
