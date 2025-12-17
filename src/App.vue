@@ -11,6 +11,7 @@
       ref="chatWindow"
       business-line="retail"
       :visible.sync="visible"
+      :extra-agents="customAgents"
       userId="4649d25a7be14f7bb1106219b3bec89c"
     >
       <!-- 处理自定义智能体的渲染 -->
@@ -42,42 +43,44 @@ export default {
     return {
       visible: false,
       // 父项目定义的额外智能体
-      // customAgents: [
-      //   {
-      //     // 基础参数
-      //     id: 'order-helper',
-      //     name: '订单助手',
-      //     miniName: '订单',
-      //     icon: '📦',  // 或图片 URL
-      //     homeIcon: '/path/to/icon.png',
-      //     description: '查询订单状态和物流信息',
-      //     tags: ['订单', '物流'],
+      customAgents: [
+        {
+          // 基础参数
+          id: 'order-helper',
+          name: '订单助手',
+          miniName: '订单',
+          icon: '📦',  // 或图片 URL
+          homeIcon: '/path/to/icon.png',
+          description: '查询订单状态和物流信息',
+          tags: ['订单', '物流'],
+
+          hideConversations: true,
           
-      //     // 类型
-      //     type: 'slot',  // 或 'external'
+          // 类型
+          type: 'slot',  // 或 'external'
           
-      //     // 如果是外部链接
-      //     getUrl: () => {
-      //       const origin = window.location.origin;
-      //       return `${origin}/order/index.html`;
-      //     },
+          // 如果是外部链接
+          getUrl: () => {
+            const origin = window.location.origin;
+            return `${origin}/order/index.html`;
+          },
           
-      //     // 权限配置（可选）
-      //     permission: {
-      //       serviceName: '订单服务',
-      //       permissionName: '订单权限码',
-      //       checkService: true,
-      //       checkPermission: true,
-      //       permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
-      //       permissionCode: 'ORDER',           // 要检查的具体权限码
-      //       serviceCheckApi: {
-      //         url: '/api/order/service/check',
-      //         method: 'get',
-      //         data: {}
-      //       }
-      //     }
-      //   }
-      // ]
+          // 权限配置（可选）
+          permission: {
+            serviceName: '订单服务',
+            permissionName: '订单权限码',
+            checkService: true,
+            checkPermission: true,
+            permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
+            permissionCode: 'ORDER',           // 要检查的具体权限码
+            serviceCheckApi: {
+              url: '/api/order/service/check',
+              method: 'get',
+              data: {}
+            }
+          }
+        }
+      ]
     };
   },
   methods: {

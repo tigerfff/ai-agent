@@ -58,12 +58,12 @@
             <div class="toggle-btn" v-if="isCollapsed" @click="isCollapsed = false" title="展开侧边栏">
               <img src="@/assets/svg/history.svg" alt="展开" class="icon-svg" />
             </div>
-            <div class="toggle-btn" v-if="isCollapsed" @click="handleNewChat" title="新建会话">
+            <div class="toggle-btn" v-show="!shouldHideConversations" v-if="isCollapsed" @click="handleNewChat" title="新建会话">
               <img src="@/assets/svg/add.svg" alt="新建会话" class="icon-svg" />
             </div>
           </div>
 
-          <div class="header-title" v-show="shouldHideConversations">
+          <div class="header-title" v-show="!shouldHideConversations">
             {{ currentConversationTitle }}
           </div>
 
