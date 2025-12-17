@@ -147,16 +147,12 @@ export const ALL_AGENTS = {
       serviceName: '巡查服务',        // 服务名称（用于提示）
       permissionName: 'SOP权限码',     // 权限名称（用于提示）
       
-      checkService: true,
-      serviceCheckConfig: {
-        url: '/inspect/checkService', // 检查巡查服务的接口 (待确认是否也需要替换为白名单接口)
-        method: 'get',
-        data: {}
-      },
+      checkService: false,
+      
 
       checkAuth: true,
-      permissionCodeKey: 'RETAIL_AUTH', // localStorage 中权限码的 key
-      permissionCode: '04007',          // 要检查的具体权限码
+      permissionCodeKey: 'authorities', // localStorage 中权限码的 key
+      permissionCode: 'RETAIL_MENU_031103',          // 要检查的具体权限码
     } 
   }
 };
