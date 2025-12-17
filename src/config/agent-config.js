@@ -138,6 +138,7 @@ export const ALL_AGENTS = {
     tags: ['SOP', '效率'],
     // 外部链接地址（使用当前域名）
     getUrl: () => {
+      window.localStorage.removeItem('Chain_IntelliInspect_addMode')
       // 根据当前域名动态构建 URL
       const origin = window.location.origin;
       return `${origin}/chain/index.html#/inspect/config/template`;
