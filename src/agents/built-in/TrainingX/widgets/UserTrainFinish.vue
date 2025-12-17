@@ -160,7 +160,7 @@ export default {
      */
     isTaskDisabled(task) {
       // 历史消息禁用
-      if (this.isHistoryDisabled) return true;
+      // if (this.isHistoryDisabled) return true;
       // 正在上传
       if (task.isUploading) return true;
       // 已上传

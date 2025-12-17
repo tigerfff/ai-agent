@@ -108,6 +108,7 @@ export default {
   created() {
     if(!this.data) {
       this.errorMessage = '数据不存在';
+      return
     };
     // 初始化数据
     this.formData.courseProjectId = this.data.courseProjectId || '';
