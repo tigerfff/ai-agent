@@ -4,14 +4,10 @@
  */
 
 // 变量定义
-@import './vars.scss';
-
-// Mixins
-@import './mixins.scss';
-
+@use './vars.scss';
 // 组件样式
-@import './message-box.scss';
-@import './select.scss';
+@use './message-box.scss';
+@use './select.scss';
 
 // 注意：组件内部的 <style> 标签样式会通过 Vue 组件自动处理
 // 这里只包含全局样式和工具类

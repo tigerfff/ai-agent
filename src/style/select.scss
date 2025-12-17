@@ -1,80 +1,83 @@
 // 全局 el-select 样式覆盖
+// 使用 .ai-component-wrapper 包裹，避免污染父组件样式
+// 需要在组件库根容器上添加此 class
 
-// 1. 修改背景色
-.el-select {
-  .el-input__inner {
-    background-color: rgba(232,246,255,1) !important;
-    border-color: rgba(232, 246, 255, 1) !important;
-    color: rgba(56,142,255,1);
-    border-radius: 4px;
-    &:hover {
+.ai-component-wrapper {
+  // 1. 修改背景色
+  .el-select {
+    .el-input__inner {
+      background-color: rgba(232,246,255,1) !important;
       border-color: rgba(232, 246, 255, 1) !important;
-    }
-    
-    &:focus {
-      border-color: rgba(232, 246, 255, 1) !important;
-    }
-  }
-  
-  // 2. 下拉按钮改为三角形
-  .el-input__suffix {
-    .el-input__suffix-inner {
-      // 隐藏默认的箭头图标（兼容多种可能的类名）
-      .el-select__caret,
-      .el-icon-arrow-up,
-      i {
-        display: none !important;
+      color: rgba(56,142,255,1);
+      border-radius: 4px;
+      &:hover {
+        border-color: rgba(232, 246, 255, 1) !important;
       }
       
-      // 使用伪元素创建三角形
-      &::after {
-        content: '';
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-top: 6px solid #909399;
-        margin-left: 8px;
-        transition: transform 0.3s;
-        vertical-align: middle;
+      &:focus {
+        border-color: rgba(232, 246, 255, 1) !important;
       }
     }
-  }
-  
-  // 下拉框打开时，三角形旋转
-  &.is-focus,
-  &.is-active {
-    .el-input__suffix-inner::after {
-      transform: rotate(180deg);
+    
+    // 2. 下拉按钮改为三角形
+    .el-input__suffix {
+      .el-input__suffix-inner {
+        // 隐藏默认的箭头图标（兼容多种可能的类名）
+        .el-select__caret,
+        .el-icon-arrow-up,
+        i {
+          display: none !important;
+        }
+        
+        // 使用伪元素创建三角形
+        &::after {
+          content: '';
+          display: inline-block;
+          width: 0;
+          height: 0;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 6px solid #909399;
+          margin-left: 8px;
+          transition: transform 0.3s;
+          vertical-align: middle;
+        }
+      }
     }
-  }
+    
+    // 下拉框打开时，三角形旋转
+    &.is-focus,
+    &.is-active {
+      .el-input__suffix-inner::after {
+        transform: rotate(180deg);
+      }
+    }
 
-  .el-select__tags {
-    .el-tag {
+    .el-select__tags {
+      .el-tag {
         display: flex;
         align-items: center;
         background: #FFF !important;
         border: none;
         color: rgba(56,142,255,1);
-    }
-    .el-tag .h-icon-close{
+      }
+      .el-tag .h-icon-close {
         height: 22px;
         width: 22px;
         color: rgba(56,142,255,1);
+      }
     }
-  }
 
-  .el-select-dropdown__item.hover {
-    background-color: #FFF;
+    .el-select-dropdown__item.hover {
+      background-color: #FFF;
+    }
   }
 }
 
-
+// Popper 样式（挂载到 body，通过 popper-class 控制）
 .ai-select-popper {
   .el-select-dropdown__item.hover {
     background-color: rgba(232,246,255,1) !important;
-    
   }
 
   .el-select-dropdown__item {
@@ -84,4 +87,3 @@
     fill: rgb(56, 142, 255) !important;
   }
 }
-

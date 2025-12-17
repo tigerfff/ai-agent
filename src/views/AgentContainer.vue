@@ -1,5 +1,5 @@
 <template>
-  <div class="agent-container-wrapper">
+  <div class="agent-container-wrapper ai-component-wrapper">
     <AILayout class="ai-agent-container" :class="{ 'is-mini': isMini }" :is-mini="isMini">
     <!-- 左侧导航 -->
     

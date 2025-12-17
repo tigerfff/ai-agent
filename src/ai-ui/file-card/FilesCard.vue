@@ -44,17 +44,17 @@
       >
         <slot name="image-preview-actions" :item="$props">
           <span class="view-icon">
-            {{ isVideo ? '▶' : '👁️' }}
+            {{ isVideo ? '▶' : '' }}
           </span>
         </slot>
       </div>
 
-      <!-- mini 模式下的圆形进度条遮罩 -->
+      <!-- mini 模式下的圆形进度条遮罩  -->
       <div 
         v-if="mode === 'mini' && status === 'uploading'"
         class="mini-progress-overlay"
       >
-        <div class="mini-progress-circle" :style="miniProgressStyle">
+        <div class="mini-progress-circle">
           <div class="mini-progress-inner">
             <span class="mini-progress-text">{{ percent }}%</span>
           </div>
@@ -96,7 +96,9 @@
       class="files-card-close"
       @click.stop="handleDelete"
     >
-      <slot name="del-icon" :item="$props">✕</slot>
+      <slot name="del-icon" :item="$props">
+        <i class="h-icon-close" style="font-size: 16px; color: #ccc;" />
+      </slot>
     </div>
     
     <!-- 进度条背景 -->
@@ -121,7 +123,7 @@ export default {
     description: { type: String, default: '' },
     url: { type: String, default: '' }, // 远程地址
     imgFile: { default: null }, // 本地 File 对象 (允许任何类型以兼容 File/Blob)
-    iconSize: { type: String, default: '42px' },
+    iconSize: { type: String, default: '64px' },
     iconColor: { type: String, default: '' },
     showDelIcon: { type: Boolean, default: false },
     maxWidth: { type: String, default: '236px' },
@@ -180,13 +182,13 @@ export default {
       return '';
     },
     // mini 模式圆形进度条样式
-    miniProgressStyle() {
-      const p = Math.max(0, Math.min(100, this.percent || 0));
-      const deg = (p / 100) * 360;
-      return {
-        backgroundImage: `conic-gradient(#409eff ${deg}deg, rgba(255, 255, 255, 0.15) 0deg)`
-      };
-    }
+    // miniProgressStyle() {
+    //   const p = Math.max(0, Math.min(100, this.percent || 0));
+    //   const deg = (p / 100) * 360;
+    //   return {
+    //     backgroundImage: `conic-gradient(#409eff ${deg}deg, rgba(255, 255, 255, 0.15) 0deg)`
+    //   };
+    // }
   },
   watch: {
     imgFile: {
@@ -276,18 +278,11 @@ export default {
     gap: 0;
     border-radius: 4px;
 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.05) !important;
-    }
-
     .files-card-close {
-      top: -6px;
-      right: -6px;
-      background: #f56c6c;
+      background: rgba(0, 0, 0, 0.5);
       color: #fff;
       width: 18px;
       height: 18px;
-      border: 2px solid #fff;
     }
   }
 
@@ -365,7 +360,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.7);
       z-index: 2;
 
       .mini-progress-circle {
@@ -380,14 +375,13 @@ export default {
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          background: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
 
           .mini-progress-text {
-            font-size: 10px;
-            color: #409eff;
+            font-size: 14px;
+            color: #FFF;
             font-weight: 500;
           }
         }
@@ -434,17 +428,17 @@ export default {
 
   .files-card-close {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 0;
+    right: 0;
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: 0 8px 0px 8px;
     background: rgba(0, 0, 0, 0.1);
     color: #909399;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 14px;
     cursor: pointer;
     z-index: 2;
     opacity: 0;

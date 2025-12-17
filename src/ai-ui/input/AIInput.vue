@@ -1231,11 +1231,11 @@ export default {
           font-size: 14px;
           line-height: 1.5;
           color: #303133;
-          max-height: 176px;
+          max-height: 110px;
           overflow-y: auto;
-          padding: 0;
           background: transparent;
           font-family: inherit;
+          padding: 0 16px;
 
           &::placeholder {
             color: #c0c4cc;

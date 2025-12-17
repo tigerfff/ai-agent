@@ -102,7 +102,7 @@ export default {
     },
     iconSize: {
       type: String,
-      default: '42px'
+      default: '64px'
     }
   },
   data() {
