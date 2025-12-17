@@ -213,7 +213,7 @@ export default {
   created() {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
-    // this.fetchConversationList();
+    this.fetchConversationList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
@@ -221,7 +221,7 @@ export default {
     // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
     // this.mockUserTrainFinish();
-    this.mockTrainResultUpload();
+    // this.mockTrainResultUpload();
   },
   methods: {
 

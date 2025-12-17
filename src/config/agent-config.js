@@ -28,7 +28,7 @@ export const BUSINESS_LINES = {
 // 所有可用的智能体定义
 export const ALL_AGENTS = {
   'inspect-x': {
-    id: 'inspect-x',
+    id: '3',
     name: '智慧巡查',
     miniName:'巡查',
     icon: inspectIcon,
@@ -86,7 +86,7 @@ export const ALL_AGENTS = {
   //   }
   // },
   'try-x': {
-    id: 'try-x',
+    id: '1',
     name: 'AI试用',
     miniName:'AI试用',
     icon: tryXIcon,
@@ -99,7 +99,7 @@ export const ALL_AGENTS = {
     permission: null 
   },
   'training-x': {
-    id: 'training-x',
+    id: '2',
     name: '员工培训助手',
     miniName:'培训',
     icon: trainingIcon,
