@@ -11,7 +11,7 @@ export const TrainingXApi = {
    */
   getOssToken(client) {
     return client.send({
-      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'sse', '/api'),
+      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'chaiin', '/api'),
       method: 'get'
     });
   },
@@ -23,7 +23,7 @@ export const TrainingXApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/list`, 'chaiin', '/api'),
       method: 'get',
       data
     });
@@ -37,7 +37,7 @@ export const TrainingXApi = {
   getHistory(client, sessionId) {
     console.log('sessionId', sessionId)
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`, 'chaiin', '/api'),
       method: 'get',
       data: { chatId: sessionId }
     });
@@ -50,7 +50,7 @@ export const TrainingXApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/delete`, 'chaiin', '/api'),
       method: 'delete',
       data
     });
@@ -63,7 +63,7 @@ export const TrainingXApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/add`, 'chaiin', '/api'),
       method: 'post',
       data
     });
@@ -77,7 +77,7 @@ export const TrainingXApi = {
   evaluateMessage(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'chaiin', '/api'),
       method: 'post',
       data: body
     });
@@ -91,7 +91,7 @@ export const TrainingXApi = {
   chatStream(client, { data, signal, onMessage, onComplete, onError, uploadType = 'img' }) {
     // V2 接口统一使用 app/stream/completion
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/app/stream/completion`, '', ''),
       method: 'POST',
       data,
       stream: true,
@@ -110,7 +110,7 @@ export const TrainingXApi = {
   renameChatTitle(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'chaiin', '/api'),
       method: 'post',
       data: body
     });
@@ -125,7 +125,7 @@ export const TrainingXApi = {
   pinnedChat(client, data) {
     const { chatId, pinned } = data;
     // pinned 参数在 query 中，手动拼接 URL
-    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'sse', '/api')}?pinned=${pinned}`;
+    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'chaiin', '/api')}?pinned=${pinned}`;
     return client.send({
       url,
       method: 'put',
@@ -152,7 +152,7 @@ export const TrainingXApi = {
   markAsRead(client, data) {
     const { chatId } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/read`, 'chaiin', '/api'),
       method: 'put',
       data: {}
     });

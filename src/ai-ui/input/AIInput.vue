@@ -1235,7 +1235,6 @@ export default {
           overflow-y: auto;
           background: transparent;
           font-family: inherit;
-          padding: 0 16px;
 
           &::placeholder {
             color: #c0c4cc;

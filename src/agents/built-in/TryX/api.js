@@ -8,7 +8,7 @@ export const TryApi = {
    */
   getOssToken(client) {
     return client.send({
-      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'sse'),
+      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'chaiin'),
       method: 'get'
     });
   },
@@ -20,7 +20,7 @@ export const TryApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/list', 'sse'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/list', 'chaiin'),
       method: 'post',
       data
     });
@@ -33,7 +33,7 @@ export const TryApi = {
    */
   getHistory(client, sessionId) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/history', 'sse'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/history', 'chaiin'),
       method: 'get',
       // 注意：AIClient.send 目前只会把 data 传给 httpAdapter，
       // 所以这里用 data，由 httpStub 在 GET 场景下自动转成 query string
@@ -48,7 +48,7 @@ export const TryApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/delete', 'sse'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/delete', 'chaiin'),
       method: 'get',
       data
     });
@@ -61,7 +61,7 @@ export const TryApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/add', 'sse'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/add', 'chaiin'),
       method: 'post',
       data
     });
@@ -75,7 +75,7 @@ export const TryApi = {
   evaluateMessage(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'chaiin', '/api'),
       method: 'post',
       data: body
     });
@@ -89,7 +89,7 @@ export const TryApi = {
   renameChatTitle(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'sse', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'chaiin', '/api'),
       method: 'post',
       data: body
     });
@@ -104,7 +104,7 @@ export const TryApi = {
   pinnedChat(client, data) {
     const { chatId, pinned } = data;
     // pinned 参数在 query 中，手动拼接 URL
-    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'sse', '/api')}?pinned=${pinned}`;
+    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'chaiin', '/api')}?pinned=${pinned}`;
     return client.send({
       url,
       method: 'put',
@@ -131,7 +131,7 @@ export const TryApi = {
       : '/inspect/chat/web/agent/chat/multimodal/stream/completion';
 
     return client.send({
-      url: buildUrl(client, apiPath, 'sse'),
+      url: buildUrl(client, apiPath, '', ''),
       method: 'POST',
       data,
       stream: true,
