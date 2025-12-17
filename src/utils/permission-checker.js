@@ -21,8 +21,9 @@ async function checkServiceWhitelist(config, userId, client) {
   if (!userId) return false; // 必须要有 userId
 
   try {
+    const requestUrl = typeof config.url === 'function' ? config.url(client) : config.url;
     const res = await client.send({
-      url: config.url,
+      url: requestUrl,
       method: config.method || 'get',
       data: { ...config.data, storeId: null } // 某些接口可能需要 storeId，这里先只传 data
     });

@@ -1,5 +1,6 @@
 import TrainingXAgent from '@/agents/built-in/TrainingX/index.vue';
 import TryAgent from '@/agents/built-in/TryX/index.vue';
+import { buildUrl } from '@/utils/api-prefix';
 
 // 导入图标资源
 import inspectIcon from '@images/inspect@3x.png';
@@ -115,7 +116,7 @@ export const ALL_AGENTS = {
       // 1. 检查服务购买 (白名单)
       checkService: true,
       serviceCheckConfig: {
-        url: '/v1/chain/patrol/patrolAgent/action/listLearnersByStore', // 白名单接口
+        url: (client) => buildUrl(client, '/chain/patrol/patrolAgent/action/listLearnersByStore', 'chain', '/api'), // 白名单接口
         method: 'get',
         data: {}
       },
