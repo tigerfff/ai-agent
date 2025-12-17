@@ -152,7 +152,7 @@ export const ALL_AGENTS = {
 
       checkAuth: true,
       permissionCodeKey: 'authorities', // localStorage 中权限码的 key
-      permissionCode: 'RETAIL_MENU_031103',          // 要检查的具体权限码
+      permissionCode: 'RETAIL_AUTH_04007',          // 要检查的具体权限码
     } 
   }
 };
