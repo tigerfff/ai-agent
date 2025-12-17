@@ -14,7 +14,7 @@ export function createDefaultSSEDriver(configProvider) {
     
     // 拼接完整 URL
     // 如果 url 已经是绝对路径 (http开头)，则不拼接 baseUrl
-    const fullUrl = url.startsWith('http') ? url : `${url}`;
+    const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
     // 准备 Headers
     const headers = {

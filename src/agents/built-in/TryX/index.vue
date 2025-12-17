@@ -309,8 +309,19 @@ export default {
           const list = [];
           rawList.forEach(item => {
             const pair = this.adaptMessage(item);
-            if (pair && pair.user) list.push(pair.user);
-            if (pair && pair.ai) list.push(pair.ai);
+            // 过滤无效的用户消息：有文本或有附件才显示
+            const hasUserText = pair.user.content && pair.user.content.trim();
+            const hasUserAttachments = pair.user.attachments && pair.user.attachments.length > 0;
+            if (hasUserText || hasUserAttachments) {
+              list.push(pair.user);
+            }
+
+            // 过滤无效的 AI 消息：有文本或有附件才显示
+            const hasAiText = pair.ai.content && pair.ai.content.trim();
+            const hasAiAttachments = pair.ai.attachments && pair.ai.attachments.length > 0;
+            if (hasAiText || hasAiAttachments) {
+              list.push(pair.ai);
+            }
           });
           this.messages = list;
         } 

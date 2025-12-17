@@ -1,5 +1,10 @@
 <template>
-  <div class="user-study-form">
+  <div class="user-study-form" :class="{ 'error': errorMessage }">
+    <!-- 错误提示 -->
+    <!-- <div v-if="errorMessage" class="error-card">
+      {{ errorMessage }}
+    </div> -->
+
     <div class="study-card">
       <!-- 左侧封面 -->
       <div class="card-cover">
@@ -11,8 +16,7 @@
         />
         <div v-else class="cover-placeholder">
           <div class="placeholder-text">
-            <div>{{ isProject ? '这里是培训项目' : '这里是培训课程' }}</div>
-            <div class="placeholder-name">{{ title || '名称示例' }}</div>
+            <div class="placeholder-name">{{ errorMessage ? '' :title }}</div>
           </div>
         </div>
       </div>
@@ -20,7 +24,7 @@
       <!-- 中间内容 -->
       <div class="card-content">
         <div class="card-title">{{ title }}</div>
-        <div class="card-duration" v-if="durationText">{{ durationText }}</div>
+        <div class="card-duration" v-if="durationText || errorMessage">{{ durationText || '无法学习' }}</div>
       </div>
 
       <!-- 右侧按钮 -->
@@ -53,6 +57,7 @@ export default {
     return {
       loading: false,
       detailInfo: {}, // 课程/项目详情
+      errorMessage: '', // 错误信息
       formData: {
         courseProjectId: '',
         type: '' // '1' = 项目, '2' = 课程
@@ -71,9 +76,9 @@ export default {
     // 标题
     title() {
       if (this.isProject) {
-        return this.detailInfo.projectName || '未知项目';
+        return this.detailInfo.projectName || this.errorMessage;
       } else {
-        return this.detailInfo.name || '未知课程';
+        return this.detailInfo.name || this.errorMessage;
       }
     },
     // 封面图片
@@ -101,12 +106,15 @@ export default {
     },
   },
   created() {
+    if(!this.data) {
+      this.errorMessage = '数据不存在';
+    };
     // 初始化数据
     this.formData.courseProjectId = this.data.courseProjectId || '';
     this.formData.type = this.data.type || '';
 
     // 如果有 courseProjectId，加载详情
-    if (this.formData.courseProjectId) {
+    if (this.formData.courseProjectId) { 
       this.fetchDetail();
     }
   },
@@ -123,6 +131,7 @@ export default {
       if (!this.formData.courseProjectId) return;
 
       this.loading = true;
+      this.errorMessage = '';
       try {
         let res;
 
@@ -136,9 +145,17 @@ export default {
 
         if (res && res.code === 0 && res.data) {
           this.detailInfo = res.data;
+        } else {
+          // 处理错误情况
+          if (res && res.message) {
+            this.errorMessage = res.message;
+          } else {
+            this.errorMessage = this.isProject ? '获取项目详情失败' : '获取课程详情失败';
+          }
         }
       } catch (e) {
         console.error('[UserStudyForm] Fetch detail failed:', e);
+        this.errorMessage = '请求发生异常';
         this.detailInfo = {};
       } finally {
         this.loading = false;
@@ -176,12 +193,22 @@ export default {
   width: 320px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
+  .error-card {
+    padding: 4px 12px;
+    background: #fff;
+    border-radius: 8px;
+    color: #ff4d4f;
+    font-size: 14px;
+    text-align: center;
+    border: 1px solid #ffccc7;
+  }
+
   .study-card {
     position: relative;
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 8px;
+    // padding: 8px;
     background: #fff;
     border-radius: 12px;
     transition: box-shadow 0.2s;
@@ -197,7 +224,7 @@ export default {
       height: 56px;
       border-radius: 8px;
       overflow: hidden;
-      background: #f5f5f5;
+      background: rgba($color: #000000, $alpha: .1);
 
       .cover-img {
         width: 100%;
@@ -208,7 +235,6 @@ export default {
       .cover-placeholder {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -297,5 +323,14 @@ export default {
     }
   }
 }
-</style>
 
+.error{
+  // width: 200px;
+  opacity: 0.7;
+  cursor: not-allowed;
+
+  .study-card .card-content .card-title ,.study-card .card-content .card-duration {
+    color: rgba($color: #000000, $alpha: 0.2) !important;
+  }
+}
+</style>

@@ -213,13 +213,13 @@ export default {
   created() {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
-    this.fetchConversationList();
+    // this.fetchConversationList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
     // this.mockTrainPlanForm();
-    // this.mockUserStudyForm();
+    this.mockUserStudyForm();
     // this.mockUserTrainFinish();
     // this.mockTrainResultUpload();
   },
@@ -559,8 +559,20 @@ export default {
           const list = [];
           rawList.forEach(item => {
             const pair = this.adaptMessage(item);
-            if (pair && pair.user) list.push(pair.user);
-            if (pair && pair.ai) list.push(pair.ai);
+            
+            // 过滤无效的用户消息：有文本或有附件才显示
+            const hasUserText = pair.user.content && pair.user.content.trim();
+            const hasUserAttachments = pair.user.attachments && pair.user.attachments.length > 0;
+            if (hasUserText || hasUserAttachments) {
+              list.push(pair.user);
+            }
+
+            // 过滤无效的 AI 消息：有文本或有附件才显示
+            const hasAiText = pair.ai.content && pair.ai.content.trim();
+            const hasAiAttachments = pair.ai.attachments && pair.ai.attachments.length > 0;
+            if (hasAiText || hasAiAttachments) {
+              list.push(pair.ai);
+            }
           });
           this.messages = list;
         } 
@@ -908,12 +920,7 @@ export default {
      * 临时 Mock 方法：添加测试用户学习表单消息（可随时删除）
      */
     mockUserStudyForm() {
-      const mockContent = `<ymform:user_study desc="以下是用户需要学习的内容">
-{
-  "courseProjectId": "43dbb90d1ba94f4f844ea71b89b4438a",
-  "type": "项目"
-}
-</ymform:user_study>`;
+      const mockContent = "您好，yangfucheng6：\n由于您的门店在2025-12-17的检查过程中，发生问题，总部推送您如下内容进行学习，请学习。\n<ymform:user_study desc=\"以下是用户需要学习的内容\">\n {\n    \"courseProjectId\":\"b190b38fc794479588c51723f504b1018\",\n    \"type\":1\n }\n<ymform:user_study>";
 
       const mockMsg = {
         key: 'mock-user-study-' + Date.now(),
