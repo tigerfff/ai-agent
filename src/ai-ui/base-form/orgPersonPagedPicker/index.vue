@@ -52,12 +52,16 @@
 </template>
 
 <script>
-import { orgPersonPagedPickerApi } from './api';
-
 import OrgPersonPagedPicker from './OrgPersonPagedPicker.vue';
 
 export default {
   name: 'PersonSelect',
+  inject: {
+    // 从父组件注入白名单获取方法（可选）
+    getWhiteUserList: {
+      default: () => () => []
+    }
+  },
   components: {
     OrgPersonPagedPicker
   },
@@ -130,7 +134,6 @@ export default {
     return {
       dialogVisible: false,
       selectedUsers: [], // 选中的用户列表
-      whiteUserList: [], // 白名单用户列表
       tempSelectedUsers: [] // 临时选中的用户（用于取消操作）
     };
   },
@@ -144,15 +147,17 @@ export default {
         // 当通过 el-select 删除标签时，会触发这个 setter
         // 但我们已经通过 @remove-tag 处理了，这里可以留空
       }
+    },
+    // 白名单用户列表（从父组件注入）
+    whiteUserList() {
+      return this.getWhiteUserList();
     }
   },
   watch: {
     value: {
-      async handler(newVal) {
+      handler(newVal) {
         if (Array.isArray(newVal)) {
           this.selectedUsers = [...newVal];
-          const { data } = await orgPersonPagedPickerApi.listLearnersByStore(this.$aiClient, { storeId: '' });
-          this.whiteUserList = data;
         } else {
           this.selectedUsers = [];
         }

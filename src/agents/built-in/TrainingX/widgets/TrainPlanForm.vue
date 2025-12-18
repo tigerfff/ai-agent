@@ -274,11 +274,8 @@ export default {
         this.formData.dateRange = [];
         this.detailLoaded = false; // 重置详情加载状态
 
-        // 初始化白名单用户列表（不依赖 data）
+        // 根据 storeId 获取门店的学员列表（用于初始化和过滤）
         await this.getListLearnersByStore();
-        
-        // 初始化选中的用户（临时使用 userIds，后续会通过接口获取完整用户信息）
-        this.selectedUsers = this.data.userIds || [];
 
         // 如果有项目/课程ID，加载详情
         if (this.formData.courseProjectId) {
@@ -297,11 +294,23 @@ export default {
     selectable (row, index) {
       return true
     },
-    // TOOD 等后端给个新接口查人名,这个是全量数据，用于去
+    /**
+     * 根据 storeId 获取门店的学员列表
+     * 注意：这里传入的是具体的 storeId，不是全局白名单
+     */
     async getListLearnersByStore() {
-      const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { storeId: this.formData.storeId })
-      this.formData.userIds = data
-      this.loadInitialUsers()
+      try {
+        const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { 
+          storeId: this.formData.storeId 
+        });
+        // 使用门店学员列表作为初始用户ID
+        this.formData.userIds = data || [];
+        // 加载用户详细信息
+        this.loadInitialUsers();
+      } catch (e) {
+        console.error('[TrainPlanForm] Get learners by store failed:', e);
+        this.formData.userIds = [];
+      }
     },
     formatDate(stringDate) {
       const date = new Date(stringDate);

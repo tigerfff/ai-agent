@@ -179,7 +179,16 @@ export default {
         title: '员工培训助手',
         description: '我可以帮你推荐培训内容、制定员工培训计划、检查培训结果，有培训问题随时找我哦～',
         prompts: [] // 从接口获取
-      }
+      },
+      
+      // 白名单用户列表（全局共享）
+      whiteUserList: []
+    };
+  },
+  provide() {
+    return {
+      // 提供获取白名单的方法
+      getWhiteUserList: () => this.whiteUserList
     };
   },
   watch: {
@@ -213,13 +222,15 @@ export default {
   },
   created() {
     this.initUploader();
+    // 获取白名单用户列表（全局共享，只调用一次）
+    this.fetchWhiteUserList();
     // 主动获取列表并通知父组件更新 Sidebar
-    this.fetchConversationList();
+    // this.fetchConversationList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
-    // this.mockTrainPlanForm();
+    this.mockTrainPlanForm();
     // this.mockUserStudyForm();
     // this.mockUserTrainFinish();
     // this.mockTrainResultUpload();
@@ -246,6 +257,19 @@ export default {
 
       this.handleWidgetSend(message);
     },
+    /**
+     * 获取白名单用户列表（全局共享）
+     */
+    async fetchWhiteUserList() {
+      try {
+        const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { storeId: '' });
+        this.whiteUserList = data || [];
+      } catch (e) {
+        console.error('[TrainingX] Fetch white user list failed:', e);
+        this.whiteUserList = [];
+      }
+    },
+
     /**
      * 获取智能体推荐的提示词
      */
