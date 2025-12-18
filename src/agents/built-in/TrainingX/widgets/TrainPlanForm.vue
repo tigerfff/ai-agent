@@ -6,7 +6,7 @@
     <div class="form-body">
       <!-- 学习项目 -->
       <div class="form-item">
-        <div class="label">学习项目</div>
+        <div class="label">学习{{ isProject ? '项目' : '课程' }}</div>
         <div class="content">
           <AILoadSelect
             v-if="!isConfirmed && !isDisabled"
@@ -18,7 +18,7 @@
             :get-option-value="getOptionValue"
             :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
             :disabled="isDisabled"
-            style="width: 50%"
+            style="width: 80%"
             @change="handleProjectChange"
             @input="handleProjectInput"
           />
@@ -38,7 +38,7 @@
             collapseTags
             :disabled="isDisabled"
             :selectable="selectable"
-            style="width: 50%"
+            style="width: 80%"
             @change="handleUsersChange"
           />
           <div v-else class="text-display">{{ userNames }}</div>
@@ -56,7 +56,12 @@
 
     <!-- 底部按钮 -->
     <div class="form-footer" >
-      <div class="confirm-btn" @click="handleConfirm" v-if="!isConfirmed && !isDisabled">
+      <div 
+        class="confirm-btn" 
+        :class="{ 'is-disabled': !canConfirm }"
+        @click="handleConfirm" 
+        v-if="!isConfirmed && !isDisabled"
+      >
         <span class="icon">
           <img src="@/assets/svg/star-white.svg" alt="" width="24px">
         </span>
@@ -113,6 +118,7 @@ export default {
         dateRange: [] // [start, end]
       },
       detailInfo: {}, // 课程/项目详情
+      detailLoaded: false, // 详情是否成功加载（用于权限判断）
       selectedUsers: [], // 选中的用户对象数组
       selectedProjectOptions: [], // 已选中的项目选项（用于 AILoadSelect 显示）
       whiteUserIds: [], // 白名单用户ID列表（用于 selectable）
@@ -122,6 +128,13 @@ export default {
   computed: {
     isDisabled() {
       return this.isHistoryDisabled || this.isConfirmed;
+    },
+    // 是否可以确认执行（必须选择了项目/课程和学员，且详情加载成功）
+    canConfirm() {
+      const hasProject = !!this.formData.courseProjectId;
+      const hasUsers = this.formData.userIds && this.formData.userIds.length > 0;
+      // 必须同时满足：有项目/课程ID、详情加载成功、有学员
+      return hasProject && this.detailLoaded && hasUsers;
     },
     // 是否为项目类型
     isProject() {
@@ -144,7 +157,7 @@ export default {
       const start = this.formData.dateRange[0];
       const end = this.formData.dateRange[1];
       
-      return this.formData.period ? `${this.formData.period}天` : `${start}-${end}`;
+      return this.formData.period ? `${this.formData.period}天` : `${start} - ${end}`;
     },
     selectedProjectName() {
       if (!this.formData.courseProjectId) return '';
@@ -249,6 +262,7 @@ export default {
       this.formData.storeId = this.data.storeId || '';
       this.formData.period = 0;
       this.formData.dateRange = [];
+      this.detailLoaded = false; // 重置详情加载状态
 
       // 初始化白名单用户列表（不依赖 data）
       this.getListLearnersByStore();
@@ -273,6 +287,7 @@ export default {
     async getListLearnersByStore() {
       const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { storeId: this.formData.storeId })
       this.formData.userIds = data
+      this.whiteUserIds = data
       this.loadInitialUsers()
     },
     formatDate(stringDate) {
@@ -280,19 +295,22 @@ export default {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
       const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      return `${y}/${m}/${d}`;
     },
     async fetchDetail() {
       this.loading = true;
+      this.detailLoaded = false; // 重置状态
       try {
         let res;
         if (this.isProject) {
           res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
-          this.formData.period = res.data.period;
-          this.formData.dateRange = [
-            this.formatDate(res.data.startDate),
-            this.formatDate(res.data.endDate)
-          ];
+          if (res && res.data) {
+            this.formData.period = res.data.period;
+            this.formData.dateRange = [
+              this.formatDate(res.data.startDate),
+              this.formatDate(res.data.endDate)
+            ];
+          }
         } else {
           // 默认课程
           res = await TrainingXApi.getCourseDetail(this.$aiClient, this.formData.courseProjectId);
@@ -300,10 +318,16 @@ export default {
 
         if (res && res.data) {
           this.detailInfo = res.data;
+          this.detailLoaded = true; // 详情加载成功
+        } else {
+          // 接口返回但没有数据，视为失败
+          this.detailInfo = { name: '获取失败' };
+          this.detailLoaded = false;
         }
       } catch (e) {
         console.error('Fetch detail failed:', e);
         this.detailInfo = { name: '获取失败' };
+        this.detailLoaded = false; // 详情加载失败（可能是权限问题）
       } finally {
         this.loading = false;
       }
@@ -449,6 +473,8 @@ export default {
       if (selectedItem) {
         // 更新选中选项列表
         this.selectedProjectOptions = [selectedItem];
+        // 重置详情加载状态
+        this.detailLoaded = false;
         // 更新详情信息：type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           this.detailInfo = {
@@ -516,6 +542,12 @@ export default {
     },
    // TrainPlanForm.vue - handleConfirm 方法
     handleConfirm() {
+      // 验证：必须选择了项目/课程和学员
+      if (!this.canConfirm) {
+        console.warn('[TrainPlanForm] Cannot confirm: missing project/course or users');
+        return;
+      }
+
       this.isConfirmed = true;
       
       // 检查是否修改过
@@ -562,6 +594,9 @@ export default {
     .form-body {
       opacity: 0.8;
       pointer-events: none; // 禁止交互
+      .form-item {
+        align-items: flex-start !important;
+      }
     }
   }
 
@@ -627,8 +662,14 @@ export default {
       gap: 4px;
       transition: opacity 0.2s;
 
-      &:hover {
+      &:hover:not(.is-disabled) {
         opacity: 0.9;
+      }
+
+      &.is-disabled {
+        background: #d3d3d3;
+        cursor: not-allowed;
+        opacity: 0.6;
       }
 
       .icon {

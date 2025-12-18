@@ -6,7 +6,26 @@
   >
     <!-- 单张大图模式 -->
     <div v-if="cardMode === 'single-image'" class="single-image-view">
+      <!-- 视频：展示首帧 + 播放按钮 -->
+      <div 
+        v-if="normalizedFileList[0].type === 'video'"
+        class="video-cover-wrapper"
+        @click="onPreview(0)"
+      >
+        <img 
+          :src="getVideoCover(normalizedFileList[0])"
+          class="limit-img"
+        />
+        <div class="play-icon-overlay">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 图片：直接展示 -->
       <img 
+        v-else
         :src="value[0].url || value[0].localUrl" 
         class="limit-img"
         @click="onPreview(0)"
@@ -72,6 +91,7 @@
 <script>
 import FilesCard from '@/ai-ui/file-card/FilesCard.vue';
 import AttachmentsPreview from './AttachmentsPreview.vue';
+import { getVideoFrameUrl } from '@/utils/index.js';
 
 export default {
   name: 'AIAttachments',
@@ -262,6 +282,12 @@ export default {
     
     closePreview() {
       this.previewVisible = false;
+    },
+    getVideoCover(file) {
+      if (file.url) {
+        return getVideoFrameUrl(file.url, 0, 0, 0, 'jpg');
+      }
+      return file.localUrl || '';
     }
   }
 };
@@ -278,6 +304,39 @@ export default {
     display: inline-block;
     vertical-align: top;
     
+    .video-cover-wrapper {
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+
+      .play-icon-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 48px;
+        height: 48px;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        transition: all 0.2s;
+        pointer-events: none;
+
+        svg {
+          margin-left: 2px; /* 视觉修正 */
+        }
+      }
+
+      &:hover .play-icon-overlay {
+        background: rgba(0, 0, 0, 0.6);
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+    }
+
     .limit-img {
       max-width: calc(var(--chat-max-width, 960px) / 2);
       max-height: calc(var(--chat-max-width, 960px) / 2);

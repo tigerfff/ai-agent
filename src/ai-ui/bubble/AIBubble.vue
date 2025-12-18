@@ -176,10 +176,19 @@ export default {
       return false;
     },
 
+    // 判断是否为单张视频
+    isSingleVideo() {
+      if (!this.attachments || this.attachments.length !== 1) return false;
+      const file = this.attachments[0];
+      if (file.type && file.type.startsWith('video')) return true;
+      if (file.name && /\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v)$/i.test(file.name)) return true;
+      return false;
+    },
+
     // 计算附件展示配置
     attachmentConfig() {
-      // 规则 1: 单张图片 -> 大图模式
-      if (this.isSingleImage) {
+      // 规则 1: 单张图片或视频 -> 大图模式
+      if (this.isSingleImage || this.isSingleVideo) {
         return {
           mode: 'single-image',
           iconSize: '', 
