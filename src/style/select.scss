@@ -71,6 +71,81 @@
     .el-select-dropdown__item.hover {
       background-color: #FFF;
     }
+
+    // 禁用状态样式
+    &.is-disabled {
+      opacity: 0.7 !important;
+      
+      .el-input__inner {
+        cursor: not-allowed !important;
+        background-color: #f5f7fa !important;
+        color: #c0c4cc !important;
+      }
+      
+      .el-input__suffix {
+        cursor: not-allowed !important;
+        
+        .el-input__suffix-inner::after {
+          border-top-color: #c0c4cc !important;
+        }
+      }
+      
+      .el-select__tags {
+        cursor: not-allowed !important;
+        
+        .el-tag {
+          cursor: not-allowed !important;
+          background-color: #f0f2f5 !important;
+          color: #909399 !important;
+          
+          .h-icon-close {
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            color: #909399 !important;
+          }
+        }
+      }
+    }
+
+    // 兼容禁用状态添加到 .el-input 上的情况
+    .el-input.is-disabled {
+      opacity: 0.7 !important;
+      
+      .el-input__inner {
+        cursor: not-allowed !important;
+        // background-color:  !important;
+        color: #c0c4cc !important;
+        opacity: .7 !important;
+      }
+      
+      .el-input__suffix {
+        cursor: not-allowed !important;
+        
+        .el-input__suffix-inner::after {
+          border-top-color: #c0c4cc !important;
+        }
+      }
+    }
+  }
+
+  // 单独处理 select 标签区域的禁用状态
+  .el-select.is-disabled,
+  .el-select .el-input.is-disabled {
+    .el-select__tags {
+      cursor: not-allowed !important;
+      
+      .el-tag {
+        cursor: not-allowed !important;
+        background-color: #f0f2f5 !important;
+        color: #909399 !important;
+        
+        .h-icon-close {
+          cursor: not-allowed !important;
+          pointer-events: none !important;
+          color: #909399 !important;
+        }
+      }
+    }
   }
 }
 

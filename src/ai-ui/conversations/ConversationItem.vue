@@ -35,9 +35,9 @@
           </div>
         </slot>
       </div>
-      
+      <!-- {{ item }} -->
       <!-- 未读红点（右上角） -->
-      <span v-if="item.hasUnread" class="unread-dot"></span>
+      <span v-if="item.isUnread" class="unread-dot"></span>
 
       <!-- Menu / Suffix -->
       <div class="item-menu" v-if="showMenu" @click.stop @mouseenter="menuVisible = true" @mouseleave="handleMenuMouseLeave">

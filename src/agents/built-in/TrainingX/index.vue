@@ -392,9 +392,9 @@ export default {
                 createTime: item.createTime,
                 updateTime: item.updateTime,
                 // 保留置顶字段
-                top: item.pinned === true || item.pinned === 'true' || item.top === true || item.top === 'true', // 兼容 pinned 和 top 字段
+                top: item.pinned === true || item.pinned === 'true',
                 // 适配未读状态
-                isUnread: item.hasUnread === 'true' || item.hasUnread === true,
+                isUnread: !item.hasRead ,
                 // 格式化显示时间（用于 label slot 中显示）
                 time: formatConversationTime(item.createTime)
               });
@@ -560,11 +560,12 @@ export default {
           const list = [];
           rawList.forEach(item => {
             const pair = this.adaptMessage(item);
-            
-            // 过滤无效的用户消息：有文本或有附件才显示
+
+            // 过滤无效的用户消息：有文本或有附件才显示，且 promptVisible 不为 false
             const hasUserText = pair.user.content && pair.user.content.trim();
             const hasUserAttachments = pair.user.attachments && pair.user.attachments.length > 0;
-            if (hasUserText || hasUserAttachments) {
+            const shouldShowUserMessage = item.promptVisible !== false; // 默认显示，只有明确为 false 时才隐藏
+            if ((hasUserText || hasUserAttachments) && shouldShowUserMessage) {
               list.push(pair.user);
             }
 

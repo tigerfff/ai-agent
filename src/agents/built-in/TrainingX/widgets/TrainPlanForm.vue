@@ -1,5 +1,5 @@
 <template>
-  <div class="train-plan-form" :class="{ 'is-disabled': isDisabled, 'is-loading': loading }">
+  <div class="train-plan-form" :class="{ 'is-loading': loading }">
     <!-- Loading 蒙层 -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
@@ -19,7 +19,7 @@
         <div class="label">学习{{ isProject ? '项目' : '课程' }}</div>
         <div class="content">
           <AILoadSelect
-            v-if="!isConfirmed && !isDisabled"
+            v-if="!isConfirmed"
             v-model="formData.courseProjectId"
             :remote-method="handleProjectSearch"
             :selected-options="selectedProjectOptions"
@@ -27,7 +27,7 @@
             :get-option-label="getOptionLabel"
             :get-option-value="getOptionValue"
             :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
-            :disabled="isDisabled || loading"
+            :disabled="isHistoryDisabled || loading"
             style="width: 80%"
             @change="handleProjectChange"
             @input="handleProjectInput"
@@ -41,12 +41,12 @@
         <div class="label">培训学员</div>
         <div class="content">
           <PersonSelect
-            v-if="!isConfirmed && !isDisabled"
+            v-if="!isConfirmed"
             v-model="selectedUsers"
             dialogTitle="选择学员"
             placeholder="请选择"
             collapseTags
-            :disabled="isDisabled || loading"
+            :disabled="isHistoryDisabled || loading"
             :selectable="selectable"
             style="width: 80%"
             @change="handleUsersChange"
@@ -70,7 +70,7 @@
         class="confirm-btn" 
         :class="{ 'is-disabled': !canConfirm || loading }"
         @click="handleConfirm" 
-        v-if="!isConfirmed && !isDisabled"
+        v-if="!isConfirmed && !isHistoryDisabled"
       >
         <span class="icon">
           <img src="@/assets/svg/star-white.svg" alt="" width="24px">
@@ -136,9 +136,6 @@ export default {
     };
   },
   computed: {
-    isDisabled() {
-      return this.isHistoryDisabled || this.isConfirmed;
-    },
     // 是否可以确认执行（必须选择了项目/课程和学员，且详情加载成功）
     canConfirm() {
       const hasProject = !!this.formData.courseProjectId;
@@ -677,15 +674,6 @@ export default {
     }
   }
 
-  &.is-disabled {
-    .form-body {
-      opacity: 0.8;
-      pointer-events: none; // 禁止交互
-      .form-item {
-        align-items: flex-start !important;
-      }
-    }
-  }
 
   .title {
     font-weight: bold;

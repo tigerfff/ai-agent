@@ -549,7 +549,6 @@ export default {
     background-color: rgba(232, 246, 255, 1);
     border: 1px solid rgba(232, 246, 255, 1);
     border-radius: 4px;
-    cursor: pointer;
     transition: all 0.3s;
     min-height: 32px;
     display: flex;
@@ -564,8 +563,8 @@ export default {
     }
 
     &.is-disabled {
-      background-color: #f5f7fa;
-      border-color: #e4e7ed;
+      background-color: rgba(232, 246, 255, 1);
+      border-color: rgba(232, 246, 255, 1);
       cursor: not-allowed;
       opacity: 0.6;
     }

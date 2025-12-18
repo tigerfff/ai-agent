@@ -342,6 +342,36 @@ export default {
       cursor: pointer;
       pointer-events: auto;
     }
+    
+    // 禁用状态样式
+    ::v-deep.is-disabled {
+      opacity: 0.7 !important;
+      
+      .el-input__inner {
+        cursor: not-allowed !important;
+        background-color: #f5f7fa;
+        color: #c0c4cc;
+      }
+      
+      .el-input__suffix {
+        cursor: not-allowed;
+      }
+      
+      .el-select__tags {
+        cursor: not-allowed;
+      }
+      
+      .el-tag {
+        cursor: not-allowed;
+        background-color: #f0f2f5;
+        color: #909399;
+        
+        .el-tag__close {
+          cursor: not-allowed;
+          pointer-events: none;
+        }
+      }
+    }
   }
 }
 </style>

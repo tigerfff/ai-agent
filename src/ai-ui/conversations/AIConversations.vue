@@ -5,7 +5,6 @@
     <div class="conversations-list-wrapper">
       <el-scrollbar ref="scrollbar" overflow-x="hidden" wrap-class="conversations-scrollbar">
         <div class="conversations-content">
-          
           <!-- 模式 A: 分组展示 -->
           <template v-if="groupable">
             <div 
@@ -39,7 +38,7 @@
               </div>
             </div>
           </template>
-
+         
           <!-- 模式 B: 扁平展示 -->
           <template v-else>
             <ConversationItem
