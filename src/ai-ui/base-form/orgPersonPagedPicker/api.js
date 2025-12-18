@@ -15,6 +15,15 @@ export const orgPersonPagedPickerApi = {
     });
   },
 
+  // 通过storeId查询人
+  listLearnersByStore(client, data = {}) {
+    return client.send({
+      url: buildUrl(client, `/chain/patrol/patrolAgent/action/listLearnersByStore`, 'chain', '/api'),
+      method: 'get',
+      data
+    });
+  },
+
 
   // 获取职位列表
   getRoleList(client,data = {}) {

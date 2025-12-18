@@ -295,5 +295,18 @@ export const TrainingXApi = {
       method: 'get',
     });
   },
+
+  /**
+   * 获取智能体红点提示
+   * @param {AIClient} client
+   * @param {Object} data { agentIds: [] }
+   */
+  getAgentTip(client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/chat/web/agentV2/actions/getAgentTip', 'chain', '/api'),
+      method: 'POST',
+      data
+    });
+  }
   
 };

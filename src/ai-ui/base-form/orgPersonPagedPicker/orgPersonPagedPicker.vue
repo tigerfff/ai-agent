@@ -154,7 +154,11 @@
       selectable: {
         type: Function,
         default: null
-      }
+      },
+      userList: {
+        type: Array,
+        default: () => [],
+      },
     },
     data() {
       return {
@@ -414,6 +418,7 @@
           positionId: positionId,
           containSubOrgUsers: this.containSubOrgUsers,
           filterAdmin: this.filterAdmin,
+          userIds: this.userList
           // ban: this.$route.path.includes('inspect') ? false : undefined,
         };
       },

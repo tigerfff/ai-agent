@@ -15,8 +15,8 @@
       @visible-change="handleVisibleChange"
     >
       <el-option
-        v-for="user in selectedUsers"
-        :key="getUserId(user)"
+        v-for="(user, index) in selectedUsers"
+        :key="getUserId(user) || `user-${index}`"
         :label="getUserName(user)"
         :value="getUserId(user)"
       />
@@ -40,6 +40,7 @@
         :value-key="valueKey"
         :label-key="labelKey"
         :selectable="selectable"
+        :userList="whiteUserList"
         @input="handlePickerChange"
       />
       <div slot="footer" class="dialog-footer">
@@ -51,6 +52,8 @@
 </template>
 
 <script>
+import { orgPersonPagedPickerApi } from './api';
+
 import OrgPersonPagedPicker from './OrgPersonPagedPicker.vue';
 
 export default {
@@ -127,6 +130,7 @@ export default {
     return {
       dialogVisible: false,
       selectedUsers: [], // 选中的用户列表
+      whiteUserList: [], // 白名单用户列表
       tempSelectedUsers: [] // 临时选中的用户（用于取消操作）
     };
   },
@@ -144,9 +148,11 @@ export default {
   },
   watch: {
     value: {
-      handler(newVal) {
+      async handler(newVal) {
         if (Array.isArray(newVal)) {
           this.selectedUsers = [...newVal];
+          const { data } = await orgPersonPagedPickerApi.listLearnersByStore(this.$aiClient, { storeId: '' });
+          this.whiteUserList = data;
         } else {
           this.selectedUsers = [];
         }

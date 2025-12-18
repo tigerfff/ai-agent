@@ -131,7 +131,6 @@ export default {
       detailLoaded: false, // 详情是否成功加载（用于权限判断）
       selectedUsers: [], // 选中的用户对象数组
       selectedProjectOptions: [], // 已选中的项目选项（用于 AILoadSelect 显示）
-      whiteUserIds: [], // 白名单用户ID列表（用于 selectable）
       _lastInitKey: '' // 用于防止重复初始化的标记
     };
   },
@@ -296,13 +295,12 @@ export default {
     },
 
     selectable (row, index) {
-      return this.whiteUserIds.includes(row.userId)
+      return true
     },
     // TOOD 等后端给个新接口查人名,这个是全量数据，用于去
     async getListLearnersByStore() {
       const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { storeId: this.formData.storeId })
       this.formData.userIds = data
-      this.whiteUserIds = data
       this.loadInitialUsers()
     },
     formatDate(stringDate) {

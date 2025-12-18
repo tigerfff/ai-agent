@@ -41,6 +41,8 @@
           </div>
           <div class="card-desc">{{ agent.description || '暂无描述' }}</div>
         </div>
+
+        <div v-if="agent.hasRedDot" class="red-dot"></div>
       </div>
     </div>
     </div>
@@ -191,6 +193,19 @@ export default {
     border: 1px solid #eee;
     display: flex;
     flex-direction: column;
+    position: relative;
+
+    .red-dot {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 12px;
+      height: 12px;
+      background-color: #ff4d4f;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      z-index: 10;
+    }
 
     &:hover {
       box-shadow: 0 8px 24px rgba(56, 142, 255, 0.2);
@@ -253,6 +268,7 @@ export default {
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative; // 确保红点定位
 
       img {
         width: 100%;
@@ -265,6 +281,8 @@ export default {
         align-items: center;
         justify-content: center;
       }
+
+     
     }
 
     .card-info {

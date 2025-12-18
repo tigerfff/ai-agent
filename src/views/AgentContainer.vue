@@ -173,6 +173,7 @@ import Home from './Home.vue';
 import { getAgentsByBusinessLine, getCurrentBusinessLine } from '@/config/agent-config';
 import { formatConversationTime } from '@/utils';
 import { checkAgentPermission, PERMISSION_STATUS } from '@/utils/permission-checker';
+import { TrainingXApi } from '@/agents/built-in/TrainingX/api';
 import AIEmpty from '@/ai-ui/empty/AIEmpty.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 
@@ -247,7 +248,8 @@ export default {
       renameLoading: false,
       // 权限相关
       permissionStatus: null,      // 当前智能体的权限状态
-      checkingPermission: false    // 是否正在检查权限
+      checkingPermission: false,    // 是否正在检查权限
+      agentTips: {} // 智能体红点状态
     };
   },
   computed: {
@@ -264,9 +266,19 @@ export default {
     builtInAgents() {
       return getAgentsByBusinessLine(this.currentBusinessLine);
     },
-    // 合并所有智能体
+    // 合并所有智能体，并注入红点状态
     allAgents() {
-      return [...this.builtInAgents, ...this.extraAgents];
+      const agents = [...this.builtInAgents, ...this.extraAgents];
+      return agents.map(agent => {
+        // 检查红点状态
+        // agentTips 格式: { "agentId": true/false }
+        const hasRedDot = this.agentTips[agent.id] === true; 
+        
+        return {
+          ...agent,
+          hasRedDot
+        };
+      });
     },
     currentAgent() {
       return this.allAgents.find(a => a.id === this.currentAgentId);
@@ -626,9 +638,34 @@ export default {
           this.$refs.renameForm.clearValidate();
         }
       });
+    },
+    
+    /**
+     * 获取智能体红点状态
+     */
+    async fetchAgentTips() {
+      try {
+        // 目前只检查培训智能体 "2"
+        const res = await TrainingXApi.getAgentTip(this.$aiClient, { agentIds: ['2'] });
+        
+        if (res.code === 0 && Array.isArray(res.data)) {
+          // 接口返回结构: [{"agentId":"2","hasTip":true}]
+          // 转换为对象: { "2": true }
+          const tipsMap = {};
+          res.data.forEach(item => {
+            if (item && item.agentId) {
+              tipsMap[item.agentId] = item.hasTip === true;
+            }
+          });
+          this.agentTips = tipsMap;
+        }
+      } catch (e) {
+        console.error('[AgentContainer] Fetch agent tips failed:', e);
+      }
     }
   },
   mounted() {
+    this.fetchAgentTips();
     // this.checkSingleAgent(); // 移除默认自动选中
   },
   watch: {

@@ -34,6 +34,7 @@
       >
         <span class="agent-icon">
           <img :src="agent.icon" :alt="agent.name" />
+          <div v-if="agent.hasRedDot" class="sidebar-red-dot"></div>
         </span>
         <span class="agent-name">{{ collapsed ? agent.miniName : agent.name }}</span>
       </div>
@@ -295,11 +296,22 @@ export default {
         width: 18px;
         height: 18px;
         flex-shrink: 0;
+        position: relative; // 确保红点定位
 
         img {
           width: 100%;
           height: 100%;
           object-fit: contain;
+        }
+
+        .sidebar-red-dot {
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          width: 6px;
+          height: 6px;
+          background-color: #ff4d4f;
+          border-radius: 50%;
         }
       }
 

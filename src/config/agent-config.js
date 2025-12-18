@@ -170,11 +170,7 @@ export const BUSINESS_LINE_AGENTS = {
     'training-x',
   ],
   [BUSINESS_LINES.PORTAL]: [
-    'inspect-x',
-    'data-analysis',
     'try-x',
-    'training-x',
-    'sop-generation'
   ],
   [BUSINESS_LINES.ENTERPRISE]: [
     'inspect-x',

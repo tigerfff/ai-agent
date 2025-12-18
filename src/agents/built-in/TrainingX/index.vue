@@ -50,7 +50,7 @@
                 :class="{ 'disabled': item.taskCancelled }"
                 @click="handleCancelTask(item)"
               >
-                <i class="h-icon-close_f"></i>
+                <i class="h-icon-close_f" style="font-size: 24px;"></i>
                 <span>停止任务</span>
               </div>
               <span style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
