@@ -68,6 +68,15 @@
               [Unknown Widget: {{ widget.widgetType }}]
             </div>
           </slot>
+          <!-- Loading 蒙层 -->
+          <div v-if="widget.loading || loading" class="widget-loading-overlay">
+            <div class="loading-content">
+              <div class="typing-indicator">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="loading-text">加载中...</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -423,6 +432,12 @@ export default {
 
       .widget-wrapper {
         width: 100%;
+        position: relative;
+
+        &.is-loading {
+          pointer-events: none;
+          user-select: none;
+        }
 
         .widget-fallback {
           background: #f0f2f5;
@@ -432,6 +447,53 @@ export default {
           font-family: monospace;
           font-size: 12px;
           border: 1px dashed #dcdfe6;
+        }
+
+        .widget-loading-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          backdrop-filter: blur(2px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          border-radius: inherit;
+
+          .loading-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+
+            .loading-text {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+
+    // 左侧气泡（机器人端）- 白色背景
+    &.start .bubble-body.filled .widget-wrapper {
+      .widget-loading-overlay {
+        background: rgba(255, 255, 255, 0.8);
+
+        .loading-content {
+          color: rgba(0, 0, 0, 0.6);
+        }
+      }
+    }
+
+    // 右侧气泡（用户端）- 蓝色背景
+    &.end .bubble-body.filled .widget-wrapper {
+      .widget-loading-overlay {
+        background: rgba(53, 172, 255, 0.8);
+
+        .loading-content {
+          color: rgba(255, 255, 255, 0.9);
         }
       }
     }

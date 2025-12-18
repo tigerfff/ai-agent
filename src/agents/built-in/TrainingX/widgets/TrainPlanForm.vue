@@ -1,5 +1,15 @@
 <template>
-  <div class="train-plan-form" :class="{ 'is-disabled': isDisabled }">
+  <div class="train-plan-form" :class="{ 'is-disabled': isDisabled, 'is-loading': loading }">
+    <!-- Loading 蒙层 -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-content">
+        <div class="loading-spinner">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="loading-text">加载中...</span>
+      </div>
+    </div>
+
     <div class="title">请确认培训任务</div>
 
     
@@ -17,7 +27,7 @@
             :get-option-label="getOptionLabel"
             :get-option-value="getOptionValue"
             :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
-            :disabled="isDisabled"
+            :disabled="isDisabled || loading"
             style="width: 80%"
             @change="handleProjectChange"
             @input="handleProjectInput"
@@ -36,7 +46,7 @@
             dialogTitle="选择学员"
             placeholder="请选择"
             collapseTags
-            :disabled="isDisabled"
+            :disabled="isDisabled || loading"
             :selectable="selectable"
             style="width: 80%"
             @change="handleUsersChange"
@@ -58,7 +68,7 @@
     <div class="form-footer" >
       <div 
         class="confirm-btn" 
-        :class="{ 'is-disabled': !canConfirm }"
+        :class="{ 'is-disabled': !canConfirm || loading }"
         @click="handleConfirm" 
         v-if="!isConfirmed && !isDisabled"
       >
@@ -252,32 +262,40 @@ export default {
       }
       this._lastInitKey = currentKey;
 
-      // 保存初始数据用于对比
-      this.initialData = { ...this.data };
-      
-      // 初始化表单字段
-      this.formData.courseProjectId = this.data?.courseProjectId || '';
-      this.formData.type = this.data.type ? Number(this.data.type) : '';
-      this.formData.userIds = [...(this.data.userIds || [])];
-      this.formData.storeId = this.data.storeId || '';
-      this.formData.period = 0;
-      this.formData.dateRange = [];
-      this.detailLoaded = false; // 重置详情加载状态
+      // 开始加载
+      this.loading = true;
 
-      // 初始化白名单用户列表（不依赖 data）
-      this.getListLearnersByStore();
-      
-      // 初始化选中的用户（临时使用 userIds，后续会通过接口获取完整用户信息）
-      this.selectedUsers = this.data.userIds || [];
-
-      // 如果有项目/课程ID，加载详情
-      if (this.formData.courseProjectId) {
-        await this.fetchDetail();
+      try {
+        // 保存初始数据用于对比
+        this.initialData = { ...this.data };
         
-        // type=1 代表项目，type=2 代表课程
-        this.loadInitialProject();
+        // 初始化表单字段
+        this.formData.courseProjectId = this.data?.courseProjectId || '';
+        this.formData.type = this.data.type ? Number(this.data.type) : '';
+        this.formData.userIds = [...(this.data.userIds || [])];
+        this.formData.storeId = this.data.storeId || '';
+        this.formData.period = 0;
+        this.formData.dateRange = [];
+        this.detailLoaded = false; // 重置详情加载状态
+
+        // 初始化白名单用户列表（不依赖 data）
+        await this.getListLearnersByStore();
+        
+        // 初始化选中的用户（临时使用 userIds，后续会通过接口获取完整用户信息）
+        this.selectedUsers = this.data.userIds || [];
+
+        // 如果有项目/课程ID，加载详情
+        if (this.formData.courseProjectId) {
+          // fetchDetail 内部会管理自己的 loading，但这里我们已经设置了外层 loading
+          await this.fetchDetail();
+          
+          // type=1 代表项目，type=2 代表课程
+          this.loadInitialProject();
+        }
+      } finally {
+        // 结束加载
+        this.loading = false;
       }
-      
     },
 
     selectable (row, index) {
@@ -298,7 +316,14 @@ export default {
       return `${y}/${m}/${d}`;
     },
     async fetchDetail() {
-      this.loading = true;
+      // 记录是否由外部管理 loading（如 initFormData）
+      const externalLoading = this.loading;
+      
+      // 如果外部没有设置 loading，则自己管理
+      if (!externalLoading) {
+        this.loading = true;
+      }
+      
       this.detailLoaded = false; // 重置状态
       try {
         let res;
@@ -329,7 +354,10 @@ export default {
         this.detailInfo = { name: '获取失败' };
         this.detailLoaded = false; // 详情加载失败（可能是权限问题）
       } finally {
-        this.loading = false;
+        // 只有自己管理的 loading 才清除
+        if (!externalLoading) {
+          this.loading = false;
+        }
       }
     },
     /**
@@ -590,6 +618,65 @@ export default {
   position: relative;
   padding: 8px;
 
+  // Loading 状态下禁用交互
+  &.is-loading {
+    pointer-events: none;
+    user-select: none;
+
+    .loading-overlay {
+      pointer-events: auto; // 蒙层本身可以接收事件（虽然不需要）
+    }
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border-radius: 8px;
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+
+      .loading-spinner {
+        display: flex;
+        gap: 4px;
+
+        span {
+          display: inline-block;
+          width: 8px;
+          height: 8px;
+          background-color: #409eff;
+          border-radius: 50%;
+          animation: bounce 1.4s infinite ease-in-out both;
+
+          &:nth-child(1) {
+            animation-delay: -0.32s;
+          }
+
+          &:nth-child(2) {
+            animation-delay: -0.16s;
+          }
+        }
+      }
+
+      .loading-text {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+  }
+
   &.is-disabled {
     .form-body {
       opacity: 0.8;
@@ -699,6 +786,17 @@ export default {
     .icon {
       margin-right: 8px;
     }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
   }
 }
 </style>

@@ -218,9 +218,9 @@ export default {
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
-    this.mockTrainPlanForm();
+    // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
-    // this.mockUserTrainFinish();
+    this.mockUserTrainFinish();
     // this.mockTrainResultUpload();
   },
   methods: {
@@ -942,8 +942,8 @@ export default {
     mockUserTrainFinish() {
       const mockContent = `<ymform:user_train_finish desc="提醒用户上传实操视频">
 {
-  "projectId": "32a0373b23884fd2aca7778db9ce18e4",
-  "taskIds": ["8eceeb944abc479fa1eb0cdbf6f0e711", "7842d76cc91947d4968664723729b5e8", "cee4a639fdfe4a9fbb7ac696e2340a1c"],
+  "projectId": "47823f9efe3047b49fe00027424c46ee",
+  "taskIds": ["cf1eb863be8341d9855df12bed57950d", "449f59083d9d461794044b3a1add0514"],
   "storeId": "0250675552214029823f83fede40671e"
 }
 </ymform:user_train_finish>`;

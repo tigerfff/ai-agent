@@ -102,6 +102,7 @@
             :key="`builtin-${componentKey}`"
             :conversation-id="currentConversationId"
             :is-mini="isMini"
+            :businessLine="businessLine"
             @update-list="handleUpdateConversationList"
             @select-conversation="handleSelectConversation"
           />
