@@ -30,6 +30,7 @@ import AgentContainer from './AgentContainer.vue';
 
 export default {
   name: 'AIChatWindow',
+  inheritAttrs: false, // 禁用默认的属性继承，让 $attrs 包含所有非 prop 属性
   components: {
     AIDrawer,
     AgentContainer

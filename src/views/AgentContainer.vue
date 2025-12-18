@@ -251,8 +251,13 @@ export default {
     };
   },
   computed: {
-    // 当前业务线
+    // 当前业务线（优先使用 prop 传入的值）
     currentBusinessLine() {
+      // 最高优先级：prop 传入的 businessLine
+      if (this.businessLine) {
+        return this.businessLine;
+      }
+      // 其他优先级：环境变量、URL参数、localStorage、默认值
       return getCurrentBusinessLine();
     },
     // 根据业务线过滤的内置智能体

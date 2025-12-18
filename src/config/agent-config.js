@@ -161,9 +161,9 @@ export const ALL_AGENTS = {
 // 业务线与智能体的映射配置
 export const BUSINESS_LINE_AGENTS = {
   [BUSINESS_LINES.RETAIL]: [
+    'inspect-x',
     'try-x',
     'training-x',
-    'sop-generation',
     'data-analysis'
   ],
   [BUSINESS_LINES.MINERVA]: [
