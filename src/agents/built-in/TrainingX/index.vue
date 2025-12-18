@@ -91,6 +91,7 @@
         <AIInput 
           ref="aiInput"
           :loading="isStreaming || isUploading"
+          :enable-stop-button="false"
           placeholder="有问题尽管问我~"
           :allowed-types="['image', 'video', 'document']"
           :max-size="200 * 1024 * 1024"

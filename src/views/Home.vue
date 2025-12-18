@@ -28,7 +28,10 @@
           <div class="card-icon">
             <img :src="agent.homeIcon" :alt="agent.name" />
           </div>
-          <div class="go-use-btn">去使用 ></div>
+          <div class="go-use-btn">
+            <span>去使用</span>
+            <i class="h-icon-angle_right" style="margin-left: 4px;"></i>
+          </div>
         </div>
         
         <div class="card-info">
@@ -197,6 +200,8 @@ export default {
       .go-use-btn {
         opacity: 1;
         transform: translateX(0);
+        display: flex;
+        align-items: center;
       }
 
       .card-name {

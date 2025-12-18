@@ -241,6 +241,11 @@ export default {
       type: Boolean,
       default: false
     },
+    // 是否启用停止按钮（如果为 false，loading 时显示禁用的发送按钮而非停止按钮）
+    enableStopButton: {
+      type: Boolean,
+      default: true
+    },
     maxLength: {
       type: Number,
       default: 2000
@@ -579,7 +584,7 @@ export default {
      * 停止按钮是否可见
      */
     showStopButton() {
-      return this.mergedButtonConfig.stop.visible && this.loading;
+      return this.enableStopButton && this.mergedButtonConfig.stop.visible && this.loading;
     },
     /**
      * 停止按钮是否禁用
@@ -591,6 +596,10 @@ export default {
      * 发送按钮是否可见
      */
     showSendButton() {
+      // 如果不启用停止按钮，即使 loading 也显示发送按钮（只是禁用状态）
+      if (!this.enableStopButton) {
+        return this.mergedButtonConfig.send.visible;
+      }
       return this.mergedButtonConfig.send.visible && !this.loading;
     },
     /**
@@ -731,8 +740,8 @@ export default {
 
     clear() {
       this.inputValue = '';
-      this.fileList = []; // 直接清空本地数据
-      this.currentFileType = null; // 重置类型锁定
+      // this.fileList = []; // 直接清空本地数据
+      // this.currentFileType = null; // 重置类型锁定
       this.adjustHeight();
       this.$emit('clear');
     },
