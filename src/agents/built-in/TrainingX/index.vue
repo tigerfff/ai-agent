@@ -920,7 +920,7 @@ export default {
      * 临时 Mock 方法：添加测试用户学习表单消息（可随时删除）
      */
     mockUserStudyForm() {
-      const mockContent = "您好，yangfucheng6：\n由于您的门店在2025-12-17的检查过程中，发生问题，总部推送您如下内容进行学习，请学习。\n<ymform:user_study desc=\"以下是用户需要学习的内容\">\n {\n    \"courseProjectId\":\"b190b38fc794479588c51723f504b1018\",\n    \"type\":1\n }\n<ymform:user_study>";
+      const mockContent = "您好，yangfucheng6：\n由于您的门店在2025-12-17的检查过程中，发生问题，总部推送您如下内容进行学习，请学习。\n<ymform:user_study desc=\"以下是用户需要学习的内容\">\n {\n    \"courseProjectId\":\"32a0373b23884fd2aca7778db9ce18e4\",\n    \"type\":1\n }\n<ymform:user_study>";
 
       const mockMsg = {
         key: 'mock-user-study-' + Date.now(),

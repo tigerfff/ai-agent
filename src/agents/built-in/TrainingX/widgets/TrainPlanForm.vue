@@ -46,7 +46,7 @@
       </div>
 
       <!-- 培训周期 -->
-      <div class="form-item">
+      <div class="form-item" v-if="isProject">
         <div class="label">培训周期</div>
         <div class="content">
           <div class="text-display">{{ dateRangeDisplay }}</div>
@@ -54,7 +54,6 @@
       </div>
     </div>
 
-    <!-- TODO YFCH 修改图标 -->
     <!-- 底部按钮 -->
     <div class="form-footer" >
       <div class="confirm-btn" @click="handleConfirm" v-if="!isConfirmed && !isDisabled">
@@ -81,8 +80,8 @@ import AILoadSelect from '@/ai-ui/base-form/AILoadSelect.vue';
 import PersonSelect from '@/ai-ui/base-form/orgPersonPagedPicker/index.vue';
 
 // 类型常量定义：1=项目，2=课程
-const TYPE_PROJECT = '1'; // 项目
-const TYPE_COURSE = '2';  // 课程
+const TYPE_PROJECT = 1; // 项目
+const TYPE_COURSE = 2;  // 课程
 
 export default {
   name: 'TrainPlanForm',
@@ -108,7 +107,7 @@ export default {
       initialData: {}, // 保存初始数据用于对比
       formData: {
         courseProjectId: '',
-        type: '', // '1' = 项目, '2' = 课程
+        type: '', // 1 = 项目, 2 = 课程
         userIds: [],
         period: 0,
         dateRange: [] // [start, end]
@@ -126,11 +125,11 @@ export default {
     },
     // 是否为项目类型
     isProject() {
-      return this.formData.type === TYPE_PROJECT;
+      return +this.formData.type === TYPE_PROJECT;
     },
     // 是否为课程类型
     isCourse() {
-      return this.formData.type === TYPE_COURSE;
+      return +this.formData.type === TYPE_COURSE;
     },
     userNames() {
       if (!this.selectedUsers || this.selectedUsers.length === 0) return '';
@@ -150,7 +149,7 @@ export default {
     selectedProjectName() {
       if (!this.formData.courseProjectId) return '';
       const selected = this.selectedProjectOptions.find(opt => {
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           return opt.projectId === this.formData.courseProjectId;
         } else {
@@ -170,7 +169,7 @@ export default {
      */
     getOptionKey() {
       return (item) => {
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           return item.projectId;
         } else {
@@ -183,7 +182,7 @@ export default {
      */
     getOptionLabel() {
       return (item) => {
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           return item.projectName;
         } else {
@@ -196,7 +195,7 @@ export default {
      */
     getOptionValue() {
       return (item) => {
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           return item.projectId;
         } else {
@@ -245,7 +244,7 @@ export default {
       
       // 初始化表单字段
       this.formData.courseProjectId = this.data?.courseProjectId || '';
-      this.formData.type = this.data.type || '';
+      this.formData.type = this.data.type ? Number(this.data.type) : '';
       this.formData.userIds = [...(this.data.userIds || [])];
       this.formData.storeId = this.data.storeId || '';
       this.formData.period = 0;
@@ -261,7 +260,7 @@ export default {
       if (this.formData.courseProjectId) {
         await this.fetchDetail();
         
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         this.loadInitialProject();
       }
       
@@ -287,7 +286,7 @@ export default {
       this.loading = true;
       try {
         let res;
-        if (+this.formData.type === 1) {
+        if (this.isProject) {
           res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
           this.formData.period = res.data.period;
           this.formData.dateRange = [
@@ -346,7 +345,7 @@ export default {
       try {
         let result;
         
-        // 根据 type 判断是项目还是课程：type="1" 代表项目，type="2" 代表课程
+        // 根据 type 判断是项目还是课程：type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           // 项目列表
           const { data } = await TrainingXApi.getProjectList(this.$aiClient, {
@@ -384,7 +383,7 @@ export default {
             hasMore: data.hasNextPage === true
           };
         } else {
-          // 课程列表（默认或 type === '课程'）
+          // 课程列表（默认或 type=2）
           const { data } = await TrainingXApi.getCourseList(this.$aiClient, {
             name: query || '',
             pageNo: page,
@@ -450,7 +449,7 @@ export default {
       if (selectedItem) {
         // 更新选中选项列表
         this.selectedProjectOptions = [selectedItem];
-        // 更新详情信息：type="1" 代表项目，type="2" 代表课程
+        // 更新详情信息：type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           this.detailInfo = {
             name: selectedItem.projectName,
@@ -468,7 +467,7 @@ export default {
       } else if (selectedId) {
         // 如果没有 selectedItem，说明可能是直接设置的值，需要查找对应的项目/课程
         const found = this.selectedProjectOptions.find(item => {
-          // type="1" 代表项目，type="2" 代表课程
+          // type=1 代表项目，type=2 代表课程
           if (this.isProject) {
             return item.projectId === selectedId;
           } else {
@@ -489,7 +488,7 @@ export default {
       if (!this.formData.courseProjectId || !this.detailInfo) return;
       
       try {
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         if (this.isProject) {
           // 从 detailInfo 构造项目信息
           if (this.detailInfo.projectId || this.detailInfo.projectName || this.detailInfo.name) {

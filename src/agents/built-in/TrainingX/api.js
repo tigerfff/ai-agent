@@ -184,6 +184,23 @@ export const TrainingXApi = {
     });
   },
 
+  getProjectDetailByUser(client, projectId) {
+    return client.send({
+      url: buildUrl(client, `/enterprise/training/userProjects/actions/getProjectInfo/${projectId}`, 'chain', '/api'),
+      method: 'get',
+    });
+  },
+
+  getCourseDetailByUser(client, courseId) {
+    return client.send({
+      url: buildUrl(client, `/enterprise/training/courses/actions/trainingCourses/getCourseMsg`, 'chain', '/api'),
+      method: 'get',
+      data: {
+        courseId
+      }
+    });
+  },
+
   /**
    * 获取课程详情
    * @param {AIClient} client

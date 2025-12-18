@@ -42,8 +42,8 @@
 import { TrainingXApi } from '../api';
 
 // 类型常量定义：1=项目，2=课程
-const TYPE_PROJECT = '1'; // 项目
-const TYPE_COURSE = '2';  // 课程
+const TYPE_PROJECT = 1; // 项目
+const TYPE_COURSE = 2;  // 课程
 
 export default {
   name: 'UserStudyForm',
@@ -60,33 +60,33 @@ export default {
       errorMessage: '', // 错误信息
       formData: {
         courseProjectId: '',
-        type: '' // '1' = 项目, '2' = 课程
+        type: '' // 1 = 项目, 2 = 课程
       }
     };
   },
   computed: {
     // 是否为项目类型
     isProject() {
-      return this.formData.type === TYPE_PROJECT;
+      return +this.formData.type === TYPE_PROJECT;
     },
     // 是否为课程类型
     isCourse() {
-      return this.formData.type === TYPE_COURSE;
+      return +this.formData.type === TYPE_COURSE;
     },
     // 标题
     title() {
       if (this.isProject) {
         return this.detailInfo.projectName || this.errorMessage;
       } else {
-        return this.detailInfo.name || this.errorMessage;
+        return this.detailInfo.courseName || this.errorMessage;
       }
     },
     // 封面图片
     coverImage() {
       if (this.isProject) {
-        return this.detailInfo.coverImage?.url || null;
+        return this.detailInfo.coverUrl?.url || null;
       } else {
-        return this.detailInfo.coverImg?.url || null;
+        return this.detailInfo.coverImage?.url || null;
       }
     },
     // 时长/周期文本
@@ -95,14 +95,15 @@ export default {
         // 项目显示周期
         if (this.detailInfo.period) {
           return `培训周期: ${this.detailInfo.period}天`;
-        } else if (this.detailInfo.startDate && this.detailInfo.endDate) {
-          const start = this.formatDate(this.detailInfo.startDate);
-          const end = this.formatDate(this.detailInfo.endDate);
+        } else if (this.detailInfo.taskStartTime && this.detailInfo.taskEndTime) {
+          const start = this.formatDate(this.detailInfo.taskStartTime);
+          const end = this.formatDate(this.detailInfo.taskEndTime);
           return `培训周期: ${start} - ${end}`;
         }
         return '培训周期: 未设置';
-      } 
-      return ''
+      } else{
+        return this.detailInfo.completedPersonNum +  '人完成'
+      }
     },
   },
   created() {
@@ -112,7 +113,9 @@ export default {
     };
     // 初始化数据
     this.formData.courseProjectId = this.data.courseProjectId || '';
-    this.formData.type = this.data.type || '';
+    this.formData.type = this.data.type ? Number(this.data.type) : '';
+
+    console.log(this.formData,'this.formData')
 
     // 如果有 courseProjectId，加载详情
     if (this.formData.courseProjectId) { 
@@ -136,12 +139,12 @@ export default {
       try {
         let res;
 
-        // type="1" 代表项目，type="2" 代表课程
+        // type=1 代表项目，type=2 代表课程
         if (this.isProject) {
-          res = await TrainingXApi.getProjectDetail(this.$aiClient, this.formData.courseProjectId);
+          res = await TrainingXApi.getProjectDetailByUser(this.$aiClient, this.formData.courseProjectId);
         } else {
-          // 默认课程（type="2"）
-          res = await TrainingXApi.getCourseDetail(this.$aiClient, this.formData.courseProjectId);
+          // 默认课程（type=2）
+          res = await TrainingXApi.getCourseDetailByUser(this.$aiClient, this.formData.courseProjectId);
         }
 
         if (res && res.code === 0 && res.data) {
@@ -209,13 +212,13 @@ export default {
     display: flex;
     align-items: center;
     gap: 16px;
-    // padding: 8px;
+    // padding: 4px;
     background: #fff;
     border-radius: 12px;
-    transition: box-shadow 0.2s;
+    // transition: box-shadow 0.2s;
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
     // 左侧封面
@@ -286,12 +289,12 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
       }
 
       .card-duration {
-        font-size: 14px;
+        font-size: 12px;
         color: rgba(0, 0, 0, 0.6);
         line-height: 1.4;
       }
