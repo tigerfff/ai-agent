@@ -1,5 +1,5 @@
 {
-  "name": "ai-aa",
+  "name": "hik-cloud-agentX",
   "version": "1.0.0",
   "description": "AI Assistant Component Library for Vue 2",
   "keywords": [
@@ -15,21 +15,24 @@
     "dev": "vite",
     "build": "vite build",
     "build:watch": "vite build --watch",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build",              
+    "publish:latest": "npm publish --access public", 
+    "publish:beta": "npm publish --tag beta --access public"
   },
-  "main": "dist/ai-aa.umd.js",
-  "module": "dist/ai-aa.es.js",
-  "style": "dist/style.css",
+  "main": "lib/hik-cloud-agentX.umd.js",
+  "module": "lib/hik-cloud-agentX.es.js",
+  "style": "lib/style.css",
   "sass": "src/style/index.scss",
   "files": [
-    "dist",
+    "lib",
     "src/style"
   ],
   "exports": {
     ".": {
-      "import": "./dist/ai-aa.es.js",
-      "require": "./dist/ai-aa.umd.js",
-      "style": "./dist/style.css"
+      "import": "./lib/hik-cloud-agentX.es.js",
+      "require": "./lib/hik-cloud-agentX.umd.js",
+      "style": "./lib/style.css"
     },
     "./style": {
       "import": "./src/style/index.scss",

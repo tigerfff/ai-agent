@@ -91,16 +91,20 @@ export default defineConfig({
 
   // 组件库打包配置：用于被父项目以 lib 形式引用
   build: {
+    // 输出目录从默认的 dist 改为 lib，更符合库的命名习惯
+    outDir: 'lib',
     lib: {
       entry: resolve(__dirname, 'src/index.js'),
-      name: 'AIAA',
-      fileName: (format) => `ai-aa.${format}.js`
+      // UMD 全局变量名（给直接用 <script> 的场景），可以用更语义化的名字
+      name: 'HikCloudAgentX',
+      // 生成 hik-cloud-agentX.es.js / hik-cloud-agentX.umd.js
+      fileName: (format) => `hik-cloud-agentX.${format}.js`
     },
     // 样式处理：将所有样式打包到一个文件
     cssCodeSplit: false,
     rollupOptions: {
       // 外部依赖：由父项目提供，不打进库里
-      external: ['vue', '@hui/lib/hui.esm-browser.js', '@hui/lib/hui.css'],
+      external: ['vue', 'hui','hui/lib/hui.css','@hui/lib/hui.esm-browser.js', '@hui/lib/hui.css'],
       output: {
         globals: {
           vue: 'Vue'
