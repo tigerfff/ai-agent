@@ -57,7 +57,9 @@
         class="back-to-bottom-btn"
         @click="scrollToBottom"
       >
-        <span class="arrow-down">↓</span>
+        <span class="arrow-down">
+          <i class="h-icon-angles_down_sm"></i>
+        </span>
         <span class="new-msg-tip" v-if="hasNewMessage">新消息</span>
       </div>
     </transition>
@@ -372,21 +374,20 @@ export default {
   }
 
   .back-to-bottom-btn {
+    display: flex;
+    align-items: center;
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background-color: #fff;
     border: 1px solid #e4e7ed;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    padding: 8px 16px;
+    border-radius: 50%;
     cursor: pointer;
     display: flex;
+    padding: 4px;
     align-items: center;
-    gap: 6px;
-    color: #409eff;
-    font-size: 14px;
+    color: #000;
     z-index: 10;
     transition: all 0.3s;
     user-select: none;
@@ -398,6 +399,9 @@ export default {
 
     .arrow-down {
       font-weight: bold;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
     }
 
     .new-msg-tip {
