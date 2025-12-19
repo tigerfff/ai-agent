@@ -368,7 +368,6 @@ export default {
      * 加载初始用户信息（用于显示已选中的用户）
      */
     async loadInitialUsers() {
-      if(!this.formData?.userIds?.length) return;
       try {
         const res = await TrainingXApi.getPersonnelInfo(this.$aiClient, {
           userIds: this.formData.userIds.join(',')

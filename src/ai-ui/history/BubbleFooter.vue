@@ -238,9 +238,7 @@ export default {
       }
     },
 
-    handleLike(type) {
-      console.log(type,'type')
-      // 如果已经是当前状态，则取消（设为 null 或 ''）
+    handleLike(type) {      // 如果已经是当前状态，则取消（设为 null 或 ''）
       const newStatus = this.localLikeStatus === type ? '' : type;
       this.localLikeStatus = newStatus;
       this.$emit('action', newStatus || 'cancel-like', this.item);
@@ -273,8 +271,8 @@ export default {
     }
 
     .action-icon {
-      width: 16px;
-      height: 16px;
+      width: 24px;
+      height: 24px;
       display: block;
     }
   }

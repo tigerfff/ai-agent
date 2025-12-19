@@ -5,6 +5,7 @@
     :width="drawerWidth"
     :modal="false"
     :wrapperClosable="false"
+    :class="{ 'fullscreen': !isMini }"
     append-to-body
     @close="handleClose"
   >
@@ -56,10 +57,9 @@ export default {
   },
   computed: {
     drawerWidth() {
-      // isMini 为 true 时宽度 600px
-      // isMini 为 false 时宽度自适应（占据大部分屏幕）
-      // AIDrawer 内部有 right: 16px 的样式，所以设为 calc(100% - 32px) 可以保持左右对称
-      return this.isMini ? '600px' : 'calc(100% - 32px)'; 
+      // isMini 为 true 时宽度 600px（小屏，有边距）
+      // isMini 为 false 时宽度 100%（大屏，铺满屏幕）
+      return this.isMini ? '600px' : '100%'; 
     }
   },
   methods: {

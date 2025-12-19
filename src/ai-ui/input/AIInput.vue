@@ -1164,6 +1164,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/style/mixins.scss';
+
 .ai-input-container {
   width: 100%;
   position: relative;
@@ -1210,7 +1212,7 @@ export default {
       flex-direction: column;
       width: 100%;
       min-height: 100px;
-      padding: 12px 16px;
+      padding: 12px 0 12px 16px; // 右侧 padding 改为 0，让滚动条贴边
       box-sizing: border-box;
 
       .input-row {
@@ -1251,8 +1253,29 @@ export default {
           color: #303133;
           max-height: 110px;
           overflow-y: auto;
+          overflow-x: hidden; // 隐藏横向滚动条
           background: transparent;
           font-family: inherit;
+          padding-right: 4px; // 给滚动条留一点点空间，防止贴得太紧
+          
+          // 自定义滚动条样式
+          &::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: transparent; // 背景透明
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.7); // 滑块颜色
+            border-radius: 4px;
+          }
+          
+          &::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.5);
+          }
 
           &::placeholder {
             color: #c0c4cc;
@@ -1265,6 +1288,7 @@ export default {
         justify-content: space-between;
         align-items: center;
         margin-top: 8px;
+        padding-right: 16px; // 为 action-list 添加右侧 padding
 
         .action-left,
         .action-right {
@@ -1301,7 +1325,7 @@ export default {
               color: #606266;
 
               &:hover:not(.disabled) {
-                background-color: #f5f7fa;
+                background: rgba(0,0,0,0.04);
               }
 
               &:not(:last-child) {
@@ -1344,15 +1368,14 @@ export default {
           font-size: 16px;
 
           .icon-img {
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             object-fit: contain;
             display: block;
           }
 
           &:hover {
-            background-color: #f2f6fc;
-            color: #409eff;
+            background: rgba(224,224,224,1);
           }
 
           &.send-btn {

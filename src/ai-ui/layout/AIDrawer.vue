@@ -96,6 +96,16 @@ export default {
   }
 }
 
+// 全屏模式样式
+.chat-bi-drawer.fullscreen {
+  .el-dialog {
+    top: 0 !important;
+    right: 0 !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+  }
+}
+
 @keyframes drawer-fade-in {
   0% {
     transform: translateX(500px);

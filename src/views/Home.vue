@@ -14,7 +14,10 @@
     
     <div class="home-scrollable-content">
       <div class="home-header">
-        <h2>海康云眸-AI试用</h2>
+        <div class="home-header-title">
+          <img src="@/assets/images/IP@3x.png" alt="logo" class="logo-icon" />
+          <span>海康云眸-AI试用</span>
+        </div>
         <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
       </div>
       <div class="agent-grid">
@@ -142,7 +145,9 @@ export default {
     margin-top: 18px;
     text-align: center;
 
-    h2 {
+    .home-header-title {
+      display: flex;
+      justify-content: center;
       color: rgba(0, 0, 0, 0.9);
       font-weight: bold;
       font-size: 28px;
@@ -150,6 +155,11 @@ export default {
       letter-spacing: 0px;
       text-align: center;
       margin-bottom: 24px;
+      img {
+        width: 40px;
+        height: 40px;
+        margin-right: 12px;
+      }
     }
 
     p {
@@ -259,8 +269,8 @@ export default {
 
     .card-icon {
       font-size: 32px;
-      width: 44px;
-      height: 44px;
+      width: 32px;
+      height: 32px;
       background: #f0f7ff;
       border-radius: 8px;
       line-height: 44px;
@@ -290,10 +300,12 @@ export default {
     }
 
     .card-name {
+      color: rgba(0,0,0,0.9);
+      font-weight: regular;
       font-size: 16px;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 6px;
+      line-height: 24px;
+      text-align: left;
+      margin-bottom: 8px;
     }
 
     .card-tag {
@@ -339,7 +351,6 @@ export default {
 
     .card-desc {
       color: rgba(0, 0, 0, 0.4);
-      font-weight: regular;
       font-size: 12px;
       line-height: 20px;
       text-align: left;
