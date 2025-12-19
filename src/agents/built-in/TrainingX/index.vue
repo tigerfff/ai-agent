@@ -91,6 +91,7 @@
         <AIInput 
           ref="aiInput"
           :loading="isStreaming || isUploading"
+          :showClearButton="false"
           :enable-stop-button="false"
           placeholder="有问题尽管问我~"
           :allowed-types="['image', 'video', 'document']"
@@ -331,12 +332,12 @@ export default {
               // this.$message.success('评价成功');
             } else {
               // 评价失败，回滚本地状态
-              this.$set(message, 'likeStatus', '');
+              this.$set(message, 'likeStatus', 'NO_EVAL');
               this.$message.error('评价失败，请重试');
             }
           } catch (e) {
             // 评价失败，回滚本地状态
-            this.$set(message, 'likeStatus', '');
+            this.$set(message, 'likeStatus', 'NO_EVAL');
             this.$message.error('评价失败，请重试');
           }
         } else {
@@ -583,9 +584,9 @@ export default {
           if (rawList.length > 1) {
              const t1 = new Date(rawList[0].createTime).getTime();
              const t2 = new Date(rawList[rawList.length - 1].createTime).getTime();
-             if (t1 > t2) {
-               rawList.reverse();
-             }
+             if (!isNaN(t1) && !isNaN(t2) && t1 > t2) {
+                rawList = [...rawList].reverse(); // 创建新数组
+              }
           }
 
           const list = [];

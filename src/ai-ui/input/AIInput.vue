@@ -413,6 +413,14 @@ export default {
         }
       },
       deep: true
+    },
+    // 监听自定义菜单项变化（确保响应式更新）
+    customMenuItems: {
+      handler(newVal) {
+        // 强制触发 computed 属性重新计算
+        this.$forceUpdate();
+      },
+      deep: true
     }
   },
   computed: {
@@ -741,8 +749,8 @@ export default {
 
     clear() {
       this.inputValue = '';
-      // this.fileList = []; // 直接清空本地数据
-      // this.currentFileType = null; // 重置类型锁定
+      this.fileList = []; // 直接清空本地数据
+      this.currentFileType = null; // 重置类型锁定
       this.adjustHeight();
       this.$emit('clear');
     },

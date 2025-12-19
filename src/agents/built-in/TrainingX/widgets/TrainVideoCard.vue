@@ -15,7 +15,7 @@
     <!-- 视频预览弹窗 -->
     <AttachmentsPreview
       :visible="previewVisible"
-      :file="previewFile"
+      :fileList="previewFile"
       :show-nav="false"
       @close="handleClosePreview"
     />
@@ -60,12 +60,13 @@ export default {
       return '培训视频';
     },
     previewFile() {
+      console.log(this.videoUrl,'this.videoUrl')
       if (!this.videoUrl) return null;
-      return {
+      return [{
         url: this.videoUrl,
         type: 'video',
         name: this.videoName
-      };
+      }];
     }
   },
   methods: {
