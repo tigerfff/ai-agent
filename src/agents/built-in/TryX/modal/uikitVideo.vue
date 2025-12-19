@@ -490,76 +490,87 @@ export default {
         return
       }
       this.syncSize()
-      pc.player = new EZUIKit.EZUIKitPlayer({
-        id: pc.containerID, // 视频容器ID
-        url: playUrl,
-        accessToken: pc.accessToken,
-        token: pc.token,
-        themeData: this.currentThemeData,
-        width: this.container.uikitWidth,
-        height: this.container.uikitHeight,
-        useSeek: false,
-        talkChannelNo: pc.playInfo.channelNo,
-        downloadRecord: false,
-        handleSuccess: (params) => {
-          pc.playing = true
-          const currentLevel = pc.player.getVideoLevel()
-          if (pc.channelVideoLevel===-1||pc.channelVideoLevel === currentLevel) {
-            pc.hasChangedLevel = true
-          }
-          if (!pc.hasChangedLevel && pc.channelVideoLevel>-1 &&pc.channelVideoLevel !== currentLevel) {
-            const levels = pc.player.getVideoLevelList()
-            if (levels && levels.length) {
-              let lowestLevel = levels.sort((a, b) => a.level - b.level)[0].level
-              if (pc.channelVideoLevel<lowestLevel) {
-                pc.channelVideoLevel = lowestLevel
-              }
+      try {
+        pc.player = new EZUIKit.EZUIKitPlayer({
+          id: pc.containerID, // 视频容器ID
+          url: playUrl,
+          accessToken: pc.accessToken,
+          token: pc.token,
+          themeData: this.currentThemeData,
+          width: this.container.uikitWidth,
+          height: this.container.uikitHeight,
+          useSeek: false,
+          talkChannelNo: pc.playInfo.channelNo,
+          downloadRecord: false,
+          handleSuccess: (params) => {
+            pc.playing = true
+            const currentLevel = pc.player.getVideoLevel()
+            if (pc.channelVideoLevel===-1||pc.channelVideoLevel === currentLevel) {
+              pc.hasChangedLevel = true
             }
-            pc.player.changeVideoLevel(pc.channelVideoLevel)
-          }
+            if (!pc.hasChangedLevel && pc.channelVideoLevel>-1 &&pc.channelVideoLevel !== currentLevel) {
+              const levels = pc.player.getVideoLevelList()
+              if (levels && levels.length) {
+                let lowestLevel = levels.sort((a, b) => a.level - b.level)[0].level
+                if (pc.channelVideoLevel<lowestLevel) {
+                  pc.channelVideoLevel = lowestLevel
+                }
+              }
+              pc.player.changeVideoLevel(pc.channelVideoLevel)
+            }
+            this.updateLocalChannelVideoLevel(pc)
+            this.injectWatermarkIfNeeded(pc)
+            let hideId = document.getElementsByClassName('header-controls')[0]
+            hideId.style.display = 'none'
+            this.playSuccessCallback(true)
+          },
+          handleError: (params) => {
+            pc.playing = false
+            this.injectWatermarkIfNeeded(pc)
+            // 录制的时候触发播放报错，会导致录制按钮无法停止录制，这里手动停止一下
+            if (pc.playbackRecording) {
+              this.clearIntervalFun()
+              pc.playbackRecording = false
+              this.stopExtraBtnDownload(pc, true)
+            }
+            if (params&&+params.code===10001&&pc.playInfo.validateCode&&!(/^[A-Za-z0-9]+$/.test(pc.playInfo.validateCode))) {
+              this.$message.error('播放失败，请检查设备验证码是否含有特殊字符')
+            }
+            this.playSuccessCallback(false)
+          },
+        })
+        // 初始化时，验证码错误不会在handleError中触发，这里单独判断一下
+        if (pc.playInfo.validateCode && !(/^[A-Za-z0-9]+$/.test(pc.playInfo.validateCode))) {
+          this.$message.error('播放失败，请检查设备验证码是否含有特殊字符')
+        }
+        // 监听开启录制事件
+        pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.startSave, () => {
+          pc.playbackRecording = true
+        });
+        pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.stopSave, (res) => {
+          pc.playbackRecording = true
+          this.getVideoSaveFile(res)
+        });
+        pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.fullscreen, (res) => {
+          this.isUikitFullScreen = true
+        })
+        pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.exitFullscreen, (res) => {
+          this.isUikitFullScreen = false
+        })
+        pc.player.eventEmitter.on('changeVideoLevel', (res) => {
+          pc.hasChangedLevel = true
           this.updateLocalChannelVideoLevel(pc)
-          this.injectWatermarkIfNeeded(pc)
-          let hideId = document.getElementsByClassName('header-controls')[0]
-          hideId.style.display = 'none'
-          this.playSuccessCallback(true)
-        },
-        handleError: (params) => {
-          pc.playing = false
-          this.injectWatermarkIfNeeded(pc)
-          // 录制的时候触发播放报错，会导致录制按钮无法停止录制，这里手动停止一下
-          if (pc.playbackRecording) {
-            this.clearIntervalFun()
-            pc.playbackRecording = false
-            this.stopExtraBtnDownload(pc, true)
+        })
+      } catch (error) {
+        // 清理可能创建的部分资源
+        if (pc.player) {
+          try {
+            pc.player.stop()
+          } catch (e) {
           }
-          if (params&&+params.code===10001&&pc.playInfo.validateCode&&!(/^[A-Za-z0-9]+$/.test(pc.playInfo.validateCode))) {
-            this.$message.error('播放失败，请检查设备验证码是否含有特殊字符')
-          }
-          this.playSuccessCallback(false)
-        },
-      })
-      // 初始化时，验证码错误不会在handleError中触发，这里单独判断一下
-      if (pc.playInfo.validateCode && !(/^[A-Za-z0-9]+$/.test(pc.playInfo.validateCode))) {
-        this.$message.error('播放失败，请检查设备验证码是否含有特殊字符')
+          pc.player = null
+        }
       }
-      // 监听开启录制事件
-      pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.startSave, () => {
-        pc.playbackRecording = true
-      });
-      pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.stopSave, (res) => {
-        pc.playbackRecording = true
-        this.getVideoSaveFile(res)
-      });
-      pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.fullscreen, (res) => {
-        this.isUikitFullScreen = true
-      })
-      pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.exitFullscreen, (res) => {
-        this.isUikitFullScreen = false
-      })
-      pc.player.eventEmitter.on('changeVideoLevel', (res) => {
-        pc.hasChangedLevel = true
-        this.updateLocalChannelVideoLevel(pc)
-      })
     },
     playSuccessCallback(flag) {
       this.$emit('playSuccess', flag)

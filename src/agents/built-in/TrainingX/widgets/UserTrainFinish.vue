@@ -206,10 +206,6 @@ export default {
      */
     async handleFileChange(e, task) {
       const file = e.target.files?.[0];
-      
-      // 立即清理 input，确保可以重复选择同一文件
-      e.target.value = '';
-      
       if (!file) return;
 
       // 验证文件类型
@@ -224,6 +220,9 @@ export default {
         this.$message?.error('视频文件大小不能超过 200MB');
         return;
       }
+
+      // 重置 input
+      e.target.value = '';
 
       // 开始上传
       await this.uploadVideo(file, task);

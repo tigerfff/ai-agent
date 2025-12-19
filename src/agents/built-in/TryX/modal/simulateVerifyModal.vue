@@ -44,7 +44,11 @@
             <div class="img_list_wrap" v-if="bgImgList&&bgImgList.length">
               <div v-for="(item,index) in bgImgList" :key="index" class="card_item" @click="onPreview(index)">
                 <img v-if="item.mineType==='img'" :src="item.base64Url" :alt="item.name || '图片'">
-                <img v-if="item.mineType==='video'" :src="getVideoThumbnail(item)" :alt="item.name || '视频'" @error="handleThumbnailError">
+                <div v-if="item.mineType==='video'" class="video_capture_wrap">
+                  <img :src="getVideoThumbnail(item)" :alt="item.name || '视频'" @error="handleThumbnailError">
+                  <div class="cover"></div>
+                  <div class="play_btn">▶</div>
+                </div>
                 <div class="pic_size">{{ item.formattedDuration }}<span style="margin-left: 6px;">{{ item.fileSize }}</span></div>
                 <div class="close_icon" @click.stop="deleteImg(index)">x</div>
               </div>
@@ -642,6 +646,30 @@ export default {
       .card_item{
         margin-bottom: 12px;
         position: relative;
+        .video_capture_wrap{
+          position: relative;
+          .cover{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            &:hover{
+              background: rgba(0, 0, 0, 0.4);
+            }
+          }
+          .play_btn{
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            left: 142px;
+            top: 72px;
+            color: #fff;
+            font-size: 20px;
+          }
+        }
         .close_icon{
           position: absolute;
           right: 0;

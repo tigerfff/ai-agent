@@ -19,6 +19,7 @@
             <img :src="card.icon" alt="" class="card_icon" />
             <div class="prompt-desc">{{ card.text }}</div>
             <div class="prompt-tips">{{ card.tips }}</div>
+            <div class="bg" :style="{ backgroundImage: 'url(' + getBgImage(card.bg) + ')' }"></div>
           </div>
         </div>
       </AIWelcome>
@@ -31,7 +32,6 @@
         :list="messages"
         :back-button-threshold="50"
         @complete="handleFinish"
-        @action-click="handleAction"
         enableActions
         class="history-full-width"
       >
@@ -69,6 +69,7 @@
           ref="aiInput"
           v-model="aiInputText"
           :loading="isStreaming || isUploading"
+          :showClearButton="false"
           placeholder="有问题尽管问我~"
           :allowed-types="[]"
           :customMenuItems="customMenuItems"
@@ -97,6 +98,14 @@
 
 <script>
 import imageIcon from '@svg/image.svg';
+import videoIcon from '@svg/video.svg';
+import channelIcon from '@svg/channel.svg';
+import imageBigIcon from './images/imageBig.svg';
+import videoBigIcon from './images/videoBig.svg';
+import channelBigIcon from './images/channelBig.svg';
+import channelBg from './images/channel_bg.png';
+import imageBg from './images/image_bg.png';
+import videoBg from './images/video_bg.png';
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
@@ -134,6 +143,14 @@ export default {
   data() {
     return {
       imageIcon,
+      videoIcon,
+      channelIcon,
+      imageBigIcon,
+      videoBigIcon,
+      channelBigIcon,
+      channelBg,
+      imageBg,
+      videoBg,
       aiInputText: '',
       customMenuItems: [],
       fileListUploadType: '',
@@ -150,8 +167,8 @@ export default {
       trainingSquareIcon,
       // 操作栏配置
       actionConfig: {
-        user: ['copy', 'edit'],
-        bot: ['copy', 'edit', 'like', 'dislike']
+        user: ['copy'],
+        bot: ['copy', 'like', 'dislike']
       },
       // OSS 上传器实例
       ossUploader: null,
@@ -166,12 +183,12 @@ export default {
   computed: {
     fullCustomMenuItems() {
       const menuItems = [
-        {label: '通道抓取', visible: true, iconSrc: imageIcon, dataSource: 'uikit', mineType: 'img, video', disabled: false,  text: '通道抓取', tips: ' ', icon: imageIcon},
-        {label: '图片', visible: true, iconSrc: imageIcon, dataSource: 'uploadImg', mineType: 'img', disabled: false, text: '上传图片', tips: ' ', icon: imageIcon },
-        {label: '视频', visible: true, iconSrc: imageIcon, dataSource: 'uploadVideo', mineType: 'video', disabled: false, text: '上传视频', tips: '大小限200M以内', icon: imageIcon }
+        {label: '通道抓取', visible: true, iconSrc: channelIcon, dataSource: 'uikit', mineType: 'img, video', disabled: false,  text: '通道抓取', tips: ' ', icon: channelBigIcon, bg: 'channel_bg.png'},
+        {label: '图片', visible: true, iconSrc: imageIcon, dataSource: 'uploadImg', mineType: 'img', disabled: false, text: '上传图片', tips: ' ', icon: imageBigIcon, bg: 'image_bg.png' },
+        {label: '视频', visible: true, iconSrc: videoIcon, dataSource: 'uploadVideo', mineType: 'video', disabled: false, text: '上传视频', tips: '大小限200M以内', icon: videoBigIcon, bg: 'video_bg.png' }
       ]
       // 如果 businessLine 为 'portal'，不显示通道抓取
-      if (this.businessLine === 'portal') {
+      if (['portal', 'retail'].includes(this.businessLine)) {
         return menuItems.filter(item => item.dataSource !== 'uikit')
       }
       
@@ -185,6 +202,9 @@ export default {
     conversationId: {
       immediate: true,
       handler(val) {
+        this.aiInputText = ''
+        this.$refs.aiInput && this.$refs.aiInput.clear()
+        this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
         if (val) {
           // 如果当前已有 chatId 且和传入的一样，则不重复加载
           // 注意：首次进入时 this.chatId 是空的，所以即使 val 是一样也会加载
@@ -199,8 +219,6 @@ export default {
           this.chatId = '';
           this.messages = [];
         }
-        this.aiInputText = ''
-        this.$refs.aiInput && this.$refs.aiInput.clear()
         if (this.chatId.startsWith('conv-') || !this.chatId) { // 新建对话
           this.fetchConversationList();
         }
@@ -219,7 +237,7 @@ export default {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
     this.fetchConversationList();
-    this.customMenuItems = [ ...this.fullCustomMenuItems ]
+    this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
   },
   methods: {
     getActions(item) {
@@ -243,7 +261,7 @@ export default {
         }
        } else {
         this.fileListUploadType = ''
-        this.customMenuItems = [ ...this.fullCustomMenuItems ]
+        this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
        }
     },
     initUploader() {
@@ -768,7 +786,7 @@ export default {
     /**
      * 处理消息操作（复制、编辑、点赞等）
      */
-    async handleAction({ type, payload, index }) {
+    async handleAction(type, payload, index) {
       
       console.log('Action Clicked:', type, payload, index);
       
@@ -866,6 +884,18 @@ export default {
         text: userMsg.content || '',
         attachments: [] // 不包含图片等附件
       });
+    },
+
+    /**
+     * 获取背景图片
+     */
+    getBgImage(bgFileName) {
+      const bgMap = {
+        'channel_bg.png': this.channelBg,
+        'image_bg.png': this.imageBg,
+        'video_bg.png': this.videoBg
+      };
+      return bgMap[bgFileName] || '';
     }
   }
 };
@@ -933,7 +963,16 @@ export default {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        &:hover {
+        position: relative;
+        .bg{
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          width: 110px;
+          height: 100px;
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: bottom right;
         }
         .card_icon{
           width: 32px;
@@ -990,4 +1029,3 @@ export default {
   }
 }
 </style>
-
