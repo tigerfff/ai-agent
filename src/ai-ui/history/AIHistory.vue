@@ -186,7 +186,6 @@ export default {
   methods: {
     // 监听图片加载事件
     handleImageLoad(e) {
-      console.log(e,'e')
       if (e.target && e.target.tagName === 'IMG') {
         // 如果处于初始加载阶段，或者之前已经在底部，强制滚动
         if (this.isInitialLoading || !this.userScrolledUp) {

@@ -8,7 +8,7 @@ export const TryApi = {
    */
   getOssToken(client) {
     return client.send({
-      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'chaiin'),
+      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'chain'),
       method: 'get'
     });
   },
@@ -20,7 +20,7 @@ export const TryApi = {
    */
   getConversationList(client, data = {}) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/list', 'chaiin'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/list', 'chain'),
       method: 'post',
       data
     });
@@ -33,7 +33,7 @@ export const TryApi = {
    */
   getHistory(client, sessionId) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/history', 'chaiin'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/history', 'chain'),
       method: 'get',
       // 注意：AIClient.send 目前只会把 data 传给 httpAdapter，
       // 所以这里用 data，由 httpStub 在 GET 场景下自动转成 query string
@@ -48,7 +48,7 @@ export const TryApi = {
    */
   deleteHistory(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/delete', 'chaiin'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/delete', 'chain'),
       method: 'get',
       data
     });
@@ -61,7 +61,7 @@ export const TryApi = {
    */
   getChatId(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/chat/web/agent/chat/add', 'chaiin'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/add', 'chain'),
       method: 'post',
       data
     });
@@ -75,7 +75,7 @@ export const TryApi = {
   evaluateMessage(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'chaiin', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/userEvaluation`, 'chain', '/api'),
       method: 'post',
       data: body
     });
@@ -89,7 +89,7 @@ export const TryApi = {
   renameChatTitle(client, data) {
     const { chatId, ...body } = data;
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'chaiin', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/renameChatTitle`, 'chain', '/api'),
       method: 'post',
       data: body
     });
@@ -104,7 +104,7 @@ export const TryApi = {
   pinnedChat(client, data) {
     const { chatId, pinned } = data;
     // pinned 参数在 query 中，手动拼接 URL
-    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'chaiin', '/api')}?pinned=${pinned}`;
+    const url = `${buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/${chatId}/actions/pinned`, 'chain', '/api')}?pinned=${pinned}`;
     return client.send({
       url,
       method: 'put',
@@ -140,6 +140,63 @@ export const TryApi = {
       onComplete,
       onError
     });
-  }
+  },
+  
+  getMonitors(client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/orgs/channels', 'chain'),
+      method: 'get',
+      data
+    });
+  },
+  getDeviceValidateCode(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/device/devices/actions/getDeviceValidateCode', 'chain'),
+      method: 'get',
+      data
+    });
+  },
+  getDeviceRamAccount(client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/analysis/video/deviceRamAccount', 'chain'),
+      method: 'get',
+      data
+    });
+  },
+  getCredentials(client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/algorithm/models/upload/ossInfo', 'chain'),
+      method: 'get',
+      data
+    });
+  },
+  getTokenStrategy(client, data) {
+    return client.send({
+      url: buildUrl(client, '/carrier/account/tkToken/getTokenStrategy', 'nissan'),
+      method: 'get',
+      data
+    });
+  },
+  getTkToken(client, data) {
+    return client.send({
+      url: buildUrl(client, '/carrier/account/tkToken/getTkToken', 'nissan'),
+      method: 'post',
+      data
+    });
+  },
+  getTreeNext(client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/orgsForLine', 'chain'),
+      method: 'get',
+      data
+    });
+  },
+  getStoresTreeList(client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/actions/storeList', 'chain'),
+      method: 'get',
+      data
+    });
+  },
 };
 

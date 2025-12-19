@@ -20,6 +20,7 @@ export const BUSINESS_LINES = {
   RETAIL: 'retail',      // 零售
   MINERVA: 'minerva',    // 教学
   PORTAL: 'portal',      // 官网
+  OPEN: 'open',      // 开发者
   ENTERPRISE: 'enterprise', // 企业
   AIOT: 'aiot',          // 智联
   DEFAULT: 'default'      // 默认（所有智能体）
@@ -170,7 +171,10 @@ export const BUSINESS_LINE_AGENTS = {
     'training-x',
   ],
   [BUSINESS_LINES.PORTAL]: [
-    'try-x',
+    'try-x'
+  ],
+  [BUSINESS_LINES.OPEN]: [
+    'try-x'
   ],
   [BUSINESS_LINES.ENTERPRISE]: [
     'inspect-x',

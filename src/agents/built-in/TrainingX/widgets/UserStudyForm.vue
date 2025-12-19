@@ -171,15 +171,7 @@ export default {
         return;
       }
 
-      let baseUrl = '';
-
-      const origin = window.location.origin;
-      // 如果当前域名包含 pb.hik-cloud.com，使用 training-cs-web 子路径
-      if (origin.includes('pb.hik-cloud.com')) {
-        return `${origin}/training-cs-web`;
-      }
-      // 其他情况，默认使用 pb.hik-cloud.com
-      baseUrl =  'https://www.hik-cloud.com/training-cs-web';
+      let baseUrl =  `${window.location.origin}/training-cs-web`;
       
       // 根据类型确定路径
       const path = this.isProject ? 'project' : 'course';

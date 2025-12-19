@@ -5,24 +5,57 @@
       <AIWelcome
         v-if="messages.length === 0 && !loadingHistory"
         v-bind="welcomeConfig"
-        @select="handleWelcomeSelect"
         class="content-wrapper"
-        :icon="trainingSquareIcon"
+        @select="handleWelcomeSelect"
       >
-    </AIWelcome>
+        <div class="welcome-prompts">
+          <div
+            v-for="(card, index) in fullCustomMenuItems"
+            :key="index"
+            class="prompt-card"
+            @click="handleWelcomeSelect(card)"
+            :class="{ 'prompt-card-disabled': (fileListUploadType!== '' && card.mineType.indexOf(fileListUploadType) < 0) || fileListUploadType==='video'}"
+          >
+            <img :src="card.icon" alt="" class="card_icon" />
+            <div class="prompt-desc">{{ card.text }}</div>
+            <div class="prompt-tips">{{ card.tips }}</div>
+          </div>
+        </div>
+      </AIWelcome>
       
       <ChatSkeleton style="margin-top: 40px;" v-else-if="loadingHistory" class="content-wrapper" />
 
-      <AIHistory 
+      <AIHistory
         v-else
         ref="history"
-        :list="messages" 
+        :list="messages"
         :back-button-threshold="50"
         @complete="handleFinish"
         @action-click="handleAction"
         enableActions
         class="history-full-width"
       >
+        <template  #footer="{ item, index }" >
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <BubbleFooter
+              :item="item"
+              :actions="getActions(item)"
+              @action="handleAction($event, item, index)"
+            >
+              <!-- 在AI回答前面添加刷新按钮 -->
+              <template #before-custom-actions>
+                <div
+                  v-if="item.role === 'ai' && !item.loading"
+                  class="action-item regenerate-btn"
+                  @click="handleRegenerate(item, index)"
+                  title="重新生成"
+                >
+                  <img src="@/assets/svg/regenerate.svg" alt="重新生成" class="action-icon" />
+                </div>
+              </template>
+            </BubbleFooter>
+          </div>
+        </template>
       </AIHistory>
     </div>
     <!-- 输入区域 -->
@@ -34,42 +67,54 @@
         -->
         <AIInput 
           ref="aiInput"
+          v-model="aiInputText"
           :loading="isStreaming || isUploading"
           placeholder="有问题尽管问我~"
-          :allowed-types="['image', 'video', 'document']"
+          :allowed-types="[]"
+          :customMenuItems="customMenuItems"
           :max-size="200 * 1024 * 1024"
           :singleTypeMode="true"
-          :maxCount="5"
+          :maxFileCount="30"
           :file-limit="{
-            image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png'] },
+            image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
             video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] }
           }"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"
           :before-send="handleBeforeSend"
+          :send-disabled="sendBtnDisabled"
           @send="handleSend" 
           @stop="handleStop"
+          @file-list-change="fileListChange"
+          @custom-menu-item-click="customMenuItemClick"
         />
       </div>
     </div>
+    <simulateVerifyModal :visible.sync="simulateVerifyModalVisible" @simulateVerifyFileUpload="simulateVerifyFileUpload" 
+      :limitImgsCanNumber="currentImgFileCount" :limitVideosCanNumber="currentVideoFileCount"></simulateVerifyModal>
   </div>
 </template>
 
 <script>
+import imageIcon from '@svg/image.svg';
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
 import { formatConversationTime } from '@/utils';
-import trainingSquareIcon from '@/assets/images/try.png';
+import trainingSquareIcon from '@/assets/images/inspect-square.png';
+import simulateVerifyModal from './modal/simulateVerifyModal.vue'
+// import trainingSquareIcon from '@/assets/images/try.png';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
-
+import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 export default {
   name: 'TryAgent',
   inject: ['sessionApi'],
   components: {
     AIWelcome,
-    ChatSkeleton
+    ChatSkeleton,
+    simulateVerifyModal,
+    BubbleFooter
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
@@ -80,11 +125,22 @@ export default {
     isMini: {
       type: Boolean,
       default: false
+    },
+    businessLine: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
-      demoText:'',
+      imageIcon,
+      aiInputText: '',
+      customMenuItems: [],
+      fileListUploadType: '',
+      inputFilesList: [],
+      currentImgFileCount: 0,
+      currentVideoFileCount: 0,
+      simulateVerifyModalVisible: false,
       messages: [],
       chatId: '', // 当前会话的真实 chatId，用于 SSE 请求
       isStreaming: false,
@@ -92,16 +148,38 @@ export default {
       loadingHistory: false,
       abortController: null,
       trainingSquareIcon,
-      
+      // 操作栏配置
+      actionConfig: {
+        user: ['copy', 'edit'],
+        bot: ['copy', 'edit', 'like', 'dislike']
+      },
       // OSS 上传器实例
       ossUploader: null,
 
       welcomeConfig: {
-        icon: '🔍',
+        icon: trainingSquareIcon,
         title: 'AI试用',
-        description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。',
+        description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。上传图片或视频并提出问题，我将给出检测结果。现在就来试试吧！',
       }
     };
+  },
+  computed: {
+    fullCustomMenuItems() {
+      const menuItems = [
+        {label: '通道抓取', visible: true, iconSrc: imageIcon, dataSource: 'uikit', mineType: 'img, video', disabled: false,  text: '通道抓取', tips: ' ', icon: imageIcon},
+        {label: '图片', visible: true, iconSrc: imageIcon, dataSource: 'uploadImg', mineType: 'img', disabled: false, text: '上传图片', tips: ' ', icon: imageIcon },
+        {label: '视频', visible: true, iconSrc: imageIcon, dataSource: 'uploadVideo', mineType: 'video', disabled: false, text: '上传视频', tips: '大小限200M以内', icon: imageIcon }
+      ]
+      // 如果 businessLine 为 'portal'，不显示通道抓取
+      if (this.businessLine === 'portal') {
+        return menuItems.filter(item => item.dataSource !== 'uikit')
+      }
+      
+      return menuItems
+    },
+    sendBtnDisabled() {
+      return Boolean((!this.messages.length && (!this.inputFilesList.length || !this.aiInputText.length)) || (this.messages.length && !this.aiInputText.length))
+    }
   },
   watch: {
     conversationId: {
@@ -121,6 +199,19 @@ export default {
           this.chatId = '';
           this.messages = [];
         }
+        this.aiInputText = ''
+        this.$refs.aiInput && this.$refs.aiInput.clear()
+        if (this.chatId.startsWith('conv-') || !this.chatId) { // 新建对话
+          this.fetchConversationList();
+        }
+      }
+    },
+    messages: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
+        }
       }
     }
   },
@@ -128,20 +219,43 @@ export default {
     this.initUploader();
     // 主动获取列表并通知父组件更新 Sidebar
     this.fetchConversationList();
+    this.customMenuItems = [ ...this.fullCustomMenuItems ]
   },
   methods: {
+    getActions(item) {
+      // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
+      const role = item.placement === 'end' ? 'user' : 'bot';
+      return this.actionConfig[role] || [];
+    },
+    customMenuItemClick(item) {
+      console.log("item", item)
+      let data = item.item
+      this.handleWelcomeSelect(data)
+    },
+    fileListChange(file) {
+      this.inputFilesList = file || []
+       if(this.inputFilesList.length > 0) {
+        this.fileListUploadType = this.inputFilesList[0].type === 'image' ? 'img' : 'video'
+        if(this.fileListUploadType === 'video') {
+          this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
+        } else {
+          this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: item.mineType.indexOf('img') < 0 }))
+        }
+       } else {
+        this.fileListUploadType = ''
+        this.customMenuItems = [ ...this.fullCustomMenuItems ]
+       }
+    },
     initUploader() {
       this.ossUploader = new OssUploader({
         tokenProvider: async () => {
           try {
             const res = await TryApi.getOssToken(this.$aiClient);
-            // 适配后端返回结构: { code: 0, data: { ... } }
             if (res.code === 0) {
               return res.data;
             }
             return null;
           } catch (e) {
-            console.error('Fetch STS token failed', e);
             return null;
           }
         }
@@ -150,7 +264,6 @@ export default {
     
     // 执行之前
     handleBeforeSend(data) {
-      console.log(data,'data')
       // 检查是否有上传失败的文件
       const hasError = data.attachments && data.attachments.some(f => f.status === 'error');
       if (hasError) {
@@ -213,7 +326,6 @@ export default {
           this.$emit('update-list', list);
         }
       } catch (e) {
-        console.error('[TryAgent] fetchConversationList failed', e);
       }
     },
 
@@ -222,19 +334,12 @@ export default {
      * 如果选项需要上传文件（如"图片分析"），则触发文件选择并传递到 AIInput
      */
     async handleWelcomeSelect(data) {
-      // 兼容旧协议：如果直接传入字符串，则作为文本处理
-      let text = typeof data === 'string' ? data : data.text || data.title;
-      // 检查是否需要文件：优先使用配置中的 needsFile，否则根据文本判断
-      const needsFile = typeof data === 'object' && data.needsFile !== undefined 
-        ? data.needsFile 
-        : (text.includes('图片') || text.includes('视频') || text.includes('上传'));
-      
-      if (needsFile) {
+      if (['uploadImg', 'uploadVideo'].includes(data.dataSource)) {
         // 创建一个隐藏的文件输入元素
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.jpg,.jpeg,.png,.mp4';
-        input.multiple = true;
+        input.accept = data.mineType === 'img' ?  '.jpg,.jpeg,.png' : '.mp4'
+        input.multiple = data.mineType === 'img' ? true: false
         input.style.display = 'none';
         
         // 等待用户选择文件
@@ -243,6 +348,7 @@ export default {
             const selectedFiles = Array.from(e.target.files || []);
             resolve(selectedFiles);
             document.body.removeChild(input);
+            this.$refs.aiInput.handleFileChange(e);
           };
           input.oncancel = () => {
             resolve([]);
@@ -254,26 +360,59 @@ export default {
 
         // 如果用户选择了文件，添加到 AIInput
         if (files.length > 0 && this.$refs.aiInput) {
-          // 设置输入框文本
-          this.$refs.aiInput.setText(text);
+          // await this.$refs.aiInput.addFiles(files);
           // 添加文件
-          await this.$refs.aiInput.addFiles(files);
-        } else if (this.$refs.aiInput) {
-          // 即使没有选择文件，也设置文本
-          this.$refs.aiInput.setText(text);
         }
-      } else {
-        // 不需要文件，直接设置文本
-        if (this.$refs.aiInput) {
-          this.$refs.aiInput.setText(text);
-          // 聚焦到输入框
-          this.$nextTick(() => {
-            this.$refs.aiInput.focusInput();
-          });
-        }
+      } else { // 通道抓取
+        let inputFiles = this.$refs.aiInput ? this.$refs.aiInput.fileList : []
+        // 获取当前已有的图片和视频文件数量
+        this.currentImgFileCount = inputFiles.filter(_ => _.type === 'image').length
+        this.currentVideoFileCount = inputFiles.filter(_ => _.type === 'video').length
+        this.simulateVerifyModalVisible = true
       }
     },
 
+    async simulateVerifyFileUpload(fileList) {
+      if(!fileList || !fileList.length) {
+        return false
+      }
+      
+      // 将 base64 图片和视频 blob 转换为 File 对象
+      const files = await Promise.all(
+        fileList.map(async (item, index) => {
+          if (item.mineType === 'img' && item.base64Url) {
+            // 将 base64 转换为 Blob
+            const response = await fetch(item.base64Url);
+            const blob = await response.blob();
+            
+            // 创建 File 对象
+            const fileName = item.name || `capture_${index + 1}.jpg`;
+            return new File([blob], fileName, { type: 'image/jpeg' });
+          }
+          if(item.mineType === 'video' && item.blobInfo) {
+            // 视频已经是 Blob 对象，直接创建 File 对象
+            const fileName = item.name || `video_${index + 1}.mp4`;
+            return new File([item.blobInfo], fileName, { type: 'video/mp4' });
+          }
+          return null;
+        })
+      );
+      
+      // 过滤掉 null 值
+      const validFiles = files.filter(file => file !== null);
+      
+      // 如果有有效的文件且 AIInput 组件存在，添加到输入框
+      if (validFiles.length > 0 && this.$refs.aiInput) {
+        await this.$refs.aiInput.addFiles(validFiles);
+        
+        // 关闭模态框
+        this.simulateVerifyModalVisible = false;
+        
+        return true;
+      }
+      
+      return false;
+    },
     /**
      * 加载当前 chatId 的历史记录
      */
@@ -327,7 +466,6 @@ export default {
           this.messages = list;
         } 
       } catch (e) {
-        console.error('[TryAgent] loadHistory failed', e);
         this.messages = [];
       } finally {
         this.loadingHistory = false;
@@ -416,9 +554,10 @@ export default {
       // 1. 如果当前没有会话ID 或 是临时ID，先创建会话
       if (!this.chatId || this.chatId.startsWith('conv-')) {
         try {
+          let mineTypeParams = data.attachments[0].type
           // 创建新会话
           const res = await TryApi.getChatId(this.$aiClient, {
-            mineType: 'image'
+            mineType: mineTypeParams
           });
           if (res.code === 0 && res.data) {
              // 假设返回的是 chatId 字符串或包含 chatId 的对象
@@ -435,7 +574,6 @@ export default {
             return;
           }
         } catch (e) {
-          console.error('[TryAgent] Create session failed', e);
           return;
         }
       }
@@ -516,14 +654,12 @@ export default {
             this.handleFinish({ index: this.messages.indexOf(aiMsg) });
           },
           onError: (err) => {
-            console.error('SSE Error', err);
             aiMsg.loading = false;
             aiMsg.content += '\n[网络错误，连接断开]';
             this.isStreaming = false;
           }
         });
       } catch (e) {
-        console.error('SSE Start Error', e);
         aiMsg.loading = false;
         aiMsg.content = '服务暂时不可用，请稍后再试。';
         this.isStreaming = false;
@@ -557,7 +693,6 @@ export default {
           this.fetchConversationList();
         }
       } catch (e) {
-        console.error('[TryAgent] renameSession failed', e);
         this.$message.error('重命名失败');
       }
     },
@@ -580,7 +715,6 @@ export default {
           this.fetchConversationList();
         }
       } catch (e) {
-        console.error('[TryAgent] Delete session failed', e);
       }
     },
 
@@ -606,7 +740,6 @@ export default {
           const { appId, sign } = res.data;
           
           if (!appId || !sign) {
-            console.error('ASR config missing appId or sign');
             return null;
           }
 
@@ -626,10 +759,8 @@ export default {
           };
         }
         
-        console.error('Failed to get ASR config:', res);
         return null;
       } catch (e) {
-        console.error('[TryAgent] getAsrConfig failed', e);
         return null;
       }
     },
@@ -670,8 +801,6 @@ export default {
                 userEvaluation: 'NO_EVAL'
               });
               if (res.code === 0) {
-                // 取消评价成功
-                console.log('[TryX] Cancel evaluation success');
               } else {
                 // 取消评价失败，回滚本地状态
                 this.$set(message, 'likeStatus', '');
@@ -679,7 +808,6 @@ export default {
               }
               return;
             }
-            console.log(type,'typ111e')
             const userEvaluation = type === 'like' ? 'UPVOTE' : 'DOWNVOTE';
             const res = await TryApi.evaluateMessage(this.$aiClient, {
               chatId: this.chatId,
@@ -688,8 +816,6 @@ export default {
             });
 
             if (res.code === 0) {
-              // 评价成功
-              console.log('[TryX] Evaluate message success:', res);
             } else {
               // 评价失败，回滚本地状态
               this.$set(message, 'likeStatus', '');
@@ -722,6 +848,24 @@ export default {
           }
         }
       }
+    },
+
+    /**
+     * 处理重新生成AI回答
+     */
+    async handleRegenerate(item, index) {
+      // 找到对应的用户消息（通常是前一条消息）
+      const userIndex = index - 1;
+      if (userIndex < 0 || !this.messages[userIndex] || this.messages[userIndex].role !== 'user') {
+        this.$message.warning('无法重新生成回答');
+        return;
+      }
+      const userMsg = this.messages[userIndex];
+      // 重新发送用户消息，只发送文字内容
+      await this.handleSend({
+        text: userMsg.content || '',
+        attachments: [] // 不包含图片等附件
+      });
     }
   }
 };
@@ -767,6 +911,50 @@ export default {
     .history-full-width {
       width: 100%;
       height: 100%;
+    }
+
+    // 自定义欢迎页卡片样式
+    .welcome-prompts {
+      display: flex;
+      margin-top: 20px;
+      width: 100%;
+      justify-content: space-between;
+
+      .prompt-card {
+        background: #fff;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        flex: 1;
+        height: 177px;
+        background: #FFFFFF7F;
+        border: 1px dashed #00000033;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+        }
+        .card_icon{
+          width: 32px;
+          height: 32px;
+        }
+        .prompt-desc {
+          color: #000000B2;
+          font-size: 14px;
+          height: 22px;
+        }
+        .prompt-tips{
+          color: #00000066;
+          font-size: 12px;
+          height: 20px;
+        }
+      }
+      .prompt-card-disabled{
+        background-color: #f5f7fa;
+        pointer-events: none;
+        opacity: 0.6;
+      }
     }
   }
 

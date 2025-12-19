@@ -104,7 +104,7 @@ export default defineConfig({
     cssCodeSplit: false,
     rollupOptions: {
       // 外部依赖：由父项目提供，不打进库里
-      external: ['vue', 'hui','hui/lib/hui.css','@hui/lib/hui.esm-browser.js', '@hui/lib/hui.css'],
+      external: ['vue', 'hui','hui/lib/hui.css','moment', 'lodash', '@hui/lib/hui.esm-browser.js', '@hui/lib/hui.css'],
       output: {
         globals: {
           vue: 'Vue'
