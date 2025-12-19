@@ -83,7 +83,7 @@
                     class="menu-item"
                     @click="selectFileType('video')"
                   >
-                    <img :src="imageIcon" alt="视频" class="menu-icon" />
+                    <img :src="videoIcon" alt="视频" class="menu-icon" />
                     <span>视频</span>
                   </div>
                   <div 
@@ -215,7 +215,8 @@ import voiceIcon from '@svg/voice.svg';
 import pauseIcon from '@images/pause@3x.png';
 import sendIcon from '@images/send-msg.png';
 import sendDisabledIcon from '@images/send_msg_disabled.png';
-import imageIcon from '@svg/image.svg';
+import imageIcon from '@svg/imgae.svg';
+import videoIcon from '@svg/video-icon.svg';
 import documentIcon from '@svg/document.svg';
 import starIcon from '@images/star@3x.png';
 

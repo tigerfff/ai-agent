@@ -112,7 +112,7 @@ export default {
       try {
         // 使用 qrcode 库生成二维码 Data URL
         const qrDataUrl = await QRCode.toDataURL(this.qrCodeLink, {
-          width: 280,
+          width: 120,
           margin: 2,
           color: {
             dark: '#000000',

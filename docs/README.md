@@ -4,6 +4,11 @@
 
 ## 📚 文档索引
 
+### 🚀 快速入门
+
+- [接入指南](./INTEGRATION.md) - 如何在项目中安装和使用组件库
+- [发布指南](./PUBLISH.md) - 如何构建和发布组件库到 npm
+
 ### 视图层组件
 
 - [AIChatWindow](./components/AIChatWindow.md) - 聊天窗口组件（顶层容器）

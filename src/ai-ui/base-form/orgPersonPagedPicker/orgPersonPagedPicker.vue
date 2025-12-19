@@ -418,7 +418,7 @@
           positionId: positionId,
           containSubOrgUsers: this.containSubOrgUsers,
           filterAdmin: this.filterAdmin,
-          userIds: this.userList
+          userIds: this.userList.join(',')
           // ban: this.$route.path.includes('inspect') ? false : undefined,
         };
       },

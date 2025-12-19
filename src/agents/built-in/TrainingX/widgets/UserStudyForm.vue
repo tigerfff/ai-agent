@@ -1,10 +1,5 @@
 <template>
   <div class="user-study-form" :class="{ 'error': errorMessage }">
-    <!-- 错误提示 -->
-    <!-- <div v-if="errorMessage" class="error-card">
-      {{ errorMessage }}
-    </div> -->
-
     <div class="study-card">
       <!-- 左侧封面 -->
       <div class="card-cover">
@@ -115,7 +110,6 @@ export default {
     this.formData.courseProjectId = this.data.courseProjectId || '';
     this.formData.type = this.data.type ? Number(this.data.type) : '';
 
-    console.log(this.formData,'this.formData')
 
     // 如果有 courseProjectId，加载详情
     if (this.formData.courseProjectId) { 

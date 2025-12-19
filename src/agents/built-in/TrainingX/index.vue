@@ -47,11 +47,11 @@
             <template v-if="item.content.includes('ymform:train_plan_result')" >
               <div 
                 class="stop-task" 
-                :class="{ 'disabled': item.taskCancelled }"
+                :class="{ 'disabled': item.taskCancelled || item.taskCancelling }"
                 @click="handleCancelTask(item)"
               >
                 <i class="h-icon-close_f" style="font-size: 24px;"></i>
-                <span>停止任务</span>
+                <span>{{ item.taskCancelling ? '取消中...' : '停止任务' }}</span>
               </div>
               <span style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
             </template>
@@ -225,12 +225,12 @@ export default {
     // 获取白名单用户列表（全局共享，只调用一次）
     this.fetchWhiteUserList();
     // 主动获取列表并通知父组件更新 Sidebar
-    // this.fetchConversationList();
+    this.fetchConversationList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单
     // 或者取消下面的注释，自动添加测试消息
-    this.mockTrainPlanForm();
+    // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
     // this.mockUserTrainFinish();
     // this.mockTrainResultUpload();
@@ -238,24 +238,32 @@ export default {
   methods: {
 
     handleCancelTask(item) {
-      // 如果已经取消过，直接返回
-      if (item.taskCancelled) {
+      // 如果已经取消过或正在取消中，直接返回
+      if (item.taskCancelled || item.taskCancelling) {
         return;
       }
 
-      // 标记为已取消，禁用按钮
-      this.$set(item, 'taskCancelled', true);
+      // 设置取消中状态，防止重复点击
+      this.$set(item, 'taskCancelling', true);
 
-      const cancelData = parseWidgetData(item, 'ymform:train_plan_result');
-      const cancelDataObj = {
-        trainCreateKey: cancelData.trainCreateKey
-      };
-      // // 构造消息格式
-      const message = `确认取消 <ymform:train_cancel desc="以下是取消内容">
-      ${JSON.stringify(cancelDataObj, null, 2)}
-      </ymform:train_cancel>`;
+      try {
+        const cancelData = parseWidgetData(item, 'ymform:train_plan_result');
+        const cancelDataObj = {
+          trainCreateKey: cancelData.trainCreateKey
+        };
+        // // 构造消息格式
+        const message = `确认取消 <ymform:train_cancel desc="以下是取消内容">
+        ${JSON.stringify(cancelDataObj, null, 2)}
+        </ymform:train_cancel>`;
 
-      this.handleWidgetSend(message);
+        this.handleWidgetSend(message);
+        
+        // 标记为已取消，禁用按钮
+        this.$set(item, 'taskCancelled', true);
+      } finally {
+        // 无论成功失败，都清除取消中状态
+        this.$set(item, 'taskCancelling', false);
+      }
     },
     /**
      * 获取白名单用户列表（全局共享）
@@ -552,7 +560,6 @@ export default {
      * 加载当前 chatId 的历史记录
      */
     async loadHistory() {
-      console.log('loadHistory', this.chatId);
       if (!this.chatId) return;
 
       // 如果是临时会话ID（AgentContainer 生成的），则不加载历史，直接显示欢迎页
@@ -1000,7 +1007,15 @@ export default {
         }
       }
     }
+  },
+  beforeDestroy() {
+  if (this.abortController) {
+    this.abortController.abort();
   }
+  if (this.ossUploader) {
+    this.ossUploader.destroy?.();
+  }
+}
 };
 </script>
 

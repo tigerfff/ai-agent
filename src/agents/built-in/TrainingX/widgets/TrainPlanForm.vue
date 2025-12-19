@@ -600,7 +600,7 @@ export default {
       };
 
       // 构造描述文本
-      let desc = `以下是用户确认的${this.formData.type}内容`;
+      let desc = `以下是用户确认的${+this.formData.type === TYPE_PROJECT ? '项目' : '课程'}内容`;
 
       // 构造消息格式
       const message = `确认执行 <ymform:train_confirm desc="${desc}">

@@ -35,7 +35,6 @@ export const TrainingXApi = {
    * @param {string} sessionId 
    */
   getHistory(client, sessionId) {
-    console.log('sessionId', sessionId)
     return client.send({
       url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`, 'chain', '/api'),
       method: 'get',
