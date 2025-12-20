@@ -317,7 +317,7 @@ export default {
   &.start {
     .bubble-body.filled {
       background: #fff;
-      color: #333;
+      color: rgba($color: #000000, $alpha: .7);
       border-radius: 0px 16px 16px 16px;
       
       // 确保所有子元素都是黑色文字
@@ -373,7 +373,7 @@ export default {
       word-break: break-word;
 
       .markdown-body {
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: var(--ym-ai-font-family, -apple-system, BlinkMacSystemFont, sans-serif);
 
         :deep(p) {
           margin-bottom: 0.5em;

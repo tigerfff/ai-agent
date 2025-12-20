@@ -1,5 +1,5 @@
 <template>
-  <div class="train-plan-form" :class="{ 'is-loading': loading }">
+  <div class="train-plan-form" :class="{ 'is-loading': loading, 'is-history-disabled': isHistoryDisabled }">
     <!-- Loading 蒙层 -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
@@ -28,7 +28,6 @@
             :get-option-value="getOptionValue"
             :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
             :disabled="isHistoryDisabled || loading"
-            style="width: 80%"
             @change="handleProjectChange"
             @input="handleProjectInput"
           />
@@ -66,24 +65,28 @@
 
     <!-- 底部按钮 -->
     <div class="form-footer" >
-      <div 
-        class="confirm-btn" 
-        :class="{ 'is-disabled': !canConfirm || loading }"
-        @click="handleConfirm" 
+      <AIButton
         v-if="!isConfirmed && !isHistoryDisabled"
-      >
-        <span class="icon">
-          <img src="@/assets/svg/star-white.svg" alt="" width="24px">
-        </span>
-        <span>确认执行</span>
-      </div>
+        :icon="starWhiteIcon"
+        text="确认执行"
+        :disabled="!canConfirm || loading"
+        :loading="loading"
+        @click="handleConfirm"
+      />
 
-      <div class="confirmed-badge" v-if="isConfirmed || isHistoryDisabled">
-        <span class="icon">
-          <img src="@/assets/svg/sure.svg" alt="" width="24px">
-        </span>
-        <span>确认执行</span>
-      </div>
+      <AIButton
+        v-if="isConfirmed"
+        :icon="sureWhiteIcon"
+        text="确认执行"
+        :disabled="true"
+      />
+
+      <AIButton
+        v-if="isHistoryDisabled && !isConfirmed"
+        :icon="starWhiteIcon"
+        text="确认执行"
+        :disabled="true"
+      />
     </div>
 
   </div>
@@ -93,6 +96,9 @@
 import { TrainingXApi } from '../api';
 import AILoadSelect from '@/ai-ui/base-form/AILoadSelect.vue';
 import PersonSelect from '@/ai-ui/base-form/orgPersonPagedPicker/index.vue';
+import AIButton from '@/ai-ui/button/AIButton.vue';
+import starWhiteIcon from '@/assets/svg/star-white.svg';
+import sureWhiteIcon from '@/assets/svg/sure.svg';
 
 // 类型常量定义：1=项目，2=课程
 const TYPE_PROJECT = 1; // 项目
@@ -102,7 +108,8 @@ export default {
   name: 'TrainPlanForm',
   components: {
     AILoadSelect,
-    PersonSelect
+    PersonSelect,
+    AIButton
   },
   props: {
     data: {
@@ -131,7 +138,9 @@ export default {
       detailLoaded: false, // 详情是否成功加载（用于权限判断）
       selectedUsers: [], // 选中的用户对象数组
       selectedProjectOptions: [], // 已选中的项目选项（用于 AILoadSelect 显示）
-      _lastInitKey: '' // 用于防止重复初始化的标记
+      _lastInitKey: '', // 用于防止重复初始化的标记
+      starWhiteIcon, // 图标路径
+      sureWhiteIcon,
     };
   },
   computed: {
@@ -618,18 +627,24 @@ export default {
   background: #fff;
   width: 400px;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--ym-ai-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
   position: relative;
   padding: 8px;
 
-  // Loading 状态下禁用交互
-  &.is-loading {
+  // Loading 或 历史记录禁用状态下禁用交互
+  &.is-loading,
+  &.is-history-disabled {
     pointer-events: none;
     user-select: none;
 
     .loading-overlay {
       pointer-events: auto; // 蒙层本身可以接收事件（虽然不需要）
     }
+  }
+
+  &.is-history-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .loading-overlay {
@@ -694,14 +709,14 @@ export default {
     .form-item {
       margin-bottom: 12px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
 
       .label {
         width: 70px;
         flex-shrink: 0;
         color: rgba(0,0,0,0.4);
         font-size: 14px;
-        line-height: 20px;
+        line-height: 26px;
         letter-spacing: 0px;
         text-align: left;
       }
@@ -713,7 +728,7 @@ export default {
         .text-display {
             color: rgba(0,0,0,0.9);
             font-size: 14px;
-            line-height: 20px;
+            line-height: 26px;
             letter-spacing: 0px;
             text-align: left;
         }
@@ -731,56 +746,6 @@ export default {
     margin-top: 12px;
     display: flex;
     justify-content: flex-end;
-
-    .confirm-btn {
-      background: linear-gradient(90deg, #6c9dfa 0%, #409eff 100%);
-      color: #fff;
-      border-radius: 8px;
-      padding: 6px 16px;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: opacity 0.2s;
-
-      &:hover:not(.is-disabled) {
-        opacity: 0.9;
-      }
-
-      &.is-disabled {
-        background: #d3d3d3;
-        cursor: not-allowed;
-        opacity: 0.6;
-      }
-
-      .icon {
-        font-size: 14px;
-        margin-right: 4px;
-      }
-    }
-  }
-
-  .confirmed-badge {
-    width: 112px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    border-radius: 4px;
-    padding: 6px 16px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    transition: opacity 0.2s;
-    margin-left: auto;
-    border-radius: 8px;
-    background: linear-gradient(-82.01deg, rgba(161,75,254,1) 0%, rgba(5,189,254,1) 100%);
-    opacity: 0.4;
-    cursor: not-allowed;
-    .icon {
-      margin-right: 8px;
-    }
   }
 }
 

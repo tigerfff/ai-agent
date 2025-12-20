@@ -7,7 +7,7 @@
       :class="{ 'is-focus': visible, 'is-disabled': disabled }"
       @click="handleInputClick"
     >
-      <div class="select-input-inner">
+      <div class="select-input-inner" :style="{ maxWidth: maxWidth }">
         <!-- 多选：显示标签 -->
         <template v-if="multiple">
           <el-tag
@@ -179,6 +179,10 @@ export default {
     popoverWidth: {
       type: [String, Number],
       default: 'auto'
+    },
+    maxWidth: {
+      type: [String, Number],
+      default: '250px'
     }
   },
   data() {
@@ -542,61 +546,81 @@ export default {
 .ai-load-select {
   position: relative;
   display: inline-block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  min-width: 80px;
+  max-width: 300px;
+  cursor: pointer;
 
   .select-input {
     position: relative;
     background-color: rgba(232, 246, 255, 1);
-    border: 1px solid rgba(232, 246, 255, 1);
+    border: 1px solid rgba(56, 142, 255, 1);
     border-radius: 4px;
     transition: all 0.3s;
-    min-height: 32px;
-    display: flex;
+    min-height: 24px;
+    display: inline-flex;
     align-items: center;
+    min-width: 80px;
+    
 
     &:hover {
-      border-color: rgba(232, 246, 255, 1);
+      border-color: rgba(56, 142, 255, 1);
     }
 
     &.is-focus {
       border-color: rgba(56, 142, 255, 1);
     }
 
-    &.is-disabled {
-      background-color: rgba(232, 246, 255, 1);
-      border-color: rgba(232, 246, 255, 1);
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
     .select-input-inner {
-      flex: 1;
+      flex: 0 0 auto;
       padding: 0 30px 0 4px;
-      min-height: 32px;
+      min-height: 24px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 4px;
+      font-family: var(--ym-ai-font-family, 'Microsoft YaHei UI', sans-serif);
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0px;
+      text-align: left;
+      color: rgba(56, 142, 255, 1);
 
       .select-tag {
         background: #fff !important;
         border: none;
         color: rgba(56, 142, 255, 1);
         margin: 0;
+        font-family: var(--ym-ai-font-family, 'Microsoft YaHei UI', sans-serif);
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 22px;
+        letter-spacing: 0px;
       }
 
       .select-text {
         color: rgba(56, 142, 255, 1);
+        font-family: var(--ym-ai-font-family, 'Microsoft YaHei UI', sans-serif);
+        font-weight: normal;
         font-size: 14px;
-        line-height: 32px;
-        word-break: break-all;
+        line-height: 22px;
+        letter-spacing: 0px;
+        text-align: left;
+        white-space: nowrap;
         @include ai.ellipsis(1);
       }
 
       .placeholder {
-        color: #c0c4cc;
+        color: rgba(56, 142, 255, 1);
+        font-family: var(--ym-ai-font-family, 'Microsoft YaHei UI', sans-serif);
+        font-weight: normal;
         font-size: 14px;
-        line-height: 32px;
+        line-height: 22px;
+        letter-spacing: 0px;
+        text-align: left;
+        white-space: nowrap;
       }
     }
 
@@ -683,15 +707,6 @@ export default {
 
           .option-check {
             color: rgba(56, 142, 255, 1);
-          }
-        }
-
-        &.is-disabled {
-          color: #c0c4cc;
-          cursor: not-allowed;
-
-          &:hover {
-            background-color: transparent;
           }
         }
 

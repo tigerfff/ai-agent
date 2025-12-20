@@ -48,9 +48,18 @@
             </slot>
           </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="pin" icon="el-icon-top">{{ item.top ? '取消置顶' : '置顶' }}</el-dropdown-item>
-            <el-dropdown-item command="rename" icon="el-icon-edit">重命名</el-dropdown-item>
-            <el-dropdown-item command="delete" icon="el-icon-delete" style="color: #f56c6c">删除</el-dropdown-item>
+            <el-dropdown-item command="pin">
+              <AIIcon size="24" :src="item.top ? cancelTopIcon : topIcon" class="dropdown-icon" />
+              <span>{{ item.top ? '取消置顶' : '置顶' }}</span>
+            </el-dropdown-item>
+            <el-dropdown-item command="rename">
+              <AIIcon :src="editIcon" size="24" class="dropdown-icon" />
+              <span>重命名</span>
+            </el-dropdown-item>
+            <el-dropdown-item command="delete">
+              <AIIcon size="24" :src="deleteIcon" class="dropdown-icon" />
+              <span>删除</span>
+            </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -59,8 +68,18 @@
 </template>
 
 <script>
+// 导入 SVG 图标
+import topIcon from '@/assets/svg/top.svg';
+import cancelTopIcon from '@/assets/svg/cancel_top.svg';
+import editIcon from '@/assets/svg/edit.svg';
+import deleteIcon from '@/assets/svg/delete.svg';
+import AIIcon from '../icon/AIIcon.vue';
+
 export default {
   name: 'ConversationItem',
+  components: {
+    AIIcon
+  },
   props: {
     item: {
       type: Object,
@@ -79,7 +98,12 @@ export default {
     return {
       isHovered: false,
       isTextOverflow: false,
-      menuVisible: false // 菜单是否应该显示（点击后保持显示）
+      menuVisible: false, // 菜单是否应该显示（点击后保持显示）
+      // 图标路径
+      topIcon,
+      cancelTopIcon,
+      editIcon,
+      deleteIcon
     };
   },
   computed: {
@@ -208,12 +232,11 @@ export default {
       color: #909399;
 
       .menu-trigger {
-        padding: 2px 6px;
+        padding: 2px 0px;
         border-radius: 4px;
-
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.05);
-        }
+      }
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
       }
     }
   }
@@ -229,6 +252,26 @@ export default {
     border-radius: 50%;
     flex-shrink: 0;
     z-index: 1;
+  }
+}
+
+.el-dropdown-menu {
+  padding: 4px 0;
+}
+
+// 下拉菜单图标样式
+:deep(.el-dropdown-menu__item) {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 2px;
+  padding: 0 36px 0 12px;
+
+  .dropdown-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    object-fit: contain;
   }
 }
 </style>

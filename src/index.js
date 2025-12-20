@@ -6,6 +6,7 @@ import AIChatWindow from './views/AIChatWindow.vue';
 import AIInput from './ai-ui/input/AIInput.vue';
 import AIBubble from './ai-ui/bubble/AIBubble.vue';
 import AIHistory from './ai-ui/history/AIHistory.vue';
+import AIIcon from './ai-ui/icon/AIIcon.vue';
 import AIConversations from './ai-ui/conversations/AIConversations.vue';
 import AIWelcome from './ai-ui/welcome/AIWelcome.vue';
 
@@ -43,6 +44,7 @@ const install = (Vue, options = {}) => {
   Vue.component('AIInput', AIInput);
   Vue.component('AIBubble', AIBubble);
   Vue.component('AIHistory', AIHistory);
+  Vue.component('AIIcon', AIIcon);
   Vue.component('AIConversations', AIConversations);
   Vue.component('AIWelcome', AIWelcome);
 

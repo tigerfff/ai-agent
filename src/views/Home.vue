@@ -53,6 +53,8 @@
 </template>
 
 <script>
+import selectionPageBg from '@/assets/images/selection-page-bg@3x.png';
+
 export default {
   name: 'AIHome',
   props: {
@@ -64,6 +66,11 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+  data() {
+    return {
+      selectionPageBg
+    };
   },
   methods: {
     toggleWindowSize() {
@@ -83,10 +90,9 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: 
-    radial-gradient(circle at 50% 50%, #C5CEFF 0%, rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle at 50% 50%, #388EFF 0%, rgba(56, 142, 255, 0) 100%),
-    #E2ECF9;
+  background-image: url('@/assets/images/selection-page-bg@3x.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   position: relative;
   
 
@@ -197,7 +203,7 @@ export default {
     background: #fff;
     width: 368px;
     height: 196px;
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 24px;
     cursor: pointer;
     border: 1px solid #eee;
@@ -219,7 +225,10 @@ export default {
 
     &:hover {
       box-shadow: 0 8px 24px rgba(56, 142, 255, 0.2);
-      background: linear-gradient(135deg, #9D83FF 0%, #388EFF 100%);
+      background-image: url('@/assets/images/hover-card-bg@3x.png');
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
       border-color: transparent;
 
       .go-use-btn {

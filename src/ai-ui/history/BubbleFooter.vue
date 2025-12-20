@@ -8,7 +8,7 @@
       @click="handleCopy"
       title="复制"
     >
-      <img src="@/assets/svg/copy.svg" alt="复制" class="action-icon" />
+      <AIIcon size="24" :src="copyIcon" class="action-icon" />
     </div>
 
     <!-- 2. 编辑 -->
@@ -18,7 +18,7 @@
       title="编辑"
       @click="openEditDialog"
     >
-      <i class="h-icon-edit" style="font-size: 20px;color: #333;"></i>
+      <AIIcon size="24" :src="editIcon" class="action-icon" />
     </div>
 
     <!-- 编辑对话框 -->
@@ -65,10 +65,11 @@
       @click="handleLike('like')"
       title="点赞"
     >
-      <img 
+      <AIIcon 
         :src="likeIconSrc" 
-        alt="点赞" 
         class="action-icon" 
+        size="24"
+        :color="localLikeStatus === 'like' ? '#388eff' : 'currentColor'"
       />
     </div>
 
@@ -80,10 +81,11 @@
       @click="handleLike('dislike')"
       title="踩"
     >
-      <img 
+      <AIIcon 
         :src="dislikeIconSrc" 
-        alt="踩" 
         class="action-icon" 
+        size="24"
+        :color="localLikeStatus === 'dislike' ? '#388eff' : 'currentColor'"
       />
     </div>
 
@@ -97,6 +99,8 @@ import likeNormalIcon from '@/assets/svg/like-normal.svg';
 import likeSelectedIcon from '@/assets/svg/like-selected.svg';
 import dislikeNormalIcon from '@/assets/svg/dislike-normal.svg';
 import dislikeSelectedIcon from '@/assets/svg/dislike-selected.svg';
+import editIcon from '@/assets/svg/edit.svg';
+import copyIcon from '@/assets/svg/copy.svg';
 
 export default {
   name: 'BubbleFooter',
@@ -128,7 +132,9 @@ export default {
       likeNormalIcon,
       likeSelectedIcon,
       dislikeNormalIcon,
-      dislikeSelectedIcon
+      dislikeSelectedIcon,
+      editIcon,
+      copyIcon
     };
   },
   computed: {
@@ -238,7 +244,9 @@ export default {
       }
     },
 
-    handleLike(type) {      // 如果已经是当前状态，则取消（设为 null 或 ''）
+    handleLike(type) {    
+      console.log('handleLike', type);
+        // 如果已经是当前状态，则取消（设为 null 或 ''）
       const newStatus = this.localLikeStatus === type ? '' : type;
       this.localLikeStatus = newStatus;
       this.$emit('action', newStatus || 'cancel-like', this.item);
@@ -274,6 +282,7 @@ export default {
       width: 24px;
       height: 24px;
       display: block;
+      color: rgba($color: #000000, $alpha: 0.3);
     }
   }
 }

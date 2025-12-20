@@ -383,18 +383,25 @@ export default {
   }
 
   .upload-btn {
+    height: 32px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    align-items: center;
+    gap: 4px;
     padding: 4px 12px;
     background: #FFF;
-    border: none;
+    border: 1px solid rgba(0,0,0,0.08);
     border-radius: 8px;
-    color: rgba($color: #000000, $alpha: 0.9);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
     user-select: none;
+    color: rgba(0,0,0,0.7);
+    font-size: 14px;
+    line-height: 32px;
+    letter-spacing: 0px;
+    text-align: left;
+
 
     &:hover:not(.is-disabled) {
       background: rgba(56, 142, 255, 0.1);

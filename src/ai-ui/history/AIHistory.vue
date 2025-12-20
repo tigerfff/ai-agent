@@ -366,7 +366,7 @@ export default {
     .history-time-divider {
       text-align: center;
       font-size: 12px;
-      color: #999;
+      color: rgba(0, 0, 0, 0.4);
       margin: 16px 0;
       user-select: none;
     }

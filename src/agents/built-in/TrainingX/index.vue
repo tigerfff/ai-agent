@@ -196,9 +196,9 @@ export default {
     conversationId: {
       immediate: true,
       handler(val) {
-        if (val) {
-          // 如果当前已有 chatId 且和传入的一样，则不重复加载
-          // 注意：首次进入时 this.chatId 是空的，所以即使 val 是一样也会加载
+        console.log('[TrainingX] conversationId', val);
+        // 如果是真实会话ID（不是临时ID且不为空），则加载历史
+        if (val && !val.startsWith('conv-')) {
           // 但为了防止在列表里点击当前会话时重复刷新，加个判断
           if (this.chatId === val) return;
 
@@ -212,7 +212,7 @@ export default {
             this.markAsRead(val);
           }
         } else {
-          // 如果没有 ID（或者是新会话状态），则清空消息显示欢迎页
+          // 如果没有 ID 或者是临时ID（conv-开头），则清空消息显示欢迎页
           this.chatId = '';
           this.messages = [];
           // 获取推荐的提示词
@@ -237,6 +237,25 @@ export default {
     // this.mockTrainResultUpload();
   },
   methods: {
+    /**
+     * 新建对话前的钩子，返回 false 可以阻止新建对话
+     * @returns {boolean} true-允许新建，false-阻止新建
+     */
+    beforeNewChat() {
+      // // 如果正在流式输出，阻止新建对话
+      // if (this.isStreaming) {
+      //   this.$message.warning('AI 正在回复中，请稍后再试');
+      //   return false;
+      // }
+      
+      // // 如果正在上传文件，阻止新建对话
+      // if (this.isUploading) {
+      //   this.$message.warning('文件正在上传中，请稍后再试');
+      //   return false;
+      // }
+      
+      return true;
+    },
 
     handleCancelTask(item) {
       // 如果已经取消过或正在取消中，直接返回
@@ -546,14 +565,8 @@ export default {
           this.$refs.aiInput.setText(text);
         }
       } else {
-        // 不需要文件，直接设置文本
-        if (this.$refs.aiInput) {
-          this.$refs.aiInput.setText(text);
-          // 聚焦到输入框
-          this.$nextTick(() => {
-            this.$refs.aiInput.focusInput();
-          });
-        }
+        // 不需要文件，直接发送
+        this.handleSend({ text, attachments: [] });
       }
     },
 
@@ -784,10 +797,16 @@ export default {
           signal: this.abortController.signal,
           uploadType,
           onMessage: (msgData) => {
+            console.log('[TrainingX] onMessage', msgData);
             if (!msgData) return;
 
             if (msgData.text) {
               aiMsg.content += msgData.text;
+            }
+
+            // 记录消息 ID，用于点赞评价
+            if (msgData.msgId && !aiMsg.msgId) {
+              aiMsg.msgId = msgData.msgId;
             }
 
             if (msgData.status !== 0) {

@@ -50,7 +50,7 @@
                   @click="handleRegenerate(item, index)"
                   title="重新生成"
                 >
-                  <img src="@/assets/svg/regenerate.svg" alt="重新生成" class="action-icon" />
+                  <AIIcon size="24" :src="regenerateIcon" class="action-icon" />
                 </div>
               </template>
             </BubbleFooter>
@@ -116,6 +116,8 @@ import simulateVerifyModal from './modal/simulateVerifyModal.vue'
 // import trainingSquareIcon from '@/assets/images/try.png';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
+import AIIcon from '@/ai-ui/icon/AIIcon.vue';
+import regenerateIcon from '@svg/regenerate.svg';
 export default {
   name: 'TryAgent',
   inject: ['sessionApi'],
@@ -123,7 +125,8 @@ export default {
     AIWelcome,
     ChatSkeleton,
     simulateVerifyModal,
-    BubbleFooter
+    BubbleFooter,
+    AIIcon
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
@@ -172,6 +175,8 @@ export default {
       },
       // OSS 上传器实例
       ossUploader: null,
+
+      regenerateIcon,
 
       welcomeConfig: {
         icon: trainingSquareIcon,
@@ -240,6 +245,16 @@ export default {
     this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
   },
   methods: {
+    /**
+     * 新建对话前的钩子，返回 false 可以阻止新建对话
+     * @returns {boolean} true-允许新建，false-阻止新建
+     */
+    beforeNewChat() {
+      // this.$message.warning('AI 正在回复中，请稍后再试');
+      
+      return true;
+    },
+
     getActions(item) {
       // 根据 placement 判断角色：'end' 是用户，'start' 是机器人
       const role = item.placement === 'end' ? 'user' : 'bot';
@@ -661,6 +676,11 @@ export default {
 
             if (msgData.text) {
               aiMsg.content += msgData.text;
+            }
+
+            // 记录消息 ID，用于点赞评价
+            if (msgData.msgId && !aiMsg.msgId) {
+              aiMsg.msgId = msgData.msgId;
             }
 
             if (msgData.status !== 0) {

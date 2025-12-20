@@ -34,9 +34,9 @@ export const ALL_AGENTS = {
     miniName:'巡查',
     icon: inspectIcon,
     homeIcon: inspectSquareIcon,
-    description: '智能巡查助手，帮助您高效完成巡查任务。',
+    description: '能通过对话进行 AI 智慧巡查，帮您快速完成多门店巡查，节省人工成本，提高巡查效率',
     type: 'built-in',
-    tags: ['巡查', '安防'],
+    tags: ['对话模型', '机器视觉'],
     hideConversations: true,
     component: TryAgent, // 暂时复用 TryAgent，实际应为 InspectAgent
     permission: {
@@ -92,8 +92,8 @@ export const ALL_AGENTS = {
     miniName:'AI试用',
     icon: tryXIcon,
     homeIcon: tryIcon,
-    description: 'AI试用助手，可以帮你快速体验各种 AI 功能',
-    tags: ['试用', 'AI'],
+    description: 'AI试用助手，识别图片，多模态大模型，可以帮你快速体验图片巡查功能',
+    tags: ['对话模型', '机器视觉'],
     type: 'built-in',
     component: TryAgent,
     // AI试用通常对所有人开放，无需特殊权限
@@ -105,9 +105,9 @@ export const ALL_AGENTS = {
     miniName:'培训',
     icon: trainingIcon,
     homeIcon: trainingHomeIcon,
-    description: '专业的培训助手，帮助你快速学习。',
+    description: '专业的培训助手，帮助你快速催学，管理学院，查看学习进度。',
     type: 'built-in',
-    tags: ['培训', '学习'],
+    tags: ['大语言模型'],
     component: TrainingXAgent,
     // 权限配置
     permission: {

@@ -56,10 +56,10 @@
           <!-- 左侧：侧边栏收起时显示 -->
           <div class="header-left">
             <div class="toggle-btn" v-if="isCollapsed" @click="isCollapsed = false" title="展开侧边栏">
-              <img src="@/assets/svg/history.svg" alt="展开" class="icon-svg" />
+              <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" :src="historyIcon" class="icon-svg" />
             </div>
             <div class="toggle-btn" v-show="!shouldHideConversations" v-if="isCollapsed" @click="handleNewChat" title="新建会话">
-              <img src="@/assets/svg/add.svg" alt="新建会话" class="icon-svg" />
+              <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" :src="addIcon" class="icon-svg" />
             </div>
           </div>
 
@@ -70,11 +70,11 @@
           <!-- 右侧：窗口控制 -->
           <div class="header-right">
             <div class="toggle-btn" @click="toggleWindowSize" :title="isMini ? '最大化' : '还原'">
-              <img v-if="isMini" src="@/assets/svg/expand.svg" alt="最大化" class="icon-svg" />
-              <img v-else src="@/assets/svg/collapse.svg" alt="还原" class="icon-svg" />
+              <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" v-if="isMini" :src="expandIcon" class="icon-svg" />
+              <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" v-else :src="collapseIcon" class="icon-svg" />
             </div>
             <div class="toggle-btn" title="关闭" @click="closeWindow">
-              <img src="@/assets/svg/close-window.svg" alt="关闭" class="icon-svg" />
+              <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" :src="closeWindowIcon" class="icon-svg" />
             </div>
           </div>
         </div>
@@ -176,6 +176,11 @@ import { checkAgentPermission, PERMISSION_STATUS } from '@/utils/permission-chec
 import { TrainingXApi } from '@/agents/built-in/TrainingX/api';
 import AIEmpty from '@/ai-ui/empty/AIEmpty.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
+import historyIcon from '@/assets/svg/history.svg';
+import addIcon from '@/assets/svg/add.svg';
+import expandIcon from '@/assets/svg/expand.svg';
+import collapseIcon from '@/assets/svg/collapse.svg';
+import closeWindowIcon from '@/assets/svg/close-window.svg';
 
 export default {
   name: 'AIAgentContainer',
@@ -249,7 +254,12 @@ export default {
       // 权限相关
       permissionStatus: null,      // 当前智能体的权限状态
       checkingPermission: false,    // 是否正在检查权限
-      agentTips: {} // 智能体红点状态
+      agentTips: {}, // 智能体红点状态
+      historyIcon,
+      addIcon,
+      expandIcon,
+      collapseIcon,
+      closeWindowIcon
     };
   },
   computed: {
@@ -510,8 +520,17 @@ export default {
       // this.componentKey++; // 切换会话时不再强制刷新组件，让子组件自己 watch conversationId
     },
     handleNewChat() {
-      console.log('User clicked new chat');
       if (!this.currentAgentId) return;
+
+      // 调用子组件的 beforeNewChat 钩子，允许智能体阻止新建对话
+      const agent = this.$refs.activeAgent;
+      if (agent && typeof agent.beforeNewChat === 'function') {
+        const canCreate = agent.beforeNewChat();
+        if (canCreate === false) {
+          // 智能体阻止了新建对话
+          return;
+        }
+      }
 
       // 如果当前已经是新会话（虚拟ID），则不再重复创建
       if (this.currentConversationId && this.currentConversationId.startsWith('conv-')) {
@@ -755,8 +774,8 @@ export default {
         }
 
         .icon-svg {
-          width: 20px;
-          height: 20px;
+          width: 24px;
+          height: 24px;
         }
         
         .icon-text {

@@ -165,7 +165,7 @@ export default {
       if (pinnedItems.length > 0 && this.enableTop) {
         groups['pinned'] = {
           key: 'pinned',
-          title: '置顶',
+          title: '已置顶',
           children: pinnedItems
         };
       }
@@ -316,7 +316,7 @@ export default {
           &.sticky-title {
             position: sticky;
             top: 0;
-            z-index: 1;
+            z-index: 2;
             background: rgb(246, 249, 253);
           }
 

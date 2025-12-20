@@ -412,11 +412,13 @@ export default {
     .section-header {
       padding: 12px 16px;
       flex-shrink: 0;
+    
+
 
       .section-title {
+        color: rgba(0,0,0,0.9);
         font-size: 14px;
         line-height: 22px;
-        letter-spacing: 0px;
         text-align: left;
       }
     }
@@ -454,7 +456,8 @@ export default {
 
       .label-text {
         font-size: 14px;
-        color: #333;
+        line-height: 22px;
+        color: rgba(0,0,0,0.7);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -462,7 +465,8 @@ export default {
 
       .label-time {
         font-size: 12px;
-        color: #999;
+        color: rgba(0,0,0,0.4);
+        line-height: 20px;
         margin-top: 2px;
       }
     }

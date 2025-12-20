@@ -844,43 +844,7 @@ export default {
         }
       }
       
-      // 检查单一类型模式限制
-      if (this.singleTypeMode && files.length > 0) {
-
-      
-        // 1. 确定目标类型
-        let targetType = this.lockedFileType;
-
-        console.log(targetType,'targetType')
-        
-        // 如果还没有锁定类型，以第一个文件的类型为准
-        if (!targetType) {
-          targetType = this.getFileType(files[0]);
-        }
-        
-        // 2. 检查所有新文件是否符合目标类型
-        const hasInvalidType = files.some(file => this.getFileType(file) !== targetType);
-        
-        if (hasInvalidType) {
-          const typeLabel = this.getTypeLabel(targetType);
-          const msg = `当前模式下只能上传 ${typeLabel} 类型文件`;
-          
-          if (this.$message) {
-            this.$message.warning(msg);
-          } else {
-            alert(msg);
-          }
-          e.target.value = '';
-          return;
-        }
-        
-        // 3. 如果是首次上传，锁定类型
-        if (!this.lockedFileType) {
-          this.currentFileType = targetType;
-        }
-      }
-      
-      // [新增] 详细校验逻辑 (大小 & 后缀)
+      // [新增] 详细校验逻辑 (大小 & 后缀) - 先执行所有校验
       if (this.fileLimit) {
         for (const file of files) {
           const fileType = this.getFileType(file); // 'image' | 'video' | 'file'
@@ -931,6 +895,38 @@ export default {
           }
           e.target.value = '';
           return;
+        }
+      }
+      
+      // 检查单一类型模式限制 - 在所有校验通过后再检查和锁定类型
+      if (this.singleTypeMode && files.length > 0) {
+        // 1. 确定目标类型
+        let targetType = this.lockedFileType;
+        
+        // 如果还没有锁定类型，以第一个文件的类型为准
+        if (!targetType) {
+          targetType = this.getFileType(files[0]);
+        }
+        
+        // 2. 检查所有新文件是否符合目标类型
+        const hasInvalidType = files.some(file => this.getFileType(file) !== targetType);
+        
+        if (hasInvalidType) {
+          const typeLabel = this.getTypeLabel(targetType);
+          const msg = `当前模式下只能上传 ${typeLabel} 类型文件`;
+          
+          if (this.$message) {
+            this.$message.warning(msg);
+          } else {
+            alert(msg);
+          }
+          e.target.value = '';
+          return;
+        }
+        
+        // 3. 如果是首次上传，锁定类型（只有在即将成功添加文件时才锁定）
+        if (!this.lockedFileType) {
+          this.currentFileType = targetType;
         }
       }
       

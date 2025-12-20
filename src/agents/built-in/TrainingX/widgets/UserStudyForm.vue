@@ -181,7 +181,7 @@ export default {
 <style lang="scss" scoped>
 .user-study-form {
   width: 320px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--ym-ai-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
 
   .error-card {
     padding: 4px 12px;
