@@ -807,8 +807,8 @@ export default {
   justify-content: center;
   
   .contact-img-full {
-    height: 56px;
-    width: auto;
+    height: auto;
+    width: 100%;
     max-width: 100%;
   }
   

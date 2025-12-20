@@ -12,7 +12,7 @@
     <div class="sidebar-header">
       <div class="logo-area">
         <span class="logo-icon">
-          <img src="@/assets/images/IP@3x.png" alt="" width="24px">
+          <img src="@/assets/images/IP@3x.png" alt="">
         </span>
         <span class="app-name" v-show="!collapsed">云小智</span>
       </div>
@@ -193,7 +193,7 @@ export default {
 }
 
 .ai-sidebar {
-  width: 240px;
+  width: 320px;
   height: 100%;
   background: rgba(246, 249, 253, 1);
   border-right: 1px solid #e4e7ed;
@@ -224,8 +224,24 @@ export default {
       display: flex;
       align-items: center;
 
+      .logo-icon {
+        width: 40px; // 展开状态 40px
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: width 0.3s, height 0.3s;
+        flex-shrink: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+
       .app-name {
-        margin-left: 6px;
+        margin-left: 12px;
       }
     }
   }
@@ -244,6 +260,10 @@ export default {
     &:hover {
       background: #e6e8eb;
       color: #303133;
+    }
+
+    img {
+      transform: scaleX(-1); // 水平翻转图标
     }
 
     .toggle-text {
@@ -293,8 +313,8 @@ export default {
         align-items: center;
         justify-content: center;
         transition: margin 0.3s;
-        width: 18px;
-        height: 18px;
+        width: 24px;
+        height: 24px;
         flex-shrink: 0;
         position: relative; // 确保红点定位
 
@@ -467,6 +487,13 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
+
+      .logo-area {
+        .logo-icon {
+          width: 32px !important; // 折叠状态 24px
+          height: 32px !important;
+        }
+      }
     }
 
     .agent-list {

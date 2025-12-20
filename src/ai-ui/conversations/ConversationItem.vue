@@ -43,7 +43,9 @@
       <div class="item-menu" v-if="showMenu" @click.stop @mouseenter="menuVisible = true" @mouseleave="handleMenuMouseLeave">
         <el-dropdown trigger="hover" @command="handleCommand" @visible-change="handleDropdownVisibleChange">
           <span class="menu-trigger">
-            <slot name="menu-icon">⋮</slot>
+            <slot name="menu-icon">
+              <i class="h-icon-more_hori" style="font-size: 24px;"></i>
+            </slot>
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="pin" icon="el-icon-top">{{ item.top ? '取消置顶' : '置顶' }}</el-dropdown-item>
