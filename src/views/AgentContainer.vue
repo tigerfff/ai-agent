@@ -63,8 +63,14 @@
             </div>
           </div>
 
-          <div class="header-title" v-show="!shouldHideConversations">
-            {{ currentConversationTitle }}
+          <div class="header-title-wrapper" v-show="!shouldHideConversations">
+            <div class="header-title">
+              {{ currentConversationTitle }}
+            </div>
+            <!-- 编辑按钮：只在有真实会话时显示 -->
+              <div v-if="currentConversationId && !currentConversationId.startsWith('conv-')"  class="edit-btn" @click="handleTitleRename" title="重命名">
+                <AIIcon :src="editIcon" :size="24" color="rgba(0, 0, 0, 0.6)" />
+              </div>
           </div>
 
           <!-- 右侧：窗口控制 -->
@@ -181,6 +187,8 @@ import addIcon from '@/assets/svg/add.svg';
 import expandIcon from '@/assets/svg/expand.svg';
 import collapseIcon from '@/assets/svg/collapse.svg';
 import closeWindowIcon from '@/assets/svg/close-window.svg';
+import editIcon from '@/assets/svg/edit.svg';
+import AIIcon from '@/ai-ui/icon/AIIcon.vue';
 
 export default {
   name: 'AIAgentContainer',
@@ -189,7 +197,8 @@ export default {
     AISidebar,
     Home,
     AIEmpty,
-    ChatSkeleton
+    ChatSkeleton,
+    AIIcon
   },
   props: {
     // 外部注入的智能体列表
@@ -259,7 +268,8 @@ export default {
       addIcon,
       expandIcon,
       collapseIcon,
-      closeWindowIcon
+      closeWindowIcon,
+      editIcon
     };
   },
   computed: {
@@ -617,6 +627,36 @@ export default {
       }
       */
     },
+    /**
+     * 点击标题旁边的编辑按钮
+     */
+    handleTitleRename() {
+      // 1. 检查是否有当前会话
+      if (!this.currentConversationId || this.currentConversationId.startsWith('conv-')) {
+        return;
+      }
+      
+      // 2. 找到当前会话数据
+      const currentChat = this.conversations.find(c => c.id === this.currentConversationId);
+      if (!currentChat) {
+        return;
+      }
+      
+      // 3. 设置重命名对话框数据（复用现有逻辑）
+      this.currentRenameItem = currentChat;
+      this.renameForm.name = currentChat.label || '';
+      this.renameDialogVisible = true;
+      
+      // 4. 聚焦输入框
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          if (this.$refs.renameInput) {
+            this.$refs.renameInput.focus();
+            this.$refs.renameInput.select();
+          }
+        });
+      });
+    },
     // 重命名相关方法
     async handleRenameConfirm() {
       if (!this.$refs.renameForm) return;
@@ -747,16 +787,44 @@ export default {
         flex-shrink: 0; // 防止按钮被标题挤压
       }
 
-      .header-title {
+      .header-title-wrapper {
         flex: 1;
-        text-align: center;
-        font-size: 16px;
-        font-weight: 500;
-        color: #333;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
         margin: 0 16px;
+        
+        .header-title {
+          text-align: center;
+          font-size: 16px;
+          font-weight: 500;
+          color: #333;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        
+        .header-title-actions {
+        }
+        
+        .edit-btn {
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          transition: background 0.2s;
+          
+          &:hover {
+            background: rgba(0, 0, 0, 0.05);
+          }
+          
+          &:active {
+            background: rgba(0, 0, 0, 0.1);
+          }
+        }
       }
 
       .toggle-btn {
