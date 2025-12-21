@@ -328,8 +328,11 @@ export default {
   width: 100%;
   position: relative;
   
+  
   .person-select {
     width: 100%;
+    border: 1px solid rgba(232, 246, 255, 1);
+    border-radius: 4px;
     
     // 让整个 select 区域可点击
     ::v-deep .el-input__inner {
@@ -360,7 +363,13 @@ export default {
       pointer-events: auto;
     }
   }
+
+  .person-select:hover {
+    border: 1px solid rgba(56, 142, 255, 1);
+  }
 }
+
+
 </style>
 
 <style lang="scss">

@@ -27,7 +27,7 @@
           />
           <!-- 视频播放标识 -->
           <div v-if="isVideo" class="video-play-overlay">
-            <span class="play-icon">▶</span>
+            <span class="play-icon" :style="{ fontSize: playIconSize }">▶</span>
           </div>
         </template>
         
@@ -43,7 +43,7 @@
         class="files-card-mask"
       >
         <slot name="image-preview-actions" :item="$props">
-          <span class="view-icon">
+          <span class="view-icon" :style="{ fontSize: playIconSize }">
             {{ isVideo ? '▶' : '' }}
           </span>
         </slot>
@@ -180,6 +180,23 @@ export default {
       
       // 文件类型（非图片、非视频）：始终返回空，使用默认图标
       return '';
+    },
+    // 根据 iconSize 判断是大图还是小图
+    isLargeIcon() {
+      // 如果是百分比，认为是大图
+      if (this.iconSize.includes('%')) {
+        return true;
+      }
+      
+      // 解析数值（去除 px 单位）
+      const sizeValue = parseInt(this.iconSize);
+      
+      // 大于等于 100px 认为是大图
+      return sizeValue >= 100;
+    },
+    // 播放图标大小
+    playIconSize() {
+      return this.isLargeIcon ? '28px' : '14px';
     },
     // mini 模式圆形进度条样式
     // miniProgressStyle() {
@@ -318,7 +335,6 @@ export default {
       
       .play-icon {
         color: #fff;
-        font-size: 14px;
         text-shadow: 0 1px 2px rgba(0,0,0,0.5);
       }
     }
@@ -344,7 +360,6 @@ export default {
 
       .view-icon {
         color: #fff;
-        font-size: 16px;
       }
     }
 

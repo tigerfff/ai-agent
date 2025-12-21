@@ -159,6 +159,7 @@ export default {
       isUploading: false,
       loadingHistory: false,
       abortController: null,
+      isCreatingSession: false, // 防止重复创建会话的标志位
 
       // 操作栏配置
       actionConfig: {
@@ -712,6 +713,13 @@ export default {
 
       // 1. 如果当前没有会话ID 或 是临时ID，先创建会话
       if (!this.chatId || this.chatId.startsWith('conv-')) {
+        // 防止重复创建会话
+        if (this.isCreatingSession) {
+          console.log('[TrainingX] 正在创建会话，请稍候...');
+          return;
+        }
+        
+        this.isCreatingSession = true;
         try {
           // 创建新会话
           const res = await TrainingXApi.getChatId(this.$aiClient, {
@@ -732,8 +740,11 @@ export default {
             return;
           }
         } catch (e) {
-          console.error('[TryAgent] Create session failed', e);
+          console.error('[TrainingX] Create session failed', e);
+          this.$message.error('创建会话失败，请重试');
           return;
+        } finally {
+          this.isCreatingSession = false;
         }
       }
 
@@ -807,6 +818,13 @@ export default {
             // 记录消息 ID，用于点赞评价
             if (msgData.msgId && !aiMsg.msgId) {
               aiMsg.msgId = msgData.msgId;
+            }
+
+            // 更新 chatId（如果后端返回了新的 chatId）
+            if (msgData.chatId && msgData.chatId !== this.chatId) {
+              this.chatId = msgData.chatId;
+              // 通知父组件更新会话 ID
+              this.$emit('select-conversation', this.chatId);
             }
 
             if (msgData.status !== 0) {

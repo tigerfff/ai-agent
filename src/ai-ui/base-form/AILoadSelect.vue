@@ -555,7 +555,7 @@ export default {
   .select-input {
     position: relative;
     background-color: rgba(232, 246, 255, 1);
-    border: 1px solid rgba(56, 142, 255, 1);
+    border: 1px solid rgba(232, 246, 255, 1);
     border-radius: 4px;
     transition: all 0.3s;
     min-height: 24px;
@@ -565,7 +565,7 @@ export default {
     
 
     &:hover {
-      border-color: rgba(56, 142, 255, 1);
+      border: 1px solid rgba(56, 142, 255, 1);
     }
 
     &.is-focus {
