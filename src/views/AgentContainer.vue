@@ -67,10 +67,15 @@
             <div class="header-title">
               {{ currentConversationTitle }}
             </div>
-            <!-- 编辑按钮：只在有真实会话时显示 -->
-              <div v-if="currentConversationId && !currentConversationId.startsWith('conv-')"  class="edit-btn" @click="handleTitleRename" title="重命名">
-                <AIIcon :src="editIcon" :size="24" color="rgba(0, 0, 0, 0.6)" />
+            <!-- 编辑按钮：只在有真实会话时显示，鼠标悬停时显示 -->
+            <div 
+              v-if="currentConversationId && !currentConversationId.startsWith('conv-')"  
+              class="header-title-actions"
+            >
+              <div class="edit-btn" @click="handleTitleRename" title="重命名">
+                <AIIcon :src="editIcon" :size="24" color="rgba(0, 0, 0, 0.7)" />
               </div>
+            </div>
           </div>
 
           <!-- 右侧：窗口控制 -->
@@ -794,9 +799,10 @@ export default {
         justify-content: center;
         gap: 4px;
         min-width: 0;
-        margin: 0 16px;
+        margin: 0 8px;
         
         .header-title {
+          cursor: pointer;
           text-align: center;
           font-size: 16px;
           font-weight: 500;
@@ -807,6 +813,16 @@ export default {
         }
         
         .header-title-actions {
+          display: flex;
+          align-items: center;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+        
+        @media (hover: hover) {
+          &:hover .header-title-actions {
+            opacity: 1;
+          }
         }
         
         .edit-btn {

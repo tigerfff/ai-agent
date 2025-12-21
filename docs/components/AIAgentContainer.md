@@ -204,10 +204,70 @@ interface Permission {
 - **TrainingX**: 员工培训助手
 - **InspectX**: 智慧巡查（建设中）
 
+## 新增功能
+
+### 标题重命名
+
+在会话标题旁边（鼠标悬停时显示）提供了编辑按钮，可以快速重命名当前会话。
+
+**使用方式**：
+- 鼠标悬停到标题上，会显示编辑图标
+- 点击编辑图标，打开重命名对话框
+- 输入新名称并确认即可完成重命名
+
+**注意事项**：
+- 只有真实会话（非临时会话 `conv-` 开头）才显示编辑按钮
+- 重命名功能由智能体组件实现（需要智能体有 `renameSession` 方法）
+- 重命名成功后会自动刷新会话列表
+
+### beforeNewChat 钩子
+
+智能体组件可以实现 `beforeNewChat` 方法来阻止新建对话。这在某些场景下很有用，比如：
+- AI 正在流式输出回复时
+- 文件正在上传时
+- 其他需要阻止新建对话的业务场景
+
+**实现方式**：
+
+```javascript
+// 在智能体组件中
+export default {
+  methods: {
+    /**
+     * 新建对话前的钩子，返回 false 可以阻止新建对话
+     * @returns {boolean} true-允许新建，false-阻止新建
+     */
+    beforeNewChat() {
+      // 如果正在流式输出，阻止新建对话
+      if (this.isStreaming) {
+        this.$message.warning('AI 正在回复中，请稍后再试');
+        return false;  // 返回 false 阻止新建对话
+      }
+      
+      // 如果正在上传文件，阻止新建对话
+      if (this.isUploading) {
+        this.$message.warning('文件正在上传中，请稍后再试');
+        return false;
+      }
+      
+      return true;  // 返回 true 允许新建对话
+    }
+  }
+}
+```
+
+**返回值**：
+- `true` 或 `undefined`：允许新建对话
+- `false`：阻止新建对话，并显示提示信息
+
+**调用时机**：
+当用户在 `AIAgentContainer` 中点击"新建会话"按钮时，容器会先调用智能体的 `beforeNewChat` 方法，如果返回 `false`，则不会创建新会话。
+
 ## 注意事项
 
 1. `userId` 是必需的，用于权限检查和白名单验证
 2. 自定义智能体的 `component` 必须是一个 Vue 组件
 3. 外部智能体（`type='external'`）会在新窗口打开 `getUrl`
 4. 权限检查失败时会显示相应的空状态页面
+5. 智能体组件如果实现了 `renameSession` 方法，可以通过标题编辑按钮重命名会话
 

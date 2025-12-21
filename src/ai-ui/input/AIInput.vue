@@ -245,7 +245,7 @@ export default {
     // 是否启用停止按钮（如果为 false，loading 时显示禁用的发送按钮而非停止按钮）
     enableStopButton: {
       type: Boolean,
-      default: true
+      default: false
     },
     maxLength: {
       type: Number,
