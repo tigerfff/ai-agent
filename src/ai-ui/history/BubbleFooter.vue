@@ -260,9 +260,6 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 4px;
-  // opacity: 0; // 默认隐藏，hover 时显示
-  // transition: opacity 0.2s;
 
   .action-item {
     cursor: pointer;

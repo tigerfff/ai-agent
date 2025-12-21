@@ -1177,10 +1177,9 @@ export default {
     flex-direction: column;
     position: relative;
     box-sizing: border-box;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
     background: #fff;
     border-radius: 12px;
-    border: 1px solid #dcdfe6;
+    border: 1px solid rgba(0,0,0,0.12);
     transition: all 0.2s;
 
     &.focused {
@@ -1246,7 +1245,7 @@ export default {
           resize: none;
           font-size: 14px;
           line-height: 1.5;
-          color: #303133;
+          color: rgba($color: #000000, $alpha: 0.7);
           max-height: 110px;
           overflow-y: auto;
           overflow-x: hidden; // 隐藏横向滚动条
@@ -1407,8 +1406,8 @@ export default {
         }
 
         .char-count {
-          font-size: 12px;
-          color: #909399;
+          font-size: 14px;
+          color: rgba($color: #000000, $alpha: 0.2);
           margin-left: 4px;
         }
       }

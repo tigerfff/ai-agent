@@ -14,7 +14,7 @@
           'is-uploaded': task.uploaded
         }"
       >
-        <i class="h-icon-upload"></i>
+        <i class="h-icon-upload" style="font-size: 24px;"></i>
         <span>{{ getButtonText(task) }}</span>
       </div>
       <input

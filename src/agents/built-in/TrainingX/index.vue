@@ -106,6 +106,8 @@
           @send="handleSend" 
           @stop="handleStop"
         />
+
+        <p class="footer-text">内容由AI生成，仅供参考</p>
       </div>
     </div>
   </div>
@@ -1133,7 +1135,14 @@ export default {
   .footer {
     flex-shrink: 0;
     width: 100%;
-    padding: 16px 0 44px;
+    padding: 16px 0 12px;
+
+    .footer-text {
+      font-size: 14px;
+      color: rgba($color: #000000, $alpha: .3);
+      text-align: center;
+      margin-top: 12px;
+    }
 
     .content-wrapper {
       max-width: 960px;
