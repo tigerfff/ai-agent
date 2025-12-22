@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cookieUtils } from '../utils';
 
 /**
  * 简化版 http 封装，用来在 ai-aa 开发环境中「模拟」父项目的 http 行为：
@@ -11,6 +12,21 @@ const axiosInstance = axios.create({
   withCredentials: true,
   timeout: 30000
 });
+
+// 方案一：在 httpStub 里统一为所有请求加上 Authorization 头（模拟父项目行为）
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // 从 cookie 中读取 accessToken（由 syncTokenFromUrl 写入）
+    const token = cookieUtils.get('accessToken');
+    if (token) {
+      config.headers = config.headers || {};
+      // 与 Postman 一致，使用 Bearer Token 方式
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 /**
  * @param {'get'|'post'|'put'|'patch'|'delete'|'form'} type
