@@ -142,14 +142,39 @@ export class STSProvider {
   /**
    * 辅助工具：Base64 转十六进制串
    */
-  base64ToHex(base64) {
-    const raw = atob(base64)
-    let hex = ''
-    for (let i = 0; i < raw.length; i++) {
-      const byte = raw.charCodeAt(i).toString(16)
-      hex += (byte.length === 2 ? byte : '0' + byte)
+   /**
+   * 辅助工具：Base64 转十六进制串（不依赖浏览器 atob，且包含 _keyStr 逻辑）
+   */
+   base64ToHex(base64) {
+    const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    let output = "";
+    let chr1, chr2, chr3;
+    let enc1, enc2, enc3, enc4;
+    let i = 0;
+
+    // 清洗掉非 Base64 字符
+    base64 = base64.replace(/[^A-Za-z0-9+/=]/g, "");
+
+    while (i < base64.length) {
+      enc1 = _keyStr.indexOf(base64.charAt(i++));
+      enc2 = _keyStr.indexOf(base64.charAt(i++));
+      enc3 = _keyStr.indexOf(base64.charAt(i++));
+      enc4 = _keyStr.indexOf(base64.charAt(i++));
+
+      chr1 = (enc1 << 2) | (enc2 >> 4);
+      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+      chr3 = ((enc3 & 3) << 6) | enc4;
+
+      // 转换为 Hex
+      output += chr1.toString(16).padStart(2, '0');
+      if (enc3 !== 64) {
+        output += chr2.toString(16).padStart(2, '0');
+      }
+      if (enc4 !== 64) {
+        output += chr3.toString(16).padStart(2, '0');
+      }
     }
-    return hex
+    return output;
   }
 
   async fetchOssCredential(params) {
