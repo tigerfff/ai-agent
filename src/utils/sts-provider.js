@@ -1,16 +1,14 @@
 /**
  * OSS STS 凭证提供者
- * 流程：全 SM4 对称加密 (sec-crypto)
- * 1. getPubKey -> 获取 Master Key
- * 2. SM4-CBC(MasterKey, MyKey/MyIv) -> 加密会话秘钥
- * 3. getOssCredential -> 获取加密的 STS 信息
- * 4. SM4-CBC(MyKey, Data) -> 解密 STS 信息
+ * 模式：RSA-2048 (加密密钥) + AES-CBC (解密业务数据)
  */
 
-import { sm4 } from "sec-crypto";
+import CryptoJS from 'crypto-js'
+import { KJUR } from 'jsrsasign'
 
 export class STSProvider {
   constructor(options = {}) {
+    // 支持实例级配置或使用全局配置
     this.httpClient = options.httpClient || STSProvider.globalHttpClient
     this.baseURL = options.baseURL || STSProvider.globalBaseURL || ''
     
@@ -18,12 +16,18 @@ export class STSProvider {
       console.warn('STSProvider: httpClient not provided, please set it via constructor or STSProvider.config()')
     }
     
+    // 缓存公钥信息，避免重复请求
     this.cache = {
+      modulus: null,
+      exponent: null,
       cacheTime: null,
-      cacheExpire: 30 * 60 * 1000
+      cacheExpire: 30 * 60 * 1000 // 缓存30分钟
     }
   }
   
+  /**
+   * 全局配置 STSProvider
+   */
   static config(options = {}) {
     if (options.httpClient) {
       STSProvider.globalHttpClient = options.httpClient
@@ -34,49 +38,42 @@ export class STSProvider {
   }
 
   /**
-   * 获取 STS 凭证 (全 SM4 流程)
+   * 获取 STS 凭证（主方法）
+   * @param {Object} params
+   * @param {string} params.bizCode - 业务编码（必传）
+   * @returns {Promise<Object>} 解密后的 STS 凭证
    */
   async getCredentials({ bizCode }) {
-    if (!bizCode) throw new Error('STSProvider: bizCode is required')
-    if (!this.httpClient) throw new Error('STSProvider: httpClient is not configured')
+    if (!bizCode) {
+      throw new Error('STSProvider: bizCode is required')
+    }
+    
+    if (!this.httpClient) {
+      throw new Error('STSProvider: httpClient is not configured. Please call STSProvider.config() first.')
+    }
 
     try {
-      // 1. 获取服务器提供的原始秘钥串 (getPubKey)
-      const serverPubKeyData = await this.getPubKey()
+      // 1. 获取公钥质数对（用于 RSA 2048 加密）
+      const { modulus, exponent } = await this.getModulusExponent()
       
-      // 2. 准备 Master Key 和 Master IV
-      // 根据约定，通常取前 32 位十六进制(16字节)作为 Key，后 32 位作为 IV
-      // 如果 serverPubKeyData 只有 32 位，则 IV 默认为全 0
-      const masterKeyHex = serverPubKeyData.slice(0, 32)
-      const masterIvHex = serverPubKeyData.slice(32, 64) || '00000000000000000000000000000000'
-
-      // 3. 随机生成本次会话的 Key 和 IV (32位十六进制)
-      const myKeyHex = this.generateRandomHex(32)
-      const myIvHex = this.generateRandomHex(32)
-
-      // 4. 【核心改动】使用 SM4-CBC 加密我们自己的 Key 和 IV
-      // 使用服务器给的 masterKeyHex 和 masterIvHex
-      const encryptedKey = sm4.encrypt(myKeyHex, masterKeyHex, {
-        mode: 'cbc',
-        iv: masterIvHex,
-        padding: 'pkcs#7'
-      })
+      // 2. 生成随机 AES 密钥和 IV
+      // AES-256 要求 32 字节密钥，IV 要求 16 字节
+      const aesKey = this.generateRandomKey(32)
+      const iv = this.generateRandomKey(16)
       
-      const encryptedIv = sm4.encrypt(myIvHex, masterKeyHex, {
-        mode: 'cbc',
-        iv: masterIvHex,
-        padding: 'pkcs#7'
-      })
-
-      // 5. 调用 STS 接口
+      // 3. 使用 RSA-2048 加密 AES 密钥和 IV
+      const encryptedKey = this.rsaEncrypt(aesKey, modulus, exponent)
+      const encryptedIv = this.rsaEncrypt(iv, modulus, exponent)
+      
+      // 4. 调用 STS 接口
       const response = await this.fetchOssCredential({
         bizCode,
         key: encryptedKey,
         iv: encryptedIv
       })
       
-      // 6. 使用我们生成的 myKeyHex 解密返回的 STS 信息
-      const decrypted = this.decryptCredentials(response.data, myKeyHex, myIvHex)
+      // 5. 使用 AES 解密返回的加密字段
+      const decrypted = this.decryptCredentials(response.data, aesKey, iv)
       
       return decrypted
     } catch (error) {
@@ -86,24 +83,112 @@ export class STSProvider {
   }
 
   /**
-   * 获取服务器公钥数据
+   * 获取公钥质数对 (n, e)
    */
-  async getPubKey() {
+  async getModulusExponent() {
+    const now = Date.now()
+    if (
+      this.cache.modulus && 
+      this.cache.exponent && 
+      this.cache.cacheTime &&
+      (now - this.cache.cacheTime < this.cache.cacheExpire)
+    ) {
+      return {
+        modulus: this.cache.modulus,
+        exponent: this.cache.exponent
+      }
+    }
+
     const res = await this.httpClient(
       'get',
-      `${this.baseURL}/basic/actions/getPubKey`
+      `${this.baseURL}/basic/actions/getModulusExponent`
     )
-    if (!res || !res.success || !res.data) {
-      throw new Error(res?.message || 'STSProvider: Failed to get public key data')
+    
+    if (res && res.success && res.data) {
+      this.cache.modulus = res.data.modulus
+      this.cache.exponent = res.data.exponent
+      this.cache.cacheTime = now
+      
+      return {
+        modulus: res.data.modulus,
+        exponent: res.data.exponent
+      }
     }
-    return res.data
+    
+    throw new Error('STSProvider: Failed to get modulus and exponent')
   }
 
   /**
-   * 辅助工具：生成随机十六进制字符串
+   * RSA 加密 (支持 2048 位)
+   * 使用 KJUR 模块确保大长度密钥加密的稳定性
    */
-  generateRandomHex(length) {
-    const chars = '0123456789abcdef'
+  rsaEncrypt(data, modulus, exponent) {
+    try {
+      const modulusHex = this.base64ToHex(modulus)
+      const exponentHex = this.base64ToHex(exponent)
+      
+      // 构造公钥对象
+      const pubKey = KJUR.crypto.Util.getRSAPublicKeyfromHex(modulusHex, exponentHex);
+      
+      // 执行加密（默认使用 RSAEncryption / PKCS1Padding）
+      const encryptedHex = KJUR.crypto.Cipher.encrypt(data, pubKey);
+      
+      // 将结果转为 Base64
+      return this.hexToBase64(encryptedHex)
+    } catch (error) {
+      console.error('STSProvider: RSA encryption failed', error)
+      throw new Error('RSA encryption failed: ' + error.message)
+    }
+  }
+
+  /**
+   * AES 解密 (CBC 模式)
+   */
+  aesDecrypt(encrypted, key, iv) {
+    const decrypted = CryptoJS.AES.decrypt(
+      encrypted, 
+      CryptoJS.enc.Utf8.parse(key),
+      {
+        iv: CryptoJS.enc.Utf8.parse(iv),
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      }
+    )
+    return decrypted.toString(CryptoJS.enc.Utf8)
+  }
+
+  /**
+   * 解密 STS 凭证中的加密字段
+   */
+  decryptCredentials(data, aesKey, iv) {
+    const encryptedFields = [
+      'accessKeyId',
+      'accessKeySecret',
+      'bucket',
+      'domain',
+      'endpoint',
+      'object'
+    ]
+    
+    const decrypted = { ...data }
+    
+    encryptedFields.forEach(field => {
+      if (data[field]) {
+        try {
+          decrypted[field] = this.aesDecrypt(data[field], aesKey, iv)
+        } catch (error) {
+          console.error(`STSProvider: Failed to decrypt field [${field}]`, error)
+        }
+      }
+    })
+    
+    return decrypted
+  }
+
+  // --- 辅助转换工具 ---
+
+  generateRandomKey(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     let result = ''
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length))
@@ -111,70 +196,23 @@ export class STSProvider {
     return result
   }
 
-  /**
-   * 辅助工具：字符串转字节数组 (bitsArray)
-   */
-  stringToUint8Array(str) {
-    const arr = [];
-    for (let i = 0, j = str.length; i < j; ++i) {
-      arr.push(str.charCodeAt(i));
+  base64ToHex(base64) {
+    const raw = atob(base64)
+    let hex = ''
+    for (let i = 0; i < raw.length; i++) {
+      const byte = raw.charCodeAt(i).toString(16)
+      hex += (byte.length === 2 ? byte : '0' + byte)
     }
-    return new Uint8Array(arr);
+    return hex
   }
 
-  /**
-   * 辅助工具：十六进制串转字节数组
-   */
-  hexToUint8Array(hex) {
-    const matches = hex.match(/[\da-f]{2}/gi) || [];
-    return new Uint8Array(matches.map(h => parseInt(h, 16)));
-  }
-
-  /**
-   * 辅助工具：字节数组转十六进制串
-   */
-  uint8ArrayToHex(uint8Array) {
-    return Array.from(uint8Array)
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
-
-  /**
-   * 辅助工具：Base64 转十六进制串
-   */
-   /**
-   * 辅助工具：Base64 转十六进制串（不依赖浏览器 atob，且包含 _keyStr 逻辑）
-   */
-   base64ToHex(base64) {
-    const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    let output = "";
-    let chr1, chr2, chr3;
-    let enc1, enc2, enc3, enc4;
-    let i = 0;
-
-    // 清洗掉非 Base64 字符
-    base64 = base64.replace(/[^A-Za-z0-9+/=]/g, "");
-
-    while (i < base64.length) {
-      enc1 = _keyStr.indexOf(base64.charAt(i++));
-      enc2 = _keyStr.indexOf(base64.charAt(i++));
-      enc3 = _keyStr.indexOf(base64.charAt(i++));
-      enc4 = _keyStr.indexOf(base64.charAt(i++));
-
-      chr1 = (enc1 << 2) | (enc2 >> 4);
-      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-      chr3 = ((enc3 & 3) << 6) | enc4;
-
-      // 转换为 Hex
-      output += chr1.toString(16).padStart(2, '0');
-      if (enc3 !== 64) {
-        output += chr2.toString(16).padStart(2, '0');
-      }
-      if (enc4 !== 64) {
-        output += chr3.toString(16).padStart(2, '0');
-      }
+  hexToBase64(hex) {
+    const bytes = []
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes.push(parseInt(hex.substr(i, 2), 16))
     }
-    return output;
+    const binary = String.fromCharCode.apply(null, bytes)
+    return btoa(binary)
   }
 
   async fetchOssCredential(params) {
@@ -183,40 +221,21 @@ export class STSProvider {
       `${this.baseURL}/basic/actions/getOssCredential`,
       params
     )
+    
     if (!res || !res.success) {
       throw new Error(res?.message || 'Failed to get OSS credentials')
     }
-    return res.data
+    
+    return res
   }
 
-  /**
-   * 解密 STS 凭证中的加密字段
-   */
-  decryptCredentials(data, sm4Key, iv) {
-    const encryptedFields = ['accessKeyId', 'accessKeySecret', 'bucket', 'domain', 'endpoint', 'object']
-    const decrypted = { ...data }
-    encryptedFields.forEach(field => {
-      if (data[field]) {
-        try {
-          decrypted[field] = this.sm4Decrypt(data[field], sm4Key, iv)
-        } catch (error) {
-          console.error(`STSProvider: Failed to decrypt field [${field}]`, error)
-        }
-      }
-    })
-    return decrypted
-  }
-
-  /**
-   * SM4 解密实现
-   */
-  sm4Decrypt(base64Data, key, iv) {
-    const hexData = this.base64ToHex(base64Data)
-    return sm4.decrypt(hexData, key, {
-      mode: 'cbc',
-      iv: iv,
-      padding: 'pkcs#7'
-    })
+  clearCache() {
+    this.cache = {
+      modulus: null,
+      exponent: null,
+      cacheTime: null,
+      cacheExpire: 30 * 60 * 1000
+    }
   }
 }
 
