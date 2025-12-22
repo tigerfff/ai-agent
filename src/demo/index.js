@@ -14,6 +14,7 @@ const myAxios = axios.create({
   headers: {
     'ChainVersion': '2.48.0',
     'ApplicationSource': '1',
+    'accessToken': `bearer ${localStorage.getItem('accessToken')}`
   },
 }); 
 let loadingInstance
