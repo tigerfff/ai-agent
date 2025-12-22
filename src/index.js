@@ -31,6 +31,10 @@ import { setAdapter } from './ai-core/adapter';
 import { AIClient } from './ai-core/client/AIClient';
 import { EventBus } from './ai-core/event-bus';
 
+// 工具类
+import { STSProvider } from './utils/sts-provider';
+import { OssUploader } from './utils/oss-uploader';
+
 // 导入样式（Vite 会自动处理 SCSS 编译和打包）
 import './style/index.scss';
 
@@ -75,6 +79,15 @@ const install = (Vue, options = {}) => {
   
   Vue.prototype.$aiClient = client;
   Vue.prototype.$aiEventBus = EventBus;
+
+  // 8. 配置 STSProvider（全局配置一次）
+  if (options.http) {
+    const baseURL = options.configProvider ? options.configProvider().baseUrl : '';
+    STSProvider.config({
+      httpClient: options.http,
+      baseURL: baseURL
+    });
+  }
 };
 
 // 导出所有组件和工具
@@ -103,7 +116,10 @@ export {
   AIEmpty,
   // 核心功能
   AIClient,
-  EventBus
+  EventBus,
+  // 工具类
+  STSProvider,
+  OssUploader
 };
 
 export default {
