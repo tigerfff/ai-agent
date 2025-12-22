@@ -1,10 +1,10 @@
 /**
  * OSS STS 凭证提供者
- * 模式：RSA-2048 (加密密钥) + AES-CBC (解密业务数据)
+ * 模式：RSA-2048 (使用 getPubKey 加密密钥) + AES-CBC (解密业务数据)
  */
 
 import CryptoJS from 'crypto-js'
-import { KJUR } from 'jsrsasign'
+import { KJUR, KEYUTIL } from 'jsrsasign'
 
 export class STSProvider {
   constructor(options = {}) {
@@ -18,8 +18,7 @@ export class STSProvider {
     
     // 缓存公钥信息，避免重复请求
     this.cache = {
-      modulus: null,
-      exponent: null,
+      pubKeyHex: null,
       cacheTime: null,
       cacheExpire: 30 * 60 * 1000 // 缓存30分钟
     }
@@ -53,17 +52,17 @@ export class STSProvider {
     }
 
     try {
-      // 1. 获取公钥质数对（用于 RSA 2048 加密）
-      const { modulus, exponent } = await this.getModulusExponent()
+      // 1. 获取完整 RSA 公钥 Hex 串（来自 /basic/actions/getPubKey）
+      const pubKeyHex = await this.getPubKey()
       
       // 2. 生成随机 AES 密钥和 IV
       // AES-256 要求 32 字节密钥，IV 要求 16 字节
       const aesKey = this.generateRandomKey(32)
       const iv = this.generateRandomKey(16)
       
-      // 3. 使用 RSA-2048 加密 AES 密钥和 IV
-      const encryptedKey = this.rsaEncrypt(aesKey, modulus, exponent)
-      const encryptedIv = this.rsaEncrypt(iv, modulus, exponent)
+      // 3. 使用 RSA-2048 公钥加密 AES 密钥和 IV
+      const encryptedKey = this.rsaEncrypt(aesKey, pubKeyHex)
+      const encryptedIv = this.rsaEncrypt(iv, pubKeyHex)
       
       // 4. 调用 STS 接口
       const response = await this.fetchOssCredential({
@@ -83,57 +82,43 @@ export class STSProvider {
   }
 
   /**
-   * 获取公钥质数对 (n, e)
+   * 获取完整 RSA 公钥（Hex DER）
+   * 来源：/basic/actions/getPubKey
    */
-  async getModulusExponent() {
+  async getPubKey() {
     const now = Date.now()
-    if (
-      this.cache.modulus && 
-      this.cache.exponent && 
-      this.cache.cacheTime &&
-      (now - this.cache.cacheTime < this.cache.cacheExpire)
-    ) {
-      return {
-        modulus: this.cache.modulus,
-        exponent: this.cache.exponent
-      }
+    if (this.cache.pubKeyHex && this.cache.cacheTime && (now - this.cache.cacheTime < this.cache.cacheExpire)) {
+      return this.cache.pubKeyHex
     }
 
     const res = await this.httpClient(
       'get',
-      `${this.baseURL}/basic/actions/getModulusExponent`
+      `${this.baseURL}/basic/actions/getPubKey`
     )
-    
+
     if (res && res.success && res.data) {
-      this.cache.modulus = res.data.modulus
-      this.cache.exponent = res.data.exponent
+      this.cache.pubKeyHex = res.data  // 就是文档里的 30820122... 那串
       this.cache.cacheTime = now
-      
-      return {
-        modulus: res.data.modulus,
-        exponent: res.data.exponent
-      }
+      return res.data
     }
-    
-    throw new Error('STSProvider: Failed to get modulus and exponent')
+
+    throw new Error('STSProvider: Failed to get public key')
   }
 
   /**
-   * RSA 加密 (支持 2048 位)
-   * 使用 KJUR 模块确保大长度密钥加密的稳定性
+   * RSA 加密 (使用 getPubKey 返回的完整公钥 Hex 串)
+   * @param {string} data - 要加密的明文
+   * @param {string} pubKeyHex - 公钥 Hex（例如 30820122...）
    */
-  rsaEncrypt(data, modulus, exponent) {
+  rsaEncrypt(data, pubKeyHex) {
     try {
-      const modulusHex = this.base64ToHex(modulus)
-      const exponentHex = this.base64ToHex(exponent)
-      
-      // 构造公钥对象
-      const pubKey = KJUR.crypto.Util.getRSAPublicKeyfromHex(modulusHex, exponentHex);
-      
-      // 执行加密（默认使用 RSAEncryption / PKCS1Padding）
-      const encryptedHex = KJUR.crypto.Cipher.encrypt(data, pubKey);
-      
-      // 将结果转为 Base64
+      // KEYUTIL.getKey 会自动识别 Hex DER 公钥并构造 RSAKey 对象
+      const pubKey = KEYUTIL.getKey(pubKeyHex)
+
+      // 执行加密（返回 Hex，默认 PKCS1Padding）
+      const encryptedHex = KJUR.crypto.Cipher.encrypt(data, pubKey)
+
+      // 转成 Base64 传给后端
       return this.hexToBase64(encryptedHex)
     } catch (error) {
       console.error('STSProvider: RSA encryption failed', error)
@@ -226,13 +211,12 @@ export class STSProvider {
       throw new Error(res?.message || 'Failed to get OSS credentials')
     }
     
-    return res
+    return res.data
   }
 
   clearCache() {
     this.cache = {
-      modulus: null,
-      exponent: null,
+      pubKeyHex: null,
       cacheTime: null,
       cacheExpire: 30 * 60 * 1000
     }
