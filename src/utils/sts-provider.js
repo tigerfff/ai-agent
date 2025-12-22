@@ -1,10 +1,10 @@
 /**
  * OSS STS 凭证提供者
- * 采用 SM4 国密对称加密算法
+ * 采用 SM4 国密对称加密算法 (sec-crypto)
  */
 
-import { sm4 } from 'sm-crypto' 
-import { RSAKey } from 'jsrsasign'
+import { sm4 } from "sec-crypto";
+import { KJUR } from 'jsrsasign';
 
 export class STSProvider {
   constructor(options = {}) {
@@ -116,14 +116,23 @@ export class STSProvider {
     throw new Error('STSProvider: Failed to get modulus and exponent')
   }
 
+  /**
+   * 修复后的 RSA 加密
+   * 使用 KJUR 模块避免直接实例化 RSAKey 可能导致的报错
+   */
   rsaEncrypt(data, modulus, exponent) {
     try {
-      const rsa = new RSAKey()
       const modulusHex = this.base64ToHex(modulus)
       const exponentHex = this.base64ToHex(exponent)
-      rsa.setPublic(modulusHex, exponentHex)
-      const encrypted = rsa.encrypt(data)
-      return this.hexToBase64(encrypted)
+      
+      // 获取公钥对象
+      const pubKey = KJUR.crypto.Util.getRSAPublicKeyfromHex(modulusHex, exponentHex);
+      
+      // 执行加密（返回十六进制）
+      const encryptedHex = KJUR.crypto.Cipher.encrypt(data, pubKey);
+      
+      // 转回 Base64 发送给后端
+      return this.hexToBase64(encryptedHex)
     } catch (error) {
       console.error('STSProvider: RSA encryption failed', error)
       throw new Error('RSA encryption failed: ' + error.message)
@@ -193,16 +202,12 @@ export class STSProvider {
 
   /**
    * SM4 解密实现
-   * @param {string} base64Data - 后端返回的加密 Base64 字符串
-   * @param {string} key - 32位十六进制密钥
-   * @param {string} iv - 32位十六进制IV
    */
   sm4Decrypt(base64Data, key, iv) {
-    // 1. 先将 Base64 转换为十六进制字符串，因为 sm-crypto 接收 hex 格式数据
+    // 1. 将 Base64 转换为十六进制字符串，因为 sec-crypto 接收 hex 格式数据
     const hexData = this.base64ToHex(base64Data)
     
-    // 2. 调用 sm4 解密，使用 cbc 模式和指定的 iv
-    // 注意：sm-crypto 默认使用 pkcs#7 填充
+    // 2. 调用 sm4 解密
     return sm4.decrypt(hexData, key, {
       mode: 'cbc',
       iv: iv,
