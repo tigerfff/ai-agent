@@ -34,19 +34,20 @@ export default {
   computed: {
     iconStyle() {
       const sizeValue = typeof this.size === 'number' ? `${this.size}px` : this.size;
+      const maskUrl = `url("${this.src}")`;
       return {
         width: sizeValue,
         height: sizeValue,
         backgroundColor: this.color,
         // 使用 mask-image 将 SVG 路径作为遮罩
-        '-webkit-mask-image': `url(${this.src})`,
-        'mask-image': `url(${this.src})`,
-        '-webkit-mask-size': '100% 100%',
-        'mask-size': '100% 100%',
-        '-webkit-mask-repeat': 'no-repeat',
-        'mask-repeat': 'no-repeat',
-        'display': 'inline-block',
-        'vertical-align': 'middle'
+        WebkitMaskImage: maskUrl,
+        maskImage: maskUrl,
+        WebkitMaskSize: '100% 100%',
+        maskSize: '100% 100%',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        display: 'inline-block',
+        verticalAlign: 'middle'
       };
     }
   }
