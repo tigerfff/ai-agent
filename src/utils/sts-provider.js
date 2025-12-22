@@ -112,17 +112,19 @@ export class STSProvider {
    */
   rsaEncrypt(data, pubKeyHex) {
     try {
-      // KEYUTIL.getKey 会自动识别 Hex DER 公钥并构造 RSAKey 对象
-      const pubKey = KEYUTIL.getKey(pubKeyHex)
+      // 从 X.509 公钥 Hex 构造 RSAKey 对象（部分版本对 Hex 直接 getKey 支持不好）
+      const pubKey = KEYUTIL.getKeyFromPublicPKCS8Hex
+        ? KEYUTIL.getKeyFromPublicPKCS8Hex(pubKeyHex)
+        : KEYUTIL.getKey(pubKeyHex)
 
-      // 执行加密（返回 Hex，默认 PKCS1Padding）
-      const encryptedHex = KJUR.crypto.Cipher.encrypt(data, pubKey)
+      // 直接使用 RSAKey.encrypt（返回 Hex，默认 PKCS1Padding）
+      const encryptedHex = pubKey.encrypt(data)
 
       // 转成 Base64 传给后端
       return this.hexToBase64(encryptedHex)
     } catch (error) {
       console.error('STSProvider: RSA encryption failed', error)
-      throw new Error('RSA encryption failed: ' + error.message)
+      throw new Error('RSA encryption failed: ' + (error && error.message ? error.message : String(error)))
     }
   }
 
