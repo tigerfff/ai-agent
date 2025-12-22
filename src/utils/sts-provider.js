@@ -64,6 +64,9 @@ export class STSProvider {
     }
 
     try {
+      // 0. 按后端规范，先获取公钥（即使当前实现暂时不用这串值）
+      await this.getPubKey()
+
       // 1. 获取公钥质数对（用于 RSA 加密）
       const { modulus, exponent } = await this.getModulusExponent()
       
@@ -90,6 +93,24 @@ export class STSProvider {
       console.error('STSProvider: Failed to get credentials', error)
       throw error
     }
+  }
+
+  /**
+   * 获取 RSA 公钥（整串）
+   * 按后端要求：在获取质数对和 STS 之前先调用一次
+   * @returns {Promise<string>} 公钥字符串
+   */
+  async getPubKey() {
+    const res = await this.httpClient(
+      'get',
+      `${this.baseURL}/basic/actions/getPubKey`
+    )
+
+    if (!res || !res.success || !res.data) {
+      throw new Error(res?.message || 'STSProvider: Failed to get public key')
+    }
+
+    return res.data
   }
 
   /**
