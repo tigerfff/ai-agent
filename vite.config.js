@@ -1,10 +1,14 @@
 import { defineConfig } from 'vite'
 import vue2 from '@vitejs/plugin-vue2'
+import commonjs from 'vite-plugin-commonjs'
 import { resolve } from 'path'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  plugins: [vue2()],
+  plugins: [
+    vue2(),
+    commonjs()
+  ],
 
   // 本地开发服务器配置
   server: {

@@ -13,6 +13,7 @@
 
 import CryptoJS from 'crypto-js'
 import { RSAKey } from 'jsrsasign'
+import { sm4 } from 'sec-crypto'
 
 export class STSProvider {
   constructor(options = {}) {
@@ -67,12 +68,12 @@ export class STSProvider {
       // 1. 获取公钥质数对（用于 RSA 加密）
       const { modulus, exponent } = await this.getModulusExponent()
       
-      // 2. 生成随机 AES 密钥和 IV
-      const aesKey = this.generateRandomKey(32) // 256位
-      const iv = this.generateRandomKey(16) // 128位
+      // 2. 生成随机密钥和 IV (SM4 要求 16 字节/128位)
+      const secretKey = this.generateRandomKey(16) 
+      const iv = this.generateRandomKey(16)
       
-      // 3. 使用 RSA 加密 AES 密钥和 IV
-      const encryptedKey = this.rsaEncrypt(aesKey, modulus, exponent)
+      // 3. 使用 RSA 加密原始密钥和 IV 传给后端
+      const encryptedKey = this.rsaEncrypt(secretKey, modulus, exponent)
       const encryptedIv = this.rsaEncrypt(iv, modulus, exponent)
       
       // 4. 调用 STS 接口
@@ -82,8 +83,8 @@ export class STSProvider {
         iv: encryptedIv
       })
       
-      // 5. 解密返回的加密字段
-      const decrypted = this.decryptCredentials(response.data, aesKey, iv)
+      // 5. 使用 SM4 解密返回的加密字段
+      const decrypted = this.decryptCredentials(response.data, secretKey, iv)
       
       return decrypted
     } catch (error) {
@@ -226,11 +227,11 @@ export class STSProvider {
   /**
    * 解密 STS 凭证中的加密字段
    * @param {Object} data - 原始数据
-   * @param {string} aesKey - AES 密钥
-   * @param {string} iv - AES IV
+   * @param {string} secretKey - 密钥
+   * @param {string} iv - IV
    * @returns {Object} 解密后的数据
    */
-  decryptCredentials(data, aesKey, iv) {
+  decryptCredentials(data, secretKey, iv) {
     const encryptedFields = [
       'accessKeyId',
       'accessKeySecret',
@@ -245,7 +246,7 @@ export class STSProvider {
     encryptedFields.forEach(field => {
       if (data[field]) {
         try {
-          decrypted[field] = this.aesDecrypt(data[field], aesKey, iv)
+          decrypted[field] = this.sm4Decrypt(data[field], secretKey, iv)
         } catch (error) {
           console.error(`STSProvider: Failed to decrypt field [${field}]`, error)
           // 解密失败时保留原值
@@ -257,23 +258,23 @@ export class STSProvider {
   }
 
   /**
-   * AES 解密
+   * SM4 解密 (CBC 模式)
    * @param {string} encrypted - 加密的 Base64 字符串
-   * @param {string} key - AES 密钥
-   * @param {string} iv - AES IV
+   * @param {string} key - 16 字节原始密钥字符串
+   * @param {string} iv - 16 字节原始 IV 字符串
    * @returns {string} 解密后的字符串
    */
-  aesDecrypt(encrypted, key, iv) {
-    const decrypted = CryptoJS.AES.decrypt(
-      encrypted, 
-      CryptoJS.enc.Utf8.parse(key),
-      {
-        iv: CryptoJS.enc.Utf8.parse(iv),
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7
-      }
-    )
-    return decrypted.toString(CryptoJS.enc.Utf8)
+  sm4Decrypt(encrypted, key, iv) {
+    // 将原始字符串转换为 hex 字符串，以符合 sec-crypto 的要求
+    const keyHex = CryptoJS.enc.Utf8.parse(key).toString(CryptoJS.enc.Hex)
+    const ivHex = CryptoJS.enc.Utf8.parse(iv).toString(CryptoJS.enc.Hex)
+
+    // 使用 sec-crypto 进行 SM4 解密
+    return sm4.decrypt(encrypted, keyHex, {
+      mode: 'cbc',
+      iv: ivHex,
+      padding: 'pkcs7'
+    })
   }
 
   /**
