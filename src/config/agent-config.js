@@ -1,5 +1,6 @@
 import TrainingXAgent from '@/agents/built-in/TrainingX/index.vue';
 import TryAgent from '@/agents/built-in/TryX/index.vue';
+import OssXAgent from '@/agents/built-in/OssX/index.vue';
 import { buildUrl } from '@/utils/api-prefix';
 
 // 导入图标资源
@@ -99,6 +100,18 @@ export const ALL_AGENTS = {
     // AI试用通常对所有人开放，无需特殊权限
     permission: null 
   },
+  'oss-x': {
+    id: 'oss-x',
+    name: 'OSS上传测试',
+    miniName:'OSS',
+    icon: dataAnalysisIcon,
+    homeIcon: dataAnalysisHomeIcon,
+    description: '用于测试和模拟 AIOssUploader 的功能，包括加密上传和进度回显。',
+    type: 'built-in',
+    tags: ['工具', '上传'],
+    component: OssXAgent,
+    permission: null 
+  },
   'training-x': {
     id: '2',
     name: '员工培训助手',
@@ -165,7 +178,8 @@ export const BUSINESS_LINE_AGENTS = {
     'inspect-x',
     'try-x',
     'training-x',
-    'data-analysis'
+    'data-analysis',
+    'oss-x'
   ],
   [BUSINESS_LINES.MINERVA]: [
     'training-x',
@@ -191,7 +205,8 @@ export const BUSINESS_LINE_AGENTS = {
     'data-analysis',
     'try-x',
     'training-x',
-    'sop-generation'
+    'sop-generation',
+    'oss-x'
   ]
 };
 

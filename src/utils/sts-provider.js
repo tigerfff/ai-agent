@@ -15,8 +15,6 @@ import CryptoJS from 'crypto-js'
 import { RSAKey } from 'jsrsasign'
 import * as secCrypto from './crypto.common'
 
-console.log(CryptoJS.enc.Hex.parse("ae6bb557e94edc22031acb471c61a563").toString(CryptoJS.enc.Utf8))
-
 
 const sm4 = secCrypto.sm4 || (secCrypto.default && secCrypto.default.sm4) || secCrypto.default || secCrypto;
 
@@ -38,7 +36,16 @@ export class STSProvider {
       cacheTime: null,
       cacheExpire: 30 * 60 * 1000 // 缓存30分钟
     }
+
+    // 凭证缓存池 (key: bizCode, value: { data, expireTime })
+    this.credentialPool = STSProvider.credentialPool
+    // 并发锁 (key: bizCode, value: Promise)
+    this.locks = STSProvider.locks
   }
+  
+  // 静态缓存池
+  static credentialPool = new Map()
+  static locks = new Map()
   
   /**
    * 全局配置 STSProvider
@@ -56,41 +63,81 @@ export class STSProvider {
   }
 
   /**
-   * 获取 STS 凭证（主方法）
+   * 清除所有缓存
+   */
+  static clearCache() {
+    STSProvider.credentialPool.clear()
+    STSProvider.locks.clear()
+  }
+
+  /**
+   * 获取 STS 凭证（带缓存和并发锁）
    * @param {Object} params
-   * @param {string} params.bizCode - 业务编码（必传）
-   * @returns {Promise<Object>} 解密后的 STS 凭证
+   * @param {string} params.bizCode - 业务编码
+   * @returns {Promise<Object>}
    */
   async getCredentials({ bizCode }) {
     if (!bizCode) {
       throw new Error('STSProvider: bizCode is required')
     }
     
+    // 1. 检查缓存
+    const cached = this.credentialPool.get(bizCode)
+    const now = Date.now()
+    // 提前 60 秒失效，确保上传过程中凭证有效
+    if (cached && cached.expireTime && (now < cached.expireTime - 60000)) {
+      return cached.data
+    }
+
+    // 2. 并发锁：防止同一 bizCode 同时发起多个请求
+    if (this.locks.has(bizCode)) {
+      return this.locks.get(bizCode)
+    }
+
+    const requestPromise = this._doGetCredentials(bizCode).finally(() => {
+      this.locks.delete(bizCode)
+    })
+
+    this.locks.set(bizCode, requestPromise)
+    return requestPromise
+  }
+
+  /**
+   * 内部执行获取逻辑
+   */
+  async _doGetCredentials(bizCode) {
     if (!this.httpClient) {
       throw new Error('STSProvider: httpClient is not configured. Please call STSProvider.config() first.')
     }
 
     try {
-      // 1. 获取公钥质数对（用于 RSA 加密）
+      // 1. 获取公钥质数对
       const { modulus, exponent } = await this.getModulusExponent()
       
-      // 2. 生成随机密钥和 IV (SM4 要求 16 字节/128位)
+      // 2. 生成随机密钥
       const secretKey = this.generateRandomKey(16) 
       const iv = this.generateRandomKey(16)
       
-      // 3. 使用 RSA 加密原始密钥和 IV 传给后端
+      // 3. RSA 加密
       const encryptedKey = this.rsaEncrypt(secretKey, modulus, exponent)
       const encryptedIv = this.rsaEncrypt(iv, modulus, exponent)
       
-      // 4. 调用 STS 接口
+      // 4. 请求接口
       const response = await this.fetchOssCredential({
         bizCode,
         key: encryptedKey,
         iv: encryptedIv
       })
       
-      // 5. 使用 SM4 解密返回的加密字段
+      // 5. SM4 解密
       const decrypted = this.decryptCredentials(response.data, secretKey, iv)
+      
+      // 6. 存入缓存池 (使用接口返回的 expireTime)
+      const expireTime = decrypted.expireTime || (Date.now() + 3600 * 1000)
+      this.credentialPool.set(bizCode, {
+        data: decrypted,
+        expireTime: expireTime
+      })
       
       return decrypted
     } catch (error) {
@@ -118,10 +165,10 @@ export class STSProvider {
       }
     }
 
-    // 调用接口获取
+    // 调用接口获取（注意带上 actions 段）
     const res = await this.httpClient(
       'get',
-      `${this.baseURL}/basic/actions/getModulusExponent`
+      `${this.baseURL}/v1/ossManager/ossManager/actions/getModulusExponent`
     )
     
     if (res && res.success && res.data) {
@@ -219,7 +266,7 @@ export class STSProvider {
   async fetchOssCredential(params) {
     const res = await this.httpClient(
       'post',
-      `${this.baseURL}/basic/actions/getOssCredential`,
+      `${this.baseURL}/v1/ossManager/ossManager/actions/getOssCredential`,
       params
     )
     

@@ -34,6 +34,7 @@ import { EventBus } from './ai-core/event-bus';
 // 工具类
 import { STSProvider } from './utils/sts-provider';
 import { OssUploader } from './utils/oss-uploader';
+import { AIOssUploader } from './utils/ai-oss-uploader';
 
 // 导入样式（Vite 会自动处理 SCSS 编译和打包）
 import './style/index.scss';
@@ -87,39 +88,21 @@ const install = (Vue, options = {}) => {
       httpClient: options.http,
       baseURL: baseURL
     });
+    // 同时配置 AIOssUploader
+    AIOssUploader.config({
+      httpClient: options.http,
+      baseURL: baseURL
+    });
   }
 };
 
 // 导出所有组件和工具
 export { 
-  // 视图层
-  AIAgentContainer,
-  AIChatWindow,
-  // 核心 UI
-  AIInput,
-  AIBubble,
-  AIHistory,
-  AIConversations,
-  AIWelcome,
-  // 布局
-  AILayout,
-  AISidebar,
-  AIDrawer,
-  // 基础 UI
-  FilesCard,
-  AIAttachments,
-  AttachmentsPreview,
-  AILoadSelect,
-  PersonSelect,
-  // 辅助
-  ChatSkeleton,
-  AIEmpty,
-  // 核心功能
-  AIClient,
-  EventBus,
+  // ... 其他导出保持不变 ...
   // 工具类
   STSProvider,
-  OssUploader
+  OssUploader,
+  AIOssUploader
 };
 
 export default {
