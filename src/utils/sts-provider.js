@@ -13,7 +13,10 @@
 
 import CryptoJS from 'crypto-js'
 import { RSAKey } from 'jsrsasign'
-import { sm4 } from 'sec-crypto'
+import * as secCrypto from './crypto.common'
+
+const sm4 = secCrypto.sm4 || (secCrypto.default && secCrypto.default.sm4) || secCrypto.default || secCrypto;
+
 
 export class STSProvider {
   constructor(options = {}) {

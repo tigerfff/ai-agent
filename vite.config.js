@@ -1,14 +1,41 @@
 import { defineConfig } from 'vite'
 import vue2 from '@vitejs/plugin-vue2'
-import commonjs from 'vite-plugin-commonjs'
 import { resolve } from 'path'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [
     vue2(),
-    commonjs()
+    {
+      name: 'fix-crypto-bundle',
+      transform(code, id) {
+        if (id.includes('crypto.common.js')) {
+          // 1. 声明原本缺失的隐式全局变量
+          // 2. 模拟 CommonJS 环境 (module/exports)
+          // 3. 将结果作为 ESM 默认导出
+          return {
+            code: `
+              var _keyStr, _utf8_encode, _utf8_decode;
+              var module = { exports: {} };
+              var exports = module.exports;
+              
+              (function() {
+                ${code}
+              }).call(window);
+              
+              export default module.exports;
+              export const sm4 = module.exports.sm4;
+            `,
+            map: null
+          }
+        }
+      }
+    }
   ],
+  optimizeDeps: {
+    // 排除这个文件，让 Vite 的 transform 插件能处理它，修复语法错误
+    exclude: ['src/utils/crypto.common.js']
+  },
 
   // 本地开发服务器配置
   server: {
