@@ -271,28 +271,34 @@ export class STSProvider {
    * @returns {string} 解密后的字符串
    */
   sm4Decrypt(encrypted, key, iv) {
-    // 1. 将接口返回的 Base64 密文解析为 Hex 字符串，作为解密器的输入
+    // 1. Base64 -> Hex
     const encryptedHex = CryptoJS.enc.Base64.parse(encrypted).toString(CryptoJS.enc.Hex)
 
-    // 2. 将原始字符串密钥和 IV 转换为 Hex 字符串（32位）
+    // 2. Key/IV -> Hex
     const keyHex = CryptoJS.enc.Utf8.parse(key).toString(CryptoJS.enc.Hex)
     const ivHex = CryptoJS.enc.Utf8.parse(iv).toString(CryptoJS.enc.Hex)
 
-    // 3. 使用 sec-crypto 进行 SM4 解密
-    // 注意：sm4.decrypt 返回的是解密后的 Hex 字符串
+    // 3. 执行解密
     const decryptedHex = sm4.decrypt(encryptedHex, keyHex, {
       mode: 'cbc',
       iv: ivHex,
       padding: 'pkcs7'
     })
 
-    // 4. 将解密后的 Hex 串转回 UTF-8 字符串（解决域名、AccessKey 显示为十六进制的问题）
     if (!decryptedHex) return ''
+
     try {
-      return CryptoJS.enc.Hex.parse(decryptedHex).toString(CryptoJS.enc.Utf8)
+      // 4. Hex -> Utf8
+      let result = CryptoJS.enc.Hex.parse(decryptedHex).toString(CryptoJS.enc.Utf8)
+      
+      // 5. 【关键修复】手动剔除末尾的 PKCS7 填充字符
+      // PKCS7 填充的字符编码通常在 0x01 到 0x10 (16) 之间
+      // 使用正则匹配末尾的所有不可见控制字符并替换为空
+      // eslint-disable-next-line no-control-regex
+      return result.replace(/[\x00-\x1F\x7F]+$/g, '')
     } catch (e) {
-      console.error('STSProvider: Hex to Utf8 conversion failed', e)
-      return decryptedHex // 如果转换失败，至少返回原解密结果
+      console.error('STSProvider: Decryption or encoding conversion failed', e)
+      return decryptedHex
     }
   }
 
