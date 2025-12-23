@@ -110,14 +110,21 @@ export class AIOssUploader {
 
       if (stsData.encryptEnable) {
         if (stsData.kmsDataKey && stsData.kmsDataKey.sm4Supported) {
-          // 如果是续传，不需要再次加密文件，因为传入的已经是加密后的 Blob 或 checkpoint 已持有信息
-          // 但为了逻辑严谨，我们通常在 UI 层管理续传时的文件对象
-          uploadFile = await createEncryptedBlob(file, stsData);
+          // 1. 我们内部的 SM4 加密
+          uploadFile = await createEncryptedBlob(file, stsData)
           meta = {
-            "encrypted-version": String(stsData.kmsDataKey.version),
-            "encrypted-data-key": String(stsData.kmsDataKey.dataKeyEncrypted),
-            "sm4-supported": "1",
-          };
+            'encrypted-version': String(stsData.kmsDataKey.version),
+            'encrypted-data-key': String(stsData.kmsDataKey.dataKeyEncrypted),
+            'sm4-supported': '1'
+          }
+        } else if (typeof options.externalEncrypt === 'function') {
+          // 2. 由外部注入加密逻辑（兼容旧加密方案）
+          const { encryptedFile, meta: extraMeta } = await options.externalEncrypt(file, stsData)
+          uploadFile = encryptedFile
+          meta = extraMeta || {}
+        } else {
+          // 3. 否则：仅告警，不做加密，交给调用方自己决定要不要用这个类
+          console.warn('AIOssUploader: encryptEnable=true 但不支持 SM4，且未提供 externalEncrypt 回调，按未加密处理')
         }
       }
 

@@ -9,6 +9,13 @@
         <el-input v-model="bizCode" placeholder="请输入 bizCode" :disabled="loading"></el-input>
       </div>
 
+      <!-- 切换是否使用 externalEncrypt（模拟旧加密模式） -->
+      <div class="form-item">
+        <el-checkbox v-model="useExternalEncrypt">
+          使用 externalEncrypt（模拟外部加密逻辑）
+        </el-checkbox>
+      </div>
+
       <div class="form-item">
         <label>选择文件（可多选，建议 > 5MB 测试分片）:</label>
         <div class="upload-area" @click="triggerFileInput">
@@ -126,7 +133,9 @@ export default {
       fileStatuses: [],      // 每个文件的状态：idle/uploading/success/error
       abortMap: new Map(),   // index -> abortFn 映射
       results: [],           // 上传结果（Promise.allSettled 的返回值）
-      uploader: null
+      uploader: null,
+      // 是否启用 externalEncrypt（用于模拟旧加密模式）
+      useExternalEncrypt: false
     }
   },
   computed: {
@@ -181,7 +190,22 @@ export default {
           },
           onItemCancelTask: (index, abortFn) => {
             this.abortMap.set(index, abortFn)
-          }
+          },
+          // externalEncrypt：演示如何使用外部加密逻辑（旧加密模式）
+          externalEncrypt: this.useExternalEncrypt
+            ? async (rawFile, stsData) => {
+                // 这里可以调用你们旧的前端加密方法，例如 encryptPicFile(...)
+                // 为了示例，这里不做真实加密，仅原样返回文件并设置 meta
+                return {
+                  encryptedFile: rawFile,
+                  meta: {
+                    'encrypted-version': String(stsData.kmsDataKey?.version || ''),
+                    'encrypted-data-key': String(stsData.kmsDataKey?.dataKeyEncrypted || ''),
+                    'sm4-supported': '0'
+                  }
+                }
+              }
+            : undefined
         })
 
         // 处理每个文件的结果
