@@ -154,7 +154,58 @@ console.log('OSS URL:', result.url)
 3. 使用 `ali-oss` 客户端执行 `put(objectKey, file, { meta, progress })`。
 4. 返回带有 `fileName` 和可用 `url` 的结果对象。
 
-### 3. 上传多个文件
+### 3. 暂停 / 中止上传（基于 abortMultipartUpload）
+
+当前实现支持通过 **中止本次分片上传** 的方式“停止”上传（不可恢复，属于硬中止）：
+
+```javascript
+const uploader = new AIOssUploader()
+
+let abortFn = null
+
+async function startUpload(file) {
+  try {
+    const result = await uploader.upload(file, '70201', {
+      // 可选：断点信息。当前实现使用 abort 中止后不会续传，这里一般传 null
+      checkpoint: null,
+
+      // 进度回调：percent 为 0-100，checkpoint 为 ali-oss 的断点对象
+      onProgress: (percent, checkpoint) => {
+        console.log('进度:', percent, '%', checkpoint)
+      },
+
+      // 拿到“中止当前上传”的函数（内部通过 abortMultipartUpload 实现）
+      onAbortHandler: (fn) => {
+        abortFn = fn
+      }
+    })
+
+    console.log('上传完成:', result.url)
+  } catch (e) {
+    console.error('上传失败或被中止:', e)
+  }
+}
+
+// 在 UI 上点击“暂停 / 停止上传”时调用：
+async function stopUpload() {
+  if (abortFn) {
+    await abortFn()        // 调用内部封装的 client.abortMultipartUpload(...)
+    abortFn = null
+    console.warn('上传已中止（不可恢复，需要重新上传）')
+  }
+}
+```
+
+说明：
+
+- `onAbortHandler(fn)` 会在真正开始 `multipartUpload` 之前被调用一次，参数 `fn` 是一个异步函数：
+  - 调用 `await fn()` 会执行 `client.abortMultipartUpload(objectKey, uploadId)`，中止当前分片上传。
+  - 一旦中止，本次上传的所有分片会被 OSS 删除，**不能**再从中间 resume，只能重新上传。
+- `onProgress(percent, checkpoint)` 中的 `checkpoint` 仅用于调试和观察；当前版本没有做“真正可恢复的暂停/续传”，而是定位为“停止当前上传”的能力。
+
+> 如果你需要“可恢复的暂停/续传”，可以在业务侧持久化 `checkpoint`，并在下次调用 `upload` 时传入该 `checkpoint`，同时不再调用 `abortFn`。这部分涉及到更复杂的策略，当前封装默认不启用。
+
+### 4. 上传多个文件
 
 ```javascript
 const results = await uploader.uploadMultiple(files, '70201', {
@@ -164,6 +215,33 @@ const results = await uploader.uploadMultiple(files, '70201', {
 })
 
 // results 为 Promise.allSettled 的结果数组
+```
+
+多文件上传时，`AIOssUploader` 会为每个文件分别调用一次 `upload`，因此也支持给每个文件单独配置进度和中止逻辑：
+
+```javascript
+const uploader = new AIOssUploader()
+const abortMap = new Map() // key: index, value: abortFn
+
+const results = await uploader.uploadMultiple(files, '70201', {
+  // 每个文件的进度
+  onItemProgress: (index, percent, checkpoint) => {
+    console.log(`文件 ${index} 进度: ${percent}%`, checkpoint)
+  },
+  // 每个文件的中止句柄
+  onItemCancelTask: (index, abortFn) => {
+    abortMap.set(index, abortFn)
+  }
+})
+
+// 在 UI 上点击“暂停第 i 个文件”时：
+async function stopOne(index) {
+  const abortFn = abortMap.get(index)
+  if (abortFn) {
+    await abortFn()
+    abortMap.delete(index)
+  }
+}
 ```
 
 ---
