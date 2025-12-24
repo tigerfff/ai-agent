@@ -63,7 +63,7 @@
             </div>
           </div>
 
-          <div class="header-title-wrapper" v-show="!shouldHideConversations && !currentConversationId.startsWith('conv-') && currentConversationTitle !== '新会话'">
+          <div class="header-title-wrapper" v-show="!shouldHideConversations && currentConversationId && !currentConversationId.startsWith('conv-') && currentConversationTitle !== '新会话'">
             <div class="header-title">
               {{ currentConversationTitle }}
             </div>
