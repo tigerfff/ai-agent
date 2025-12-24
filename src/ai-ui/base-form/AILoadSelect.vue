@@ -646,7 +646,7 @@ export default {
         height: 0;
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
-        border-top: 6px solid #909399;
+        border-top: 6px solid rgba(56,142,255,1);
         transition: transform 0.3s;
         vertical-align: middle;
 

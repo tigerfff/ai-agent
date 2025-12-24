@@ -267,6 +267,7 @@ export default {
     transition: opacity 0.2s;
 
     &:hover {
+      border-radius: 4px;;
       opacity: 0.8;
       background: rgba($color: #000000, $alpha: 0.04);
     }

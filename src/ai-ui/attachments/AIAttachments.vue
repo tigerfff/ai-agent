@@ -375,7 +375,7 @@ export default {
     .attachments-list {
       flex-wrap: wrap;
       overflow-y: auto;
-      max-height: 200px;
+      max-height: 208px;
     }
   }
 

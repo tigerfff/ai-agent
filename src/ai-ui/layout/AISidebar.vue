@@ -54,7 +54,7 @@
         <div v-show="!collapsed" class="new-chat-wrapper" :class="{ 'collapsed': collapsed }" @click="$emit('new-chat')">
           <div class="new-chat-btn" :title="collapsed ? '新建会话' : ''">
             <span class="icon">
-              <i class="h-icon-add"></i>
+              <AIIcon :src="addIcon" :size="24" />
             </span>
             <span class="text" v-show="!collapsed">新建会话</span>
           </div>
@@ -103,8 +103,14 @@
 </template>
 
 <script>
+import AIIcon from '@/ai-ui/icon/AIIcon.vue';
+import addIcon from '@svg/add.svg';
+
 export default {
   name: 'AISidebar',
+  components: {
+    AIIcon
+  },
   props: {
     agents: {
       type: Array,
@@ -140,7 +146,9 @@ export default {
     }
   },
   data() {
-    return {};
+    return {
+      addIcon
+    };
   },
   computed: {
     displayConversations() {
@@ -209,7 +217,7 @@ export default {
     height: 64px;
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 16px 0 24px;;
     justify-content: space-between;
     flex-shrink: 0;
 
@@ -225,8 +233,8 @@ export default {
       align-items: center;
 
       .logo-icon {
-        width: 40px; // 展开状态 40px
-        height: 40px;
+        width: 32px; // 展开状态 40px
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -252,7 +260,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 40px;
     border-radius: 4px;
     transition: all 0.2s;
     font-size: 24px;
@@ -260,6 +267,7 @@ export default {
     &:hover {
       background: #e6e8eb;
       color: #303133;
+      padding: 4px;
     }
 
     img {
@@ -277,11 +285,12 @@ export default {
   }
 
   .agent-list {
-    padding: 16px 12px;
+    padding: 0 16px 16px;
     border-bottom: 1px solid #ebeef5;
     flex-shrink: 0;
     transition: padding 0.3s;
 
+   
     .agent-item {
       display: flex;
       align-items: center;
@@ -336,6 +345,7 @@ export default {
       }
 
       .agent-name {
+        color: rgba(0,0,0,0.9);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -343,6 +353,7 @@ export default {
       }
     }
   }
+
 
   .new-chat-wrapper {
     padding: 0 12px;
@@ -365,7 +376,7 @@ export default {
       justify-content: center;
       width: 100%;
       height: 40px;
-      border-radius: 4px;
+      border-radius: 8px;
       cursor: pointer;
       color: #fff;
       transition: all 0.2s;
@@ -378,11 +389,11 @@ export default {
       }
 
       .icon {
-        font-weight: bold;
-        height: 24px;
-        line-height: 24px;
-        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-right: 4px;
+        flex-shrink: 0;
       }
     }
   }
@@ -478,6 +489,7 @@ export default {
   }
 
   .sidebar-bottom {
+    background-color: #FFF;
     padding: 12px;
     flex-shrink: 0;
   }
@@ -502,6 +514,7 @@ export default {
 
     .agent-list {
       padding: 0px 8px 16px 8px;
+      border-bottom: none;
     }
 
     .agent-item {

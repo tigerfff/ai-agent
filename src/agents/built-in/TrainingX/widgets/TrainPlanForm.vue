@@ -6,7 +6,7 @@
         <div class="loading-spinner">
           <span></span><span></span><span></span>
         </div>
-        <span class="loading-text">加载中...</span>
+        <span class="loading-text">培训任务加载中...</span>
       </div>
     </div>
 
@@ -638,7 +638,6 @@ export default {
   overflow: hidden;
   font-family: var(--ym-ai-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
   position: relative;
-  padding: 8px;
 
   // Loading 或 历史记录禁用状态下禁用交互
   &.is-loading,
@@ -707,6 +706,7 @@ export default {
 
 
   .title {
+    color: rgba(0,0,0,0.9);
     font-weight: bold;
     font-size: 16px;
     line-height: 24px;

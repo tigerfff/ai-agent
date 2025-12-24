@@ -1245,7 +1245,6 @@ export default {
     }
 
     .el-sender-header-wrap {
-      border-bottom: 1px solid #ebeef5;
       overflow: hidden;
 
       .el-sender-header {
@@ -1360,6 +1359,7 @@ export default {
             z-index: 1000;
             min-width: 120px;
             overflow: hidden;
+            padding: 4px 0;
 
             .menu-item {
               display: flex;
@@ -1375,7 +1375,7 @@ export default {
               }
 
               &:not(:last-child) {
-                border-bottom: 1px solid #ebeef5;
+                // border-bottom: 1px solid #ebeef5;
               }
 
               &.disabled {
@@ -1385,8 +1385,8 @@ export default {
               }
 
               .menu-icon {
-                width: 16px;
-                height: 16px;
+                width: 24px;
+                height: 24px;
                 margin-right: 8px;
                 object-fit: contain;
                 flex-shrink: 0;
@@ -1426,7 +1426,7 @@ export default {
 
           &.send-btn {
             color: #fff;
-            border-radius: 8px;
+            border-radius: 50%;
 
             &:hover {
               color: #fff;

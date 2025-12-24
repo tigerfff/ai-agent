@@ -187,7 +187,7 @@ export default {
         title: 'AI试用',
         description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。上传图片或视频并提出问题，我将给出检测结果。现在就来试试吧！',
       },
-      buttonConfig: { upload: { visible: true, disabled: false }, speech: { visible: false, disabled: false } }
+      buttonConfig: { upload: { visible: true, disabled: false }, speech: { visible: false, disabled: false }, clear: { visible: false, disabled: false } }
     };
   },
   computed: {

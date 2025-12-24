@@ -99,6 +99,7 @@
           :speech-config-provider="getAsrConfig"
           :button-config="{
             upload: { visible: false, disabled: false },
+            clear: { visible: false, disabled: false },
             speech: { visible: false }, // 隐藏语音按钮
           }"
           :send-disabled="sendBtnDisabled"
@@ -115,7 +116,7 @@
 <script>
 import AIWelcome from '@/ai-ui/welcome/AIWelcome.vue';
 import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
-import trainingSquareIcon from '@/assets/images/try.png';
+import trainingSquareIcon from '@/assets/images/training.png';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from './api';
 import { formatConversationTime } from '@/utils';
@@ -1066,7 +1067,7 @@ export default {
   &.is-mini {
     .chat-area .content-wrapper,
     .footer .content-wrapper {
-      padding: 0 16px;
+      padding: 0 32px;
       max-width: 100%;
     }
   }

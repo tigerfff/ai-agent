@@ -554,7 +554,9 @@ export default {
       this.collapsedMenuForMini()
     },
     async handleNewChat() {
-      if (!this.currentAgentId) return;
+      if (!this.currentAgentId) {
+        return;
+      };
 
       this.collapsedMenuForMini()
 
@@ -570,6 +572,8 @@ export default {
 
       // 如果当前已经是新会话（虚拟ID），则不再重复创建
       if (this.currentConversationId && this.currentConversationId.startsWith('conv-')) {
+        // 提示用户已是新会话
+        this.$message && this.$message.info('已是新会话');
         return;
       }
 
@@ -826,8 +830,8 @@ export default {
           cursor: pointer;
           text-align: center;
           font-size: 16px;
-          font-weight: 500;
-          color: #333;
+          font-weight: 600;
+          color: rgba($color: #000000, $alpha: 0.9);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -970,5 +974,6 @@ export default {
   border-radius: 8px !important;;
   min-width: 0 !important;
   box-shadow: none !important;
+  background-color: transparent !important;;
 }
 </style>

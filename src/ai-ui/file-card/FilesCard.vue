@@ -481,7 +481,7 @@ export default {
     transition: opacity 0.2s;
 
     &:hover {
-      background: #f56c6c;
+      background: rgba(0, 0, 0, 0.9);
       color: #fff;
     }
   }
