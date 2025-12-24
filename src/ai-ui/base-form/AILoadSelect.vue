@@ -1,54 +1,54 @@
 <template>
   <div class="ai-load-select" :class="{ 'is-disabled': disabled }">
-    <!-- 输入框（显示选中值） -->
-    <div 
-      ref="inputRef"
-      class="select-input"
-      :class="{ 'is-focus': visible, 'is-disabled': disabled }"
-      @click="handleInputClick"
-    >
-      <div class="select-input-inner" :style="{ maxWidth: maxWidth }">
-        <!-- 多选：显示标签 -->
-        <template v-if="multiple">
-          <el-tag
-            v-for="(tag, index) in selectedTags"
-            :key="getOptionKey(tag)"
-            closable
-            @close="handleTagClose(tag)"
-            size="small"
-            class="select-tag"
-          >
-            {{ getOptionLabel(tag) }}
-          </el-tag>
-          <span v-if="selectedTags.length === 0" class="placeholder">{{ placeholder }}</span>
-        </template>
-        
-        <!-- 单选：显示文本 -->
-        <template v-else>
-          <span v-if="selectedLabel" class="select-text">{{ selectedLabel }}</span>
-          <span v-else class="placeholder">{{ placeholder }}</span>
-        </template>
-      </div>
-      
-      <!-- 三角形图标 -->
-      <div class="select-suffix">
-        <span class="triangle-icon" :class="{ 'is-reverse': visible }"></span>
-      </div>
-    </div>
-
     <!-- 下拉框（使用 el-popover） -->
     <el-popover
       ref="popover"
       v-model="visible"
       placement="bottom-start"
-      :width="popoverWidth"
+      :width="popoverWidthValue || popoverWidth"
       trigger="manual"
       popper-class="ver"
-      :reference="referenceElement"
-      :append-to-body="true"
+      :append-to-body="popperAppendToBody"
       @show="handlePopoverShow"
       @hide="handlePopoverHide"
     >
+      <!-- 输入框（作为 reference slot） -->
+      <div 
+        slot="reference"
+        ref="inputRef"
+        class="select-input"
+        :class="{ 'is-focus': visible, 'is-disabled': disabled }"
+        @click="handleInputClick"
+      >
+        <div class="select-input-inner" :style="{ maxWidth: maxWidth }">
+          <!-- 多选：显示标签 -->
+          <template v-if="multiple">
+            <el-tag
+              v-for="(tag, index) in selectedTags"
+              :key="getOptionKey(tag)"
+              closable
+              @close="handleTagClose(tag)"
+              size="small"
+              class="select-tag"
+            >
+              {{ getOptionLabel(tag) }}
+            </el-tag>
+            <span v-if="selectedTags.length === 0" class="placeholder">{{ placeholder }}</span>
+          </template>
+          
+          <!-- 单选：显示文本 -->
+          <template v-else>
+            <span v-if="selectedLabel" class="select-text">{{ selectedLabel }}</span>
+            <span v-else class="placeholder">{{ placeholder }}</span>
+          </template>
+        </div>
+        
+        <!-- 三角形图标 -->
+        <div class="select-suffix">
+          <span class="triangle-icon" :class="{ 'is-reverse': visible }"></span>
+        </div>
+      </div>
+
       <div class="select-dropdown">
         <!-- 搜索框（第一行） -->
         <div class="search-input-wrapper" v-if="showSearch">
@@ -178,11 +178,16 @@ export default {
     // 下拉框宽度
     popoverWidth: {
       type: [String, Number],
-      default: 'auto'
+      default: 300
     },
     maxWidth: {
       type: [String, Number],
       default: '250px'
+    },
+    // 是否将弹出层插入至 body
+    popperAppendToBody: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -243,6 +248,10 @@ export default {
         // 计算下拉框宽度（与输入框一致）
         this.$nextTick(() => {
           this.updatePopoverWidth();
+          // [新增] 强制更新一次 popper 定位，防止固定高度导致的偏移
+          if (this.$refs.popover && typeof this.$refs.popover.updatePopper === 'function') {
+            this.$refs.popover.updatePopper();
+          }
           if (this.$refs.optionsWrapper) {
             this.$refs.optionsWrapper.scrollTop = 0;
           }
@@ -653,12 +662,11 @@ export default {
 <style lang="scss">
 // 下拉框样式（需要全局样式，因为 popover 是 append-to-body 的）
 .ver {
-  width: 250px;
+  width: 300px !important;
   padding: 0 !important;
-  position: fixed !important;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  margin-top: 0px !important;
+  z-index: 3000 !important;
 
   .select-dropdown {
     .search-input-wrapper {
@@ -682,11 +690,16 @@ export default {
     }
 
     .options-wrapper {
-      max-height: 300px;
+      height: 300px;
       overflow-y: auto;
       padding: 4px 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
 
       .select-option {
+        flex-shrink: 0;
+        min-height: 34px;
         padding: 8px 12px;
         cursor: pointer;
         display: flex;
@@ -746,8 +759,11 @@ export default {
     .loading-more,
     .no-more,
     .empty-state {
-      padding: 12px;
-      text-align: center;
+      padding: 20px 12px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #909399;
       font-size: 12px;
 

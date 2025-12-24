@@ -19,7 +19,8 @@
             popper-class="qr-code-popover"
           > 
             <div slot="reference" class="scan-contact-btn">
-              {{ actionText || '扫码联系' }}
+              <img src="@/assets/svg/star-white.svg" alt="扫码联系" class="scan-contact-icon" />
+              <span>{{ actionText || '扫码联系' }}</span>
             </div>
             <div class="qr-code-popover-content">
               <div class="qr-code-wrapper">
@@ -200,6 +201,9 @@ export default {
     justify-content: center;
 
     .scan-contact-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: linear-gradient(-82.01deg, rgba(161,75,254,1) 0%, rgba(5,189,254,1) 100%);
       width: 108px;
       height: 32px;
@@ -210,6 +214,9 @@ export default {
       line-height: 32px;
       text-align: center;
       cursor: pointer;
+      span{
+        margin-left: 4px;
+      }
     }
   }
 

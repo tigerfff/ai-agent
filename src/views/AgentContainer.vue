@@ -393,6 +393,10 @@ export default {
 
     async handleSelectAgent(agent) {
       this.collapsedMenuForMini()
+      
+      // 判断是否从 home 进入（当前没有选中智能体）
+      const isFromHome = !this.currentAgentId;
+      
       // 如果是外部链接类型，先检查权限再跳转
       if (agent.type === 'external' && agent.getUrl) {
         this.checkingPermission = true;
@@ -435,10 +439,17 @@ export default {
         this.checkingPermission = false;
       }
       
-      // 切换智能体后，尝试选中该智能体的最新会话
-      // 如果是 TryAgent，列表可能是空的，等待组件 emit update-list 后再选中
-      const firstConv = this.conversations.find(c => c.agentId === agent.id);
-      this.currentConversationId = firstConv ? firstConv.id : null;
+      // 如果从 home 进入，直接创建新会话；否则选中第一个会话
+      if (isFromHome) {
+        // 从 home 进入，创建新会话
+        const newId = 'conv-' + Date.now();
+        this.currentConversationId = newId;
+      } else {
+        // 切换智能体后，尝试选中该智能体的最新会话
+        // 如果是 TryAgent，列表可能是空的，等待组件 emit update-list 后再选中
+        const firstConv = this.conversations.find(c => c.agentId === agent.id);
+        this.currentConversationId = firstConv ? firstConv.id : null;
+      }
       this.componentKey++; 
     },
     

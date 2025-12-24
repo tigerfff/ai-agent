@@ -71,7 +71,7 @@
                   @click.stop
                 >
                   <div 
-                    v-if="parsedAllowedTypes.image"
+                    v-if="shouldShowStandardType('image')"
                     class="menu-item"
                     @click="selectFileType('image')"
                   >
@@ -79,7 +79,7 @@
                     <span>图片</span>
                   </div>
                   <div 
-                    v-if="parsedAllowedTypes.video"
+                    v-if="shouldShowStandardType('video')"
                     class="menu-item"
                     @click="selectFileType('video')"
                   >
@@ -87,7 +87,7 @@
                     <span>视频</span>
                   </div>
                   <div 
-                    v-if="parsedAllowedTypes.document"
+                    v-if="shouldShowStandardType('document')"
                     class="menu-item"
                     @click="selectFileType('document')"
                   >
@@ -215,8 +215,8 @@ import voiceIcon from '@svg/voice.svg';
 import pauseIcon from '@images/pause@3x.png';
 import sendIcon from '@images/send-msg.png';
 import sendDisabledIcon from '@images/send_msg_disabled.png';
-import imageIcon from '@svg/imgae.svg';
-import videoIcon from '@svg/video-icon.svg';
+import imageIcon from '@svg/image.svg';
+import videoIcon from '@svg/video.svg';
 import documentIcon from '@svg/document.svg';
 import starIcon from '@images/star@3x.png';
 
@@ -461,8 +461,21 @@ export default {
       const config = this.allowedTypes || this.accepts;
       
       // 如果没有配置，默认支持所有类型
-      if (!config) {
-        return { image: true, video: true, document: true };
+      if (!config || (Array.isArray(config) && config.length === 0)) {
+        // 如果提供了 fileLimit，则从 fileLimit 的 key 中推断
+        if (this.fileLimit && Object.keys(this.fileLimit).length > 0) {
+          return {
+            image: !!this.fileLimit.image,
+            video: !!this.fileLimit.video,
+            document: !!(this.fileLimit.document || this.fileLimit.file)
+          };
+        }
+        // 如果连 fileLimit 都没有，且 config 是 null/undefined，则全开
+        if (!config) {
+          return { image: true, video: true, document: true };
+        }
+        // 如果 config 明确是 [] 且没配 fileLimit，则全关
+        return { image: false, video: false, document: false };
       }
       
       // 格式1: 字符串 ".jpg,.jpeg,.png,.mp4"
@@ -479,7 +492,7 @@ export default {
                     accept.includes('.docx') || accept.includes('.xls') || 
                     accept.includes('.xlsx') || accept.includes('.ppt') || 
                     accept.includes('.pptx') || accept.includes('.txt') || 
-                    accept.includes('.csv')
+                    accept.includes('.csv') || accept.includes('document') || accept.includes('file')
         };
       }
       
@@ -488,7 +501,7 @@ export default {
         return {
           image: config.image === true,
           video: config.video === true,
-          document: config.document === true
+          document: config.document === true || config.file === true
         };
       }
       
@@ -497,7 +510,7 @@ export default {
         return {
           image: config.includes('image'),
           video: config.includes('video'),
-          document: config.includes('document')
+          document: config.includes('document') || config.includes('file')
         };
       }
       
@@ -844,11 +857,34 @@ export default {
         }
       }
       
+      // [新增] 检查文件类型是否在允许的类型列表中（优先级最高）
+      for (const file of files) {
+        const fileType = this.getFileType(file); // 'image' | 'video' | 'file'
+        
+        // 检查文件类型是否在允许的类型列表中
+        const isAllowed = this.parsedAllowedTypes[fileType] === true;
+        
+        if (!isAllowed) {
+          const allowedTypesList = this.supportedTypes.map(t => this.getTypeLabel(t)).join('、');
+          const msg = `文件 ${file.name} 类型不支持，仅支持: ${allowedTypesList}`;
+          
+          if (this.$message) {
+            this.$message.warning(msg);
+          } else {
+            alert(msg);
+          }
+          
+          e.target.value = '';
+          return;
+        }
+      }
+      
       // [新增] 详细校验逻辑 (大小 & 后缀) - 先执行所有校验
       if (this.fileLimit) {
         for (const file of files) {
-          const fileType = this.getFileType(file); // 'image' | 'video' | 'file'
-          const limitConfig = this.fileLimit[fileType];
+          const fileType = this.getFileType(file); // 'image' | 'video' | 'document'
+          // 兼容 'document' 和 'file' 两个键名
+          const limitConfig = this.fileLimit[fileType] || (fileType === 'document' ? this.fileLimit.file : null);
 
           if (limitConfig) {
             // A. 校验大小
@@ -997,10 +1033,14 @@ export default {
           return;
         } catch (e) {
           console.error('[AIInput] beforeAddAttachments failed:', e);
-          // 失败则退回到本地模式：标记为 done，但没有 url
+          // 如果 beforeAddAttachments 内部已经设置了 error 状态（如 agent-upload.js），不要覆盖
+          // 只处理那些仍然是 uploading 状态的文件（可能是未处理的异常）
           rawFiles.forEach((file, i) => {
             const target = this.fileList[baseIndex + i];
             if (!target) return;
+            // 如果 status 已经是 'error'，说明已经由 updateItem 设置过了，不要覆盖
+            if (target.status === 'error') return;
+            // 否则退回到本地模式：标记为 done，但没有 url
             Object.assign(target, {
               status: 'done',
               percent: 100,
@@ -1015,7 +1055,7 @@ export default {
     getFileType(file) {
       if (file.type.startsWith('image/')) return 'image';
       if (file.type.startsWith('video/')) return 'video';
-      return 'file';
+      return 'document';
     },
     
     /**
@@ -1129,6 +1169,17 @@ export default {
      */
     setText(text) {
       this.inputValue = text || '';
+    },
+    /**
+     * 判断是否显示标准菜单项（图片/视频/文档）
+     * 如果用户显式传了 :allowed-types="[]"，则不显示标准项，由 customMenuItems 接管
+     */
+    shouldShowStandardType(type) {
+      // 如果明确传了空数组，认为用户想完全自定义菜单，因此隐藏组件默认的菜单项
+      if (Array.isArray(this.allowedTypes) && this.allowedTypes.length === 0) {
+        return false;
+      }
+      return this.parsedAllowedTypes[type];
     },
     /**
      * 处理自定义菜单项点击

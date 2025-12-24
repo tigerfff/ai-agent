@@ -165,8 +165,8 @@ export default {
       if (task.isUploading) return true;
       // 已上传
       if (task.uploaded) return true;
-      // status 不为 -1 时禁用
-      if (task.status !== null && task.status !== -1) return true;
+      // status 不为 -1 未开始 2 已驳回
+      if (task.status !== null && [-1, 2].includes(task.status)) return true;
       return false;
     },
 
@@ -373,6 +373,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @use '@/style/mixins.scss';
 .user-train-finish {
   display: flex;
   flex-wrap: wrap;
@@ -386,7 +387,6 @@ export default {
     height: 32px;
     display: inline-flex;
     align-items: center;
-    align-items: center;
     gap: 4px;
     padding: 4px 12px;
     background: #FFF;
@@ -397,10 +397,22 @@ export default {
     transition: all 0.2s;
     user-select: none;
     color: rgba(0,0,0,0.7);
-    font-size: 14px;
     line-height: 32px;
     letter-spacing: 0px;
     text-align: left;
+    max-width: 400px;
+    overflow: hidden;
+
+    i {
+      flex-shrink: 0; // 图标不收缩
+    }
+
+    span {
+      min-width: 0; // 允许 flex 项收缩
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
 
     &:hover:not(.is-disabled) {

@@ -79,7 +79,7 @@ export default {
       
       // 根据当前域名动态构建 URL
       const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.hik-cloud.com';
-      return `${origin}/training-h5/index.html#/?canType=operation&id=${this.projectId}&taskId=${this.taskId}`;
+      return `${origin}/training-h5/index.html#/scanCodePage?canType=operation&id=${this.projectId}&taskId=${this.taskId}`;
     }
   },
   watch: {

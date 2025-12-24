@@ -97,7 +97,7 @@ export default {
         }
         return '培训周期: 未设置';
       } else{
-        return this.detailInfo.completedPersonNum +  '人完成'
+        return this.detailInfo.completedPersonNum || 0 +  '人完成'
       }
     },
   },

@@ -211,6 +211,7 @@ export default {
     conversationId: {
       immediate: true,
       handler(val) {
+
         this.aiInputText = ''
         this.$refs.aiInput && this.$refs.aiInput.clear()
         this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
@@ -226,6 +227,8 @@ export default {
           // 如果没有 ID（或者是新会话状态），则清空消息显示欢迎页
           this.chatId = '';
           this.messages = [];
+           // 切换会话时，强制中止正在进行的流
+         this.handleStop(); 
         }
       }
     },
@@ -908,12 +911,9 @@ export default {
     handleFinish({ index }) {
       if (index === this.messages.length - 1) {
         this.isStreaming = false;
-        // 更新会话标题 (仅对第一条消息或新会话)
-        if (this.messages.length <= 2 && this.sessionApi) {
-          const userMsg = this.messages.find(m => m.role === 'user');
-          if (userMsg && userMsg.content) {
-             this.sessionApi.updateCurrentTitle(userMsg.content.slice(0, 10));
-          }
+        // 刷新会话列表 (仅对第一条消息或新会话，确保新会话出现在侧边栏)
+        if (this.messages.length <= 2) {
+          this.fetchConversationList();
         }
       }
     },

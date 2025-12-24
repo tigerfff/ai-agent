@@ -60,6 +60,15 @@
           </div>
         </div>
       </div>
+
+      <!-- mini 模式下的错误遮罩 -->
+      <div 
+        v-if="mode === 'mini' && status === 'error'"
+        class="mini-error-overlay"
+        :title="errorTip"
+      >
+         {{ errorTip }}
+      </div>
     </div>
 
     <!-- 2. 内容区域 (仅在非 mini 模式下显示) -->
@@ -147,7 +156,7 @@ export default {
         return {
           width: 'auto',
           maxWidth: 'none',
-          padding: '4px',
+          padding: '0px',
           background: 'transparent',
           border: 'none'
         };
@@ -401,6 +410,18 @@ export default {
           }
         }
       }
+    }
+
+    .mini-error-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba($color: #000, $alpha: .1);
+      color: #fff;
+      font-size: 12px;
+      z-index: 2;
     }
   }
 

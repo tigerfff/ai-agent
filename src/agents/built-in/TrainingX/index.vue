@@ -51,7 +51,7 @@
                 @click="handleCancelTask(item)"
               >
                 <i class="h-icon-close_f" style="font-size: 24px;"></i>
-                <span>{{ item.taskCancelling ? '取消中...' : '停止任务' }}</span>
+                <span>{{ item.taskCancelling ? '取消中...' : '取消任务' }}</span>
               </div>
               <span style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
             </template>
@@ -67,7 +67,6 @@
             <template v-else-if="item.content.includes('ymform:train_video_process_check')">
               <TrainResultUpload
                 :data="item"
-                :is-history-disabled="index < messages.length - 1"
               />
             </template>
            
@@ -199,7 +198,6 @@ export default {
     conversationId: {
       immediate: true,
       handler(val) {
-        console.log('[TrainingX] conversationId', val);
         // 如果是真实会话ID（不是临时ID且不为空），则加载历史
         if (val && !val.startsWith('conv-')) {
           // 但为了防止在列表里点击当前会话时重复刷新，加个判断
@@ -215,6 +213,8 @@ export default {
             this.markAsRead(val);
           }
         } else {
+           // 切换会话时，强制中止正在进行的流
+          this.handleStop(); 
           // 如果没有 ID 或者是临时ID（conv-开头），则清空消息显示欢迎页
           this.chatId = '';
           this.messages = [];
@@ -451,7 +451,7 @@ export default {
                 // 适配未读状态
                 isUnread: !item.hasRead ,
                 // 格式化显示时间（用于 label slot 中显示）
-                time: formatConversationTime(item.createTime)
+                time: formatConversationTime(item.updateTime)
               });
             }
           });
@@ -965,15 +965,14 @@ export default {
      * 临时 Mock 方法：添加测试培训计划表单消息（可随时删除）
      */
     mockTrainPlanForm() {
-      const mockContent = `<ymform:train_plan>
-{
-  "courseProjectId": "47823f9efe3047b49fe00027424c46ee",
-  "type": "1", 
-  "questionId": "123",
-  "storeId": "70070670a8ed430497b15e70e5eb8763",
-  "userIds": ["4649d25a7be14f7bb1106219b3bec89c"]
-}
-</ymform:train_plan>`;
+      const mockContent = `"根据您的要求汉堡制作培训，匹配您的培训课程。当前课程列表中无直接相关的汉堡制作类课程，但‘炸鸡项目’在食品制作类培训中与汉堡制作同属快餐食品加工范畴，技术流程和操作规范具有较高相似性，可作为替代学习参考。帮您推荐课程如下：<ymform:train_plan>{"courseProjectId":"11ee7b846fbb442ca3e564f82212929f","type":"1","questionId":"","storeId":"","userIds":["08040da51923457aaaf43e4267abcf4e","083360b3255f4a6489e0b159e0be83fe","1681cc62cd7442b1827431d6bada368d","2d5ece66a4b242b0a5914b555046a5af","3f1051db965b470598827d6a600ce9ba","4649d25a7be14f7bb1106219b3bec89c","52b1ff1eebce4424803351c76e1233c7","5d750d152f0e4cd0b66ca3b789251593","63f1a9fa057f4e5d83b0671f199d6a6b","6dda093645b241d5ac7b9a3fb75de9f3","892d117d848d41e4864f14bf98094778","9275b603380e4923aa265c3836f56129","949b8f4e5f2b4d37842aa4a330012839","9bc411a74d424c018d362bd9b12402ac","a1447565e9c24b7aa979b83dba766a16","ccbbca263a6446a4afafa470c5cf1a94","ea6de590832a4e899ad7cc8ef07feb9a","fae79137463c40368a5d746f2d8922a5"]}</ymform:train_plan>
+
+
+
+
+
+
+"`;
 
       const mockMsg = {
         key: 'mock-train-plan-' + Date.now(),
@@ -1038,15 +1037,12 @@ export default {
     handleFinish({ index }) {
       if (index === this.messages.length - 1) {
         this.isStreaming = false;
-        // 更新会话标题 (仅对第一条消息或新会话)
-        if (this.messages.length <= 2 && this.sessionApi) {
-          const userMsg = this.messages.find(m => m.role === 'user');
-          if (userMsg && userMsg.content) {
-             this.sessionApi.updateCurrentTitle(userMsg.content.slice(0, 10));
-          }
+        // 刷新会话列表 (仅对第一条消息或新会话，确保新会话出现在侧边栏)
+        if (this.messages.length <= 2) {
+          this.fetchConversationList();
         }
       }
-    }
+    },
   },
   beforeDestroy() {
   if (this.abortController) {

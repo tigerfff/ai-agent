@@ -69,7 +69,7 @@
             </div>
           </slot>
           <!-- Loading 蒙层 -->
-          <div v-if="widget.loading || loading" class="widget-loading-overlay">
+          <div v-if="loading" class="widget-loading-overlay">
             <div class="loading-content">
               <div class="typing-indicator">
                 <span></span><span></span><span></span>

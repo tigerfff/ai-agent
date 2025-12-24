@@ -42,7 +42,6 @@
       >
         ‹
       </div>
-
       <!-- 列表容器 -->
       <div 
         ref="scrollContainer"

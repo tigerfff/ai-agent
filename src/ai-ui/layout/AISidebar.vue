@@ -74,7 +74,7 @@
           >
             <template #label="{ item }">
               <div class="conversation-label">
-                <span class="label-text">{{ item.label }}</span>               
+                <span class="label-text" :title="item.label">{{ item.label }}</span>               
                 <span class="label-time" >{{ item.time }}</span>
               </div>
             </template>

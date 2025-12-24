@@ -3,7 +3,7 @@
  * 
  * 规则：
  * 1. 默认识别 <type:name>...</type:name> 格式的标签
- * 2. 如果标签未闭合，视为 loading 状态
+ * 2. 如果标签未闭合，当做普通文本处理
  * 3. 标签内容尝试解析为 JSON，失败则返回字符串
  */
 export class StreamMessageParser {
@@ -15,7 +15,7 @@ export class StreamMessageParser {
   /**
    * 解析文本为 Token 列表
    * @param {string} fullText 完整消息文本
-   * @returns {Array} [{ type: 'text'|'widget', content?, widgetType?, data?, loading? }]
+   * @returns {Array} [{ type: 'text'|'widget', content?, widgetType?, data? }]
    */
   parse(fullText) {
     if (!fullText) return [];
@@ -56,17 +56,12 @@ export class StreamMessageParser {
 
       // 如果找不到结束符，或者看起来不像是一个完整的开始标签
       if (tagNameEndIndex === -1) {
-        // 检查这是否是一个正在输入的、尚未完成的标签，例如 "<form:de"
-        // 简单的启发式：如果包含 ':' 且没有空格/换行，可能是一个正在输入的 Widget 标签
+        // 检查这是否是一个正在输入的、尚未完成的标签，例如 "<ymform:tra"
         const potentialTag = fullText.slice(tagStartIndex + 1);
-        // 排除掉像 "< " 这样的情况
         if (potentialTag.includes(':') && !/\s/.test(potentialTag)) {
-           // 这是一个未完成的 Widget Start Tag，我们也标记为 loading
-           // 但我们需要知道它大概是什么类型吗？
-           // 暂时作为 text 处理比较安全，或者作为一个特殊的 'pending' widget
-           // 为了用户体验，直到我们确认它是 valid tag 之前，最好先按 text 显示（或者不显示）
-           // 这里选择：如果还没打完，就先当做 text "<form:de" 显示出来，等有了 ">" 再变身
-           // 这样可以避免闪烁
+          // 这是一个未完成的 Widget 标签，隐藏它及其后续所有内容，防止源码闪烁
+          currentIndex = length;
+          break;
         }
         
         // 当做普通文本处理
@@ -90,52 +85,47 @@ export class StreamMessageParser {
       const correctClosingTag = `</${tagName}>`;
       const wrongClosingTag = `<${tagName}>`; // 错误的闭合标签（缺少 /）
       
-      // 先查找正确的闭合标签
-      let closingTagIndex = fullText.indexOf(correctClosingTag, tagNameEndIndex);
+      // 先找到开始标签的结束位置 '>'
+      const openingTagCloseIndex = fullText.indexOf('>', tagStartIndex);
+      if (openingTagCloseIndex === -1) {
+        // 开始标签本身都没闭合，当做文本处理
+        tokens.push({ type: 'text', content: '<' });
+        currentIndex = tagStartIndex + 1;
+        continue;
+      }
+      
+      // 从开始标签的 '>' 之后开始查找闭合标签
+      let closingTagIndex = fullText.indexOf(correctClosingTag, openingTagCloseIndex + 1);
       let closingTag = correctClosingTag;
       
       // 如果找不到正确的闭合标签，尝试查找错误的闭合标签
       if (closingTagIndex === -1) {
         // 从后往前查找最后一个错误的闭合标签（应该是真正的闭合标签）
         const lastWrongIndex = fullText.lastIndexOf(wrongClosingTag);
-        if (lastWrongIndex > tagNameEndIndex) {
-          // 检查这个错误的闭合标签是否在开始标签之后
-          const openingTagCloseIndex = fullText.indexOf('>', tagStartIndex);
-          if (openingTagCloseIndex !== -1 && lastWrongIndex > openingTagCloseIndex) {
-            closingTagIndex = lastWrongIndex;
-            closingTag = wrongClosingTag;
-          }
+        if (lastWrongIndex > openingTagCloseIndex) {
+          closingTagIndex = lastWrongIndex;
+          closingTag = wrongClosingTag;
         }
       }
 
       if (closingTagIndex === -1) {
-        // --- 情况 A: 标签未闭合 (Loading 状态) ---
-        // 这意味着我们收到了 "<form:demo" 或 "<form:demo>..." 但还没收到结束
-        tokens.push({ 
-            type: 'widget', 
-            widgetType: tagName, 
-            data: null, 
-            loading: true 
-        });
-        // 既然正在 loading，我们假设剩下的所有内容都属于这个 widget
-        // 停止解析
-        currentIndex = length;
+        // --- 情况 A: 标签未闭合 ---
+        // 既然是一个合法的 Widget 标签开始但未闭合，隐藏它及其内部所有内容
+        // 这样在流式输出时，用户不会看到 XML 源码和中间的 JSON
+        currentIndex = length; 
         break;
       } else {
         // --- 情况 B: 标签已闭合 (Done 状态) ---
         
-        // 我们需要找到开始标签的结束位置 '>'，以便提取内容
-        const openingTagCloseIndex = fullText.indexOf('>', tagStartIndex);
-        
-        // 如果开始标签本身都没闭合（这在 closingTagIndex !== -1 的情况下不太可能，除非嵌套错乱）
-        if (openingTagCloseIndex === -1 || openingTagCloseIndex > closingTagIndex) {
-           // 异常结构，当做文本处理
-           tokens.push({ type: 'text', content: '<' });
-           currentIndex = tagStartIndex + 1;
-           continue;
+        // 验证开始标签位置的有效性（虽然理论上不会发生，但防御性检查）
+        if (openingTagCloseIndex > closingTagIndex) {
+          // 异常结构，当做文本处理
+          tokens.push({ type: 'text', content: '<' });
+          currentIndex = tagStartIndex + 1;
+          continue;
         }
 
-        // 提取中间的内容
+        // 提取中间的内容（openingTagCloseIndex 已经在上面找到了）
         const rawContent = fullText.slice(openingTagCloseIndex + 1, closingTagIndex);
         
         // 尝试解析 JSON
@@ -154,8 +144,7 @@ export class StreamMessageParser {
         tokens.push({
             type: 'widget',
             widgetType: tagName,
-            data: parsedData,
-            loading: false
+            data: parsedData
         });
 
         // 移动指针到闭合标签之后
