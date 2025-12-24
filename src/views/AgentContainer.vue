@@ -63,13 +63,13 @@
             </div>
           </div>
 
-          <div class="header-title-wrapper" v-show="!shouldHideConversations">
+          <div class="header-title-wrapper" v-show="!shouldHideConversations && !currentConversationId.startsWith('conv-') && currentConversationTitle !== '新会话'">
             <div class="header-title">
               {{ currentConversationTitle }}
             </div>
-            <!-- 编辑按钮：只在有真实会话时显示，鼠标悬停时显示 -->
+            <!-- 编辑按钮：只在有真实会话时显示，新对话时不显示 -->
             <div 
-              v-if="currentConversationId && !currentConversationId.startsWith('conv-')"  
+              v-if="currentConversationId"  
               class="header-title-actions"
             >
               <div class="edit-btn" @click="handleTitleRename" title="重命名">

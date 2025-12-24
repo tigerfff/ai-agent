@@ -18,7 +18,7 @@
             trigger="hover"
             popper-class="qr-code-popover"
             :visble-arrow="false"
-            :offset="-50"
+            :offset="-100"
           > 
             <div slot="reference" class="scan-contact-btn">
               <img src="@/assets/svg/star-white.svg" alt="扫码联系" class="scan-contact-icon" />
@@ -262,19 +262,18 @@ export default {
   border-radius: 8px !important;;
   min-width: 0 !important;
   box-shadow: none !important;
-  background: transparent !important;
+  
 
   .qr-code-popover-content {
     .qr-code-wrapper {
       width: 120px;
       height: 120px;
       padding: 0;;
-      border: none;
+      border: 1px solid #e4e7ed;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: transparent !important;
 
       .qr-code-image {
         width: 100%;
