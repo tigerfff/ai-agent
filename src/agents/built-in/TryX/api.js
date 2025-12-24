@@ -184,16 +184,16 @@ export const TryApi = {
       data
     });
   },
-  getTreeNext(client, data) {
+  getStoresTreeList(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/orgsForLine', 'chain'),
+      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/actions/storeList', 'chain'),
       method: 'get',
       data
     });
   },
-  getStoresTreeList(client, data) {
+  remainingChatTimes(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/actions/storeList', 'chain'),
+      url: buildUrl(client, '/inspect/chat/web/agent/chat/remainingChatTimes', 'chain'),
       method: 'get',
       data
     });

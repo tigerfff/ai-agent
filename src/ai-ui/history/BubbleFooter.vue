@@ -245,7 +245,6 @@ export default {
     },
 
     handleLike(type) {    
-      console.log('handleLike', type);
         // 如果已经是当前状态，则取消（设为 null 或 ''）
       const newStatus = this.localLikeStatus === type ? '' : type;
       this.localLikeStatus = newStatus;
@@ -269,6 +268,7 @@ export default {
 
     &:hover {
       opacity: 0.8;
+      background: rgba($color: #000000, $alpha: 0.04);
     }
 
     &.active {

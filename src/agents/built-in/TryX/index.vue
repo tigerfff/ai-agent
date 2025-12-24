@@ -70,7 +70,7 @@
           v-model="aiInputText"
           :loading="isStreaming || isUploading"
           :showClearButton="false"
-          placeholder="有问题尽管问我~"
+          placeholder="您可以问我任何问题，比如“图片中是否有员工违规”"
           :allowed-types="[]"
           :customMenuItems="customMenuItems"
           :max-size="200 * 1024 * 1024"
@@ -84,6 +84,7 @@
           :speech-config-provider="getAsrConfig"
           :before-send="handleBeforeSend"
           :send-disabled="sendBtnDisabled"
+          :buttonConfig="buttonConfig"
           @send="handleSend" 
           @stop="handleStop"
           @file-list-change="fileListChange"
@@ -94,7 +95,7 @@
       </div>
     </div>
     <simulateVerifyModal :visible.sync="simulateVerifyModalVisible" @simulateVerifyFileUpload="simulateVerifyFileUpload" 
-      :limitImgsCanNumber="currentImgFileCount" :limitVideosCanNumber="currentVideoFileCount"></simulateVerifyModal>
+      :limitImgsCanNumber="currentImgFileCount" :limitVideosCanNumber="currentVideoFileCount" :fileListUploadType="fileListUploadType"></simulateVerifyModal>
   </div>
 </template>
 
@@ -185,7 +186,8 @@ export default {
         icon: trainingSquareIcon,
         title: 'AI试用',
         description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。上传图片或视频并提出问题，我将给出检测结果。现在就来试试吧！',
-      }
+      },
+      buttonConfig: { upload: { visible: true, disabled: false }, speech: { visible: false, disabled: false } }
     };
   },
   computed: {
@@ -195,7 +197,6 @@ export default {
         {label: '图片', visible: true, iconSrc: imageIcon, dataSource: 'uploadImg', mineType: 'img', disabled: false, text: '上传图片', tips: ' ', icon: imageBigIcon, bg: 'image_bg.png' },
         {label: '视频', visible: true, iconSrc: videoIcon, dataSource: 'uploadVideo', mineType: 'video', disabled: false, text: '上传视频', tips: '大小限200M以内', icon: videoBigIcon, bg: 'video_bg.png' }
       ]
-      // 如果 businessLine 为 'portal'，不显示通道抓取
       if (['portal', 'retail'].includes(this.businessLine)) {
         return menuItems.filter(item => item.dataSource !== 'uikit')
       }
@@ -213,12 +214,11 @@ export default {
         this.aiInputText = ''
         this.$refs.aiInput && this.$refs.aiInput.clear()
         this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
-        if (val) {
-          // 如果当前已有 chatId 且和传入的一样，则不重复加载
-          // 注意：首次进入时 this.chatId 是空的，所以即使 val 是一样也会加载
+
+         if (val && !val.startsWith('conv-')) {
           // 但为了防止在列表里点击当前会话时重复刷新，加个判断
           if (this.chatId === val) return;
-
+          
           this.chatId = val;
           // 当外部传入新的会话 ID 时，加载对应的历史记录
           this.loadHistory();
@@ -227,16 +227,16 @@ export default {
           this.chatId = '';
           this.messages = [];
         }
-        if (this.chatId.startsWith('conv-') || !this.chatId) { // 新建对话
-          this.fetchConversationList();
-        }
       }
     },
     messages: {
       immediate: true,
       handler(val) {
-        if (val) {
+        if (val && val.length>0) {
           this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
+          this.buttonConfig.upload.visible = false
+        } else {
+          this.buttonConfig.upload.visible = true
         }
       }
     }
@@ -252,10 +252,14 @@ export default {
      * 新建对话前的钩子，返回 false 可以阻止新建对话
      * @returns {boolean} true-允许新建，false-阻止新建
      */
-    beforeNewChat() {
+    async beforeNewChat() {
       // this.$message.warning('AI 正在回复中，请稍后再试');
+      const {data} = await TryApi.remainingChatTimes(this.$aiClient)
+      if(!data.isRemaining) {
+        this.$message.warning('今天无剩余次数，请明天再来！')
+      }
       
-      return true;
+      return data.isRemaining;
     },
 
     getActions(item) {
@@ -270,17 +274,17 @@ export default {
     },
     fileListChange(file) {
       this.inputFilesList = file || []
-       if(this.inputFilesList.length > 0) {
+      if(this.inputFilesList.length > 0) {
         this.fileListUploadType = this.inputFilesList[0].type === 'image' ? 'img' : 'video'
         if(this.fileListUploadType === 'video') {
           this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
         } else {
           this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: item.mineType.indexOf('img') < 0 }))
         }
-       } else {
+      } else {
         this.fileListUploadType = ''
         this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
-       }
+      }
     },
     initUploader() {
       this.ossUploader = new OssUploader({
@@ -370,7 +374,14 @@ export default {
      * 如果选项需要上传文件（如"图片分析"），则触发文件选择并传递到 AIInput
      */
     async handleWelcomeSelect(data) {
+      let inputFiles = this.$refs.aiInput ? this.$refs.aiInput.fileList : []
+      this.currentImgFileCount = inputFiles.filter(_ => _.type === 'image').length
+      this.currentVideoFileCount = inputFiles.filter(_ => _.type === 'video').length
       if (['uploadImg', 'uploadVideo'].includes(data.dataSource)) {
+        if(['uploadVideo', 'uikit'].includes(data.dataSource) && this.currentVideoFileCount > 0) {
+          this.$message.warning(`最多只能上传1个视频`)
+          return false
+        }
         // 创建一个隐藏的文件输入元素
         const input = document.createElement('input');
         input.type = 'file';
@@ -400,10 +411,7 @@ export default {
           // 添加文件
         }
       } else { // 通道抓取
-        let inputFiles = this.$refs.aiInput ? this.$refs.aiInput.fileList : []
         // 获取当前已有的图片和视频文件数量
-        this.currentImgFileCount = inputFiles.filter(_ => _.type === 'image').length
-        this.currentVideoFileCount = inputFiles.filter(_ => _.type === 'video').length
         this.simulateVerifyModalVisible = true
       }
     },

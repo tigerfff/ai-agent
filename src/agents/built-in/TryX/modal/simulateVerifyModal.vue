@@ -35,8 +35,8 @@
       <div class="right">
         <div class="oper_wrap">
           <div class="o_right">
-            <el-button icon="h-icon-add" plain @click="getPicture" :disabled="getPictureDisabled">{{ `抓图(${imgList.length}/${20 - limitImgsCanNumber})` }}</el-button>
-            <el-button icon="h-icon-liveview" plain @click="getVideo" :disabled="getVideoDisabled">{{ `${videoSaveText}(${videoList.length}/${1 - limitVideosCanNumber})` }}</el-button>
+            <el-button icon="h-icon-add" plain @click="getPicture" :disabled="getPictureDisabled">{{ `抓图(${imgList.length}/${MAX_IMAGES - limitImgsCanNumber})` }}</el-button>
+            <el-button icon="h-icon-liveview" plain @click="getVideo" :disabled="getVideoDisabled">{{ `${videoSaveText}(${videoList.length}/${MAX_VIDEOS - limitVideosCanNumber})` }}</el-button>
           </div>
         </div>
         <div class="img_cards">
@@ -44,12 +44,15 @@
             <div class="img_list_wrap" v-if="bgImgList&&bgImgList.length">
               <div v-for="(item,index) in bgImgList" :key="index" class="card_item" @click="onPreview(index)">
                 <img v-if="item.mineType==='img'" :src="item.base64Url" :alt="item.name || '图片'">
-                <div v-if="item.mineType==='video'" class="video_capture_wrap">
+                <div v-if="item.mineType==='video'" class="video-cover-wrapper">
                   <img :src="getVideoThumbnail(item)" :alt="item.name || '视频'" @error="handleThumbnailError">
-                  <div class="cover"></div>
-                  <div class="play_btn">▶</div>
+                  <div class="play-icon-overlay">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
                 </div>
-                <div class="pic_size">{{ item.formattedDuration }}<span style="margin-left: 6px;">{{ item.fileSize }}</span></div>
+                <div class="pic_size" v-show="item.mineType==='video'">{{ item.formattedDuration }}<span style="margin-left: 6px;">{{ item.fileSize }}</span></div>
                 <div class="close_icon" @click.stop="deleteImg(index)">x</div>
               </div>
               <div class="img_empty" v-show="!bgImgList.length"><img src="../images/empty1.png"></div>
@@ -94,6 +97,10 @@ export default {
       type: Number,
       default: 0
     },
+    fileListUploadType: {
+      type: String,
+      default: ''
+    }
   },
   data () {
     return {
@@ -133,16 +140,22 @@ export default {
       return this.videoStartSaveing ? '录制中...' : '录制视频'
     },
     getPictureDisabled() {
-      return this.captureing || !this.currentLeftCard.channelId || (this.bgImgList.length >= (20 - this.limitImgsCanNumber)) || (this.bgImgList.length > 0 && this.bgImgList[0].mineType === 'video')
+      return this.captureing || !this.currentLeftCard.channelId || (this.bgImgList.length >= (this.MAX_IMAGES - this.limitImgsCanNumber)) || (this.bgImgList.length > 0 && this.bgImgList[0].mineType === 'video')
     },
     getVideoDisabled() {
-      return this.captureing || !this.currentLeftCard.channelId || this.bgImgList.length >= 1 || this.limitVideosCanNumber > 0
+      return this.captureing || !this.currentLeftCard.channelId || this.bgImgList.length >= 1 || this.limitVideosCanNumber > 0 || (this.limitImgsCanNumber <= this.MAX_IMAGES)
     },
     imgList() {
       return this.bgImgList.filter(_ => _.mineType === 'img')
     },
     videoList() {
       return this.bgImgList.filter(_ => _.mineType === 'video')
+    },
+    MAX_IMAGES() {
+      return 30
+    },
+    MAX_VIDEOS() {
+      return this.fileListUploadType === 'img' ? 0 : 1
     },
     normalizedFileList() {
       return this.bgImgList.map(file => ({
@@ -646,28 +659,36 @@ export default {
       .card_item{
         margin-bottom: 12px;
         position: relative;
-        .video_capture_wrap{
+        .video-cover-wrapper {
           position: relative;
-          .cover{
+          cursor: pointer;
+          display: inline-block;
+
+          .play-icon-overlay {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            &:hover{
-              background: rgba(0, 0, 0, 0.4);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: all 0.2s;
+            pointer-events: none;
+
+            svg {
+              margin-left: 2px; /* 视觉修正 */
             }
           }
-          .play_btn{
-            position: absolute;
-            width: 36px;
-            height: 36px;
-            left: 142px;
-            top: 72px;
-            color: #fff;
-            font-size: 20px;
+
+          &:hover .play-icon-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            transform: translate(-50%, -50%) scale(1.1);
           }
         }
         .close_icon{

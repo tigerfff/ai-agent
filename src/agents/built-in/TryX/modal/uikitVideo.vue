@@ -636,7 +636,7 @@ export default {
                       "iconId": "pantile",
                       "part": "left",
                       "memo": "云台控制按钮",
-                      "isrender": 1,
+                      "isrender": 0,
                       "defaultActive": 0
                   },
                   {
@@ -650,7 +650,7 @@ export default {
                       "iconId": "talk",
                       "part": "left",
                       "memo": "对讲按钮",
-                      "isrender": 1,
+                      "isrender": 0,
                       "defaultActive": 0
                   },
                   {
@@ -678,7 +678,7 @@ export default {
                       "iconId": "zoom",
                       "part": "left",
                       "memo": "电子放大",
-                      "isrender": 1,
+                      "isrender": 0,
                       "defaultActive": 0
                   }
               ]

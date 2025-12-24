@@ -16,7 +16,7 @@
       <div class="home-header">
         <div class="home-header-title">
           <img src="@/assets/images/IP@3x.png" alt="logo" class="logo-icon" />
-          <span>海康云眸-AI试用</span>
+          <span>海康云眸-云小智</span>
         </div>
         <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
       </div>
@@ -33,7 +33,7 @@
           </div>
           <div class="go-use-btn">
             <span>去使用</span>
-            <i class="h-icon-angle_right" style="margin-left: 4px;"></i>
+            <i class="h-icon-angle_right" style="margin-left: 4px; font-weight: bold"></i>
           </div>
         </div>
         
@@ -224,12 +224,12 @@ export default {
     }
 
     &:hover {
-      box-shadow: 0 8px 24px rgba(56, 142, 255, 0.2);
       background-image: url('@/assets/images/hover-card-bg@3x.png');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
       border-color: transparent;
+      border: 4px solid #FFF;
 
       .go-use-btn {
         opacity: 1;
@@ -266,7 +266,7 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 4px;
+      margin-bottom: 12px;
     }
 
     .go-use-btn {
@@ -280,8 +280,6 @@ export default {
       font-size: 32px;
       width: 32px;
       height: 32px;
-      background: #f0f7ff;
-      border-radius: 8px;
       line-height: 44px;
       display: flex;
       align-items: center;
@@ -320,7 +318,7 @@ export default {
     .card-tag {
       display: flex;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
 
       .el-tag {
         border: none;

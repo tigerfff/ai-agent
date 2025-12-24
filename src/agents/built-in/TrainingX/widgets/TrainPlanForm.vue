@@ -27,6 +27,7 @@
             :get-option-label="getOptionLabel"
             :get-option-value="getOptionValue"
             :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
+            :searchPlaceholder="isProject ? '请输入项目名称搜索' : '请输入课程名称搜索'"
             :disabled="isHistoryDisabled || loading"
             @change="handleProjectChange"
             @input="handleProjectInput"

@@ -374,17 +374,25 @@ export default {
 
       // 4. 选中智能体
       await this.handleSelectAgent(targetAgent);
+        
 
-      // 5. 如果指定了会话 ID，尝试选中它
-      // 注意：handleSelectAgent 会默认选中第一个会话，这里进行覆盖
-      if (targetChatId) {
-        // 这里不需要判断 chatId 是否在 conversations 列表中
-        // 因为 handleUpdateConversationList 会在组件加载后再次校验
-        this.currentConversationId = targetChatId;
+        // 5. 如果指定了会话 ID，尝试选中它
+        // 注意：handleSelectAgent 会默认选中第一个会话，这里进行覆盖
+        if (targetChatId) {
+          // 这里不需要判断 chatId 是否在 conversations 列表中
+          // 因为 handleUpdateConversationList 会在组件加载后再次校验
+          this.currentConversationId = targetChatId;
+        }
+    },
+
+    collapsedMenuForMini() {
+      if (this.isMini) {
+        this.isCollapsed = true
       }
     },
 
     async handleSelectAgent(agent) {
+      this.collapsedMenuForMini()
       // 如果是外部链接类型，先检查权限再跳转
       if (agent.type === 'external' && agent.getUrl) {
         this.checkingPermission = true;
@@ -532,15 +540,17 @@ export default {
 
     handleSelectConversation(id) {
       this.currentConversationId = id;
-      // this.componentKey++; // 切换会话时不再强制刷新组件，让子组件自己 watch conversationId
+      this.collapsedMenuForMini()
     },
-    handleNewChat() {
+    async handleNewChat() {
       if (!this.currentAgentId) return;
+
+      this.collapsedMenuForMini()
 
       // 调用子组件的 beforeNewChat 钩子，允许智能体阻止新建对话
       const agent = this.$refs.activeAgent;
       if (agent && typeof agent.beforeNewChat === 'function') {
-        const canCreate = agent.beforeNewChat();
+        const canCreate = await agent.beforeNewChat();
         if (canCreate === false) {
           // 智能体阻止了新建对话
           return;

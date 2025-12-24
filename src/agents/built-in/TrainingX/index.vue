@@ -351,7 +351,7 @@ export default {
             });
 
             if (res.code === 0) {
-              // this.$message.success('评价成功');
+              this.$message.success('评价成功');
             } else {
               // 评价失败，回滚本地状态
               this.$set(message, 'likeStatus', 'NO_EVAL');
