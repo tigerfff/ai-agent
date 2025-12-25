@@ -171,7 +171,7 @@ export class STSProvider {
       `${this.baseURL}/v1/ossManager/ossManager/actions/getModulusExponent`
     )
     
-    if (res && res.success && res.data) {
+    if (res && +res.code === 0) {
       this.cache.modulus = res.data.modulus
       this.cache.exponent = res.data.exponent
       this.cache.cacheTime = now
@@ -270,11 +270,11 @@ export class STSProvider {
       params
     )
     
-    if (!res || !res.success) {
-      throw new Error(res?.message || 'Failed to get OSS credentials')
+    if (res && +res.code === 0) {
+      return res
     }
     
-    return res
+    throw new Error(res?.message || 'Failed to get OSS credentials')
   }
 
   /**

@@ -41,6 +41,21 @@ function base64toHEX(base64) {
 }
 
 /**
+ * DataURL (Base64) 转 Blob
+ */
+function dataURLtoBlob(dataurl) {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = window.atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
+
+/**
  * 使用 SM4 对二进制数据加密
  */
 function sm4Encrypt(arrayBuffer, kmsDataKey) {
@@ -86,7 +101,7 @@ export class AIOssUploader {
 
   /**
    * 上传单个文件 (使用分片上传模式)
-   * @param {File|Blob} file - 要上传的文件
+   * @param {File|Blob|string} file - 要上传的文件 (File, Blob, 或 Base64 字符串)
    * @param {string} bizCode - 业务编码
    * @param {Object} options - 配置项
    * @param {string} options.fileName - 自定义文件名
@@ -101,17 +116,23 @@ export class AIOssUploader {
     }
 
     try {
+      // 0. 归一化输入：如果是 base64 字符串，转换为 Blob
+      let normalizedFile = file;
+      if (typeof file === "string" && file.startsWith("data:")) {
+        normalizedFile = dataURLtoBlob(file);
+      }
+
       // 1. 获取 STS 凭证
       const stsData = await this.stsProvider.getCredentials({ bizCode });
 
       // 2. 处理文件加密 (注意：分片上传建议先完成整体加密)
-      let uploadFile = file;
+      let uploadFile = normalizedFile;
       let meta = {};
 
       if (stsData.encryptEnable) {
         if (stsData.kmsDataKey && stsData.kmsDataKey.sm4Supported) {
           // 1. 我们内部的 SM4 加密
-          uploadFile = await createEncryptedBlob(file, stsData)
+          uploadFile = await createEncryptedBlob(normalizedFile, stsData)
           meta = {
             'encrypted-version': String(stsData.kmsDataKey.version),
             'encrypted-data-key': String(stsData.kmsDataKey.dataKeyEncrypted),
@@ -119,7 +140,7 @@ export class AIOssUploader {
           }
         } else if (typeof options.externalEncrypt === 'function') {
           // 2. 由外部注入加密逻辑（兼容旧加密方案）
-          const { encryptedFile, meta: extraMeta } = await options.externalEncrypt(file, stsData)
+          const { encryptedFile, meta: extraMeta } = await options.externalEncrypt(normalizedFile, stsData)
           uploadFile = encryptedFile
           meta = extraMeta || {}
         } else {
@@ -141,24 +162,40 @@ export class AIOssUploader {
       });
 
       // 4. 路径处理
-      const fileName =
-        options.fileName || this.generateUniqueFileName(file.name || "unnamed");
+      // 注意：Blob 没有 name 属性，需要处理
+      const originalName = normalizedFile.name || (normalizedFile.type ? `upload.${normalizedFile.type.split('/')[1]}` : "unnamed");
+      const fileName = options.fileName || this.generateUniqueFileName(originalName);
       const objectKey = `${stsData.object}/${fileName}`.replace(/\/+/g, "/");
       // 关键信息：保存最新的 checkpoint（里面有 uploadId）
       let latestCheckpoint = options.checkpoint || null;
 
       // 先把 abort 函数暴露给外面（里面用的是闭包里的 latestCheckpoint）
       if (options.onAbortHandler) {
-        const abortFn = async () => {
-          if (latestCheckpoint && latestCheckpoint.uploadId) {
-            await client.abortMultipartUpload(
-              objectKey,
-              latestCheckpoint.uploadId
-            );
+        options.onAbortHandler(async () => {
+          if (client) {
+            // 先尝试取消当前请求
+            if (typeof client.cancel === 'function') {
+              client.cancel();
+            }
+            if (latestCheckpoint && latestCheckpoint.uploadId) {
+              await client.abortMultipartUpload(
+                objectKey,
+                latestCheckpoint.uploadId
+              );
+            }
           }
-        };
-        options.onAbortHandler(abortFn);
+        });
       }
+
+      // 提供暂停（仅取消请求，保留分片）句柄
+      if (options.onPauseHandler) {
+        options.onPauseHandler(() => {
+          if (client && typeof client.cancel === 'function') {
+            client.cancel();
+          }
+        });
+      }
+
       // 5. 执行分片上传
       const result = await client.multipartUpload(objectKey, uploadFile, {
         checkpoint: options.checkpoint,
@@ -176,24 +213,37 @@ export class AIOssUploader {
 
       // 优先使用后端返回的 domain + objectKey 组合 URL（而不是 endpoint）
       let finalUrl = "";
+      let originUrl = "";
       if (stsData.domain) {
         const domain = stsData.domain.replace(/\/+$/, "");
         const key = objectKey.replace(/^\/+/, "");
         finalUrl = `${domain}/${key}`;
+        originUrl = `${domain}/${key}`;
       } else if (result.url) {
         finalUrl = result.url;
+        originUrl = result.url;
       } else if (
         result.res &&
         result.res.requestUrls &&
         result.res.requestUrls[0]
       ) {
         finalUrl = result.res.requestUrls[0];
+        originUrl = result.res.requestUrls[0];
+      }
+
+      // 如果开启了加密，追加访问参数
+      if (stsData.encryptEnable && stsData.kmsDataKey) {
+        const separator = finalUrl.includes("?") ? "&" : "?";
+        const accessKey = stsData.kmsDataKey.accessKey || "";
+        finalUrl = `${finalUrl}${separator}accessKey=${accessKey}&v=1&encrypted=1`;
       }
 
       return {
         ...result,
         fileName,
         url: finalUrl,
+        originUrl: originUrl,
+        stsData
       };
     } catch (error) {
       // 判断是否是主动取消
@@ -224,6 +274,18 @@ export class AIOssUploader {
         onCancelTask: (cancel) => {
           if (options.onItemCancelTask) {
             options.onItemCancelTask(index, cancel);
+          }
+        },
+         // 新增：传递暂停句柄
+        onPauseHandler: (pauseFn) => {
+          if (options.onItemPauseTask) {
+            options.onItemPauseTask(index, pauseFn);
+          }
+        },
+        // 新增：传递中止句柄
+        onAbortHandler: (abortFn) => {
+          if (options.onItemAbortTask) {
+            options.onItemAbortTask(index, abortFn);
           }
         },
       });
