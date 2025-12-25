@@ -215,7 +215,7 @@ export default {
           }
         } else {
            // 切换会话时，强制中止正在进行的流
-          this.handleStop(); 
+          // this.handleStop(); 
           // 如果没有 ID 或者是临时ID（conv-开头），则清空消息显示欢迎页
           this.chatId = '';
           this.messages = [];

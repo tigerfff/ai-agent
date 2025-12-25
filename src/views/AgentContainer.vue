@@ -110,7 +110,7 @@
             v-else-if="currentAgent && currentAgent.type === 'built-in' && (!permissionStatus || permissionStatus.status === 'has_permission')"
             ref="activeAgent"
             :is="currentAgent.component"
-            :key="`builtin-${componentKey}`"
+            :key="`builtin-${currentAgentId}-${currentSessionStableKey || 'new'}`"
             :conversation-id="currentConversationId"
             :is-mini="isMini"
             :businessLine="businessLine"
@@ -251,6 +251,7 @@ export default {
       componentKey: 0, // 用于强制刷新组件的 key
       conversations: [],
       currentConversationId: '',
+      currentSessionStableKey: '', // 用于组件 key 的稳定标识，避免临时ID转真实ID时组件重载
       isCollapsed: false,
       // 重命名对话框相关
       renameDialogVisible: false,
@@ -382,6 +383,7 @@ export default {
           // 这里不需要判断 chatId 是否在 conversations 列表中
           // 因为 handleUpdateConversationList 会在组件加载后再次校验
           this.currentConversationId = targetChatId;
+          this.currentSessionStableKey = targetChatId;
         }
     },
 
@@ -444,11 +446,14 @@ export default {
         // 从 home 进入，创建新会话
         const newId = 'conv-' + Date.now();
         this.currentConversationId = newId;
+        this.currentSessionStableKey = newId; // 初始化稳定 Key
       } else {
         // 切换智能体后，尝试选中该智能体的最新会话
         // 如果是 TryAgent，列表可能是空的，等待组件 emit update-list 后再选中
         const firstConv = this.conversations.find(c => c.agentId === agent.id);
         this.currentConversationId = firstConv ? firstConv.id : null;
+        // 如果有会话，用会话ID作为稳定Key；没有则生成一个空Key
+        this.currentSessionStableKey = this.currentConversationId || `empty-${Date.now()}`;
       }
       this.componentKey++; 
     },
@@ -550,8 +555,22 @@ export default {
     },
 
     handleSelectConversation(id) {
+      // 判断是否是从 临时ID -> 真实ID 的过程（发送消息后后端返回真实ID）
+      const isTempToReal = this.currentConversationId && 
+                           this.currentConversationId.startsWith('conv-') && 
+                           id && !id.startsWith('conv-');
+
       this.currentConversationId = id;
-      this.collapsedMenuForMini()
+
+      // 如果不是流程中的 ID 更新（即不是发消息导致的 ID 变化），而是用户点击列表切换
+      // 则更新稳定 Key，触发组件重载
+      if (!isTempToReal) {
+        this.currentSessionStableKey = id;
+      }
+      // 如果是 isTempToReal，则稳定 Key 保持不变（还是原来的 conv-xxx），组件不销毁！
+      // 子组件内部 watch 了 conversationId，可以在 watch 里处理 ID 变更，而不丢失状态
+
+      this.collapsedMenuForMini();
     },
     async handleNewChat() {
       if (!this.currentAgentId) {
@@ -582,6 +601,8 @@ export default {
       const newId = 'conv-' + Date.now();
       
       this.currentConversationId = newId;
+      // 【重要】新建会话，必须更新稳定 Key，强制重载组件
+      this.currentSessionStableKey = newId;
     },
     deleteConversation(id) {
       // 1. 调用子组件的删除方法（如果存在）
@@ -597,7 +618,8 @@ export default {
           // 如果删除了当前会话，选中当前智能体的下一个会话
           const nextConv = this.conversations.find(c => c.agentId === this.currentAgentId);
           this.currentConversationId = nextConv ? nextConv.id : null;
-          // this.componentKey++; // 不再强制刷新，让子组件自己处理状态
+          // 更新稳定 Key，触发组件重载到新会话
+          this.currentSessionStableKey = this.currentConversationId || `empty-${Date.now()}`;
         }
       }
     },
