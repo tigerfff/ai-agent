@@ -272,7 +272,6 @@ export default {
 
       // 开始加载
       this.loading = true;
-      console.log('loading initFormData')
 
       try {
         // 保存初始数据用于对比
@@ -301,7 +300,6 @@ export default {
       } finally {
         // 结束加载
         this.loading = false;
-        console.log('loading initFormData false')
       }
     },
 
@@ -341,8 +339,6 @@ export default {
       if (!externalLoading) {
         this.loading = true;
       }
-
-    console.log('loading initFormData')
       
       this.detailLoaded = false; // 重置状态
       try {
@@ -378,8 +374,6 @@ export default {
         if (!externalLoading) {
           this.loading = false;
         }
-
-        console.log('loading initFormData false')
       }
     },
     /**

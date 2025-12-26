@@ -70,7 +70,7 @@
           v-model="aiInputText"
           :loading="isStreaming || isUploading"
           :showClearButton="false"
-          placeholder="您可以问我任何问题，比如“图片中是否有员工违规”"
+          :placeholder="inputPlaceholder"
           :allowed-types="[]"
           :customMenuItems="customMenuItems"
           :max-size="200 * 1024 * 1024"
@@ -114,9 +114,8 @@ import ChatSkeleton from '@/ai-ui/skeleton/ChatSkeleton.vue';
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TryApi } from './api';
 import { formatConversationTime } from '@/utils';
-import trainingSquareIcon from '@/assets/images/inspect-square.png';
+import trainingSquareIcon from '@/assets/images/try.png';
 import simulateVerifyModal from './modal/simulateVerifyModal.vue'
-// import trainingSquareIcon from '@/assets/images/try.png';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 import AIIcon from '@/ai-ui/icon/AIIcon.vue';
@@ -187,7 +186,8 @@ export default {
         title: 'AI试用',
         description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。上传图片或视频并提出问题，我将给出检测结果。现在就来试试吧！',
       },
-      buttonConfig: { upload: { visible: true, disabled: false }, speech: { visible: false, disabled: false }, clear: { visible: false, disabled: false } }
+      buttonConfig: { upload: { visible: true, disabled: false }, speech: { visible: false, disabled: false }, clear: { visible: false, disabled: false } },
+      inputPlaceholder: '您可以问我任何问题，比如“图片中是否有员工违规”'
     };
   },
   computed: {
@@ -197,7 +197,7 @@ export default {
         {label: '图片', visible: true, iconSrc: imageIcon, dataSource: 'uploadImg', mineType: 'img', disabled: false, text: '上传图片', tips: ' ', icon: imageBigIcon, bg: 'image_bg.png' },
         {label: '视频', visible: true, iconSrc: videoIcon, dataSource: 'uploadVideo', mineType: 'video', disabled: false, text: '上传视频', tips: '大小限200M以内', icon: videoBigIcon, bg: 'video_bg.png' }
       ]
-      if (['portal', 'retail'].includes(this.businessLine)) {
+      if (['portal'].includes(this.businessLine)) {
         return menuItems.filter(item => item.dataSource !== 'uikit')
       }
       
@@ -215,7 +215,7 @@ export default {
         this.aiInputText = ''
         this.$refs.aiInput && this.$refs.aiInput.clear()
         this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
-
+        this.fetchConversationList()
          if (val && !val.startsWith('conv-')) {
           // 但为了防止在列表里点击当前会话时重复刷新，加个判断
           if (this.chatId === val) return;
@@ -227,8 +227,6 @@ export default {
           // 如果没有 ID（或者是新会话状态），则清空消息显示欢迎页
           this.chatId = '';
           this.messages = [];
-           // 切换会话时，强制中止正在进行的流
-         this.handleStop(); 
         }
       }
     },
@@ -271,7 +269,6 @@ export default {
       return this.actionConfig[role] || [];
     },
     customMenuItemClick(item) {
-      console.log("item", item)
       let data = item.item
       this.handleWelcomeSelect(data)
     },
@@ -281,12 +278,15 @@ export default {
         this.fileListUploadType = this.inputFilesList[0].type === 'image' ? 'img' : 'video'
         if(this.fileListUploadType === 'video') {
           this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
+          this.inputPlaceholder = "询问视频内容..."
         } else {
           this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: item.mineType.indexOf('img') < 0 }))
+          this.inputPlaceholder = "询问图片内容..."
         }
       } else {
         this.fileListUploadType = ''
         this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
+        this.inputPlaceholder = "您可以问我任何问题，比如“图片中是否有员工违规”"
       }
     },
     initUploader() {
@@ -602,7 +602,6 @@ export default {
       if (!this.chatId || this.chatId.startsWith('conv-')) {
         // 防止重复创建会话
         if (this.isCreatingSession) {
-          console.log('[TryX] 正在创建会话，请稍候...');
           return;
         }
         
@@ -628,7 +627,6 @@ export default {
             return;
           }
         } catch (e) {
-          console.error('[TryX] Create session failed', e);
           this.$message.error('创建会话失败，请重试');
           return;
         } finally {
@@ -652,17 +650,21 @@ export default {
 
       // 3. 构造请求参数
       let uploadType = 'img'; 
-      const imageUrls = attachments
-        .filter(a => a.type === 'image' && a.url)
-        .map(a => a.url);
-      const videoUrls = attachments
-        .filter(a => a.type === 'video' && a.url)
-        .map(a => a.url);
+      let imageUrls = attachments
+          .filter(a => a.type === 'image' && a.url)
+          .map(a => a.url);
+      let videoUrls = attachments
+          .filter(a => a.type === 'video' && a.url)
+          .map(a => a.url);
 
       if (videoUrls.length > 0) {
         uploadType = 'video';
       }
+      if(this.messages && this.messages.length > 0) {
+        uploadType = this.messages[0]?.attachments[0]?.type === 'video' ? 'video' : 'img'
+      }
 
+      console.log("uploadType",uploadType)
       // 4. 准备 AI 占位消息
       const aiMsgKey = Date.now() + '_ai';
       const aiMsg = {
@@ -696,7 +698,6 @@ export default {
           signal: this.abortController.signal,
           uploadType,
           onMessage: (msgData) => {
-            console.log('[TryX] onMessage', msgData);
             aiMsg.loading = false;
             if (!msgData) return;
 
@@ -841,8 +842,6 @@ export default {
      */
     async handleAction(type, payload, index) {
       
-      console.log('Action Clicked:', type, payload, index);
-      
       if (type === 'edit') {
         // 更新本地消息内容
         if (this.messages[index]) {
@@ -860,7 +859,6 @@ export default {
 
         // 更新本地点赞状态
         this.$set(message, 'likeStatus', type === 'cancel-like' ? '' : type);
-        console.log(this.chatId,message.msgId,'this.chatId,message.msgId')
         // 调用评价接口
         if (this.chatId && message.msgId) {
          

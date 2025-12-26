@@ -158,7 +158,7 @@ export const TryApi = {
   },
   getDeviceRamAccount(client, data) {
     return client.send({
-      url: buildUrl(client, '/inspect/analysis/video/deviceRamAccount', 'chain'),
+      url: buildUrl(client, '/chain/device/deviceRamAccount', 'chain'),
       method: 'get',
       data
     });
@@ -198,5 +198,12 @@ export const TryApi = {
       data
     });
   },
+  refreshToken (client, data) {
+    return client.send({
+      url: buildUrl(client, '/inspect/taskconfig/taskConfigs/actions/refreshToken', 'chain'),
+      method: 'get',
+      data
+    });
+  }
 };
 

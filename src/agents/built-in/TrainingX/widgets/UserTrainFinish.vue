@@ -166,7 +166,7 @@ export default {
       // 已上传
       if (task.uploaded) return true;
       // status 不为 -1 未开始 2 已驳回
-      if (task.status !== null && [-1, 2].includes(task.status)) return true;
+      if (task.status !== null && ![-1, 2].includes(task.status)) return true;
       return false;
     },
 

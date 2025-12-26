@@ -119,7 +119,8 @@ export default {
       previewIndex: 0,
       startTime: '',
       endTime: '',
-      playSuccessFinish: false
+      playSuccessFinish: false,
+      refreshTokenTimer: null // 刷新token定时器
     }
   },
   watch: {
@@ -132,6 +133,11 @@ export default {
         this.btnLoading = false
         this.captureing = false
         this.playSuccessFinish = false
+        // 停止刷新token定时器
+        if (this.refreshTokenTimer) {
+          clearInterval(this.refreshTokenTimer)
+          this.refreshTokenTimer = null
+        }
       }
     }
   },
@@ -140,10 +146,10 @@ export default {
       return this.videoStartSaveing ? '录制中...' : '录制视频'
     },
     getPictureDisabled() {
-      return this.captureing || !this.currentLeftCard.channelId || (this.bgImgList.length >= (this.MAX_IMAGES - this.limitImgsCanNumber)) || (this.bgImgList.length > 0 && this.bgImgList[0].mineType === 'video')
+      return this.captureing || !this.currentLeftCard.channelId || this.videoStartSaveing || (this.bgImgList.length >= (this.MAX_IMAGES - this.limitImgsCanNumber)) || (this.bgImgList.length > 0 && this.bgImgList[0].mineType === 'video')
     },
     getVideoDisabled() {
-      return this.captureing || !this.currentLeftCard.channelId || this.bgImgList.length >= 1 || this.limitVideosCanNumber > 0 || (this.limitImgsCanNumber <= this.MAX_IMAGES)
+      return this.captureing || !this.currentLeftCard.channelId || this.bgImgList.length >= 1 || (this.MAX_VIDEOS - this.limitVideosCanNumber) < 1
     },
     imgList() {
       return this.bgImgList.filter(_ => _.mineType === 'img')
@@ -208,7 +214,6 @@ export default {
             this.$forceUpdate();
           } else if (retryCount < maxRetries) {
             // 生成了默认缩略图，但还有重试机会
-            console.log(`缩略图生成失败，第${retryCount + 1}次重试`);
             setTimeout(() => generateWithRetry(retryCount + 1), 500 * (retryCount + 1));
             return;
           } else {
@@ -221,7 +226,6 @@ export default {
         }).catch(error => {
           console.error('生成视频缩略图失败:', error);
           if (retryCount < maxRetries) {
-            console.log(`缩略图生成异常，第${retryCount + 1}次重试`);
             setTimeout(() => generateWithRetry(retryCount + 1), 500 * (retryCount + 1));
           } else {
             // 重试次数用完，使用默认缩略图
@@ -270,12 +274,10 @@ export default {
         
         // 定义事件处理函数（提前定义以便清理）
         const onLoadedData = () => {
-          console.log('视频loadeddata事件触发');
           tryCaptureFrame(0);
         };
         
         const onLoadedMetadata = () => {
-          console.log('视频loadedmetadata事件触发');
           // 如果loadeddata没有触发，这里作为备用
           if (video.readyState >= HAVE_METADATA) {
             setTimeout(() => tryCaptureFrame(0), 100);
@@ -283,7 +285,6 @@ export default {
         };
         
         const onCanPlay = () => {
-          console.log('视频canplay事件触发');
           // 作为最终备用方案
           if (video.readyState >= HAVE_CURRENT_DATA) {
             setTimeout(() => tryCaptureFrame(0), 200);
@@ -360,7 +361,6 @@ export default {
               // 转换为base64 URL
               const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
               
-              console.log(`成功生成缩略图，时间点: ${time} 秒`);
               cleanup();
               resolve(thumbnailUrl);
             } catch (error) {
@@ -399,13 +399,11 @@ export default {
         
         // 尝试播放以触发加载（静音状态下）
         video.play().catch(err => {
-          console.log('自动播放被阻止（正常现象）:', err);
           // 这不是错误，继续处理
         });
         
         // 如果视频已经准备好，立即开始处理
         if (video.readyState >= HAVE_METADATA) {
-          console.log('视频已准备好，立即开始处理');
           setTimeout(() => tryCaptureFrame(0), 100);
         }
       });
@@ -426,6 +424,9 @@ export default {
       }
     },
     async clickChannelCard(index) {
+      if(this.videoStartSaveing) {
+        this.stopGetVideo()
+      }
       this.currentCardIndex = index
       this.currentLeftCard = this.channelList[this.currentCardIndex]
       let data = { ...this.currentLeftCard }
@@ -448,6 +449,17 @@ export default {
     deleteImg (index) {
       this.bgImgList.splice(index, 1)
     },
+    async stopGetVideo() {
+      this.$message.info("视频录制已取消")
+      this.videoStartSaveing = false
+      await this.$refs.hkvideo.stopSaveVideo()
+      this.endTime = Date.now()
+      // 停止刷新token定时器
+      if (this.refreshTokenTimer) {
+        clearInterval(this.refreshTokenTimer)
+        this.refreshTokenTimer = null
+      }
+    },
     getVideo() {
       if(!this.playSuccessFinish) {
         this.$message.warning('请等待视频正常播放~')
@@ -457,9 +469,18 @@ export default {
       if(this.videoStartSaveing) {
         this.$refs.hkvideo.startSaveVideo()
         this.startTime = Date.now()
+        // 开启定时器，每5分钟请求一次refreshToken接口
+        this.refreshTokenTimer = setInterval(() => {
+          TryApi.refreshToken(this.$aiClient, {})
+        }, 5 * 60 * 1000)
       } else {
         this.$refs.hkvideo.stopSaveVideo()
         this.endTime = Date.now()
+        // 停止定时器
+        if (this.refreshTokenTimer) {
+          clearInterval(this.refreshTokenTimer)
+          this.refreshTokenTimer = null
+        }
       }
     },
     getVideoSaveFile(res) {
@@ -485,7 +506,6 @@ export default {
         // 生成文件名（使用时间戳避免重复）
         const fileName = `video_${Date.now()}.mp4`
         // 确保blob数据正确保存
-        console.log("resresres", res)
         const videoItem = {
           name: fileName,
           mineType: 'video',
@@ -871,4 +891,3 @@ export default {
   }
 }
 </style>
-

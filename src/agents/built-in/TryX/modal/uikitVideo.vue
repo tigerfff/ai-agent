@@ -1,22 +1,23 @@
 <template>
   <div class="agent-x-container">
-    <div class="video-switch">
-      <div class="video-switch-tab">
-        <div class="video-switch-tab-line" :style="switchLineStyle">
+    <div class="agent-video-switch">
+      <div class="agent-video-switch-tab">
+        <div class="agent-video-switch-tab-line" :style="switchLineStyle">
         </div>
-        <div class="video-switch-tab-btn" @click="switchTo(0)" :class="{'tab-active': (switchVideo===0?true : false )}">实时预览</div>
-        <div class="video-switch-tab-btn" @click="switchTo(1)" :class="{'tab-active':(switchVideo===1?true : false )}">录像回放</div>
+        <div class="agent-video-switch-tab-btn" @click="switchTo(0)" :class="{'agent-tab-active': (switchVideo===0?true : false )}">实时预览</div>
+        <div class="agent-video-switch-tab-btn" @click="switchTo(1)" :class="{'agent-tab-active':(switchVideo===1?true : false )}">录像回放</div>
       </div>
     </div>
-    <div class="players" :class="`screen_${playerCount}`" ref="container" >
+    <div class="agent-players" :class="`screen_${playerCount}`" ref="container" >
       <div v-for="(p, idx) in playerControllers"
         :key="p.containerID"
-        class="player"
+        class="agent-player"
         :class="{selected: idx === currentPlayerControllerIndex}"
         @click="currentPlayerControllerIndex = idx"
         v-show="playerCount > idx">
         <div :id="p.containerID">
           <span class="tips">请选择监控点</span>
+          <!-- <span class="tips" v-show="!p||!p.player">请选择监控点</span> -->
         </div>
       </div>
       <waterMark v-if="watermarkStatus" ref="watermark" v-show="false"></waterMark>
@@ -26,12 +27,11 @@
 
 <script>
 import { TryApi } from '../api';
-// import { getDeviceRamAccount, getCredentials, getTokenStrategy, getTkToken } from './proxy'
-// import { getClient, dataURLtoBlob } from '@/utils/index.js'
 import waterMark from './simpleWaterMark.vue'
 import { v1 as uuidv1 } from 'uuid'
 import moment from 'moment'
 import _ from 'lodash'
+import { loadScript } from './script-load.js'
 
 export default {
   name: 'uikitComponent',
@@ -230,6 +230,7 @@ export default {
     },
     startExtraBtnDownload (pc, downloadVideoName) { // 扩展的录制按钮开始的一些状态设置
       pc.player.Theme.countTime('add', 0)
+      // pc.player.countTime('add', 0)
       if (downloadVideoName) {
         pc.player.startSave(downloadVideoName)
       } else {
@@ -239,6 +240,7 @@ export default {
     stopExtraBtnDownload (pc) { // 扩展的录制按钮停止的一些状态清除，
       pc.player.stopSave()
       pc.player.Theme.countTime('destroy', 0)
+      // pc.player.countTime('destroy', 0)
       pc.player.pluginStatus.loadingClear()
     },
     /**
@@ -456,7 +458,7 @@ export default {
       })
     },
     // 内部方法，播放视频请使用playMacVideo
-    playVideo(pc) {
+    async playVideo(pc) {
       let isHD = this.isHD
       // let channelVideoLevel = this.$store.state.userInfo.videoLevelStatus
       let channelVideoLevel = 3
@@ -476,21 +478,11 @@ export default {
         // 控件的回放时间是秒级，这里兼容下，外部可以统一处理
         playUrl += `?begin=${moment(+pc.playInfo.startTime * 1000).format('yyyyMMDDHHmmss')}`
       }
-      // 你问我为什么这么写而不是最开始初始化，然后每次播放的时候传url和at。。。。那是因为初始化的时候解码器会正则解析url，不传url就报错block，凉凉
-      if (pc.player) {
-        pc.player.changePlayUrl({
-          url: playUrl,
-          accessToken: pc.accessToken,
-          token: pc.token,
-        }, () => {}, false).then(() => {
-          pc.player.Talk.changeTalkChannelNo(pc.playInfo.channelNo)
-        }).finally(() => {
-          pc.player.Theme.changeTheme(this.currentThemeData)
-        })
-        return
-      }
       this.syncSize()
       try {
+        // if (!window.EZUIKit) {
+        //   await loadScript('/static/hik-cloud-player-static/ezuikit.js')
+        // }
         pc.player = new EZUIKit.EZUIKitPlayer({
           id: pc.containerID, // 视频容器ID
           url: playUrl,
@@ -520,8 +512,10 @@ export default {
             }
             this.updateLocalChannelVideoLevel(pc)
             this.injectWatermarkIfNeeded(pc)
+
             let hideId = document.getElementsByClassName('header-controls')[0]
             hideId.style.display = 'none'
+
             this.playSuccessCallback(true)
           },
           handleError: (params) => {
@@ -548,7 +542,7 @@ export default {
           pc.playbackRecording = true
         });
         pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.stopSave, (res) => {
-          pc.playbackRecording = true
+          pc.playbackRecording = false
           this.getVideoSaveFile(res)
         });
         pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.fullscreen, (res) => {
@@ -562,6 +556,7 @@ export default {
           this.updateLocalChannelVideoLevel(pc)
         })
       } catch (error) {
+        console.error(error)
         // 清理可能创建的部分资源
         if (pc.player) {
           try {
@@ -799,26 +794,30 @@ export default {
   ::v-deep .theme-icon-item span[id*="-recordvideo"] {
     display: none !important;
   }
+  ::v-deep .ezplayer-control-record {
+    display: none !important;
+  }
 }
 .agent-x-container {
   flex: 1;
   overflow: hidden;
   position: relative;
+  line-height: 0px;
   display: flex;
   flex-direction: column;
-  .video-switch {
+  .agent-video-switch {
     height: 36px;
     background: #333333;
     display: flex;
     align-items: center;
   }
-  .video-switch-tab {
+  .agent-video-switch-tab {
     height: 36px;
     margin: 0 auto;
     transition: transform 0.3s;
     position: relative;
   }
-  .video-switch-tab-line {
+  .agent-video-switch-tab-line {
     position: absolute;
     width: 88px;
     top: 0;
@@ -828,7 +827,7 @@ export default {
     z-index: 1;
     transition: 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   }
-  .video-switch-tab-btn {
+  .agent-video-switch-tab-btn {
     font-size: 12px;
     font-weight: 800;
     float: left;
@@ -840,28 +839,27 @@ export default {
     text-align: center;
     cursor: pointer;
   }
-  .tab-active {
+  .agent-tab-active {
     opacity: 1;
   }
-  .players {
+  .agent-players {
     flex: 1;
     overflow: hidden;
     position: relative;
-    line-height: 0px;
-    &.screen_1 > .player {
+    &.screen_1 > .agent-player {
       width: 100%;
       height: 100%;
     }
-    &.screen_2 > .player {
+    &.screen_2 > .agent-player {
       width: 50%;
       height: 100%;
     }
-    &.screen_4 > .player {
+    &.screen_4 > .agent-player {
       width: 50%;
       height: 50%;
     }
   }
-  .player {
+  .agent-player {
     background:black;
     border: 1px solid #444;
     display: inline-flex;

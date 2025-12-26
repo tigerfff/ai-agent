@@ -199,6 +199,7 @@ export default {
     conversationId: {
       immediate: true,
       handler(val) {
+        this.fetchConversationList()
         // 如果是真实会话ID（不是临时ID且不为空），则加载历史
         if (val && !val.startsWith('conv-')) {
           // 但为了防止在列表里点击当前会话时重复刷新，加个判断
@@ -214,8 +215,6 @@ export default {
             this.markAsRead(val);
           }
         } else {
-           // 切换会话时，强制中止正在进行的流
-          // this.handleStop(); 
           // 如果没有 ID 或者是临时ID（conv-开头），则清空消息显示欢迎页
           this.chatId = '';
           this.messages = [];

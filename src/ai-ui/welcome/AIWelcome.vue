@@ -81,7 +81,6 @@ export default {
   max-width: 1200px;
 
   .welcome-content {
-    max-width: 680px;
     padding: 32px 0;
     width: 100%;
     text-align: left;
@@ -123,7 +122,7 @@ export default {
     
     gap: 16px;
     text-align: left;
-
+    flex-wrap: wrap;
     .prompt-card {
       background: #fff;
       border: none;
@@ -134,7 +133,8 @@ export default {
       position: relative;
       display: flex;
       flex-direction: column;
-
+      flex-shrink: 0;
+      max-width: 100%;
       &:hover {
         border-color: #c0c4cc;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
