@@ -18,7 +18,7 @@
       <div class="form-item">
         <div class="label">学习{{ isProject ? '项目' : '课程' }}</div>
         <div class="content">
-          <AILoadSelect
+        <AILoadSelect
             v-if="!isConfirmed"
             v-model="formData.courseProjectId"
             :remote-method="handleProjectSearch"
@@ -30,9 +30,7 @@
             :searchPlaceholder="isProject ? '请输入项目名称搜索' : '请输入课程名称搜索'"
             :disabled="isHistoryDisabled || loading"
             @change="handleProjectChange"
-            @input="handleProjectInput"
             :popper-append-to-body="true"
-            :key="'load-select-' + (data.msgId || formData.courseProjectId)"
           />
           <div v-else class="text-display">{{ detailInfo.name || selectedProjectName || (isProject ? '未知项目' : '未知课程') }}</div>
         </div>
@@ -286,8 +284,8 @@ export default {
         this.formData.dateRange = [];
         this.detailLoaded = false; // 重置详情加载状态
 
-        // 根据 storeId 获取门店的学员列表（用于初始化和过滤）
-        await this.getListLearnersByStore();
+        // 逻辑修改~ 改成员工自己搜
+        this.getListLearnersByStore();
 
         // 如果有项目/课程ID，加载详情
         if (this.formData.courseProjectId) {
@@ -311,18 +309,19 @@ export default {
      * 注意：这里传入的是具体的 storeId，不是全局白名单
      */
     async getListLearnersByStore() {
-      try {
-        const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { 
-          storeId: this.formData.storeId 
-        });
-        // 使用门店学员列表作为初始用户ID
-        this.formData.userIds = data || [];
-        // 加载用户详细信息
-        this.loadInitialUsers();
-      } catch (e) {
-        console.error('[TrainPlanForm] Get learners by store failed:', e);
-        this.formData.userIds = [];
-      }
+      this.loadInitialUsers();
+      // try {
+      //   // const { data } = await TrainingXApi.listLearnersByStore(this.$aiClient, { 
+      //   //   storeId: this.formData.storeId 
+      //   // });
+      //   // 使用门店学员列表作为初始用户ID
+      //   // this.formData.userIds = data || [];
+      //   // 加载用户详细信息
+      //   this.loadInitialUsers();
+      // } catch (e) {
+      //   console.error('[TrainPlanForm] Get learners by store failed:', e);
+      //   this.formData.userIds = [];
+      // }
     },
     formatDate(stringDate) {
       const date = new Date(stringDate);
@@ -499,17 +498,7 @@ export default {
         return { list: [], hasMore: false };
       }
     },
-    /**
-     * 处理项目输入（v-model 更新）
-     */
-    handleProjectInput(projectId) {
-      // v-model 会自动更新 formData.courseProjectId
-      // 这里只需要确保 selectedProjectOptions 同步更新
-      if (projectId) {
-        // 从 allOptions 中查找对应的项目（如果下拉框已加载）
-        // 或者通过 change 事件来更新
-      }
-    },      
+   
     /**
      * 处理项目/课程选择变化
      */

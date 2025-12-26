@@ -351,7 +351,11 @@ export default {
             });
 
             if (res.code === 0) {
-              this.$message.success('评价成功');
+              if(type === 'like') {
+                this.$message.success('点赞成功');
+              } else {
+                this.$message.success('感谢反馈，我们会继续努力的~');
+              }
             } else {
               // 评价失败，回滚本地状态
               this.$set(message, 'likeStatus', 'NO_EVAL');

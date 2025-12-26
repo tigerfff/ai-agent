@@ -12,7 +12,7 @@
       business-line="retail"
       :visible.sync="visible"
       :extra-agents="customAgents"
-      userId="4649d25a7be14f7bb1106219b3bec89c"
+      userId="211fdcadaa424f279670cf093af3340d"
     >
       <!-- 处理自定义智能体的渲染 -->
       <template #agent-view="{ agent }">

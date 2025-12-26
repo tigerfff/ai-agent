@@ -41,10 +41,19 @@ async function checkServiceWhitelist(config, userId, client) {
 
 /**
  * 检查本地权限码 (通用权限判断)
- * @param {Object} config - { permissionCodeKey, permissionCode }
+ * @param {Object} config - { permissionCodeKey, permissionCode, permissionMode? }
+ * permissionMode: 'or' | 'and' - 默认 'or'（只要有一个匹配就通过）
  */
 function checkLocalAuth(config) {
-  if (!config || !config.permissionCodeKey || !config.permissionCode) return true;
+  if (!config || !config.permissionCodeKey) return true;
+  
+  // 支持单个权限码或权限码数组
+  const permissionCodes = Array.isArray(config.permissionCode) 
+    ? config.permissionCode 
+    : (config.permissionCode ? [config.permissionCode] : []);
+  
+  // 如果没有配置权限码，默认通过
+  if (permissionCodes.length === 0) return true;
 
   try {
     const stored = localStorage.getItem(config.permissionCodeKey);
@@ -58,12 +67,21 @@ function checkLocalAuth(config) {
       codes = stored.split(',');
     }
 
-    return codes.includes(config.permissionCode);
+    // 根据模式判断：'and' 需要全部匹配，'or' 只要有一个匹配
+    const mode = config.permissionMode || 'or';
+    if (mode === 'and') {
+      // AND 逻辑：全部权限码都要匹配
+      return permissionCodes.every(code => codes.includes(code));
+    } else {
+      // OR 逻辑：只要有一个权限码匹配就通过（默认）
+      return permissionCodes.some(code => codes.includes(code));
+    }
   } catch (e) {
     console.error('[Permission] Check local auth failed', e);
     return false;
   }
 }
+
 
 /**
  * 核心：检查智能体权限

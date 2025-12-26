@@ -1,5 +1,5 @@
 <template>
-  <div class="user-train-finish">
+  <div class="user-train-finish" v-if="taskList.length > 0">
     <div 
       v-for="task in taskList" 
       :key="task.taskId"
@@ -131,25 +131,13 @@ export default {
             };
           });
         } else {
-          // 如果接口返回失败，至少显示任务ID
-          this.taskList = this.taskIds.map(taskId => ({
-            taskId: taskId,
-            taskName: `任务 ${taskId.substring(0, 8)}`,
-            status: null,
-            isUploading: false,
-            uploaded: false
-          }));
+          // 如果接口返回失败或项目不存在，不显示按钮
+          this.taskList = [];
         }
       } catch (e) {
         console.error('[UserTrainFinish] Load task info failed:', e);
-        // 失败时至少显示任务ID
-        this.taskList = this.taskIds.map(taskId => ({
-          taskId: taskId,
-          taskName: `任务 ${taskId.substring(0, 8)}`,
-          status: null,
-          isUploading: false,
-          uploaded: false
-        }));
+        // 失败时项目不存在，不显示按钮
+        this.taskList = [];
       } finally {
         this.loading = false;
       }

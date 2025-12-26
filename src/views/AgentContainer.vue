@@ -542,10 +542,29 @@ export default {
       const currentExists = formattedList.some(item => item.id === this.currentConversationId);
       const isTempId = this.currentConversationId && this.currentConversationId.startsWith('conv-');
 
+      // 4. 找出所有未读会话，按更新时间倒序排序（最新的在最前）
+      const unreadList = formattedList.filter(c => c.isUnread).sort((a, b) => {
+        const timeA = new Date(a.updateTime || 0).getTime();
+        const timeB = new Date(b.updateTime || 0).getTime();
+        return timeB - timeA; // 降序：最新的在前
+      });
+      const latestUnread = unreadList[0];
+
+      // 5. 场景 A: 如果当前是临时会话（说明刚从 Home 进来），且发现了未读会话，自动跳转
+      if (isTempId && latestUnread) {
+        // 自动跳转到最新的未读会话
+        this.currentConversationId = latestUnread.id;
+        this.currentSessionStableKey = latestUnread.id;
+        return;
+      }
+
+      // 6. 场景 B: 如果当前选中的 ID 不存在了，或者本来就没选中
       if (!isTempId && (!this.currentConversationId || !currentExists)) {
         if (formattedList.length > 0) {
-          // 如果不是临时 ID，且当前没有选中或选中的 ID 已失效，则选中第一个
-          this.currentConversationId = formattedList[0].id;
+          // 优先选中最新的未读，如果没有未读则选中列表第一个
+          const target = latestUnread || formattedList[0];
+          this.currentConversationId = target.id;
+          this.currentSessionStableKey = target.id;
         } else {
           // 如果列表为空，自动进入新建会话状态
           this.handleNewChat();

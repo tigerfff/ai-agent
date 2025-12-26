@@ -37,7 +37,8 @@
       >
         <!-- Loading 状态 -->
         <div v-if="loading" class="typing-indicator">
-          <span></span><span></span><span></span>
+          <img src="@/assets/images/star-sport.png" alt="loading" class="loading-star-image" />
+          <span>正在生成中...</span>
         </div>
 
         <!-- 文本内容渲染 -->
@@ -72,7 +73,7 @@
           <div v-if="loading" class="widget-loading-overlay">
             <div class="loading-content">
               <div class="typing-indicator">
-                <span></span><span></span><span></span>
+                <img src="@/assets/images/star-sport.png" alt="loading" class="loading-star-image" />
               </div>
               <span class="loading-text">加载中...</span>
             </div>
@@ -411,22 +412,13 @@ export default {
       }
 
       .typing-indicator {
-        span {
-          display: inline-block;
-          width: 6px;
-          height: 6px;
-          background-color: #aaa;
-          border-radius: 50%;
-          margin: 0 2px;
-          animation: bounce 1.4s infinite ease-in-out both;
-
-          &:nth-child(1) {
-            animation-delay: -0.32s;
-          }
-
-          &:nth-child(2) {
-            animation-delay: -0.16s;
-          }
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        .loading-star-image {
+          width: 24px;
+          height: 24px;
         }
       }
 
@@ -514,6 +506,15 @@ export default {
   }
   40% {
     transform: scale(1);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
