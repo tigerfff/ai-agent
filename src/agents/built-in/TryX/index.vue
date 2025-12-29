@@ -664,7 +664,6 @@ export default {
         uploadType = this.messages[0]?.attachments[0]?.type === 'video' ? 'video' : 'img'
       }
 
-      console.log("uploadType",uploadType)
       // 4. 准备 AI 占位消息
       const aiMsgKey = Date.now() + '_ai';
       const aiMsg = {
@@ -791,10 +790,10 @@ export default {
     },
 
     handleStop() {
-      if (this.abortController) {
-        this.abortController.abort();
-        this.abortController = null;
-      }
+      // if (this.abortController) {
+      //   this.abortController.abort();
+      //   this.abortController = null;
+      // }
       this.isStreaming = false;
       this.isUploading = false;
     },

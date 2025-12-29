@@ -814,7 +814,6 @@ export default {
           signal: this.abortController.signal,
           uploadType,
           onMessage: (msgData) => {
-            console.log('[TrainingX] onMessage', msgData);
             if (!msgData) return;
 
             if (msgData.text) {
@@ -830,6 +829,7 @@ export default {
             if (msgData.chatId && msgData.chatId !== this.chatId) {
               this.chatId = msgData.chatId;
               // 通知父组件更新会话 ID
+              // 快速切换，父组件已经被我的强制Key干掉了。所以这句话就不会发送，而当前会话还能保持
               this.$emit('select-conversation', this.chatId);
             }
 
@@ -1049,9 +1049,9 @@ export default {
     },
   },
   beforeDestroy() {
-  if (this.abortController) {
-    this.abortController.abort();
-  }
+  // if (this.abortController) {
+    // this.abortController.abort();
+  // }
   if (this.ossUploader) {
     this.ossUploader.destroy?.();
   }

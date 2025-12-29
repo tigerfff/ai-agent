@@ -252,6 +252,7 @@ export default {
       conversations: [],
       currentConversationId: '',
       currentSessionStableKey: '', // 用于组件 key 的稳定标识，避免临时ID转真实ID时组件重载
+      isManualNewChat: false, // 标记是否为用户手动新建的会话，防止自动跳转逻辑覆盖手动新建
       isCollapsed: false,
       // 重命名对话框相关
       renameDialogVisible: false,
@@ -447,6 +448,7 @@ export default {
         const newId = 'conv-' + Date.now();
         this.currentConversationId = newId;
         this.currentSessionStableKey = newId; // 初始化稳定 Key
+        this.isManualNewChat = false; // 标记为非手动（自动进入）
       } else {
         // 切换智能体后，尝试选中该智能体的最新会话
         // 如果是 TryAgent，列表可能是空的，等待组件 emit update-list 后再选中
@@ -551,7 +553,8 @@ export default {
       const latestUnread = unreadList[0];
 
       // 5. 场景 A: 如果当前是临时会话（说明刚从 Home 进来），且发现了未读会话，自动跳转
-      if (isTempId && latestUnread) {
+      // 关键修改：只有不是用户手动点击新建的情况下，才允许自动跳转
+      if (isTempId && latestUnread && !this.isManualNewChat) {
         // 自动跳转到最新的未读会话
         this.currentConversationId = latestUnread.id;
         this.currentSessionStableKey = latestUnread.id;
@@ -622,6 +625,7 @@ export default {
       this.currentConversationId = newId;
       // 【重要】新建会话，必须更新稳定 Key，强制重载组件
       this.currentSessionStableKey = newId;
+      this.isManualNewChat = true; // 标记为手动新建
     },
     deleteConversation(id) {
       // 1. 调用子组件的删除方法（如果存在）
