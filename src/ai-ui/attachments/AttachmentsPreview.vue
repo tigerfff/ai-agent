@@ -31,10 +31,7 @@
           @error="handleVideoError"
         ></video>
         
-        <div v-if="isVideo && videoError" class="video-error-tip">
-          <i class="h-icon-warn"></i>
-          <span>视频加载失败，请检查格式或网络</span>
-        </div>
+        
         
         <!-- 其他文件 -->
         <div v-else class="preview-file">
@@ -43,6 +40,11 @@
           <div class="file-size">{{ formatFileSize(currentFile.size) }}</div>
         </div>
       </template>
+
+      <div v-if="isVideo && videoError" class="video-error-tip">
+        <i class="h-icon-warn"></i>
+        <span>视频加载失败，请检查格式或网络</span>
+      </div>
     </div>
 
     <!-- 右箭头 -->
@@ -113,6 +115,7 @@ export default {
   watch: {
     visible(val) {
       if (val) {
+        this.videoError = false
         // 打开预览时，重置为初始索引
         this.currentIndex = Math.max(0, Math.min(this.initialIndex, (this.fileList?.length || 1) - 1));
         window.addEventListener('keydown', this.handleKeydown);
