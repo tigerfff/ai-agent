@@ -28,7 +28,13 @@
           class="preview-video"
           controls
           autoplay
+          @error="handleVideoError"
         ></video>
+        
+        <div v-if="isVideo && videoError" class="video-error-tip">
+          <i class="h-icon-warn"></i>
+          <span>视频加载失败，请检查格式或网络</span>
+        </div>
         
         <!-- 其他文件 -->
         <div v-else class="preview-file">
@@ -71,12 +77,16 @@ export default {
   },
   data() {
     return {
-      currentIndex: 0
+      currentIndex: 0,
+      videoError: false
     };
   },
   computed: {
     // 当前预览的文件对象
     currentFile() {
+      // 重置错误状态
+      this.videoError = false;
+      
       if (!this.fileList || this.fileList.length === 0) return null;
       const file = this.fileList[this.currentIndex];
       if (!file) return null;
@@ -172,6 +182,10 @@ export default {
       
       // 5. 默认为文件类型
       return 'file';
+    },
+    handleVideoError(e) {
+      console.error('Video playback error:', e);
+      this.videoError = true;
     },
     handleKeydown(e) {
       if (!this.visible) return;
@@ -303,6 +317,27 @@ export default {
         font-size: 14px;
         opacity: 0.7;
       }
+    }
+  }
+
+  .video-error-tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 100;
+    
+    i {
+      font-size: 18px;
+      color: #e6a23c;
     }
   }
 }

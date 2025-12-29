@@ -418,7 +418,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba($color: #000, $alpha: .1);
+      background: rgba($color: #000, $alpha: .6);
       color: #fff;
       font-size: 12px;
       z-index: 2;
