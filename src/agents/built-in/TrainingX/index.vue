@@ -93,7 +93,7 @@
           :showClearButton="false"
           :enable-stop-button="false"
           placeholder="有问题尽管问我~"
-          :allowed-types="['image', 'video', 'document']"
+          :allowed-types="[]"
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="getAsrConfig"

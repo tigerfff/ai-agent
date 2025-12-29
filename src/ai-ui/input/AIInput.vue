@@ -756,7 +756,27 @@ export default {
       const files = e.clipboardData?.files;
       if (files?.length) {
         e.preventDefault();
-        await this.processFiles(Array.from(files));
+        const fileList = Array.from(files);
+
+        // 检查文件类型是否在允许的类型列表中
+        for (const file of fileList) {
+          const fileType = this.getFileType(file);
+          const isAllowed = this.parsedAllowedTypes[fileType] === true;
+          
+          if (!isAllowed) {
+            const allowedTypesList = this.supportedTypes.map(t => this.getTypeLabel(t)).join('、');
+            const msg = `文件 ${file.name} 类型不支持`;
+            
+            if (this.$message) {
+              this.$message.warning(msg);
+            } else {
+              alert(msg);
+            }
+            return;
+          }
+        }
+
+        await this.processFiles(fileList);
       }
     },
 
