@@ -3,6 +3,8 @@
  * 依赖：需要在 index.html 中引入 speechrecognizer.js
  * 文档: https://github.com/TencentCloud/tencentcloud-speech-sdk-js
  */
+import { buildUrl } from '@/utils/api-prefix';
+
 export class SpeechRecognizerWrapper {
   constructor(options = {}) {
     this.recognizer = null;
@@ -25,9 +27,19 @@ export class SpeechRecognizerWrapper {
   /**
    * 开始识别
    * @param {Object} config - 鉴权配置
+   * 
+   * 方式1（使用 secretKey）：
    * @param {string} config.secretId - 腾讯云 SecretId
    * @param {string} config.secretKey - 腾讯云 SecretKey
    * @param {number} config.appId - 应用ID（必须是数字）
+   * 
+   * 方式2（使用签名）：
+   * @param {string} config.secretId - 腾讯云 SecretId（SDK 需要，即使使用签名方式）
+   * @param {string} [config.sign] - 签名字符串（可选，如果提供了 signCallback 则不需要）
+   * @param {Function} [config.signCallback] - 签名回调函数 (stringToSign) => Promise<string> | string（可选）
+   * @param {number} config.appId - 应用ID（必须是数字）
+   * 
+   * 通用参数：
    * @param {string} [config.engineModelType='16k_zh'] - 引擎模式
    * @param {string} [config.hotwordId] - 热词ID
    */
@@ -42,15 +54,26 @@ export class SpeechRecognizerWrapper {
         throw new Error('WebAudioSpeechRecognizer not found. Please ensure speechrecognizer.js is loaded.');
       }
 
+      // 判断使用哪种认证方式
+      const useSignCallback = !!(config.signCallback || config.sign);
+      const useSecretKey = !!(config.secretId && config.secretKey);
+
+      // 验证必要参数
+      if (!config.appId) {
+        throw new Error('appId is required');
+      }
+
+      if (!useSignCallback && !useSecretKey) {
+        throw new Error('Either secretId+secretKey or sign/signCallback is required');
+      }
+
       // 根据官方示例配置参数
       const params = {
-          secretid: config.secretId,
-          secretkey: config.secretKey,
-          appid: config.appId,
+        appid: typeof config.appId === 'string' ? Number(config.appId) : config.appId,
         engine_model_type: config.engineModelType || '16k_zh',
         // 以下为可选参数
         voice_format: config.voice_format || 1,
-          hotword_id: config.hotwordId || '',
+        hotword_id: config.hotwordId || '',
         needvad: config.needvad !== undefined ? config.needvad : 1,
         filter_dirty: config.filter_dirty !== undefined ? config.filter_dirty : 1,
         filter_modal: config.filter_modal !== undefined ? config.filter_modal : 1,
@@ -59,11 +82,34 @@ export class SpeechRecognizerWrapper {
         word_info: config.word_info !== undefined ? config.word_info : 0
       };
 
+      // 方式1：使用 secretKey 认证
+      if (useSecretKey) {
+        params.secretid = config.secretId;
+        params.secretkey = config.secretKey;
+      }
+      // 方式2：使用签名认证
+      else if (useSignCallback) {
+        // SDK 需要 secretid（即使使用签名方式）
+        if (config.secretId) {
+          params.secretid = config.secretId;
+        }
+        
+        // 设置 signCallback（优先级高于 sign）
+        if (config.signCallback) {
+          params.signCallback = config.signCallback;
+        } else if (config.sign) {
+          // 如果没有 signCallback，但提供了 sign，创建一个简单的回调函数
+          params.signCallback = () => Promise.resolve(config.sign);
+        }
+      }
+
       console.log('[ASR] Creating WebAudioSpeechRecognizer with params:', {
         appid: params.appid,
         engine_model_type: params.engine_model_type,
+        authMode: useSignCallback ? 'sign' : 'secretKey',
         hasSecretId: !!params.secretid,
-        hasSecretKey: !!params.secretkey
+        hasSecretKey: !!params.secretkey,
+        hasSignCallback: !!params.signCallback
       });
 
       // 创建识别器实例（根据官方示例）
@@ -140,5 +186,83 @@ export class SpeechRecognizerWrapper {
         console.warn('[ASR] DestroyStream error:', e);
       }
     }
+  }
+
+  /**
+   * 创建 ASR 配置提供器（使用签名回调方式）
+   * 封装了接口调用逻辑，组件只需要传入 aiClient 即可
+   * 
+   * @param {AIClient} aiClient - AI 客户端实例
+   * @returns {Function} 配置提供函数，返回 Promise<Object|null>
+   * 
+   * @example
+   * const configProvider = SpeechRecognizerWrapper.createConfigProvider(this.$aiClient);
+   * <AIInput :speech-config-provider="configProvider" />
+   */
+  static createConfigProvider(aiClient) {
+    /**
+     * 获取 ASR 配置（用于语音识别）
+     * 流程：
+     * 1. 调用 getAsrLint 获取 appId 和 secretId
+     * 2. SDK 内部生成待签名字符串 (strToBeSigned)
+     * 3. 在 signCallback 中调用 getAsrSign 获取最终签名
+     * 
+     * @returns {Promise<Object|null>} ASR 配置对象或 null
+     */
+    return async function getAsrConfig() {
+      try {
+        // 1. 先获取基础配置 (appId, secretId)
+        const lintRes = await aiClient.send({
+          url: buildUrl(aiClient, `/inspect/chat/web/asr/actions/asrlint`, 'chain'),
+          method: 'get',
+          data: {}
+        });
+        
+        if (lintRes.code !== 0 || !lintRes.data) {
+          console.error('[ASR] Failed to get ASR lint config:', lintRes);
+          return null;
+        }
+
+        const { appId, secretId, secretid } = lintRes.data;
+        const finalAppId = typeof appId === 'string' ? Number(appId) : appId;
+        const finalSecretId = secretId || secretid || '';
+
+        if (!finalAppId) {
+          console.error('[ASR] ASR config missing appId');
+          return null;
+        }
+
+        // 2. 返回配置，SDK 在需要签名时会触发 signCallback
+        return {
+          appId: finalAppId,
+          secretId: finalSecretId,
+          // 腾讯云 SDK 在连接时会生成待签名字符串并通过此回调传递
+          signCallback: async (stringToSign) => {
+            try {
+              // 3. 调用 getAsrSign 将待签名字符串传给后端进行 HmacSHA1 签名
+              const signRes = await aiClient.send({
+                url: buildUrl(aiClient, `/inspect/chat/web/asr/actions/getSign`, 'chain'),
+                method: 'post',
+                data: {
+                  strToBeSigned: stringToSign
+                }
+              });
+              
+              if (signRes.code === 0 && signRes.data && signRes.data.sign) {
+                return signRes.data.sign;
+              }
+              console.error('[ASR] getAsrSign returned invalid data:', signRes);
+            } catch (e) {
+              console.error('[ASR] getAsrSign request failed:', e);
+            }
+            return ''; // 失败返回空，SDK 会报错
+          },
+          engineModelType: '16k_zh' // 默认使用中文16k
+        };
+      } catch (e) {
+        console.error('[ASR] getAsrConfig failed:', e);
+        return null;
+      }
+    };
   }
 }

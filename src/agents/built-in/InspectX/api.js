@@ -1,6 +1,6 @@
 // TryX 智能体 API 定义 (基于 api-培训 文档更新)
 
-const AGENT_ID = '2';
+const AGENT_ID = '3';
 
 import { buildUrl } from '@/utils/api-prefix';
 
@@ -157,18 +157,6 @@ export const TrainingXApi = {
     });
   },
 
-  /**
-   * 获取项目详情
-   * @param {AIClient} client
-   * @param {string} projectId
-   */
-  getProjectDetail(client, projectId) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/projects/${projectId}`, 'chain', '/api'),
-      method: 'get',
-      baseURL: '' // 使用完整 URL
-    });
-  },
 
   getProjectDetailByUser(client, projectId) {
     return client.send({
@@ -177,76 +165,6 @@ export const TrainingXApi = {
     });
   },
 
-  getCourseDetailByUser(client, courseId) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/courses/actions/trainingCourses/getCourseMsg`, 'chain', '/api'),
-      method: 'get',
-      data: {
-        courseId
-      }
-    });
-  },
-
-  /**
-   * 获取课程详情
-   * @param {AIClient} client
-   * @param {string} courseId
-   */
-  getCourseDetail(client, courseId) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/course`, 'chain', '/api'),
-      method: 'get',
-      data: { courseId },
-      baseURL: '' // 使用完整 URL
-    });
-  },
-
-  /**
-   * 获取人员信息 (Mock)
-   * @param {AIClient} client
-   * @param {Array<string>} userIds
-   */
-  getPersonnelInfo(client, data) {
-    return client.send({
-      url: buildUrl(client, `/chain/patrol/patrolAgent/actions/findAgentUserByIds`, 'chain', '/api'),
-      method: 'get',
-      data
-    });
-  },
-
-  /**
-   * 获取项目列表（支持搜索和分页）
-   * @param {AIClient} client
-   * @param {Object} params - { projectName, pageNo, pageSize, containSub, projectStatus, projectType }
-   */
-  getProjectList(client, data = {}) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/projects`, 'chain', '/api'),
-      method: 'get',
-      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
-    });
-  },
-
-  /**
-   * 获取课程列表（支持搜索和分页）
-   * @param {AIClient} client
-   * @param {Object} params - { name, pageNo, pageSize, state, classId, orderName, orderType, subClass, type }
-   */
-  getCourseList(client, data = {}) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/course/list`, 'chain', '/api'),
-      method: 'get',
-      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
-    });
-  },
-
-  getCourseList(client, data = {}) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/course/list`, 'chain', '/api'),
-      method: 'get',
-      data // GET 请求的 data 可能不会被使用，但为了兼容性保留
-    });
-  },
 
   // 通过storeId查询人
   listLearnersByStore(client, data = {}) {
@@ -270,17 +188,7 @@ export const TrainingXApi = {
     });
   },
 
-  /**
-   * 获取项目任务列表
-   * @param {AIClient} client
-   * @param {string} projectId - 项目ID
-   */
-  getProjectTasks(client, projectId) {
-    return client.send({
-      url: buildUrl(client, `/enterprise/training/userProjects/actions/getProjectTasks/${projectId}`, 'chain', '/api'),
-      method: 'get',
-    });
-  },
+
 
   /**
    * 获取智能体红点提示

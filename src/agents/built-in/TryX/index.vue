@@ -81,7 +81,7 @@
             video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] }
           }"
           :before-add-attachments="handlePreUpload"
-          :speech-config-provider="getAsrConfig"
+          :speech-config-provider="asrConfigProvider"
           :before-send="handleBeforeSend"
           :send-disabled="sendBtnDisabled"
           :buttonConfig="buttonConfig"
@@ -120,6 +120,7 @@ import { handleAgentPreUpload } from '@/utils/agent-upload';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 import AIIcon from '@/ai-ui/icon/AIIcon.vue';
 import regenerateIcon from '@svg/regenerate.svg';
+import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 export default {
   name: 'TryAgent',
   inject: ['sessionApi'],
@@ -203,10 +204,14 @@ export default {
       
       return menuItems
     },
-    sendBtnDisabled() {
-      return Boolean((!this.messages.length && (!this.inputFilesList.length || !this.aiInputText.length)) || (this.messages.length && !this.aiInputText.length))
-    }
-  },
+      sendBtnDisabled() {
+        return Boolean((!this.messages.length && (!this.inputFilesList.length || !this.aiInputText.length)) || (this.messages.length && !this.aiInputText.length))
+      },
+      // 创建 ASR 配置提供器
+      asrConfigProvider() {
+        return SpeechRecognizerWrapper.createConfigProvider(this.$aiClient);
+      }
+    },
   watch: {
     conversationId: {
       immediate: true,
@@ -796,44 +801,6 @@ export default {
       // }
       this.isStreaming = false;
       this.isUploading = false;
-    },
-
-    /**
-     * 获取 ASR 配置（用于语音识别）
-     * 优先使用 window.config 中的测试密钥，否则调用后端接口获取签名
-     */
-    async getAsrConfig() {
-      // 生产环境：调用后端接口获取签名
-      try {
-        const res = await TryApi.getAsrSign(this.$aiClient, {});
-        
-        if (res.code === 0 && res.data) {
-          const { appId, sign } = res.data;
-          
-          if (!appId || !sign) {
-            return null;
-          }
-
-          // 返回配置，使用签名回调方式
-          return {
-            appId,
-            sign, // 直接使用后端返回的签名
-            signCallback: async () => {
-              // 如果需要动态获取签名，可以在这里调用后端接口
-              const refreshRes = await TryApi.getAsrSign(this.$aiClient, {});
-              if (refreshRes.code === 0 && refreshRes.data) {
-                return refreshRes.data.sign;
-              }
-              return sign; // 降级使用初始签名
-            },
-            engineModelType: '16k_zh' // 默认使用中文16k
-          };
-        }
-        
-        return null;
-      } catch (e) {
-        return null;
-      }
     },
 
     /**

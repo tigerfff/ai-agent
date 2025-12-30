@@ -1,5 +1,6 @@
 import TrainingXAgent from '@/agents/built-in/TrainingX/index.vue';
 import TryAgent from '@/agents/built-in/TryX/index.vue';
+import InspectX from '@/agents/built-in/InspectX/index.vue';
 import { buildUrl } from '@/utils/api-prefix';
 
 // 导入图标资源
@@ -38,9 +39,9 @@ export const ALL_AGENTS = {
     type: 'built-in',
     tags: ['对话模型', '机器视觉'],
     hideConversations: true,
-    component: TryAgent, // 暂时复用 TryAgent，实际应为 InspectAgent
+    component: InspectX, // 暂时复用 TryAgent，实际应为 InspectAgent
     permission: {
-      underConstruction: true, // 建设中
+      underConstruction: false, // 建设中
       serviceName: '巡查服务',
       permissionName: '巡查权限',
       // 将来开发完成后开启

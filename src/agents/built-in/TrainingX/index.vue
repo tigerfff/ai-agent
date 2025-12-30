@@ -96,11 +96,11 @@
           :allowed-types="[]"
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
-          :speech-config-provider="getAsrConfig"
+          :speech-config-provider="asrConfigProvider"
           :button-config="{
             upload: { visible: false, disabled: false },
             clear: { visible: false, disabled: false },
-            speech: { visible: false }, // 隐藏语音按钮
+            speech: { visible: true }, // 隐藏语音按钮
           }"
           :send-disabled="sendBtnDisabled"
           @send="handleSend" 
@@ -128,6 +128,7 @@ import TrainResultUpload from './widgets/TrainResultUpload.vue';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
 import { parseWidgetData } from './widgets/widgetParser';
+import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 
 export default {
   name: 'TryAgent',
@@ -237,9 +238,15 @@ export default {
     // this.mockTrainPlanForm();
     // this.mockUserStudyForm();
     // this.mockUserTrainFinish();
-    // this.mockTrainResultUpload();
-  },
-  methods: {
+      // this.mockTrainResultUpload();
+    },
+    computed: {
+      // 创建 ASR 配置提供器
+      asrConfigProvider() {
+        return SpeechRecognizerWrapper.createConfigProvider(this.$aiClient);
+      }
+    },
+    methods: {
     /**
      * 新建对话前的钩子，返回 false 可以阻止新建对话
      * @returns {boolean} true-允许新建，false-阻止新建
@@ -383,8 +390,18 @@ export default {
      * @returns {boolean} 是否显示 footer
      */
     shouldShowFooter(item) {
+      console.log('item', item);
+
+      // 对于 AI 消息（placement === 'start'），需要检查是否还在生成中或是否有 msgId
+      if (item.placement === 'start' && item.role === 'ai') {
+        // 如果没有 msgId，不显示 footer（因为评价接口需要 msgId）
+        if (!item.msgId) {
+          return false;
+        }
+      }
+      
       if (!item || !item.content) {
-        return true;
+        return false;
       }
 
       // 需要隐藏 footer 的 widget 类型列表
@@ -890,51 +907,11 @@ export default {
       this.isUploading = false;
     },
 
-    /**
-     * 获取 ASR 配置（用于语音识别）
-     * 调用后端接口获取签名，使用签名方式连接腾讯云 ASR
-     */
-    async getAsrConfig() {
-      // 生产环境：调用后端接口获取签名
-      try {
-        const res = await TrainingXApi.getAsrSign(this.$aiClient, {});
-        
-        if (res.code === 0 && res.data) {
-          const { appId, sign } = res.data;
-          
-          if (!appId || !sign) {
-            console.error('ASR config missing appId or sign');
-            return null;
-          }
-
-          // 返回配置，使用签名回调方式
-          return {
-            appId,
-            sign, // 直接使用后端返回的签名
-            signCallback: async () => {
-              // 如果需要动态获取签名，可以在这里调用后端接口
-              const refreshRes = await TrainingXApi.getAsrSign(this.$aiClient, {});
-              if (refreshRes.code === 0 && refreshRes.data) {
-                return refreshRes.data.sign;
-              }
-              return sign; // 降级使用初始签名
-            },
-            engineModelType: '16k_zh' // 默认使用中文16k
-          };
-        }
-        
-        console.error('Failed to get ASR config:', res);
-        return null;
-      } catch (e) {
-        console.error('[TrainingX] getAsrConfig failed', e);
-        return null;
-      }
-    },
+   
 
     handleWidgetSend(text) {
       this.handleSend({ text });
     },
-
     handleUserStudyLearn(data) {
       // 处理用户学习按钮点击
       // data 包含 courseProjectId, type, detailInfo

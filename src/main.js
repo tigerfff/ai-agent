@@ -2,11 +2,15 @@ import Vue from 'vue'
 import App from './App.vue'
 import '@/style/vars.scss'
 import '@/assets/reset.css'
-import '@hui/lib/hui.css'
+import 'hui/lib/hui.css'
+
+
 import '@/style/message-box.scss'
 import '@/style/select.scss'
-import Hui from '@hui/lib/hui.esm-browser.js'
-
+import '../public/hik-cloud-ui/packages/theme-chalk/index.css'
+import '../public/hik-cloud-ui/packages/theme-chalk/organization.css'
+import Hui from 'hui/lib/hui.esm-browser.js'
+import HikCloudOrganizer from '../public/org.js'
 // 引入我们刚开发的组件库
 import AIComponentLib from './index.js'
 // 简化版 http 封装，用来在本项目里模拟父项目的 this.$http / this.$aiClient 行为
@@ -21,6 +25,9 @@ syncTokenFromUrl('token', 'accessToken', {
 });
 
 Vue.use(Hui)
+
+// 全局注册 HikCloudOrganizer 组件
+Vue.component(HikCloudOrganizer.name, HikCloudOrganizer)
 
 // 注册组件库
 Vue.use(AIComponentLib, {
