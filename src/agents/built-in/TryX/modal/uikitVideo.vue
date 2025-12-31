@@ -179,6 +179,9 @@ export default {
     },
   },
   methods: {
+    recStartTimeChange() {
+      this.playSuccessCallback(true)
+    },
     switchTo (num) {
       this.switchVideo = num
       this.playSuccessCallback(false)
@@ -544,6 +547,10 @@ export default {
         pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.stopSave, (res) => {
           pc.playbackRecording = false
           this.getVideoSaveFile(res)
+        });
+        pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.date.recStartTimeChange, (res) => {
+          pc.playbackRecording = false
+          this.recStartTimeChange(res)
         });
         pc.player.eventEmitter.on(EZUIKit.EZUIKitPlayer.EVENTS.fullscreen, (res) => {
           this.isUikitFullScreen = true

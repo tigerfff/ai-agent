@@ -38,6 +38,7 @@
         <template  #footer="{ item, index }" >
           <div style="display: flex; align-items: center; gap: 4px;">
             <BubbleFooter
+              v-show="shouldShowFooter(item)"
               :item="item"
               :actions="getActions(item)"
               @action="handleAction($event, item, index)"
@@ -293,6 +294,17 @@ export default {
         this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
         this.inputPlaceholder = "您可以问我任何问题，比如“图片中是否有员工违规”"
       }
+    },
+    shouldShowFooter(item) {
+      if(item.placement === 'start' && item.role === 'ai') {
+        if(!item.msgId) {
+          return false
+        }
+      }
+      if (!item || !item.content) {
+        return false;
+      }
+      return true
     },
     initUploader() {
       this.ossUploader = new OssUploader({
@@ -836,6 +848,7 @@ export default {
                 userEvaluation: 'NO_EVAL'
               });
               if (res.code === 0) {
+                
               } else {
                 // 取消评价失败，回滚本地状态
                 this.$set(message, 'likeStatus', '');
@@ -851,6 +864,11 @@ export default {
             });
 
             if (res.code === 0) {
+              if(type === 'like') {
+                this.$message.success('点赞成功');
+              } else {
+                this.$message.success('感谢反馈，我们会继续努力的~');
+              }
             } else {
               // 评价失败，回滚本地状态
               this.$set(message, 'likeStatus', '');

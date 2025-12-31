@@ -180,6 +180,9 @@ export default {
   methods: {
     playSuccess(finish) {
       this.playSuccessFinish = finish
+      if(this.videoStartSaveing) {
+        this.stopGetVideo()
+      }
     },
     getVideoThumbnail(item) {
       // 如果已经有缓存的缩略图，直接返回
@@ -519,7 +522,7 @@ export default {
         // 重置录制状态
         this.videoStartSaveing = false
       } else {
-        this.$message.warning('录制失败，录制时间请不要低于5秒')
+        this.$message.warning('录制失败，录制时间请不要太短~')
       }
     },
     // 抓图

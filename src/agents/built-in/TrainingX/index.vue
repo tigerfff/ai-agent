@@ -390,16 +390,13 @@ export default {
      * @returns {boolean} 是否显示 footer
      */
     shouldShowFooter(item) {
-      console.log('item', item);
 
-      // 对于 AI 消息（placement === 'start'），需要检查是否还在生成中或是否有 msgId
-      if (item.placement === 'start' && item.role === 'ai') {
-        // 如果没有 msgId，不显示 footer（因为评价接口需要 msgId）
-        if (!item.msgId) {
-          return false;
+      if(item.placement === 'start' && item.role === 'ai') {
+        if(!item.msgId) {
+          return false
         }
       }
-      
+
       if (!item || !item.content) {
         return false;
       }
@@ -906,12 +903,11 @@ export default {
       this.isStreaming = false;
       this.isUploading = false;
     },
-
    
-
     handleWidgetSend(text) {
       this.handleSend({ text });
     },
+
     handleUserStudyLearn(data) {
       // 处理用户学习按钮点击
       // data 包含 courseProjectId, type, detailInfo
