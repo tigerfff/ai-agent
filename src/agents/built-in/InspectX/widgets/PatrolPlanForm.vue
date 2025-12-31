@@ -32,7 +32,7 @@
         <div class="content">
           <div class="time-tags">
             <el-tag
-              v-for="(time, index) in formData.patrolTimeStr.timeList"
+              v-for="(time, index) in formData.patrolTime.timeList"
               :key="index"
               size="small"
               class="time-tag"
@@ -49,7 +49,7 @@
               <!-- 隐藏的时间选择器，覆盖在 + 号上，点击直接触发面板 -->
               <!-- 时间段选择器 -->
               <el-time-picker
-                v-if="formData.patrolTimeStr.timeType === 0"
+                v-if="formData.patrolTime.timeType === 0"
                 ref="timePicker"
                 v-model="tempTimeRange"
                 is-range
@@ -185,7 +185,7 @@ export default {
         startDate: '',
         endDate: '',
         problemSheetAssignment: 1,
-        patrolTimeStr: {
+        patrolTime: {
           timeType: 0,
           timeList: []
         }
@@ -242,7 +242,7 @@ export default {
       this.formData = {
         ...this.formData,
         ...data,
-        patrolTimeStr: data.patrolTimeStr || { timeType: 0, timeList: [] }
+        patrolTime: data.patrolTime || { timeType: 0, timeList: [] }
       };
       
       if (this.formData.startDate && this.formData.endDate) {
@@ -269,7 +269,7 @@ export default {
     },
     formatTimeDisplay(time) {
       // 根据 timeType 判断是时间段还是时间点
-      const timeType = this.formData.patrolTimeStr.timeType;
+      const timeType = this.formData.patrolTime.timeType;
       
       if (timeType === 0) {
         // 时间段：显示开始时间-结束时间
@@ -287,18 +287,18 @@ export default {
       return '未知时间';
     },
     removeTime(index) {
-      this.formData.patrolTimeStr.timeList.splice(index, 1);
+      this.formData.patrolTime.timeList.splice(index, 1);
     },
     /**
      * 处理时间选择器选择结果
      */
     handleTimePickerChange(val) {
-      const timeType = this.formData.patrolTimeStr.timeType;
+      const timeType = this.formData.patrolTime.timeType;
       
       if (timeType === 0) {
         // 时间段：val 是数组 [startTime, endTime]
         if (val && Array.isArray(val) && val.length === 2) {
-          this.formData.patrolTimeStr.timeList.push({
+          this.formData.patrolTime.timeList.push({
             aiStartTime: val[0],
             aiEndTime: val[1]
           });
@@ -308,7 +308,7 @@ export default {
       } else {
         // 时间点：val 是单个时间字符串，开始和结束时间相同
         if (val) {
-          this.formData.patrolTimeStr.timeList.push({
+          this.formData.patrolTime.timeList.push({
             aiStartTime: val,
             aiEndTime: val
           });
