@@ -17,7 +17,7 @@
         :list="messages" 
         :back-button-threshold="50"
         @complete="handleFinish"
-         :ignoreWidgetTypes="['ymform:patrol_plan_delete', 'ymform:patrol_plan_create_result']"
+         :ignoreWidgetTypes="['ymform:patrol_plan_delete', 'ymform:patrol_plan_create_result','ymform:patrol_plan_confirm']"
         class="history-full-width"
       >
         <template #widget="{ item, index }">

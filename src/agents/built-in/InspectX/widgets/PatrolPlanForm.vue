@@ -326,9 +326,9 @@ export default {
       };
 
       const desc = `以下是巡检任务确认结果`;
-      const message = `确认执行 <ymform:patrol_confirm desc="${desc}">
+      const message = `确认执行 <ymform:patrol_plan_confirm desc="${desc}">
 ${JSON.stringify(confirmData, null, 2)}
-</ymform:patrol_confirm>`;
+</ymform:patrol_plan_confirm>`;
 
       console.log(message)
 
