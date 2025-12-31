@@ -1,21 +1,73 @@
 /**
  * 腾讯云语音识别 SDK 封装
- * 依赖：需要在 index.html 中引入 speechrecognizer.js
  * 文档: https://github.com/TencentCloud/tencentcloud-speech-sdk-js
  */
 import { buildUrl } from '@/utils/api-prefix';
+
+// SDK 加载状态管理
+let sdkLoadPromise = null;
+
+/**
+ * 动态加载 speechrecognizer.js SDK
+ * @param {string} sdkPath - SDK 脚本路径，默认为 /libs/speechrecognizer.js
+ * @returns {Promise<void>}
+ */
+function loadSDK(sdkPath = '/libs/speechrecognizer.js') {
+  // 如果已经加载，直接返回
+  if (window.WebAudioSpeechRecognizer) {
+    return Promise.resolve();
+  }
+
+  // 如果正在加载，返回现有的 Promise
+  if (sdkLoadPromise) {
+    return sdkLoadPromise;
+  }
+
+  // 创建新的加载 Promise
+  sdkLoadPromise = new Promise((resolve, reject) => {
+    // 检查是否已经存在 script 标签
+    const existingScript = document.querySelector(`script[src="${sdkPath}"]`);
+    if (existingScript) {
+      // 如果脚本已存在，等待其加载完成
+      if (window.WebAudioSpeechRecognizer) {
+        resolve();
+      } else {
+        existingScript.onload = () => resolve();
+        existingScript.onerror = () => reject(new Error('Failed to load speechrecognizer.js'));
+      }
+      return;
+    }
+
+    // 创建 script 标签
+    const script = document.createElement('script');
+    script.src = sdkPath;
+    script.async = true;
+    
+    script.onload = () => {
+      if (window.WebAudioSpeechRecognizer) {
+        resolve();
+      } else {
+        reject(new Error('WebAudioSpeechRecognizer not found after loading script'));
+      }
+    };
+    
+    script.onerror = () => {
+      sdkLoadPromise = null; // 重置，允许重试
+      reject(new Error(`Failed to load SDK from ${sdkPath}`));
+    };
+
+    // 添加到 head
+    document.head.appendChild(script);
+  });
+
+  return sdkLoadPromise;
+}
 
 export class SpeechRecognizerWrapper {
   constructor(options = {}) {
     this.recognizer = null;
     this.options = options;
-    
-    // 从 window 对象获取 SDK 类（由 speechrecognizer.js 全局注册）
-    this.SpeechRecognizerClass = window.WebAudioSpeechRecognizer;
-
-    if (!this.SpeechRecognizerClass) {
-      console.error('WebAudioSpeechRecognizer not found. Please ensure speechrecognizer.js is loaded in index.html');
-    }
+    this.sdkPath = options.sdkPath || '/libs/speechrecognizer.js';
     
     // 回调函数
     this.onText = options.onText || (() => {});
@@ -25,53 +77,52 @@ export class SpeechRecognizerWrapper {
   }
 
   /**
+   * 获取 SDK 类，如果未加载则先加载
+   * @returns {Promise<Function>}
+   */
+  async getSDKClass() {
+    if (window.WebAudioSpeechRecognizer) {
+      return window.WebAudioSpeechRecognizer;
+    }
+
+    // 动态加载 SDK
+    await loadSDK(this.sdkPath);
+    
+    if (!window.WebAudioSpeechRecognizer) {
+      throw new Error('WebAudioSpeechRecognizer not found after loading SDK');
+    }
+
+    return window.WebAudioSpeechRecognizer;
+  }
+
+  /**
    * 开始识别
    * @param {Object} config - 鉴权配置
-   * 
-   * 方式1（使用 secretKey）：
-   * @param {string} config.secretId - 腾讯云 SecretId
-   * @param {string} config.secretKey - 腾讯云 SecretKey
-   * @param {number} config.appId - 应用ID（必须是数字）
-   * 
-   * 方式2（使用签名）：
    * @param {string} config.secretId - 腾讯云 SecretId（SDK 需要，即使使用签名方式）
-   * @param {string} [config.sign] - 签名字符串（可选，如果提供了 signCallback 则不需要）
-   * @param {Function} [config.signCallback] - 签名回调函数 (stringToSign) => Promise<string> | string（可选）
+   * @param {Function} [config.signCallback] - 签名回调函数 (stringToSign) => Promise<string> | string
    * @param {number} config.appId - 应用ID（必须是数字）
-   * 
-   * 通用参数：
    * @param {string} [config.engineModelType='16k_zh'] - 引擎模式
    * @param {string} [config.hotwordId] - 热词ID
    */
-  start(config) {
+  async start(config) {
     if (this.recognizer) {
       this.stop();
     }
 
     try {
-      // 检查 SDK 是否已加载
-      if (!this.SpeechRecognizerClass) {
-        throw new Error('WebAudioSpeechRecognizer not found. Please ensure speechrecognizer.js is loaded.');
-      }
-
-      // 判断使用哪种认证方式
-      const useSignCallback = !!(config.signCallback || config.sign);
-      const useSecretKey = !!(config.secretId && config.secretKey);
+      // 确保 SDK 已加载
+      const SpeechRecognizerClass = await this.getSDKClass();
 
       // 验证必要参数
       if (!config.appId) {
         throw new Error('appId is required');
       }
 
-      if (!useSignCallback && !useSecretKey) {
-        throw new Error('Either secretId+secretKey or sign/signCallback is required');
-      }
-
       // 根据官方示例配置参数
+      const appId = typeof config.appId === 'string' ? Number(config.appId) : config.appId;
       const params = {
-        appid: typeof config.appId === 'string' ? Number(config.appId) : config.appId,
+        appid: appId,
         engine_model_type: config.engineModelType || '16k_zh',
-        // 以下为可选参数
         voice_format: config.voice_format || 1,
         hotword_id: config.hotwordId || '',
         needvad: config.needvad !== undefined ? config.needvad : 1,
@@ -82,38 +133,18 @@ export class SpeechRecognizerWrapper {
         word_info: config.word_info !== undefined ? config.word_info : 0
       };
 
-      // 方式1：使用 secretKey 认证
-      if (useSecretKey) {
+      // SDK 需要 secretid
+      if (config.secretId) {
         params.secretid = config.secretId;
-        params.secretkey = config.secretKey;
-      }
-      // 方式2：使用签名认证
-      else if (useSignCallback) {
-        // SDK 需要 secretid（即使使用签名方式）
-        if (config.secretId) {
-          params.secretid = config.secretId;
-        }
-        
-        // 设置 signCallback（优先级高于 sign）
-        if (config.signCallback) {
-          params.signCallback = config.signCallback;
-        } else if (config.sign) {
-          // 如果没有 signCallback，但提供了 sign，创建一个简单的回调函数
-          params.signCallback = () => Promise.resolve(config.sign);
-        }
       }
 
-      console.log('[ASR] Creating WebAudioSpeechRecognizer with params:', {
-        appid: params.appid,
-        engine_model_type: params.engine_model_type,
-        authMode: useSignCallback ? 'sign' : 'secretKey',
-        hasSecretId: !!params.secretid,
-        hasSecretKey: !!params.secretkey,
-        hasSignCallback: !!params.signCallback
-      });
+      // 直接传递 signCallback，SDK 内部会正确处理 await
+      if (config.signCallback) {
+        params.signCallback = config.signCallback;
+      }
 
-      // 创建识别器实例（根据官方示例）
-      this.recognizer = new this.SpeechRecognizerClass(params);
+      // 创建识别器实例
+      this.recognizer = new SpeechRecognizerClass(params);
 
       // 绑定事件监听器（参照官方示例的命名）
       this.recognizer.OnRecognitionStart = (res) => {
@@ -213,7 +244,7 @@ export class SpeechRecognizerWrapper {
       try {
         // 1. 先获取基础配置 (appId, secretId)
         const lintRes = await aiClient.send({
-          url: buildUrl(aiClient, `/inspect/chat/web/asr/actions/asrlint`, 'chain'),
+          url: buildUrl(aiClient, `/inspect/chat/web/asr/actions/asrInit`, 'chain'),
           method: 'get',
           data: {}
         });
@@ -239,7 +270,6 @@ export class SpeechRecognizerWrapper {
           // 腾讯云 SDK 在连接时会生成待签名字符串并通过此回调传递
           signCallback: async (stringToSign) => {
             try {
-              // 3. 调用 getAsrSign 将待签名字符串传给后端进行 HmacSHA1 签名
               const signRes = await aiClient.send({
                 url: buildUrl(aiClient, `/inspect/chat/web/asr/actions/getSign`, 'chain'),
                 method: 'post',
@@ -248,14 +278,15 @@ export class SpeechRecognizerWrapper {
                 }
               });
               
-              if (signRes.code === 0 && signRes.data && signRes.data.sign) {
-                return signRes.data.sign;
+              if (signRes.code === 0 && signRes.data) {
+                // 如果返回的是对象，提取 sign 字段；否则直接返回
+                return signRes.data.sign || signRes.data;
               }
               console.error('[ASR] getAsrSign returned invalid data:', signRes);
             } catch (e) {
               console.error('[ASR] getAsrSign request failed:', e);
             }
-            return ''; // 失败返回空，SDK 会报错
+            return ''; // 失败返回空字符串
           },
           engineModelType: '16k_zh' // 默认使用中文16k
         };

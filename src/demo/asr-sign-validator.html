@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASR Sign 验证工具</title>
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 100px;
+      font-family: monospace;
+      resize: vertical;
+    }
+    button {
+      background: #409eff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #66b1ff;
+    }
+    button.secondary {
+      background: #909399;
+    }
+    button.secondary:hover {
+      background: #a6a9ad;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f9ff;
+      border: 1px solid #b3d8ff;
+      border-radius: 4px;
+    }
+    .result h3 {
+      margin-top: 0;
+      color: #409eff;
+    }
+    .result-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+    .result-label {
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .result-value {
+      color: #333;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .match {
+      color: #67c23a;
+      font-weight: bold;
+    }
+    .mismatch {
+      color: #f56c6c;
+      font-weight: bold;
+    }
+    .example {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff7e6;
+      border: 1px solid #ffd591;
+      border-radius: 4px;
+    }
+    .example h4 {
+      margin-top: 0;
+      color: #d46b08;
+    }
+    .example code {
+      display: block;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 ASR Sign 验证工具</h1>
+    
+    <div class="form-group">
+      <label>SecretKey:</label>
+      <input type="text" id="secretKey" value="JPUL5e7NQGuLZcXGm5A4kFYgcLrBKG7l" placeholder="请输入 SecretKey">
+    </div>
+
+    <div class="form-group">
+      <label>待签名字符串 (stringToSign):</label>
+      <textarea id="stringToSign" placeholder="例如: asr.cloud.tencent.com/asr/v2/125922***?engine_model_type=16k_zh&expired=1673494772&needvad=1&nonce=1673408372&secretid=*****Qq1zhZMN8dv0******&timestamp=1673408372&voice_format=1&voice_id=c64385ee-3e5c-4fc5-bbfd-7c71addb35b0"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>后端返回的 Sign 值 (用于对比):</label>
+      <input type="text" id="backendSign" placeholder="粘贴后端返回的 sign 值进行对比">
+    </div>
+
+    <button onclick="calculateSign()">计算 Sign</button>
+    <button class="secondary" onclick="loadExample()">加载示例</button>
+    <button class="secondary" onclick="clearAll()">清空</button>
+
+    <div id="result" class="result" style="display: none;">
+      <h3>计算结果</h3>
+      <div class="result-item">
+        <div class="result-label">计算出的 Sign:</div>
+        <div class="result-value" id="calculatedSign"></div>
+      </div>
+      <div class="result-item" id="comparison" style="display: none;">
+        <div class="result-label">对比结果:</div>
+        <div class="result-value" id="comparisonResult"></div>
+      </div>
+      <div class="result-item">
+        <div class="result-label">计算步骤:</div>
+        <div class="result-value" id="steps"></div>
+      </div>
+    </div>
+
+    <div class="example">
+      <h4>📝 使用说明</h4>
+      <p>1. 输入 SecretKey（已默认填入）</p>
+      <p>2. 输入待签名字符串（从 SDK 的 signCallback 中获取）</p>
+      <p>3. 可选：输入后端返回的 Sign 值进行对比验证</p>
+      <p>4. 点击"计算 Sign"按钮</p>
+      <p><strong>加密方法：</strong></p>
+      <code>Base64Encode(HmacSha1(stringToSign, secretKey))</code>
+    </div>
+  </div>
+
+  <script>
+    function calculateSign() {
+      const secretKey = document.getElementById('secretKey').value.trim();
+      const stringToSign = document.getElementById('stringToSign').value.trim();
+      const backendSign = document.getElementById('backendSign').value.trim();
+
+      if (!secretKey) {
+        alert('请输入 SecretKey');
+        return;
+      }
+
+      if (!stringToSign) {
+        alert('请输入待签名字符串');
+        return;
+      }
+
+      try {
+        // 步骤1: 使用 HmacSHA1 加密
+        const hmac = CryptoJS.HmacSHA1(stringToSign, secretKey);
+        const hmacHex = hmac.toString(CryptoJS.enc.Hex);
+        
+        // 步骤2: Base64 编码
+        const hmacBase64 = CryptoJS.enc.Base64.stringify(hmac);
+        const calculatedSign = hmacBase64;
+
+        // 显示结果
+        document.getElementById('calculatedSign').textContent = calculatedSign;
+        document.getElementById('steps').innerHTML = `
+          <div>1. HmacSHA1(stringToSign, secretKey) = ${hmacHex.substring(0, 40)}...</div>
+          <div>2. Base64Encode(hmac) = ${calculatedSign}</div>
+        `;
+
+        // 如果有后端返回的 sign，进行对比
+        if (backendSign) {
+          const match = calculatedSign === backendSign;
+          const comparisonDiv = document.getElementById('comparison');
+          const comparisonResult = document.getElementById('comparisonResult');
+          
+          comparisonDiv.style.display = 'block';
+          comparisonResult.innerHTML = match 
+            ? '<span class="match">✅ 匹配！后端返回的 Sign 值正确</span>'
+            : '<span class="mismatch">❌ 不匹配！后端返回的 Sign 值可能有问题</span>';
+        } else {
+          document.getElementById('comparison').style.display = 'none';
+        }
+
+        document.getElementById('result').style.display = 'block';
+      } catch (error) {
+        alert('计算失败: ' + error.message);
+        console.error(error);
+      }
+    }
+
+    function loadExample() {
+      document.getElementById('stringToSign').value = 'asr.cloud.tencent.com/asr/v2/125922***?engine_model_type=16k_zh&expired=1673494772&needvad=1&nonce=1673408372&secretid=*****Qq1zhZMN8dv0******&timestamp=1673408372&voice_format=1&voice_id=c64385ee-3e5c-4fc5-bbfd-7c71addb35b0';
+    }
+
+    function clearAll() {
+      document.getElementById('secretKey').value = 'JPUL5e7NQGuLZcXGm5A4kFYgcLrBKG7l';
+      document.getElementById('stringToSign').value = '';
+      document.getElementById('backendSign').value = '';
+      document.getElementById('result').style.display = 'none';
+    }
+
+    // 支持 Enter 键触发计算
+    document.getElementById('stringToSign').addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        calculateSign();
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -43,7 +43,9 @@ export default defineConfig({
           // 其他 /api/... 替换为 /v1/...
           return path.replace(/^\/api/, '/v1');
         },
-        secure: false
+        secure: false,
+        timeout: 10 * 60 * 1000, // 设置代理转发超时 (10分钟)
+        proxyTimeout: 10 * 60 * 1000, // 设置代理响应超时
       },
       // 4. 代理图片资源请求 (pbpic.hik-cloud.com)
       '/pbpic': {
