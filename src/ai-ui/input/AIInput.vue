@@ -149,16 +149,22 @@
                 @click="!disableSpeechButton && toggleRecord()"
                 title="语音输入"
               >
+                <!-- Lottie 动画 -->
+                <AILottie
+                  v-if="isRecording"
+                  ref="speechAnimation"
+                  :animation-data="speechAnimationData"
+                  :autoplay="true"
+                  :loop="true"
+                  :width="24"
+                  :height="24"
+                  class="speech-animation"
+                />
+                <!-- 未录音时显示静态图标 -->
                 <img 
-                  v-if="!isRecording" 
+                  v-else
                   :src="voiceIcon" 
                   alt="语音输入" 
-                  class="icon-img" 
-                />
-                <img 
-                  v-else 
-                  :src="pauseIcon" 
-                  alt="停止录音" 
                   class="icon-img" 
                 />
               </div>
@@ -207,6 +213,8 @@
 <script>
 import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 import AIAttachments from '@/ai-ui/attachments/AIAttachments.vue';
+import AILottie from '@/ai-ui/lottie/AILottie.vue';
+import speechAnimationData from '@/assets/lottery/speech.json';
 
 // 导入图标资源
 import attachmentIcon from '@svg/attachment.svg';
@@ -223,7 +231,8 @@ import starIcon from '@images/star@3x.png';
 export default {
   name: 'AIInput',
   components: {
-    AIAttachments
+    AIAttachments,
+    AILottie
   },
   props: {
     value: {
@@ -380,6 +389,7 @@ export default {
       recognizer: null,
       tempRecognitionText: '', // 临时存储实时识别的文本
       confirmedText: '', // 已确认的文本（句子结束后）
+      speechAnimationData, // Lottie 动画数据
       // 图标资源
       attachmentIcon,
       deleteIcon,
@@ -421,6 +431,16 @@ export default {
         this.$forceUpdate();
       },
       deep: true
+    },
+    // 监听录音状态，控制 Lottie 动画
+    isRecording(newVal) {
+      if (this.$refs.speechAnimation) {
+        if (newVal) {
+          this.$refs.speechAnimation.play();
+        } else {
+          this.$refs.speechAnimation.stop();
+        }
+      }
     }
   },
   computed: {
@@ -689,6 +709,8 @@ export default {
         this.$message && this.$message.error('语音识别失败：' + err.message);
       }
     });
+    
+    // Lottie 动画将在首次录音时初始化
     
     // 点击外部关闭上传菜单
     this.handleClickOutside = (e) => {
@@ -1127,7 +1149,7 @@ export default {
     /* --- 录音逻辑 --- */
     async toggleRecord() {
       if (this.isRecording) {
-        this.recognizer.stop();
+        this.stopRecording();
       } else {
         if (!this.speechConfigProvider) {
           return;
@@ -1145,7 +1167,22 @@ export default {
       }
     },
 
+    /**
+     * 停止录音（统一入口）
+     */
+    stopRecording() {
+      if (this.isRecording && this.recognizer) {
+        this.recognizer.stop();
+      }
+    },
+
     async submit() {
+      // 如果正在录音，先停止录音
+      if (this.isRecording) {
+        this.stopRecording();
+        // 等待录音停止完成（可选，如果需要等待最终文本）
+        await this.$nextTick();
+      }
       if (this.isSubmitDisabled) return;
 
       const data = {
@@ -1394,9 +1431,6 @@ export default {
                 background: rgba(0,0,0,0.04);
               }
 
-              &:not(:last-child) {
-                // border-bottom: 1px solid #ebeef5;
-              }
 
               &.disabled {
                 cursor: not-allowed;
@@ -1445,10 +1479,11 @@ export default {
           }
 
           &.send-btn {
-            color: #fff;
-            border-radius: 50%;
+            // color: #fff;
+            // border-radius: 50%;
 
             &:hover {
+              background: transparent;
               color: #fff;
             }
 
@@ -1470,8 +1505,13 @@ export default {
 
           &.speech-btn {
             &.recording {
-              background-color: #fef0f0;
               animation: pulse 1.5s infinite;
+            }
+
+            .speech-animation {
+              display: flex;
+              align-items: center;
+              justify-content: center;
             }
           }
         }

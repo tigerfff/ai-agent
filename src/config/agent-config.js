@@ -38,7 +38,7 @@ export const ALL_AGENTS = {
     description: '通过对话快速进行多门店巡查，提高巡查效率，降低人力成本',
     type: 'built-in',
     tags: ['对话模型', '机器视觉'],
-    hideConversations: true,
+    hideConversations: false,
     component: InspectX, // 暂时复用 TryAgent，实际应为 InspectAgent
     permission: {
       underConstruction: false, // 建设中
