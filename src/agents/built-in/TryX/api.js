@@ -30,14 +30,15 @@ export const TryApi = {
    * 获取会话历史记录
    * @param {AIClient} client 
    * @param {string} sessionId 
+   * @param {Object} params - { pagesize, key }
    */
-  getHistory(client, sessionId) {
+  getHistory(client, sessionId, params = {}) {
     return client.send({
       url: buildUrl(client, '/inspect/chat/web/agent/chat/history', 'chain'),
       method: 'get',
       // 注意：AIClient.send 目前只会把 data 传给 httpAdapter，
       // 所以这里用 data，由 httpStub 在 GET 场景下自动转成 query string
-      data: { chatId: sessionId }
+      data: { chatId: sessionId, ...params }
     });
   },
 

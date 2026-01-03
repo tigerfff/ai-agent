@@ -33,12 +33,13 @@ export const TrainingXApi = {
    * 获取会话历史记录
    * @param {AIClient} client 
    * @param {string} sessionId 
+   * @param {Object} params - { pagesize, key }
    */
-  getHistory(client, sessionId) {
+  getHistory(client, sessionId, params = {}) {
     return client.send({
-      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/history`, 'chain', '/api'),
+      url: buildUrl(client, `/inspect/chat/web/agentV2/${AGENT_ID}/chat/historyScrolling`, 'chain', '/api'),
       method: 'get',
-      data: { chatId: sessionId }
+      data: { chatId: sessionId, ...params }
     });
   },
 
