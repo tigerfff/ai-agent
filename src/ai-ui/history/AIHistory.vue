@@ -502,7 +502,7 @@ export default {
     }
 
     .new-msg-tip {
-      color: #f56c6c;
+      color: var(--ym-ai-primary-color);
       font-size: 12px;
     }
   }
