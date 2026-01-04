@@ -1,73 +1,14 @@
 /**
  * 腾讯云语音识别 SDK 封装
  * 文档: https://github.com/TencentCloud/tencentcloud-speech-sdk-js
+ * 注意：本组件库不包含 SDK 源码，需在父项目中自行引入（如通过 <script> 标签引入）
  */
 import { buildUrl } from '@/utils/api-prefix';
-
-// SDK 加载状态管理
-let sdkLoadPromise = null;
-
-/**
- * 动态加载 speechrecognizer.js SDK
- * @param {string} sdkPath - SDK 脚本路径，默认为 /libs/speechrecognizer.js
- * @returns {Promise<void>}
- */
-function loadSDK(sdkPath = '/libs/speechrecognizer.js') {
-  // 如果已经加载，直接返回
-  if (window.WebAudioSpeechRecognizer) {
-    return Promise.resolve();
-  }
-
-  // 如果正在加载，返回现有的 Promise
-  if (sdkLoadPromise) {
-    return sdkLoadPromise;
-  }
-
-  // 创建新的加载 Promise
-  sdkLoadPromise = new Promise((resolve, reject) => {
-    // 检查是否已经存在 script 标签
-    const existingScript = document.querySelector(`script[src="${sdkPath}"]`);
-    if (existingScript) {
-      // 如果脚本已存在，等待其加载完成
-      if (window.WebAudioSpeechRecognizer) {
-        resolve();
-      } else {
-        existingScript.onload = () => resolve();
-        existingScript.onerror = () => reject(new Error('Failed to load speechrecognizer.js'));
-      }
-      return;
-    }
-
-    // 创建 script 标签
-    const script = document.createElement('script');
-    script.src = sdkPath;
-    script.async = true;
-    
-    script.onload = () => {
-      if (window.WebAudioSpeechRecognizer) {
-        resolve();
-      } else {
-        reject(new Error('WebAudioSpeechRecognizer not found after loading script'));
-      }
-    };
-    
-    script.onerror = () => {
-      sdkLoadPromise = null; // 重置，允许重试
-      reject(new Error(`Failed to load SDK from ${sdkPath}`));
-    };
-
-    // 添加到 head
-    document.head.appendChild(script);
-  });
-
-  return sdkLoadPromise;
-}
 
 export class SpeechRecognizerWrapper {
   constructor(options = {}) {
     this.recognizer = null;
     this.options = options;
-    this.sdkPath = options.sdkPath || '/libs/speechrecognizer.js';
     
     // 回调函数
     this.onText = options.onText || (() => {});
@@ -77,7 +18,7 @@ export class SpeechRecognizerWrapper {
   }
 
   /**
-   * 获取 SDK 类，如果未加载则先加载
+   * 获取 SDK 类，假定已由父项目加载到全局 window
    * @returns {Promise<Function>}
    */
   async getSDKClass() {
@@ -85,14 +26,7 @@ export class SpeechRecognizerWrapper {
       return window.WebAudioSpeechRecognizer;
     }
 
-    // 动态加载 SDK
-    await loadSDK(this.sdkPath);
-    
-    if (!window.WebAudioSpeechRecognizer) {
-      throw new Error('WebAudioSpeechRecognizer not found after loading SDK');
-    }
-
-    return window.WebAudioSpeechRecognizer;
+    throw new Error('WebAudioSpeechRecognizer not found. Please ensure the Tencent Cloud ASR SDK is loaded in the parent project.');
   }
 
   /**
