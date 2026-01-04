@@ -76,8 +76,13 @@
           :showClearButton="false"
           :enable-stop-button="false"
           :placeholder="inputPlaceholder"
-          :allowed-types="[]"
-          :customMenuItems="customMenuItems"
+          :allowed-types="['image', 'video']"
+          :upload-menu="{
+            image: { visible: false },
+            video: { visible: false },
+            document: { visible: false }
+          }"
+          :customMenuItems="displayCustomMenuItems"
           :max-size="200 * 1024 * 1024"
           :singleTypeMode="true"
           :maxFileCount="30"
@@ -89,7 +94,7 @@
           :speech-config-provider="asrConfigProvider"
           :before-send="handleBeforeSend"
           :send-disabled="sendBtnDisabled"
-          :buttonConfig="buttonConfig"
+          :buttonConfig="dynamicButtonConfig"
           @send="handleSend" 
           @stop="handleStop"
           @file-list-change="fileListChange"
@@ -105,7 +110,7 @@
 </template>
 
 <script>
-import imageIcon from '@svg/image.svg';
+import imageIcon from '@svg/imgae.svg';
 import videoIcon from '@svg/video.svg';
 import channelIcon from '@svg/channel.svg';
 import imageBigIcon from './images/imageBig.svg';
@@ -153,7 +158,6 @@ export default {
       channelBg,
       imageBg,
       videoBg,
-      customMenuItems: [],
       fileListUploadType: '',
       currentImgFileCount: 0,
       currentVideoFileCount: 0,
@@ -183,6 +187,42 @@ export default {
       
       return menuItems
     },
+    // 计算最终要显示的自定义菜单项（处理禁用逻辑）
+    displayCustomMenuItems() {
+      const hasMessages = this.messages.length > 0;
+      
+      return this.fullCustomMenuItems.map(item => {
+        let disabled = false;
+        
+        // 1. 已有消息时全部禁用（TryX 业务规则：开始对话后不可再传文件）
+        if (hasMessages) {
+          disabled = true;
+        } 
+        // 2. 根据当前已选文件类型进行互斥禁用
+        else if (this.inputFilesList.length > 0) {
+          const type = this.inputFilesList[0].type === 'image' ? 'img' : 'video';
+          if (type === 'video') {
+            disabled = true; // 传了视频，禁掉所有（包括图片和通道抓取）
+          } else {
+            // 传了图片，只能继续传图片（禁掉不支持 img 的项）
+            disabled = item.mineType.indexOf('img') < 0;
+          }
+        }
+        
+        return { ...item, disabled };
+      });
+    },
+    // 动态计算上传按钮配置 
+    dynamicButtonConfig() {
+      const hasMessages = this.messages.length > 0;
+      return {
+        ...this.buttonConfig,
+        upload: {
+          visible: !hasMessages, // 有消息后隐藏上传按钮
+          disabled: false
+        }
+      };
+    }
   },
   watch: {
     conversationId: {
@@ -190,23 +230,10 @@ export default {
       handler(val) {
         this.aiInputText = ''
         this.$refs.aiInput && this.$refs.aiInput.clear()
-        this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
-      }
-    },
-    messages: {
-      immediate: true,
-      handler(val) {
-        if (val && val.length>0) {
-          this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
-          this.buttonConfig.upload.visible = false
-        } else {
-          this.buttonConfig.upload.visible = true
-        }
       }
     }
   },
   created() {
-    this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
   },
   methods: {
     /**
@@ -251,15 +278,12 @@ export default {
       if(this.inputFilesList.length > 0) {
         this.fileListUploadType = this.inputFilesList[0].type === 'image' ? 'img' : 'video'
         if(this.fileListUploadType === 'video') {
-          this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: true }))
           this.inputPlaceholder = "询问视频内容..."
         } else {
-          this.customMenuItems = this.fullCustomMenuItems.map(item => ({ ...item, disabled: item.mineType.indexOf('img') < 0 }))
           this.inputPlaceholder = "询问图片内容..."
         }
       } else {
         this.fileListUploadType = ''
-        this.customMenuItems = JSON.parse(JSON.stringify(this.fullCustomMenuItems))
         this.inputPlaceholder = "您可以问我任何问题，比如“图片中是否有员工违规”"
       }
     },
@@ -299,45 +323,24 @@ export default {
      * 如果选项需要上传文件（如"图片分析"），则触发文件选择并传递到 AIInput
      */
     async handleWelcomeSelect(data) {
-      let inputFiles = this.$refs.aiInput ? this.$refs.aiInput.fileList : []
-      this.currentImgFileCount = inputFiles.filter(_ => _.type === 'image').length
-      this.currentVideoFileCount = inputFiles.filter(_ => _.type === 'video').length
-      if (['uploadImg', 'uploadVideo'].includes(data.dataSource)) {
-        if(['uploadVideo', 'uikit'].includes(data.dataSource) && this.currentVideoFileCount > 0) {
-          this.$message.warning(`最多只能上传1个视频`)
-          return false
-        }
-        // 创建一个隐藏的文件输入元素
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = data.mineType === 'img' ?  '.jpg,.jpeg,.png' : '.mp4'
-        input.multiple = data.mineType === 'img' ? true: false
-        input.style.display = 'none';
-        
-        // 等待用户选择文件
-        const files = await new Promise((resolve) => {
-          input.onchange = (e) => {
-            const selectedFiles = Array.from(e.target.files || []);
-            resolve(selectedFiles);
-            document.body.removeChild(input);
-            this.$refs.aiInput.handleFileChange(e);
-          };
-          input.oncancel = () => {
-            resolve([]);
-            document.body.removeChild(input);
-          };
-          document.body.appendChild(input);
-          input.click();
-        });
+      const aiInput = this.$refs.aiInput;
+      if (!aiInput) return;
 
-        // 如果用户选择了文件，添加到 AIInput
-        if (files.length > 0 && this.$refs.aiInput) {
-          // await this.$refs.aiInput.addFiles(files);
-          // 添加文件
+      const inputFiles = aiInput.fileList || [];
+      this.currentImgFileCount = inputFiles.filter(_ => _.type === 'image').length;
+      this.currentVideoFileCount = inputFiles.filter(_ => _.type === 'video').length;
+
+      if (['uploadImg', 'uploadVideo'].includes(data.dataSource)) {
+        if (['uploadVideo', 'uikit'].includes(data.dataSource) && this.currentVideoFileCount > 0) {
+          this.$message.warning(`最多只能上传1个视频`);
+          return false;
         }
+        
+        // 使用 AIInput 暴露的标准方法触发文件选择，不再手动创建 input 标签
+        const type = data.dataSource === 'uploadImg' ? 'image' : 'video';
+        aiInput.triggerFileSelect(type);
       } else { // 通道抓取
-        // 获取当前已有的图片和视频文件数量
-        this.simulateVerifyModalVisible = true
+        this.simulateVerifyModalVisible = true;
       }
     },
 

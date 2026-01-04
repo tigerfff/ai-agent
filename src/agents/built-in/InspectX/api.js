@@ -202,6 +202,23 @@ export const InspectXApi = {
       method: 'POST',
       data
     });
-  }
+  },
   
+
+  
+  /**
+   * 获取智能体红点提示
+   * @param {AIClient} client
+   * @param {Object} data { {
+    "areaIdList": [],
+    "storeIdList": []
+  } }
+   */
+  savePatrolScope(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/patrol/aiAgent/actions/savePatrolScope', 'chain', '/api'),
+      method: 'POST',
+      data
+    });
+  }
 };

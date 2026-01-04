@@ -26,6 +26,14 @@
         </div>
       </div>
 
+      <!-- 巡检周期 -->
+      <div class="form-item">
+        <div class="label">巡检周期</div>
+        <div class="content">
+          <div class="text-display"> {{ issueDaysLabel }}</div>
+        </div>
+      </div>
+
       <!-- 巡检时间 -->
       <div class="form-item">
         <div class="label">巡检时间</div>
@@ -95,6 +103,7 @@
               end-placeholder="结束日期"
               format="yyyy/MM/dd"
               value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
               @change="handleDateRangeChange"
             />
           </div>
@@ -149,6 +158,8 @@ import AreaPickerSelect from '@/ai-ui/base-form/AreaPickerSelect/index.vue';
 import AIButton from '@/ai-ui/button/AIButton.vue';
 import starWhiteIcon from '@/assets/svg/star-white.svg';
 import sureWhiteIcon from '@/assets/svg/sure.svg';
+import { InspectXApi } from '../api';
+import { AreaPickerApi } from '@/ai-ui/base-form/AreaPickerSelect/proxy';
 
 export default {
   name: 'PatrolPlanForm',
@@ -174,6 +185,7 @@ export default {
       tempTimeRange: [], // 时间段选择器的临时值
       dateRange: [],
       selectedAreas: [],
+      lastSelectedIds: '', // 用于记录上次选中的 ID 组合，防止重复调用接口
       originalPrimaryColor: null, // 保存原始的 --ym-primary 值
       formData: {
         questions: [],
@@ -190,6 +202,11 @@ export default {
           timeList: []
         }
       },
+      peakConfig: [
+        { name: '早高峰', start: '07:00:00', end: '09:00:00' },
+        { name: '午高峰', start: '11:30:00', end: '13:30:00' },
+        { name: '晚高峰', start: '17:00:00', end: '19:00:00' }
+      ],
       starWhiteIcon,
       sureWhiteIcon
     };
@@ -206,11 +223,60 @@ export default {
     areaNames() {
       if (!this.selectedAreas || this.selectedAreas.length === 0) return '';
       return this.selectedAreas.map(a => a.nodeName).join('、');
+    },
+    issueDaysLabel() {
+      const { frequency, issueDays } = this.formData;
+      if (frequency === 1) {
+        return '每天';
+      }
+      
+      if (!issueDays || issueDays.length === 0) {
+        return '-';
+      }
+
+      const sortedDays = [...issueDays].sort((a, b) => a - b);
+
+      if (frequency === 2) {
+        const weekMap = { 1: '周一', 2: '周二', 3: '周三', 4: '周四', 5: '周五', 6: '周六', 7: '周日' };
+        return '每周' + sortedDays.map(d => weekMap[d] || d).join('，');
+      }
+
+      if (frequency === 3) {
+        return '每月' + sortedDays.map(d => `${d}号`).join('，');
+      }
+
+      return issueDays.join('，');
+    },
+    pickerOptions() {
+      return {
+        disabledDate: (time) => {
+          const now = new Date();
+          // 今天 0 点
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+          // 一年前 0 点
+          const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).getTime();
+          
+          // 1. 基础限制：不能超过今天，不能早于一年前
+          if (time.getTime() > today || time.getTime() < oneYearAgo) {
+            return true;
+          }
+          
+          // 2. 周期频次限制（周频次）
+          if (this.formData.frequency === 2) {
+            const day = time.getDay();
+            // 只能选择周一(1)或周日(0)
+            return day !== 1 && day !== 0;
+          }
+          
+          return false;
+        }
+      };
     }
   },
   watch: {
     data: {
       handler(newVal) {
+        console.log('newVal', newVal);
         if (newVal && Object.keys(newVal).length > 0) {
           this.initFormData(newVal);
         }
@@ -238,7 +304,7 @@ export default {
     }
   },
   methods: {
-    initFormData(data) {
+    async initFormData(data) {
       this.formData = {
         ...this.formData,
         ...data,
@@ -248,15 +314,104 @@ export default {
       if (this.formData.startDate && this.formData.endDate) {
         this.dateRange = [this.formData.startDate, this.formData.endDate];
       }
+
+      // 如果 storeKey 不是 '0'，则使用接口查询名称并反显
+      if (data.storeKey && data.storeKey !== '0') {
+        try {
+          const res = await AreaPickerApi.searchAreaListForBusiness(this.$aiClient, { 
+            condition: data.storeKey, 
+            limit: 1000 
+          });
+
+          if (res && res.code === 0) {
+            const list = res.data || [];
+            
+            if (list && list.length > 0) {
+              // 1. 更新选中的区域（用于页面展示名称）
+              this.selectedAreas = list;
+              
+              // 2. 反显到选择器组件
+              // 注意：调用 initParams 会触发组件内部的 popChange 事件，进而调用 handleAreaChecked
+              // 所有的 savePatrolScope 逻辑将统一在 handleAreaChecked 中处理
+              this.$nextTick(() => {
+                if (this.$refs.areaPicker) {
+                  this.$refs.areaPicker.initParams(this.selectedAreas);
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('[PatrolPlanForm] initFormData search error:', error);
+        }
+      }
     },
-    handleAreaChecked(areas) {
+    async handleAreaChecked(areas) {
+      // 1. 生成选中的 ID 组合标识并校验是否发生变化
+      const currentIds = (areas || []).map(a => a.nodeId).sort().join(',');
+      if (this.lastSelectedIds === currentIds) {
+        return; // ID 组合未变，不重复调用接口
+      }
+      this.lastSelectedIds = currentIds;
+
+      console.log('areas', areas);
       this.selectedAreas = areas;
-      // 这里根据业务需求，可能需要调用接口获取 storeKey
-      // 暂时模拟处理
-      this.formData.storeKey = areas.length > 0 ? 'cached_key_' + Date.now() : '0';
+      
+      // 如果未选择任何区域，使用默认值 '0'（表示权限下所有门店）
+      if (!areas || areas.length === 0) {
+        this.formData.storeKey = '0';
+        return;
+      }
+
+      // 如果是根目录也返回所有门店
+      if(areas.length === 1 && areas[0].nodeType === 0 && !areas[0].parentId) {
+        this.formData.storeKey = '0';
+        return;
+      }
+
+      try {
+        // 根据 nodeType 区分区域和门店
+        // nodeType === 0 表示区域（area），否则表示门店（store）
+        const areaIdList = areas
+          .filter(area => area.nodeType === 0)
+          .map(area => area.nodeId)
+          .filter(Boolean);
+        
+        const storeIdList = areas
+          .filter(area => area.nodeType !== 0)
+          .map(area => area.nodeId)
+          .filter(Boolean);
+
+        // 调用 API 获取合并后的 id
+        const res = await InspectXApi.savePatrolScope(this.$aiClient, {
+          areaIdList,
+          storeIdList
+        });
+
+        // 从 res.data 获取合并后的 id
+        if (res && res.code === 0 && res.data) {
+          this.formData.storeKey = res.data;
+        } 
+      } catch (error) {
+        // 发生错误时，使用默认值 '0'
+        this.formData.storeKey = '0';
+        console.error('[PatrolPlanForm] savePatrolScope error:', error);
+      }
     },
     handleDateRangeChange(val) {
       if (val && val.length === 2) {
+        // 周频次特殊校验
+        if (this.formData.frequency === 2) {
+          const start = new Date(val[0]);
+          const end = new Date(val[1]);
+          // getDay: 0为周日，1为周一
+          if (start.getDay() !== 1 || end.getDay() !== 0) {
+            this.$message.warning('周频次任务，有效期开始时间必须为周一，结束时间必须为周日');
+            this.dateRange = [];
+            this.formData.startDate = '';
+            this.formData.endDate = '';
+            return;
+          }
+        }
         this.formData.startDate = val[0];
         this.formData.endDate = val[1];
       } else {
@@ -279,8 +434,15 @@ export default {
           return `${start}-${end}`;
         }
       } else {
-        // 时间点：只显示开始时间（开始和结束时间相同）
+        // 时间点：判断是否在高峰期内
         if (time.aiStartTime) {
+          const peak = this.peakConfig.find(p => {
+            return time.aiStartTime >= p.start && time.aiStartTime <= p.end;
+          });
+          
+          if (peak) {
+            return `${peak.name}${time.aiStartTime.substring(0, 5)}`;
+          }
           return time.aiStartTime.substring(0, 5);
         }
       }
@@ -614,6 +776,11 @@ ${JSON.stringify(confirmData, null, 2)}
       --ym-primary: rgba(56, 142, 255, 1) !important;
       color: rgba(56, 142, 255, 1) !important;
     }
+  }
+
+  // 下拉选择器全局样式
+  .el-select-dropdown__item.selected {
+    color: rgba(56, 142, 255, 1) !important;
   }
 </style>
 

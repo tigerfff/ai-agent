@@ -45,7 +45,7 @@
               v-if="item.content && item.content.includes('ymform:patrol_plan_create_result')" 
               style="padding: 0 4px; color: rgba(0, 0, 0, .1);"
             >|</span>
-            
+
             <BubbleFooter 
               v-show="shouldShowFooter(item)"
               :item="item" 
@@ -189,8 +189,9 @@ export default {
      */
     shouldShowFooter(item) {
       if (item.placement === 'start' && item.role === 'ai') {
-        if (item.loading || item.typing) return false;
+        if (item.loading) return false;
         if (!item.msgId) return false;
+        return true
       }
       return !!(item && item.content);
     },
@@ -217,14 +218,14 @@ export default {
         ],
         "templatName": "食品安全智能模板",
         "scopeSearchKey": "全部门店",
-        "storeKey": "161d3b6e5ae14e3ca676c9564907c0e3",
+        "storeKey": "0",
         "frequency": 2,
-        "issueDays": [3],
+        "issueDays": [1,3,5],
         "startDate": "2025-12-03",
         "endDate": "2025-12-30",
         "problemSheetAssignment": 1,
-        "patrolTimeStr": {
-          "timeType": 0,
+        "patrolTime": {
+          "timeType": 1,
           "timeList": [
             {
               "aiStartTime": "08:30:00",

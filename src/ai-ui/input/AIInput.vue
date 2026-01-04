@@ -26,7 +26,7 @@
           <!-- 前缀 -->
             <div class="el-sender-prefix">
               <slot name="prefix">
-                <img v-show="!(isFocused || inputValue.length > 0)" :src="starIcon" alt="星星" class="prefix-star-icon" />
+                <img v-show="!(isFocused || (inputValue && inputValue.length > 0))" :src="starIcon" alt="星星" class="prefix-star-icon" />
               </slot>
           </div>
 
@@ -54,52 +54,34 @@
             <!-- 左侧操作区：上传 & 计数 -->
             <div class="action-left">
               <!-- 上传按钮（带下拉菜单） -->
-              <div v-if="showUploadButton" class="upload-btn-wrapper">
+              <div v-if="actionButtons.upload.visible" class="upload-btn-wrapper">
                 <div 
                   class="action-btn upload-btn" 
-                  :class="{ 'disabled': disableUploadButton }"
-                  @click="!disableUploadButton && handleUploadClick()" 
+                  :class="{ 'disabled': actionButtons.upload.disabled }"
+                  @click="!actionButtons.upload.disabled && handleUploadClick()" 
                   title="上传文件"
                 >
-                  <img :src="attachmentIcon" alt="上传文件" class="icon-img" />
+                  <img :src="uploadActionIcon" alt="上传文件" class="icon-img" />
                 </div>
                 
-                <!-- 下拉菜单（仅在支持多种类型时显示，或有自定义菜单项时显示） -->
+                <!-- 下拉菜单 -->
                 <div 
-                  v-if="(!isSingleTypeOnly || visibleCustomMenuItems.length > 0) && showUploadMenu" 
+                  v-if="!isSingleTypeOnly && showUploadMenu" 
                   class="upload-menu"
                   @click.stop
                 >
+                  <!-- 标准菜单项 -->
                   <div 
-                    v-if="shouldShowStandardType('image')"
+                    v-for="item in visibleStandardMenuItems"
+                    :key="item.key"
                     class="menu-item"
-                    @click="selectFileType('image')"
+                    :class="{ 'disabled': item.disabled }"
+                    @click="!item.disabled && selectFileType(item.key)"
                   >
-                    <img :src="imageIcon" alt="图片" class="menu-icon" />
-                    <span>图片</span>
-                  </div>
-                  <div 
-                    v-if="shouldShowStandardType('video')"
-                    class="menu-item"
-                    @click="selectFileType('video')"
-                  >
-                    <img :src="videoIcon" alt="视频" class="menu-icon" />
-                    <span>视频</span>
-                  </div>
-                  <div 
-                    v-if="shouldShowStandardType('document')"
-                    class="menu-item"
-                    @click="selectFileType('document')"
-                  >
-                    <img :src="documentIcon" alt="文档" class="menu-icon" />
-                    <span>文档</span>
+                    <img :src="item.icon" :alt="item.label" class="menu-icon" />
+                    <span>{{ item.label }}</span>
                   </div>
                   
-                  <!-- <div 
-                    v-if="hasFileTypeOptions && visibleCustomMenuItems.length > 0"
-                    class="menu-divider"
-                  ></div>
-                   -->
                   <!-- 自定义菜单项 -->
                   <div
                     v-for="item in visibleCustomMenuItems"
@@ -124,7 +106,7 @@
               />
               
               <div class="char-count" v-if="maxLength">
-                {{ inputValue.length }}/{{ maxLength }}
+                {{ (inputValue || '').length }}/{{ maxLength }}
               </div>
             </div>
 
@@ -132,10 +114,10 @@
             <div class="action-right">
               <!-- 清空按钮 -->
               <div 
-                v-if="showClearButton"
+                v-if="actionButtons.clear.visible"
                 class="action-btn clear-btn" 
-                :class="{ 'disabled': disableClearButton }"
-                @click="!disableClearButton && clear()"
+                :class="{ 'disabled': actionButtons.clear.disabled }"
+                @click="!actionButtons.clear.disabled && clear()"
                 title="清空"
               >
                 <i class="h-icon-close_f" style="font-size: 32px;"></i>
@@ -143,10 +125,10 @@
 
               <!-- 语音按钮 -->
               <div 
-                v-if="showSpeechButton"
+                v-if="actionButtons.speech.visible"
                 class="action-btn speech-btn" 
-                :class="{ 'recording': isRecording, 'disabled': disableSpeechButton }"
-                @click="!disableSpeechButton && toggleRecord()"
+                :class="{ 'recording': isRecording, 'disabled': actionButtons.speech.disabled }"
+                @click="!actionButtons.speech.disabled && toggleRecord()"
                 title="语音输入"
               >
                 <!-- Lottie 动画 -->
@@ -171,10 +153,10 @@
 
               <!-- 停止按钮 -->
               <div 
-                v-if="showStopButton"
+                v-if="actionButtons.stop.visible"
                 class="action-btn stop-btn"
-                :class="{ 'disabled': disableStopButton }"
-                @click="!disableStopButton && stopGeneration()"
+                :class="{ 'disabled': actionButtons.stop.disabled }"
+                @click="!actionButtons.stop.disabled && stopGeneration()"
                 title="停止生成"
               >
                 <img :src="pauseIcon" alt="停止生成" class="icon-img" />
@@ -182,14 +164,14 @@
               
               <!-- 发送按钮 -->
               <div 
-                v-if="showSendButton"
+                v-if="actionButtons.send.visible"
                 class="action-btn send-btn" 
-                :class="{ 'disabled': disableSendButton }"
-                @click="!disableSendButton && submit()"
+                :class="{ 'disabled': actionButtons.send.disabled }"
+                @click="!actionButtons.send.disabled && submit()"
                 title="发送"
               >
                 <img 
-                  :src="disableSendButton ? sendDisabledIcon : sendIcon" 
+                  :src="actionButtons.send.disabled ? sendDisabledIcon : sendIcon" 
                   alt="发送" 
                   class="icon-img" 
                 />
@@ -211,6 +193,29 @@
 </template>
 
 <script>
+/**
+ * AIInput 组件
+ * 
+ * 功能概述：
+ * - 支持文本输入、文件上传（图片/视频/文档）、语音输入
+ * - 支持文件类型限制、大小限制、数量限制
+ * - 支持单一类型模式（一旦选择某种类型，只能继续选择该类型）
+ * - 支持自定义菜单项（如通道抓取等业务功能）
+ * - 支持发送前校验钩子、文件上传前处理钩子
+ * - 支持按钮显示/隐藏/禁用状态控制
+ * 
+ * 使用示例：
+ * <AIInput
+ *   v-model="inputText"
+ *   :loading="isStreaming"
+ *   :allowed-types="['image', 'video']"
+ *   :file-limit="{ image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png'] } }"
+ *   :button-config="{ upload: { visible: true }, speech: { visible: false } }"
+ *   @send="handleSend"
+ *   @file-list-change="handleFileListChange"
+ * />
+ */
+
 import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 import AIAttachments from '@/ai-ui/attachments/AIAttachments.vue';
 import AILottie from '@/ai-ui/lottie/AILottie.vue';
@@ -235,68 +240,72 @@ export default {
     AILottie
   },
   props: {
+    /** 输入框的值（v-model） */
     value: {
       type: String,
       default: ''
     },
+    /** 输入框占位符 */
     placeholder: {
       type: String,
       default: '请输入内容...'
     },
+    /** 是否禁用整个输入框 */
     disabled: {
       type: Boolean,
       default: false
     },
+    /** 是否处于加载状态（会影响发送按钮的禁用状态） */
     loading: {
       type: Boolean,
       default: false
     },
-    // 是否启用停止按钮（如果为 false，loading 时显示禁用的发送按钮而非停止按钮）
+    /** 是否启用停止按钮（如果为 true，loading 时显示停止按钮而非禁用的发送按钮） */
     enableStopButton: {
       type: Boolean,
       default: false
     },
+    /** 最大字符长度 */
     maxLength: {
       type: Number,
       default: 2000
     },
+    /** 提交方式：'enter' 表示按 Enter 提交，'shiftEnter' 表示按 Shift+Enter 提交 */
     submitType: {
       type: String,
-      default: 'enter' // 'enter' | 'shiftEnter'
+      default: 'enter'
     },
-    // 提供语音识别配置: async () => ({ secretId, secretKey, appId })
+    /** 
+     * 语音识别配置提供者
+     * 函数签名：async () => ({ secretId, secretKey, appId })
+     * 如果为 null，则语音按钮会被禁用
+     */
     speechConfigProvider: {
       type: Function,
       default: null
     },
-    /**
-     * 预上传钩子：在文件进入附件列表前触发
-     * async (rawFiles: File[]) => Promise<UploadedItem[]>
-     * UploadedItem: { url, name, size, type, rawFile? }
+    /** 
+     * 文件上传前钩子
+     * 函数签名：async (rawFiles: File[], { updateItem: (idx, patch) => void }) => Promise<UploadedItem[] | void>
+     * 用于在文件进入附件列表前进行上传处理（如上传到 OSS）
+     * updateItem 可用于更新上传进度：updateItem(0, { percent: 50, status: 'uploading' })
      */
     beforeAddAttachments: {
       type: Function,
       default: null
     },
-    /**
+    /** 
      * 允许的文件类型配置
-     * 格式1: 字符串，如 ".jpg,.jpeg,.png,.mp4" (兼容旧版 accepts)
+     * 格式1: 字符串，如 ".jpg,.jpeg,.png,.mp4"
      * 格式2: 对象，如 { image: true, video: true, document: true }
      * 格式3: 数组，如 ['image', 'video'] 或 ['image'] (单一类型)
+     * 如果为 null 或 undefined，默认支持所有类型
      */
     allowedTypes: {
       type: [String, Object, Array],
       default: null
     },
-    /**
-     * 兼容旧版：文件类型限制（字符串格式）
-     * 如果提供了 allowedTypes，则优先使用 allowedTypes
-     */
-    accepts: {
-      type: String,
-      default: null
-    },
-    /**
+    /** 
      * 单一类型模式：如果为 true，一旦选择了某种类型，就只能继续选择该类型
      * 例如：传了视频后，就不能再传图片或文档
      */
@@ -304,23 +313,17 @@ export default {
       type: Boolean,
       default: false
     },
-    /**
-     * 最大文件大小（字节）
-     */
+    /** 最大文件大小（字节），全局限制 */
     maxSize: {
       type: Number,
       default: null
     },
-    /**
-     * 最大文件数量限制
-     * @type {Number}
-     * @default null - 不限制
-     */
+    /** 最大文件数量限制，null 表示不限制 */
     maxFileCount: {
       type: Number,
       default: null
     },
-    /**
+    /** 
      * 按钮配置对象，控制按钮的显示/隐藏和禁用
      * {
      *   upload: { visible: true, disabled: false },
@@ -334,35 +337,37 @@ export default {
       type: Object,
       default: () => ({})
     },
-    /**
-     * 发送按钮是否禁用（快速控制，优先级高于 buttonConfig）
+    /** 
+     * 发送按钮是否禁用（快速控制，优先级高于 buttonConfig 和内部逻辑）
+     * null 表示使用内部逻辑自动判断
      */
     sendDisabled: {
       type: Boolean,
       default: null
     },
-    /**
+    /** 
      * 发送前钩子，用于校验或拦截
+     * 函数签名：(data: { text: string, attachments: FileItem[] }) => boolean | Promise<boolean>
      * 返回 false 或 Promise.reject 则中断发送流程（不清空输入框）
-     * (data: { text, attachments }) => boolean | Promise<boolean>
      */
     beforeSend: {
       type: Function,
       default: null
     },
-    /**
+    /** 
      * 分类型的限制配置
      * 格式示例：
      * {
      *   image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
-     *   video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] }
+     *   video: { maxSize: 200 * 1024 * 1024, extensions: ['mp4'] },
+     *   document: { maxSize: 50 * 1024 * 1024, extensions: ['pdf', 'doc'] }
      * }
      */
     fileLimit: {
       type: Object,
       default: () => ({})
     },
-    /**
+    /** 
      * 自定义菜单项数组（添加到上传按钮的下拉菜单中）
      * [
      *   {
@@ -378,18 +383,38 @@ export default {
     customMenuItems: {
       type: Array,
       default: () => []
+    },
+    /** 
+     * 上传下拉菜单配置（控制标准菜单项的显示和禁用）
+     * {
+     *   image: { visible: true, disabled: false, label: '图片' },
+     *   video: { visible: true, disabled: false, label: '视频' },
+     *   document: { visible: true, disabled: false, label: '文档' }
+     * }
+     */
+    uploadMenu: {
+      type: Object,
+      default: () => ({})
     }
   },
   data() {
     return {
-      inputValue: this.value,
-      fileList: [], // 用于 v-model 绑定 AIAttachments
+      /** 输入框的值（内部状态） */
+      inputValue: this.value || '',
+      /** 文件列表（与 AIAttachments 组件双向绑定） */
+      fileList: [],
+      /** 输入框是否获得焦点 */
       isFocused: false,
+      /** 是否正在录音 */
       isRecording: false,
+      /** 语音识别器实例 */
       recognizer: null,
-      tempRecognitionText: '', // 临时存储实时识别的文本
-      confirmedText: '', // 已确认的文本（句子结束后）
-      speechAnimationData, // Lottie 动画数据
+      /** 临时存储实时识别的文本（句子未结束时） */
+      tempRecognitionText: '',
+      /** 已确认的文本（句子结束后） */
+      confirmedText: '',
+      /** Lottie 动画数据 */
+      speechAnimationData,
       // 图标资源
       attachmentIcon,
       deleteIcon,
@@ -398,41 +423,43 @@ export default {
       sendIcon,
       sendDisabledIcon,
       imageIcon,
+      videoIcon,
       documentIcon,
       starIcon,
-      // 上传菜单相关
-      showUploadMenu: false, // 控制下拉菜单显示
-      currentFileType: null // 当前已选择的文件类型（用于单一类型模式）
+      /** 是否显示上传下拉菜单 */
+      showUploadMenu: false,
+      /** 当前已选择的文件类型（用于单一类型模式锁定） */
+      currentFileType: null
     };
   },
   watch: {
+    /** 监听外部传入的 value 变化，同步到内部状态 */
     value(val) {
-      this.inputValue = val;
+      this.inputValue = val || '';
     },
+    /** 监听内部输入值变化，触发 input 事件并调整高度 */
     inputValue(val) {
       this.$emit('input', val);
       this.$nextTick(this.adjustHeight);
     },
-    // 监听文件列表变化
+    /** 监听文件列表变化，触发 file-list-change 事件，并在列表为空时重置类型锁定 */
     fileList: {
       handler(newList) {
         this.$emit('file-list-change', newList);
-        // 如果列表为空，重置单一类型锁定
         if (newList.length === 0) {
           this.currentFileType = null;
         }
       },
       deep: true
     },
-    // 监听自定义菜单项变化（确保响应式更新）
+    /** 监听自定义菜单项变化，强制更新视图 */
     customMenuItems: {
-      handler(newVal) {
-        // 强制触发 computed 属性重新计算
+      handler() {
         this.$forceUpdate();
       },
       deep: true
     },
-    // 监听录音状态，控制 Lottie 动画
+    /** 监听录音状态变化，控制 Lottie 动画播放/停止 */
     isRecording(newVal) {
       if (this.$refs.speechAnimation) {
         if (newVal) {
@@ -444,125 +471,122 @@ export default {
     }
   },
   computed: {
+    /** 是否有附件 */
     hasAttachments() {
       return this.fileList && this.fileList.length > 0;
     },
+    /** 是否有正在上传的文件 */
     hasUploading() {
       return this.fileList && this.fileList.some(f => f.status === 'uploading');
     },
+    /** 发送按钮是否应该被禁用（内部逻辑） */
     isSubmitDisabled() {
+      const text = this.inputValue || '';
       return (
         this.disabled || 
         this.loading || 
         this.hasUploading ||
-        (!this.inputValue.trim() && !this.hasAttachments)
+        (!text.trim() && !this.hasAttachments)
       );
     },
+    /** 
+     * 附件卡片显示模式
+     * 'default': 完整卡片模式（用于文档等）
+     * 'mini': 缩略图模式（用于图片/视频）
+     */
     attachmentCardMode() {
       if (!this.fileList || this.fileList.length === 0) return 'default';
-      
-      // 检查是否包含文件类型（非图片、非视频）
-      // 使用和 AIAttachments.normalizeFileType 相同的逻辑
       const hasDocument = this.fileList.some(f => {
         const fileType = this.getFileTypeFromItem(f);
-        return fileType === 'file';
+        return fileType === 'document' || fileType === 'file';
       });
-
-      // 如果有文件，强制默认模式 (完整卡片)
-      if (hasDocument) return 'default';
-
-      // 如果只有图片或视频，使用 mini 模式 (缩略图)
-      return 'mini';
+      return hasDocument ? 'default' : 'mini';
     },
-    /**
-     * 解析 allowedTypes prop
+    /** 
+     * 解析 allowedTypes prop，统一转为对象格式
+     * 返回值：{ image: boolean, video: boolean, document: boolean }
+     * 注意：如果明确传了空数组 []，则表示不允许任何标准类型进入校验。
      */
     parsedAllowedTypes() {
-      const config = this.allowedTypes || this.accepts;
+      const config = this.allowedTypes;
+      const defaultTypes = { image: true, video: true, document: true };
       
-      // 如果没有配置，默认支持所有类型
-      if (!config || (Array.isArray(config) && config.length === 0)) {
-        // 如果提供了 fileLimit，则从 fileLimit 的 key 中推断
-        if (this.fileLimit && Object.keys(this.fileLimit).length > 0) {
-          return {
-            image: !!this.fileLimit.image,
-            video: !!this.fileLimit.video,
-            document: !!(this.fileLimit.document || this.fileLimit.file)
-          };
-        }
-        // 如果连 fileLimit 都没有，且 config 是 null/undefined，则全开
-        if (!config) {
-          return { image: true, video: true, document: true };
-        }
-        // 如果 config 明确是 [] 且没配 fileLimit，则全关
+      if (config === null || config === undefined) return defaultTypes;
+      
+      // 如果明确传了空数组，表示不允许任何标准类型校验通过
+      if (Array.isArray(config) && config.length === 0) {
         return { image: false, video: false, document: false };
       }
       
-      // 格式1: 字符串 ".jpg,.jpeg,.png,.mp4"
-      if (typeof config === 'string') {
-        const accept = config.toLowerCase();
-        return {
-          image: accept.includes('.jpg') || accept.includes('.jpeg') || 
-                 accept.includes('.png') || accept.includes('.gif') || 
-                 accept.includes('.webp') || accept.includes('image'),
-          video: accept.includes('.mp4') || accept.includes('.avi') || 
-                 accept.includes('.mov') || accept.includes('.wmv') || 
-                 accept.includes('.flv') || accept.includes('video'),
-          document: accept.includes('.pdf') || accept.includes('.doc') || 
-                    accept.includes('.docx') || accept.includes('.xls') || 
-                    accept.includes('.xlsx') || accept.includes('.ppt') || 
-                    accept.includes('.pptx') || accept.includes('.txt') || 
-                    accept.includes('.csv') || accept.includes('document') || accept.includes('file')
-        };
-      }
-      
-      // 格式2: 对象 { image: true, video: true, document: true }
-      if (typeof config === 'object' && !Array.isArray(config)) {
-        return {
-          image: config.image === true,
-          video: config.video === true,
-          document: config.document === true || config.file === true
-        };
-      }
-      
-      // 格式3: 数组 ['image', 'video'] 或 ['image']
-      if (Array.isArray(config)) {
-        return {
-          image: config.includes('image'),
-          video: config.includes('video'),
-          document: config.includes('document') || config.includes('file')
-        };
-      }
-      
-      return { image: true, video: true, document: true };
+      const configStr = typeof config === 'string' ? config.toLowerCase() : JSON.stringify(config).toLowerCase();
+      const isArr = Array.isArray(config);
+
+      return {
+        image: isArr ? config.includes('image') : (config.image === true || configStr.includes('image') || configStr.includes('.jpg') || configStr.includes('.png')),
+        video: isArr ? config.includes('video') : (config.video === true || configStr.includes('video') || configStr.includes('.mp4')),
+        document: isArr ? (config.includes('document') || config.includes('file')) : (config.document === true || config.file === true || configStr.includes('doc') || configStr.includes('pdf') || configStr.includes('txt'))
+      };
     },
-    /**
-     * 支持的类型列表
+    /** 
+     * 合并标准菜单项配置
+     * 结合了 parsedAllowedTypes（逻辑准入）和 uploadMenu（展示配置）
      */
+    standardMenuOptions() {
+      const defaultMenu = {
+        image: { visible: true, disabled: false, label: '图片', icon: imageIcon },
+        video: { visible: true, disabled: false, label: '视频', icon: videoIcon },
+        document: { visible: true, disabled: false, label: '文档', icon: documentIcon }
+      };
+
+      const merged = {};
+      Object.keys(defaultMenu).forEach(key => {
+        const config = this.uploadMenu[key] || {};
+        // 只有在逻辑准入允许，且配置未隐藏时，才显示
+        const isAllowedByLogic = this.parsedAllowedTypes[key];
+        const isVisibleByConfig = config.visible !== false;
+        
+        merged[key] = {
+          ...defaultMenu[key],
+          ...config,
+          visible: isAllowedByLogic && isVisibleByConfig
+        };
+      });
+      return merged;
+    },
+    /** 可见的标准菜单项列表 */
+    visibleStandardMenuItems() {
+      return Object.keys(this.standardMenuOptions)
+        .filter(key => this.standardMenuOptions[key].visible)
+        .map(key => ({ key, ...this.standardMenuOptions[key] }));
+    },
+    /** 支持的文件类型列表（用于单类型判断等） */
     supportedTypes() {
-      const types = [];
-      if (this.parsedAllowedTypes.image) types.push('image');
-      if (this.parsedAllowedTypes.video) types.push('video');
-      if (this.parsedAllowedTypes.document) types.push('document');
-      return types;
+      return Object.keys(this.parsedAllowedTypes).filter(key => this.parsedAllowedTypes[key]);
     },
-    /**
-     * 是否只支持单一类型（不需要下拉菜单）
-     */
+    /** 是否只支持单一类型（决定是否直接触发上传而不开菜单） */
     isSingleTypeOnly() {
-      return this.supportedTypes.length === 1;
+      // 这里的单类型判断需要结合可见菜单项
+      return (this.visibleStandardMenuItems.length + this.visibleCustomMenuItems.length) === 1;
     },
-    /**
-     * 当前已锁定的文件类型（用于单一类型模式）
-     */
-    lockedFileType() {
-      if (!this.singleTypeMode || !this.currentFileType) return null;
-      return this.currentFileType;
+    /** 上传按钮显示的图标 */
+    uploadActionIcon() {
+      // 如果只支持单一类型，使用该类型对应的图标
+      if (this.isSingleTypeOnly) {
+        if (this.visibleStandardMenuItems.length === 1) {
+          return this.visibleStandardMenuItems[0].icon;
+        }
+        if (this.visibleCustomMenuItems.length === 1) {
+          return this.visibleCustomMenuItems[0].iconSrc || this.attachmentIcon;
+        }
+      }
+      // 否则使用默认的附件图标
+      return this.attachmentIcon;
     },
-    /**
-     * 合并后的按钮配置（默认值 + 用户配置）
+    /** 
+     * 统一按钮状态控制
+     * 合并默认配置和用户传入的 buttonConfig，返回所有按钮的显示/禁用状态
      */
-    mergedButtonConfig() {
+    actionButtons() {
       const defaultConfig = {
         upload: { visible: true, disabled: false },
         clear: { visible: true, disabled: false },
@@ -571,105 +595,48 @@ export default {
         send: { visible: true, disabled: false }
       };
       
-      // 合并用户配置
-      const merged = { ...defaultConfig };
-      Object.keys(this.buttonConfig).forEach(key => {
-        if (merged[key]) {
-          merged[key] = { ...merged[key], ...this.buttonConfig[key] };
+      const config = { ...defaultConfig };
+      if (this.buttonConfig) {
+        Object.keys(this.buttonConfig).forEach(key => {
+          if (config[key]) {
+            config[key] = { ...config[key], ...this.buttonConfig[key] };
+          }
+        });
+      }
+
+      return {
+        upload: {
+          visible: config.upload.visible,
+          disabled: config.upload.disabled
+        },
+        clear: {
+          visible: config.clear.visible && (this.inputValue || this.hasAttachments),
+          disabled: config.clear.disabled
+        },
+        speech: {
+          visible: config.speech.visible,
+          disabled: config.speech.disabled || !this.speechConfigProvider
+        },
+        stop: {
+          visible: this.enableStopButton && config.stop.visible && this.loading,
+          disabled: config.stop.disabled
+        },
+        send: {
+          visible: config.send.visible && (this.enableStopButton ? !this.loading : true),
+          disabled: this.sendDisabled !== null ? this.sendDisabled : this.isSubmitDisabled
         }
-      });
-      
-      // sendDisabled 优先级最高
-      if (this.sendDisabled !== null) {
-        merged.send.disabled = this.sendDisabled;
-      }
-      
-      return merged;
+      };
     },
-    /**
-     * 上传按钮是否可见
-     */
-    showUploadButton() {
-      return this.mergedButtonConfig.upload.visible;
-    },
-    /**
-     * 上传按钮是否禁用
-     */
-    disableUploadButton() {
-      return this.mergedButtonConfig.upload.disabled;
-    },
-    /**
-     * 清空按钮是否可见
-     */
-    showClearButton() {
-      return this.mergedButtonConfig.clear.visible && (this.inputValue || this.hasAttachments);
-    },
-    /**
-     * 清空按钮是否禁用
-     */
-    disableClearButton() {
-      return this.mergedButtonConfig.clear.disabled;
-    },
-    /**
-     * 语音按钮是否可见
-     */
-    showSpeechButton() {
-      return this.mergedButtonConfig.speech.visible;
-    },
-    /**
-     * 语音按钮是否禁用
-     */
-    disableSpeechButton() {
-      return this.mergedButtonConfig.speech.disabled || !this.speechConfigProvider;
-    },
-    /**
-     * 停止按钮是否可见
-     */
-    showStopButton() {
-      return this.enableStopButton && this.mergedButtonConfig.stop.visible && this.loading;
-    },
-    /**
-     * 停止按钮是否禁用
-     */
-    disableStopButton() {
-      return this.mergedButtonConfig.stop.disabled;
-    },
-    /**
-     * 发送按钮是否可见
-     */
-    showSendButton() {
-      // 如果不启用停止按钮，即使 loading 也显示发送按钮（只是禁用状态）
-      if (!this.enableStopButton) {
-        return this.mergedButtonConfig.send.visible;
-      }
-      return this.mergedButtonConfig.send.visible && !this.loading;
-    },
-    /**
-     * 发送按钮是否禁用（合并内部逻辑和外部配置）
-     */
-    disableSendButton() {
-      return this.mergedButtonConfig.send.disabled || this.isSubmitDisabled;
-    },
-    /**
-     * 是否有文件类型选项（图片/视频/文档）
-     */
-    hasFileTypeOptions() {
-      return this.parsedAllowedTypes.image || 
-             this.parsedAllowedTypes.video || 
-             this.parsedAllowedTypes.document;
-    },
-    /**
-     * 可见的自定义菜单项（过滤掉不可见的）
-     */
+    /** 可见的自定义菜单项（过滤掉 visible: false 的项） */
     visibleCustomMenuItems() {
       return (this.customMenuItems || []).filter(item => item.visible !== false);
     }
   },
   mounted() {
-    // 初始化录音实例
+    // 初始化语音识别器
     this.recognizer = new SpeechRecognizerWrapper({
+      /** 识别文本回调（实时和最终结果） */
       onText: (text, isFinal) => {
-        console.log('[AIInput] onText:', { text, isFinal });
         if (isFinal) {
           // 句子结束，确认文本
           this.confirmedText += text;
@@ -680,21 +647,19 @@ export default {
           this.tempRecognitionText = text;
           this.inputValue = this.confirmedText + text;
         }
-        
-           // 保持焦点在最后
-           this.$nextTick(() => {
-             this.adjustHeight();
-             this.focusToEnd();
-           });
+        this.$nextTick(() => {
+          this.adjustHeight();
+          this.focusToEnd();
+        });
       },
+      /** 录音开始回调 */
       onStart: () => {
-        console.log('[AIInput] ASR started');
         // 录音开始时，保存当前输入框内容
         this.confirmedText = this.inputValue || '';
         this.tempRecognitionText = '';
       },
+      /** 录音停止回调 */
       onStop: () => {
-        console.log('[AIInput] ASR stopped');
         this.isRecording = false;
         // 停止时，确认所有临时文本
         if (this.tempRecognitionText) {
@@ -703,14 +668,12 @@ export default {
           this.tempRecognitionText = '';
         }
       },
+      /** 识别错误回调 */
       onError: (err) => {
-        console.error('[AIInput] ASR Error:', err);
         this.isRecording = false;
         this.$message && this.$message.error('语音识别失败：' + err.message);
       }
     });
-    
-    // Lottie 动画将在首次录音时初始化
     
     // 点击外部关闭上传菜单
     this.handleClickOutside = (e) => {
@@ -720,50 +683,53 @@ export default {
     };
     document.addEventListener('click', this.handleClickOutside);
     
+    // 初始化输入框高度
     this.adjustHeight();
   },
   beforeDestroy() {
+    // 清理语音识别器
     if (this.recognizer) {
       this.recognizer.stop();
     }
+    // 移除事件监听器
     if (this.handleClickOutside) {
       document.removeEventListener('click', this.handleClickOutside);
     }
   },
   methods: {
-    /* --- 输入框逻辑 --- */
+    /* ========== 输入框相关方法 ========== */
+    
+    /** 处理输入框输入事件 */
     handleInput(e) {
       this.inputValue = e.target.value;
     },
-    
+    /** 处理输入框获得焦点 */
     handleFocus() {
       this.isFocused = true;
     },
-    
+    /** 处理输入框失去焦点 */
     handleBlur() {
       this.isFocused = false;
     },
-
+    /** 聚焦到输入框 */
     focusInput() {
       this.$refs.textarea.focus();
     },
-
+    /** 聚焦到输入框末尾 */
     focusToEnd() {
       const el = this.$refs.textarea;
       el.focus();
       el.setSelectionRange(el.value.length, el.value.length);
     },
-
+    /** 自动调整输入框高度（根据内容） */
     adjustHeight() {
       const textarea = this.$refs.textarea;
       textarea.style.height = 'auto';
-      // max-height: 300px via CSS
       textarea.style.height = textarea.scrollHeight + 'px';
     },
-
+    /** 处理键盘按键事件（Enter 提交） */
     handleKeyDown(e) {
-      if (e.keyCode === 13) { // Enter
-        // 如果是 shift+enter，默认换行，不需要阻止
+      if (e.keyCode === 13) {
         if (this.submitType === 'enter' && !e.shiftKey) {
           e.preventDefault();
           this.submit();
@@ -773,265 +739,109 @@ export default {
         }
       }
     },
-
+    /** 处理粘贴事件（支持粘贴图片） */
     async handlePaste(e) {
       const files = e.clipboardData?.files;
       if (files?.length) {
         e.preventDefault();
-        const fileList = Array.from(files);
-
-        // 检查文件类型是否在允许的类型列表中
-        for (const file of fileList) {
-          const fileType = this.getFileType(file);
-          const isAllowed = this.parsedAllowedTypes[fileType] === true;
-          
-          if (!isAllowed) {
-            const allowedTypesList = this.supportedTypes.map(t => this.getTypeLabel(t)).join('、');
-            const msg = `文件 ${file.name} 类型不支持`;
-            
-            if (this.$message) {
-              this.$message.warning(msg);
-            } else {
-              alert(msg);
-            }
-            return;
-          }
+        const validFiles = this.validateFiles(Array.from(files));
+        if (validFiles.length > 0) {
+          await this.processFiles(validFiles);
         }
-
-        await this.processFiles(fileList);
       }
     },
-
+    /** 清空输入框和文件列表 */
     clear() {
       this.inputValue = '';
-      this.fileList = []; // 直接清空本地数据
-      this.currentFileType = null; // 重置类型锁定
+      this.fileList = [];
+      this.currentFileType = null;
       this.adjustHeight();
       this.$emit('clear');
     },
-
-    /* --- 文件上传逻辑 --- */
-    /**
-     * 处理上传按钮点击
-     */
-    handleUploadClick(e) {
-      // 点击外部区域关闭菜单
-      if (this.showUploadMenu) {
-        this.showUploadMenu = false;
-        return;
-      }
-      
-      // 如果有自定义菜单项，即使只有一种文件类型也显示菜单
-      if (this.isSingleTypeOnly && this.visibleCustomMenuItems.length === 0) {
-        // 只支持一种类型且没有自定义菜单项，直接触发文件选择
-        this.triggerFileSelect(this.supportedTypes[0]);
-      } else {
-        // 支持多种类型或有自定义菜单项，显示下拉菜单
-        this.showUploadMenu = !this.showUploadMenu;
-      }
-    },
     
-    /**
-     * 从下拉菜单选择类型
-     */
-    selectFileType(type) {
-      this.showUploadMenu = false;
-      this.triggerFileSelect(type);
-    },
+    /* ========== 文件处理相关方法 ========== */
     
-    /**
-     * 触发文件选择
+    /** 
+     * 统一文件校验逻辑
+     * @param {File[]} files - 待校验的文件数组
+     * @returns {File[]} 通过校验的文件数组
      */
-    triggerFileSelect(type) {
-      const input = this.$refs.fileInput;
-      
-      let accept = '*/*';
+    validateFiles(files) {
+      if (!files || files.length === 0) return [];
+      const validFiles = [];
+      const currentCount = this.fileList.length;
 
-      // 1. 优先读取 fileLimit 配置
-      if (this.fileLimit && this.fileLimit[type] && this.fileLimit[type].extensions) {
-        const exts = this.fileLimit[type].extensions;
-        // 转换为 .jpg,.png 格式
-        accept = exts.map(ext => ext.startsWith('.') ? ext : `.${ext}`).join(',');
-        
-        // 为了兼容性和移动端体验，追加大类通配符
-        if (type === 'image') accept = 'image/*,' + accept;
-        if (type === 'video') accept = 'video/*,' + accept;
-      } else {
-        // 2. 降级使用默认映射
-      const acceptMap = {
-        image: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
-        video: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
-        document: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv'
-      };
-        accept = acceptMap[type] || '*/*';
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileType = this.getFileType(file);
+
+        if (this.maxFileCount !== null && (currentCount + validFiles.length) >= this.maxFileCount) {
+          this.$message?.warning(`最多只能上传 ${this.maxFileCount} 个文件`);
+          break;
+        }
+
+        if (!this.parsedAllowedTypes[fileType]) {
+          const allowedLabels = Object.keys(this.parsedAllowedTypes)
+            .filter(k => this.parsedAllowedTypes[k])
+            .map(k => this.getTypeLabel(k)).join('、');
+          this.$message?.warning(`不支持文件 ${file.name}`);
+          continue;
+        }
+
+        if (this.singleTypeMode) {
+          const lockedType = this.currentFileType || this.getFileType(files[0]);
+          if (fileType !== lockedType) {
+            this.$message?.warning(`当前模式下只能上传 ${this.getTypeLabel(lockedType)} 类型文件`);
+            continue;
+          }
+          if (!this.currentFileType) this.currentFileType = lockedType;
+        }
+
+        const limitConfig = this.fileLimit[fileType] || (fileType === 'document' ? this.fileLimit.file : null);
+        const maxSize = limitConfig?.maxSize || this.maxSize;
+        if (maxSize && file.size > maxSize) {
+          this.$message?.warning(`文件 ${file.name} 超过大小限制 (${(maxSize / 1024 / 1024).toFixed(0)}MB)`);
+          continue;
+        }
+
+        if (limitConfig?.extensions?.length > 0) {
+          const ext = file.name.split('.').pop().toLowerCase();
+          if (!limitConfig.extensions.map(e => e.replace('.', '').toLowerCase()).includes(ext)) {
+            this.$message?.warning(`文件 ${file.name} 格式不正确，仅支持: ${limitConfig.extensions.join(', ')}`);
+            continue;
+          }
+        }
+        validFiles.push(file);
       }
-      
-      input.accept = accept;
-      input.click();
+      return validFiles;
     },
-
+    /** 处理文件选择器的 change 事件 */
     async handleFileChange(e) {
-
       const files = Array.from(e.target.files || []);
       if (files.length === 0) {
         e.target.value = '';
         return;
       }
-
-      // [新增] 检查文件数量限制
-      if (this.maxFileCount !== null && this.maxFileCount !== undefined) {
-        const currentCount = this.fileList.length;
-        const newCount = currentCount + files.length;
-        
-        if (newCount > this.maxFileCount) {
-          const remaining = Math.max(0, this.maxFileCount - currentCount);
-          const msg = remaining > 0 
-            ? `最多只能上传 ${this.maxFileCount} 个文件，还可以上传 ${remaining} 个`
-            : `最多只能上传 ${this.maxFileCount} 个文件，请先删除一些文件`;
-          
-          if (this.$message) {
-            this.$message.warning(msg);
-          } else {
-            alert(msg);
-          }
-          e.target.value = '';
-          return;
-        }
+      const validFiles = this.validateFiles(files);
+      if (validFiles.length > 0) {
+        await this.processFiles(validFiles);
       }
-      
-      // [新增] 检查文件类型是否在允许的类型列表中（优先级最高）
-      for (const file of files) {
-        const fileType = this.getFileType(file); // 'image' | 'video' | 'file'
-        
-        // 检查文件类型是否在允许的类型列表中
-        const isAllowed = this.parsedAllowedTypes[fileType] === true;
-        
-        if (!isAllowed) {
-          const allowedTypesList = this.supportedTypes.map(t => this.getTypeLabel(t)).join('、');
-          const msg = `文件 ${file.name} 类型不支持，仅支持: ${allowedTypesList}`;
-          
-          if (this.$message) {
-            this.$message.warning(msg);
-          } else {
-            alert(msg);
-          }
-          
-          e.target.value = '';
-          return;
-        }
-      }
-      
-      // [新增] 详细校验逻辑 (大小 & 后缀) - 先执行所有校验
-      if (this.fileLimit) {
-        for (const file of files) {
-          const fileType = this.getFileType(file); // 'image' | 'video' | 'document'
-          // 兼容 'document' 和 'file' 两个键名
-          const limitConfig = this.fileLimit[fileType] || (fileType === 'document' ? this.fileLimit.file : null);
-
-          if (limitConfig) {
-            // A. 校验大小
-            if (limitConfig.maxSize && file.size > limitConfig.maxSize) {
-              const limitMB = (limitConfig.maxSize / 1024 / 1024).toFixed(0);
-              const msg = `文件 ${file.name} 超过大小限制 (${limitMB}MB)`;
-              if (this.$message) this.$message.warning(msg);
-              else alert(msg);
-              
-              e.target.value = '';
-              return;
-            }
-
-            // B. 校验后缀 (extensions)
-            if (limitConfig.extensions && limitConfig.extensions.length > 0) {
-              const fileName = file.name.toLowerCase();
-              const isValidExt = limitConfig.extensions.some(ext => {
-                const cleanExt = ext.startsWith('.') ? ext : `.${ext}`;
-                return fileName.endsWith(cleanExt.toLowerCase());
-              });
-
-              if (!isValidExt) {
-                const msg = `文件 ${file.name} 格式不正确，仅支持: ${limitConfig.extensions.join(', ')}`;
-                if (this.$message) this.$message.warning(msg);
-                else alert(msg);
-
-                e.target.value = '';
-                return;
-              }
-            }
-          }
-        }
-      }
-
-      // 检查文件大小限制 (全局 maxSize)
-      if (this.maxSize) {
-        const oversizedFiles = files.filter(file => file.size > this.maxSize);
-        if (oversizedFiles.length > 0) {
-          const maxSizeMB = (this.maxSize / 1024 / 1024).toFixed(2);
-          if (this.$message) {
-            this.$message.warning(`文件大小不能超过 ${maxSizeMB}MB`);
-          } else {
-            alert(`文件大小不能超过 ${maxSizeMB}MB`);
-          }
-          e.target.value = '';
-          return;
-        }
-      }
-      
-      // 检查单一类型模式限制 - 在所有校验通过后再检查和锁定类型
-      if (this.singleTypeMode && files.length > 0) {
-        // 1. 确定目标类型
-        let targetType = this.lockedFileType;
-        
-        // 如果还没有锁定类型，以第一个文件的类型为准
-        if (!targetType) {
-          targetType = this.getFileType(files[0]);
-        }
-        
-        // 2. 检查所有新文件是否符合目标类型
-        const hasInvalidType = files.some(file => this.getFileType(file) !== targetType);
-        
-        if (hasInvalidType) {
-          const typeLabel = this.getTypeLabel(targetType);
-          const msg = `当前模式下只能上传 ${typeLabel} 类型文件`;
-          
-          if (this.$message) {
-            this.$message.warning(msg);
-          } else {
-            alert(msg);
-          }
-          e.target.value = '';
-          return;
-        }
-        
-        // 3. 如果是首次上传，锁定类型（只有在即将成功添加文件时才锁定）
-        if (!this.lockedFileType) {
-          this.currentFileType = targetType;
-        }
-      }
-      
-      await this.processFiles(files);
-      e.target.value = ''; // Reset
+      e.target.value = ''; // 重置 input，允许重复选择同一文件
     },
-    
-    /**
-     * 获取文件类型标签
-     */
+    /** 获取文件类型的中文标签 */
     getTypeLabel(type) {
-      const labels = {
-        image: '图片',
-        video: '视频',
-        document: '文档',
-        file: '文档'
-      };
+      const labels = { image: '图片', video: '视频', document: '文档', file: '文档' };
       return labels[type] || '文件';
     },
-
+    /** 
+     * 处理文件（创建占位条目，调用上传钩子）
+     * @param {File[]} files - 要处理的文件数组
+     */
     async processFiles(files) {
       const rawFiles = Array.from(files);
-
-      // 1. 先在本地创建占位条目（用于显示上传进度）
       const baseIndex = this.fileList.length;
       rawFiles.forEach(file => {
-        const item = {
+        this.fileList.push({
           uid: Date.now() + Math.random(),
           name: file.name,
           size: file.size,
@@ -1040,125 +850,119 @@ export default {
           url: '',
           status: this.beforeAddAttachments ? 'uploading' : 'done',
           percent: this.beforeAddAttachments ? 0 : 100
-        };
-        this.fileList.push(item);
+        });
       });
 
-      // 2. 如果外部提供了预上传钩子，则优先交给外部处理（例如上传到 OSS，带进度）
       if (this.beforeAddAttachments) {
         const updateItem = (idx, patch) => {
           const target = this.fileList[baseIndex + idx];
-          if (target) {
-            Object.assign(target, patch);
-          }
+          if (target) Object.assign(target, patch);
         };
-
         try {
           const maybeResult = await this.beforeAddAttachments(rawFiles, { updateItem });
-
-          // 兼容旧协议：如果返回了数组，则用返回的数据覆盖占位条目
           if (Array.isArray(maybeResult)) {
             maybeResult.forEach((file, i) => {
               const target = this.fileList[baseIndex + i];
-              if (!target) return;
-              Object.assign(target, {
-                name: file.name || target.name,
-                size: file.size != null ? file.size : target.size,
-                type: file.type || target.type,
-                rawFile: file.rawFile != null ? file.rawFile : target.rawFile,
-                url: file.url || target.url,
-                status: file.status || 'done',
-                percent: file.percent != null ? file.percent : 100
-              });
+              if (target) Object.assign(target, { ...file, status: file.status || 'done', percent: file.percent || 100 });
             });
           }
-          return;
         } catch (e) {
-          console.error('[AIInput] beforeAddAttachments failed:', e);
-          // 如果 beforeAddAttachments 内部已经设置了 error 状态（如 agent-upload.js），不要覆盖
-          // 只处理那些仍然是 uploading 状态的文件（可能是未处理的异常）
           rawFiles.forEach((file, i) => {
             const target = this.fileList[baseIndex + i];
-            if (!target) return;
-            // 如果 status 已经是 'error'，说明已经由 updateItem 设置过了，不要覆盖
-            if (target.status === 'error') return;
-            // 否则退回到本地模式：标记为 done，但没有 url
-            Object.assign(target, {
-              status: 'done',
-              percent: 100,
-              url: ''
-            });
+            if (target && target.status !== 'error') Object.assign(target, { status: 'done', percent: 100 });
           });
-          return;
         }
       }
     },
-
+    /** 
+     * 判断文件类型
+     * @param {File} file - 文件对象
+     * @returns {string} 'image' | 'video' | 'document'
+     */
     getFileType(file) {
-      if (file.type.startsWith('image/')) return 'image';
-      if (file.type.startsWith('video/')) return 'video';
+      if (!file) return 'document';
+      const type = (file.type || '').toLowerCase();
+      if (type.startsWith('image/')) return 'image';
+      if (type.startsWith('video/')) return 'video';
+      // 根据扩展名兜底判断
+      const ext = file.name?.split('.').pop()?.toLowerCase();
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)) return 'image';
+      if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(ext)) return 'video';
       return 'document';
     },
-    
-    /**
-     * 从文件条目判断文件类型（用于 attachmentCardMode）
-     * 逻辑和 AIAttachments.normalizeFileType 保持一致
+    /** 
+     * 从文件条目判断文件类型（用于展示模式）
+     * @param {Object} fileItem - 文件条目对象（可能包含 rawFile 属性）
+     * @returns {string} 'image' | 'video' | 'document'
      */
     getFileTypeFromItem(fileItem) {
-      if (!fileItem) return 'file';
-      
-      // 1. 优先使用 rawFile 的 MIME type（最可靠）
-      if (fileItem.rawFile && fileItem.rawFile.type) {
-        const mimeType = fileItem.rawFile.type.toLowerCase();
-        if (mimeType.startsWith('image/')) return 'image';
-        if (mimeType.startsWith('video/')) return 'video';
-        return 'file';
-      }
-      
-      // 2. 根据文件名扩展名判断
-      const fileName = (fileItem.name || '').toLowerCase();
-      if (/\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(fileName)) {
-        return 'image';
-      }
-      if (/\.(mp4|avi|mov|wmv|flv|mkv|webm|m4v)$/i.test(fileName)) {
-        return 'video';
-      }
-      // PDF 等文档类型
-      if (/\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip|rar)$/i.test(fileName)) {
-        return 'file';
-      }
-      
-      // 3. 如果 fileItem.type 是 MIME type，解析它
-      if (fileItem.type && typeof fileItem.type === 'string') {
-        const type = fileItem.type.toLowerCase();
-        if (type.startsWith('image/') || type.startsWith('image')) return 'image';
-        if (type.startsWith('video/') || type.startsWith('video')) return 'video';
-        // 其他 MIME type 都是文件
-        if (type.includes('/')) return 'file';
-      }
-      
-      // 4. 如果 fileItem.type 已经是规范的类型字符串
-      if (fileItem.type === 'image' || fileItem.type === 'video' || fileItem.type === 'file') {
-        return fileItem.type;
-      }
-      
-      // 5. 默认为文件类型
-      return 'file';
+      return this.getFileType(fileItem.rawFile || fileItem);
     },
-
-    /* --- 录音逻辑 --- */
+    
+    /* ========== 文件上传相关方法 ========== */
+    
+    /** 处理上传按钮点击（显示/隐藏下拉菜单或直接触发文件选择） */
+    handleUploadClick() {
+      if (this.showUploadMenu) {
+        this.showUploadMenu = false;
+        return;
+      }
+      
+      // 如果总共只有一个可见项（标准项 + 自定义项），直接触发对应的动作
+      if (this.isSingleTypeOnly) {
+        if (this.visibleStandardMenuItems.length === 1) {
+          const item = this.visibleStandardMenuItems[0];
+          if (!item.disabled) this.triggerFileSelect(item.key);
+        } else if (this.visibleCustomMenuItems.length === 1) {
+          const item = this.visibleCustomMenuItems[0];
+          if (!item.disabled) this.handleCustomMenuItemClick(item);
+        }
+      } else {
+        // 多项则显示菜单
+        this.showUploadMenu = true;
+      }
+    },
+    /** 从下拉菜单选择文件类型 */
+    selectFileType(type) {
+      this.showUploadMenu = false;
+      this.triggerFileSelect(type);
+    },
+    /** 
+     * 触发文件选择器
+     * @param {string} type - 文件类型：'image' | 'video' | 'document'
+     */
+    triggerFileSelect(type) {
+      const input = this.$refs.fileInput;
+      if (!input) return;
+      let accept = '*/*';
+      const limitConfig = this.fileLimit[type] || (type === 'document' ? this.fileLimit.file : null);
+      if (limitConfig?.extensions) {
+        accept = limitConfig.extensions.map(ext => ext.startsWith('.') ? ext : `.${ext}`).join(',');
+        if (type === 'image') accept = 'image/*,' + accept;
+        if (type === 'video') accept = 'video/*,' + accept;
+      } else {
+        const acceptMap = {
+          image: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
+          video: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
+          document: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv'
+        };
+        accept = acceptMap[type] || '*/*';
+      }
+      input.accept = accept;
+      input.click();
+    },
+    
+    /* ========== 语音识别相关方法 ========== */
+    
+    /** 切换录音状态（开始/停止） */
     async toggleRecord() {
       if (this.isRecording) {
         this.stopRecording();
       } else {
-        if (!this.speechConfigProvider) {
-          return;
-        }
-        
+        if (!this.speechConfigProvider) return;
         try {
           const config = await this.speechConfigProvider();
           if (!config) return;
-          
           this.isRecording = true;
           this.recognizer.start(config);
         } catch (e) {
@@ -1166,102 +970,69 @@ export default {
         }
       }
     },
-
-    /**
-     * 停止录音（统一入口）
-     */
+    /** 停止录音（统一入口） */
     stopRecording() {
       if (this.isRecording && this.recognizer) {
         this.recognizer.stop();
       }
     },
-
+    
+    /* ========== 提交相关方法 ========== */
+    
+    /** 提交表单（发送消息） */
     async submit() {
-      // 如果正在录音，先停止录音
       if (this.isRecording) {
         this.stopRecording();
-        // 等待录音停止完成（可选，如果需要等待最终文本）
         await this.$nextTick();
       }
       if (this.isSubmitDisabled) return;
-
-      const data = {
-        text: this.inputValue,
-        attachments: this.fileList // 直接使用 AIAttachments 同步过来的列表
-      };
-
-      // 调用 beforeSend 钩子
+      const data = { text: this.inputValue, attachments: this.fileList };
       if (this.beforeSend) {
         try {
           const shouldContinue = await this.beforeSend(data);
           if (shouldContinue === false) return;
         } catch (e) {
-          console.error('[AIInput] beforeSend failed:', e);
           return;
         }
       }
-
-      this.$emit('send', data); 
+      this.$emit('send', data);
       this.$emit('submit', data.text);
-
       this.clear();
     },
-
+    /** 停止生成（触发 stop 事件） */
     stopGeneration() {
       this.$emit('stop');
     },
-
-    /**
-     * 公开方法：从外部添加文件
+    
+    /* ========== 公开方法（供外部调用） ========== */
+    
+    /** 
+     * 从外部添加文件（如通道抓取回传的文件）
      * @param {File[]} files - 要添加的文件数组
      */
     async addFiles(files) {
       if (!files || files.length === 0) return;
-      await this.processFiles(Array.from(files));
+      const validFiles = this.validateFiles(Array.from(files));
+      if (validFiles.length > 0) await this.processFiles(validFiles);
     },
-
-    /**
-     * 公开方法：设置输入框文本
-     * @param {String} text - 要设置的文本
+    /** 
+     * 设置输入框文本
+     * @param {string} text - 要设置的文本
      */
     setText(text) {
       this.inputValue = text || '';
     },
-    /**
-     * 判断是否显示标准菜单项（图片/视频/文档）
-     * 如果用户显式传了 :allowed-types="[]"，则不显示标准项，由 customMenuItems 接管
-     */
-    shouldShowStandardType(type) {
-      // 如果明确传了空数组，认为用户想完全自定义菜单，因此隐藏组件默认的菜单项
-      if (Array.isArray(this.allowedTypes) && this.allowedTypes.length === 0) {
-        return false;
-      }
-      return this.parsedAllowedTypes[type];
-    },
-    /**
-     * 处理自定义菜单项点击
-     */
+    
+    /* ========== 菜单相关方法 ========== */
+    
+    /** 处理自定义菜单项点击 */
     handleCustomMenuItemClick(item) {
       if (item.disabled) return;
-      
-      // 关闭菜单
       this.showUploadMenu = false;
-      
       if (typeof item.onClick === 'function') {
-        item.onClick({
-          inputValue: this.inputValue,
-          fileList: this.fileList,
-          hasAttachments: this.hasAttachments
-        });
+        item.onClick({ inputValue: this.inputValue, fileList: this.fileList, hasAttachments: this.hasAttachments });
       }
-      
-      // 触发事件，让父组件可以监听
-      this.$emit('custom-menu-item-click', {
-        key: item.key,
-        item: item,
-        inputValue: this.inputValue,
-        fileList: this.fileList
-      });
+      this.$emit('custom-menu-item-click', { key: item.key, item, inputValue: this.inputValue, fileList: this.fileList });
     }
   }
 };
@@ -1314,7 +1085,7 @@ export default {
       flex-direction: column;
       width: 100%;
       min-height: 100px;
-      padding: 12px 0 12px 16px; // 右侧 padding 改为 0，让滚动条贴边
+      padding: 12px 0 12px 16px;
       box-sizing: border-box;
 
       .input-row {
@@ -1327,7 +1098,7 @@ export default {
       .el-sender-prefix {
         flex: none;
         margin-right: 8px;
-        margin-top: 2px; // Align with text
+        margin-top: 2px;
         display: flex;
         align-items: center;
 
@@ -1352,33 +1123,28 @@ export default {
           resize: none;
           font-size: 14px;
           line-height: 1.5;
-          color: rgba($color: #000000, $alpha: 0.7);
+          color: rgba(0, 0, 0, 0.7);
           max-height: 110px;
           overflow-y: auto;
-          overflow-x: hidden; // 隐藏横向滚动条
+          overflow-x: hidden;
           background: transparent;
           font-family: inherit;
-          padding-right: 4px; // 给滚动条留一点点空间，防止贴得太紧
+          padding-right: 4px;
           
-          // 自定义滚动条样式
           &::-webkit-scrollbar {
             width: 4px;
             height: 4px;
           }
-          
           &::-webkit-scrollbar-track {
-            background: transparent; // 背景透明
+            background: transparent;
           }
-          
           &::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.7); // 滑块颜色
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 4px;
           }
-          
           &::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 0, 0, 0.5);
           }
-
           &::placeholder {
             color: #c0c4cc;
           }
@@ -1390,7 +1156,7 @@ export default {
         justify-content: space-between;
         align-items: center;
         margin-top: 8px;
-        padding-right: 16px; // 为 action-list 添加右侧 padding
+        padding-right: 16px;
 
         .action-left,
         .action-right {
@@ -1402,7 +1168,7 @@ export default {
         .upload-btn-wrapper {
           position: relative;
           border: 1px solid #dcdfe6;
-          border-radius: 8px;;
+          border-radius: 8px;
 
           .upload-menu {
             position: absolute;
@@ -1431,7 +1197,6 @@ export default {
                 background: rgba(0,0,0,0.04);
               }
 
-
               &.disabled {
                 cursor: not-allowed;
                 opacity: 0.6;
@@ -1445,12 +1210,6 @@ export default {
                 object-fit: contain;
                 flex-shrink: 0;
               }
-            }
-
-            .menu-divider {
-              height: 1px;
-              background-color: #ebeef5;
-              margin: 4px 0;
             }
           }
         }
@@ -1479,14 +1238,9 @@ export default {
           }
 
           &.send-btn {
-            // color: #fff;
-            // border-radius: 50%;
-
             &:hover {
               background: transparent;
-              color: #fff;
             }
-
             &.disabled {
               cursor: not-allowed;
               opacity: 0.7;
@@ -1497,17 +1251,12 @@ export default {
             color: #fff;
             border-radius: 8px;
             font-size: 12px;
-
-            &:hover {
-              color: #fff;
-            }
           }
 
           &.speech-btn {
             &.recording {
               animation: pulse 1.5s infinite;
             }
-
             .speech-animation {
               display: flex;
               align-items: center;
@@ -1518,7 +1267,7 @@ export default {
 
         .char-count {
           font-size: 14px;
-          color: rgba($color: #000000, $alpha: 0.2);
+          color: rgba(0, 0, 0, 0.2);
           margin-left: 4px;
         }
       }
@@ -1536,13 +1285,11 @@ export default {
   }
 }
 
-// Animations
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.3s;
   max-height: 300px;
 }
-
 .slide-enter,
 .slide-leave-to {
   max-height: 0;
@@ -1550,23 +1297,12 @@ export default {
 }
 
 @keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 </style>

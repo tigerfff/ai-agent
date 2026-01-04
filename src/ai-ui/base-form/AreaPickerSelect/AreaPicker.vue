@@ -36,6 +36,7 @@
       }
     },
     mounted () {
+      this.tableHeadName =  `区域/${this.applicationSceneName || '门店'}名称`;
       this.getOptionsData()
     },
     methods: {
@@ -61,6 +62,11 @@
       },
       parentChange(node, cb) {
         this.searchCondition = ''
+        // 如果节点是门店（nodeType = 1），则没有下级，不加载数据
+        if (node && node.nodeType === 1) {
+          cb && cb()
+          return
+        }
         this.getOptionsData(node, cb)
       },
       selectionChange(objs) {
@@ -87,18 +93,22 @@
       },
       // 搜索
       async handleIconClick (keyword, cb) {
+        console.log('keyword', keyword);
         if (!keyword) return
         try {
           this.loading = true
           let rows = []
-          let res = await AreaPickerApi.searchAreaListForBusiness(this.$aiClient, { condition: keyword, limit: 30, isLeafArea: false })
+          let res = await AreaPickerApi.searchAreaListForBusiness(this.$aiClient, { condition: keyword, limit: 30, isLeafArea: true })
           if (res.code === 0) {
-            rows = res.data || []
+            rows = (res.data && res.data.hasOwnProperty('nodeList') ? res.data.nodeList : res.data) || []
           }
           rows.forEach(e => {
-            e.type = 0
-            e.nodeType = 0
+            e.type = e.nodeType
             this.setIcon(e)
+            // 如果是门店（nodeType = 1），设置为叶子节点，没有下级
+            if (e.nodeType === 1) {
+              e.isLeaf = true
+            }
           })
           this.options = rows
           this.loading = false
@@ -111,7 +121,7 @@
       getOptionsData (row, cb) {
           this.loading = true
           let params = {
-            needStore: false,
+            needStore: true,  // 设置为 true 以支持加载门店
           }
           if (row) {
             params.nodeId = row.nodeId
@@ -120,8 +130,12 @@
             if (res.code === 0) {
               let rows = (res.data && res.data.hasOwnProperty('nodeList') ? res.data.nodeList : res.data) || []
               rows.forEach(e => {
-                e.type = 0
+                e.type = e.nodeType
                 this.setIcon(e)
+                // 门店节点（nodeType = 1）设置为叶子节点，没有下级
+                if (e.nodeType === 1) {
+                  e.isLeaf = true
+                }
               })
               this.options = rows
               this.$emit('optionLoaded', rows)

@@ -26,6 +26,8 @@ syncTokenFromUrl('token', 'accessToken', {
 
 Vue.use(Hui)
 
+Vue.prototype.applicationSceneName = '门店'
+
 // 全局注册 HikCloudOrganizer 组件
 Vue.component(HikCloudOrganizer.name, HikCloudOrganizer)
 

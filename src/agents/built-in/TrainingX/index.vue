@@ -98,13 +98,18 @@
           :enable-stop-button="true"
           placeholder="有问题尽管问我~"
           :allowed-types="[]"
+          :upload-menu="{
+            image: { visible: false },
+            video: { visible: false },
+            document: { visible: false }
+          }"
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="asrConfigProvider"
           :button-config="{
-            upload: { visible: false, disabled: false },
-            clear: { visible: false, disabled: false },
-            speech: { visible: true }, // 隐藏语音按钮
+            upload: { visible: false },
+            clear: { visible: false },
+            speech: { visible: true }, 
           }"
           :send-disabled="sendBtnDisabled"
           @send="handleSend" 

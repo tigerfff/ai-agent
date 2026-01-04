@@ -109,7 +109,7 @@ export default {
     // 自动滚动容差（在这个距离内认为是在底部）
     autoScrollTolerance: {
       type: Number,
-      default: 100
+      default: 300
     },
     // 是否启用默认操作栏
     enableActions: {
@@ -161,7 +161,9 @@ export default {
       // 向上分页加载锁：避免分页过程中被 ResizeObserver/图片load/bubble update 误判并滚到底部
       isLoadMoreTriggered: false,
       loadMorePrevScrollHeight: 0,
-      loadMorePrevScrollTop: 0
+      loadMorePrevScrollTop: 0,
+      
+      lastListLength: 0 // 记录上一次列表长度，避开 Vue 2 数组引用相同导致的 watch 判定失效问题
     };
   },
   computed: {
@@ -181,11 +183,18 @@ export default {
   },
   watch: {
     list: {
-      handler(newVal, oldVal) {
-        const newLen = newVal ? newVal.length : 0;
-        const oldLen = oldVal ? oldVal.length : 0;
+      handler(newVal) {
+        const el = this.$refs.listRef;
+        // 在数据更新前，先记录当前是否接近底部
+        const wasNearBottom = el ? this.isNearBottom(el) : true;
 
-        // 1. 会话切换或初始化：旧列表为空，新列表有数据
+        const newLen = newVal ? newVal.length : 0;
+        const oldLen = this.lastListLength; // 使用记录的旧长度，避开对象引用问题
+
+        // 立即更新长度记录
+        this.lastListLength = newLen;
+
+        // 1. 会话切换或初始化：旧长度为 0，新长度大于 0
         if (oldLen === 0 && newLen > 0) {
           this.userScrolledUp = false;
           this.scrollToBottom('auto');
@@ -217,7 +226,9 @@ export default {
         // 3. 新消息到达（向下增加）
         if (newLen > oldLen) {
           this.$nextTick(() => {
-            if (!this.userScrolledUp) {
+            // 使用更新前记录的状态 wasNearBottom 来决定是否自动滚动
+            // 这样可以避免新消息撑开高度后导致 isNearBottom 判定失败
+            if (wasNearBottom) {
               this.scrollToBottom('smooth');
             } else {
               this.hasNewMessage = true;
@@ -318,6 +329,8 @@ export default {
       
       const { scrollTop, scrollHeight, clientHeight } = el;
 
+      console.log('scrollTop', scrollTop);
+
       // 触发向上分页加载：必须有滚动条且触达顶部阈值
       const hasScrollbar = scrollHeight > clientHeight;
       if (!this.loading && !this.noMore && !this.isLoadMoreTriggered && hasScrollbar && scrollTop <= this.loadMoreThreshold) {
@@ -334,6 +347,8 @@ export default {
       // 按钮显示逻辑
       this.showBackToBottom = dist > this.backButtonThreshold;
       this.userScrolledUp = dist > this.autoScrollTolerance;
+
+      console.log('dist', dist);
 
       if (dist <= this.autoScrollTolerance) {
         this.hasNewMessage = false;

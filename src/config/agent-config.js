@@ -44,49 +44,25 @@ export const ALL_AGENTS = {
       underConstruction: false, // 建设中
       serviceName: '巡查服务',
       permissionName: '巡查权限',
+
+      // 1. 检查服务购买 (白名单)
+      checkService: true,
+      serviceCheckConfig: {
+        url: (client) => buildUrl(client, '/chain/patrol/patrolAgent/action/listLearnersByStore', 'chain', '/api'), // 白名单接口
+        method: 'get',
+        data: {}
+      },
+
+      // 2. 检查权限码 (LocalStorage)
+      checkAuth: true,
+      permissionCodeKey: 'authorities', // localStorage 中权限码的 key
+      permissionCode: ["RETAIL_AUTH_04017"],        // 要检查的具体权限码
       // 将来开发完成后开启
       // checkService: true,
       // serviceCheckConfig: { url: '...', method: 'get' }
     }
   },
-  // 'data-analysis': {
-  //   id: 'data-analysis',
-  //   name: '数据分析',
-  //   miniName:'数据',
-  //   icon: dataAnalysisIcon,
-  //   homeIcon: dataAnalysisHomeIcon,
-  //   description: '深度挖掘数据价值，辅助业务决策。',
-  //   type: 'built-in',
-  //   tags: ['数据', '分析'],
-  //   component: TryAgent, // 暂时复用
-  //   permission: {
-  //     serviceName: '数据服务',
-  //     permissionName: '数据分析权限',
-  //     checkService: false, 
-  //     checkAuth: false,
-  //     // 自定义外部接口检查
-  //     customCheck: async ({ client, userId }) => {
-  //       try {
-  //         // 假设接口是 /api/external/check_access (需根据实际接口修改)
-  //         // 这里仅为示例，实际请替换为真实接口
-  //         // const res = await client.send({
-  //         //   url: '/api/external/check_access',
-  //         //   method: 'GET',
-  //         //   data: { uid: userId }
-  //         // });
-  //         // if (res.code === 0 && res.data === true) {
-  //         //   return { status: 'has_permission' };
-  //         // }
-  //         // return { status: 'no_permission', message: '暂无数据分析权限' };
-          
-  //         // 暂时放行，方便演示
-  //         return { status: 'has_permission' };
-  //       } catch (e) {
-  //         return { status: 'no_permission', message: '权限检查服务异常' };
-  //       }
-  //     }
-  //   }
-  // },
+  
   'try-x': {
     id: '1',
     name: 'AI试用',

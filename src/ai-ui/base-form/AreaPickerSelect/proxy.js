@@ -8,7 +8,7 @@ export const AreaPickerApi = {
    */
   findAreaStoreTreeForBusiness(client, data = {}) {
     return client.send({
-      url: buildUrl(client, '/chain/basic/areas/actions/findAreaStoreTreeForBusiness', 'chain', '/api'),
+      url: buildUrl(client, '/chain/basic/areas/actions/findAreaStoreTree', 'chain', '/api'),
       method: 'get',
       data
     });
@@ -21,7 +21,7 @@ export const AreaPickerApi = {
    */
   searchAreaListForBusiness(client, data = {}) {
     return client.send({
-      url: buildUrl(client, '/chain/basic/areas/actions/findAreaListByAreaName', 'chain', '/api'),
+      url: buildUrl(client, '/chain/basic/users/actions/findUserAreaStoreListByNodeName', 'chain', '/api'),
       method: 'get',
       data
     });
