@@ -407,6 +407,8 @@ export default {
       isFocused: false,
       /** 是否正在录音 */
       isRecording: false,
+      /** 语音停止的 Promise resolver */
+      pendingStopResolver: null,
       /** 语音识别器实例 */
       recognizer: null,
       /** 临时存储实时识别的文本（句子未结束时） */
@@ -667,11 +669,21 @@ export default {
           this.inputValue = this.confirmedText;
           this.tempRecognitionText = '';
         }
+        // 处理等待停止的 Promise
+        if (this.pendingStopResolver) {
+          this.pendingStopResolver();
+          this.pendingStopResolver = null;
+        }
       },
       /** 识别错误回调 */
       onError: (err) => {
         this.isRecording = false;
         this.$message && this.$message.error('语音识别失败：' + err.message);
+        // 处理等待停止的 Promise
+        if (this.pendingStopResolver) {
+          this.pendingStopResolver();
+          this.pendingStopResolver = null;
+        }
       }
     });
     
@@ -755,6 +767,8 @@ export default {
       this.inputValue = '';
       this.fileList = [];
       this.currentFileType = null;
+      this.confirmedText = '';
+      this.tempRecognitionText = '';
       this.adjustHeight();
       this.$emit('clear');
     },
@@ -957,7 +971,7 @@ export default {
     /** 切换录音状态（开始/停止） */
     async toggleRecord() {
       if (this.isRecording) {
-        this.stopRecording();
+        await this.stopRecording();
       } else {
         if (!this.speechConfigProvider) return;
         try {
@@ -973,8 +987,20 @@ export default {
     /** 停止录音（统一入口） */
     stopRecording() {
       if (this.isRecording && this.recognizer) {
-        this.recognizer.stop();
+        return new Promise((resolve) => {
+          this.pendingStopResolver = resolve;
+          this.recognizer.stop();
+          
+          // 安全兜底：1.5秒后如果还没触发 onStop 则强制 resolve
+          setTimeout(() => {
+            if (this.pendingStopResolver === resolve) {
+              resolve();
+              this.pendingStopResolver = null;
+            }
+          }, 1500);
+        });
       }
+      return Promise.resolve();
     },
     
     /* ========== 提交相关方法 ========== */
@@ -982,8 +1008,8 @@ export default {
     /** 提交表单（发送消息） */
     async submit() {
       if (this.isRecording) {
-        this.stopRecording();
-        await this.$nextTick();
+        // 等待语音识别完全停止并同步最后一段文字
+        await this.stopRecording();
       }
       if (this.isSubmitDisabled) return;
       const data = { text: this.inputValue, attachments: this.fileList };

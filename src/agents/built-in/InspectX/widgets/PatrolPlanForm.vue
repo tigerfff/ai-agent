@@ -44,6 +44,7 @@
               :key="index"
               size="small"
               class="time-tag"
+              :class="{ 'is-error': isTimeConflict(time, index) }"
               :closable="!isConfirmed && !isHistoryDisabled"
               @close="removeTime(index)"
             >
@@ -52,6 +53,7 @@
             <div 
               v-if="!isConfirmed && !isHistoryDisabled" 
               class="add-time-btn"
+              v-show="formData.patrolTime?.timeList?.length < 6"
             >
               <i class="h-icon-add"></i>
               <!-- 隐藏的时间选择器，覆盖在 + 号上，点击直接触发面板 -->
@@ -88,6 +90,12 @@
               />
             </div>
           </div>
+          <div v-if="hasTimeConflict" class="error-tip">
+            <i class="h-icon-info" style="font-size: 18px;"></i> 巡检时间存在重叠或一致，请重新调整
+          </div>
+          <div v-else-if="!isConfirmed && (!formData.patrolTime.timeList || formData.patrolTime.timeList.length === 0)" class="error-tip">
+            <i class="h-icon-info" style="font-size: 18px;"></i> 请添加巡检时间
+          </div>
         </div>
       </div>
 
@@ -109,6 +117,9 @@
               @change="handleDateRangeChange"
               popper-class="patrol-plan-picker-popper"
             />
+            <div v-if="!dateRange || dateRange.length === 0" class="error-tip">
+              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择任务有效期
+            </div>
           </div>
           <div v-else class="text-display">{{ formData.startDate }} ~ {{ formData.endDate }}</div>
         </div>
@@ -134,7 +145,7 @@
         v-if="!isConfirmed && !isHistoryDisabled"
         :icon="starWhiteIcon"
         text="确认执行"
-        :disabled="loading"
+        :disabled="loading || hasTimeConflict || isFormIncomplete"
         :loading="loading"
         @click="handleConfirm"
       />
@@ -226,6 +237,17 @@ export default {
     areaNames() {
       if (!this.selectedAreas || this.selectedAreas.length === 0) return '';
       return this.selectedAreas.map(a => a.nodeName).join('、');
+    },
+    hasTimeConflict() {
+      const list = this.formData.patrolTime.timeList || [];
+      if (list.length <= 1) return false;
+      
+      return list.some((time, index) => this.isTimeConflict(time, index));
+    },
+    isFormIncomplete() {
+      const hasTime = this.formData.patrolTime?.timeList?.length > 0;
+      const hasDate = this.formData.startDate && this.formData.endDate;
+      return !hasTime || !hasDate;
     },
     issueDaysLabel() {
       const { frequency, issueDays } = this.formData;
@@ -455,6 +477,23 @@ export default {
       }
       return '未知时间';
     },
+    isTimeConflict(time, index) {
+      const list = this.formData.patrolTime.timeList || [];
+      const timeType = this.formData.patrolTime.timeType;
+      
+      return list.some((item, i) => {
+        if (i === index) return false;
+        
+        if (timeType === 1) {
+          // 时间点冲突：时间一致
+          return item.aiStartTime === time.aiStartTime;
+        } else {
+          // 时间段冲突：存在重叠
+          // [s1, e1] 和 [s2, e2] 重叠条件：s1 < e2 && s2 < e1
+          return time.aiStartTime < item.aiEndTime && item.aiStartTime < time.aiEndTime;
+        }
+      });
+    },
     removeTime(index) {
       this.formData.patrolTime.timeList.splice(index, 1);
     },
@@ -583,6 +622,19 @@ ${JSON.stringify(confirmData, null, 2)}
             ::v-deep .h-icon-close {
               color: rgba(56, 142, 255, 1) !important;
             }
+
+            &.is-error {
+              background-color: rgba(255, 77, 79, 0.1);
+              color: #ff4d4f;
+              
+              ::v-deep .el-tag__close {
+                color: #ff4d4f !important;
+              }
+              
+              ::v-deep .h-icon-close {
+                color: #ff4d4f !important;
+              }
+            }
           }
 
           .add-time-btn {
@@ -631,7 +683,31 @@ ${JSON.stringify(confirmData, null, 2)}
               }
             }
           }
+
+         
         }
+
+          .error-tip {
+            display: flex;
+            align-items: center;
+            color: #ff4d4f;
+            font-size: 12px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            
+            i {
+              margin-right: 4px;
+              font-size: 14px;
+            }
+
+            &.warning {
+              color: #faad14;
+              i {
+                color: #faad14;
+              }
+            }
+          }
 
         .date-range-wrapper {
           ::v-deep .el-range-editor.el-input__inner {
@@ -701,6 +777,15 @@ ${JSON.stringify(confirmData, null, 2)}
 
     // 日期选择器样式
     .el-date-table {
+
+      td.today {
+        color: rgba(56, 142, 255, 0.8) !important;
+        
+        span {
+          color: rgba(56, 142, 255, 0.8) !important;
+        }
+      }
+      
       td.start-date,
       td.end-date {
         background-color: rgba(56, 142, 255, 1) !important;
@@ -709,15 +794,13 @@ ${JSON.stringify(confirmData, null, 2)}
         &:hover {
           background-color: rgba(56, 142, 255, 0.8) !important;
         }
-      }
-      
-      td.today {
-        color: #FFF !important;
-        
+
         span {
-          color: #fff !important;
+          color: #FFF !important;
         }
       }
+      
+      
 
       td.selected,
       td.current {
@@ -783,9 +866,5 @@ ${JSON.stringify(confirmData, null, 2)}
   }
 
   // 下拉选择器全局样式，应尽量通过 popper-class 限制，此处暂保持但提醒注意
-  .el-select-dropdown__item.selected {
-    // 如果此样式也需要严格限制，建议给 el-select 也增加 popper-class
-    // color: rgba(56, 142, 255, 1) !important;
-  }
 </style>
 

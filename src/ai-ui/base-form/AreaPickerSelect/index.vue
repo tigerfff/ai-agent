@@ -50,7 +50,7 @@
             <AreaPicker ref="picker" :checkStrictly="true" @optionLoaded="optionLoaded" @selectionChange="selectionChange" style="height:400px" :needClearAllSelection="needClearAllSelection"></AreaPicker>
           </div>
           <div class="footer">
-            <el-button type="primary" @click="confirm">确定</el-button>
+            <el-button type="info" @click="confirm">确定</el-button>
             <el-button @click="cancel">取消</el-button>
           </div>
         </div>

@@ -489,7 +489,6 @@ export default {
   }
 
   .sidebar-bottom {
-    background-color: #FFF;
     padding: 12px;
     flex-shrink: 0;
   }
