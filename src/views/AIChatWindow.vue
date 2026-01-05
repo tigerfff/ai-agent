@@ -50,8 +50,12 @@ export default {
   watch: {
     visible(val) {
       console.log('AIChatWindow visible changed:', val);
-      // 每次打开窗口时，调用 fetchAgentTips 获取智能体红点状态
+      // 每次打开窗口时，执行周期重置逻辑
       if (val && this.$refs.agentContainer) {
+        if (typeof this.$refs.agentContainer.resetCycle === 'function') {
+          this.$refs.agentContainer.resetCycle();
+        }
+        
         this.$nextTick(() => {
           if (this.$refs.agentContainer && typeof this.$refs.agentContainer.fetchAgentTips === 'function') {
             this.$refs.agentContainer.fetchAgentTips();

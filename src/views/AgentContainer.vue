@@ -271,6 +271,7 @@ export default {
       permissionStatus: null,      // 当前智能体的权限状态
       checkingPermission: false,    // 是否正在检查权限
       agentTips: {}, // 智能体红点状态
+      cycleSessions: {}, // 窗口周期内的会话缓存 { agentId: chatId }
       historyIcon,
       addIcon,
       expandIcon,
@@ -345,6 +346,13 @@ export default {
     },
 
     /**
+     * 重置窗口周期缓存（每次重新打开窗口时调用）
+     */
+    resetCycle() {
+      this.cycleSessions = {};
+    },
+
+    /**
      * 初始化状态（支持 Deep Link）
      * @param {Object} params - { agentId, chatId }
      */
@@ -385,6 +393,8 @@ export default {
           // 因为 handleUpdateConversationList 会在组件加载后再次校验
           this.currentConversationId = targetChatId;
           this.currentSessionStableKey = targetChatId;
+          // 更新周期缓存
+          this.cycleSessions[targetAgent.id] = targetChatId;
         }
     },
 
@@ -442,21 +452,24 @@ export default {
         this.checkingPermission = false;
       }
       
-      // 如果从 home 进入，直接创建新会话；否则选中第一个会话
-      if (isFromHome) {
-        // 从 home 进入，创建新会话
+      // 【核心逻辑】根据窗口周期缓存决定是新建会话还是恢复会话
+      const cachedChatId = this.cycleSessions[agent.id];
+      
+      if (cachedChatId) {
+        // 如果本周期内已经在这个智能体聊过了，恢复之前的会话
+        this.currentConversationId = cachedChatId;
+        this.currentSessionStableKey = cachedChatId;
+        this.isManualNewChat = false;
+      } else {
+        // 如果是本周期第一次进入，或者是从 Home 自动进入 -> 创建新会话
         const newId = 'conv-' + Date.now();
         this.currentConversationId = newId;
-        this.currentSessionStableKey = newId; // 初始化稳定 Key
-        this.isManualNewChat = false; // 标记为非手动（自动进入）
-      } else {
-        // 切换智能体后，尝试选中该智能体的最新会话
-        // 如果是 TryAgent，列表可能是空的，等待组件 emit update-list 后再选中
-        const firstConv = this.conversations.find(c => c.agentId === agent.id);
-        this.currentConversationId = firstConv ? firstConv.id : null;
-        // 如果有会话，用会话ID作为稳定Key；没有则生成一个空Key
-        this.currentSessionStableKey = this.currentConversationId || `empty-${Date.now()}`;
+        this.currentSessionStableKey = newId;
+        this.isManualNewChat = false; 
+        // 存入缓存
+        this.cycleSessions[agent.id] = newId;
       }
+      
       this.componentKey++; 
     },
     
@@ -558,6 +571,7 @@ export default {
         // 自动跳转到最新的未读会话
         this.currentConversationId = latestUnread.id;
         this.currentSessionStableKey = latestUnread.id;
+        this.cycleSessions[this.currentAgentId] = latestUnread.id;
         return;
       }
 
@@ -568,6 +582,7 @@ export default {
           const target = latestUnread || formattedList[0];
           this.currentConversationId = target.id;
           this.currentSessionStableKey = target.id;
+          this.cycleSessions[this.currentAgentId] = target.id;
         } else {
           // 如果列表为空，自动进入新建会话状态
           this.handleNewChat();
@@ -591,6 +606,11 @@ export default {
       }
       // 如果是 isTempToReal，则稳定 Key 保持不变（还是原来的 conv-xxx），组件不销毁！
       // 子组件内部 watch 了 conversationId，可以在 watch 里处理 ID 变更，而不丢失状态
+
+      // 更新周期缓存，确保下次切回来时能对应到这个会话
+      if (this.currentAgentId) {
+        this.cycleSessions[this.currentAgentId] = id;
+      }
 
       this.collapsedMenuForMini();
     },
@@ -626,6 +646,11 @@ export default {
       // 【重要】新建会话，必须更新稳定 Key，强制重载组件
       this.currentSessionStableKey = newId;
       this.isManualNewChat = true; // 标记为手动新建
+
+      // 更新周期缓存
+      if (this.currentAgentId) {
+        this.cycleSessions[this.currentAgentId] = newId;
+      }
     },
     deleteConversation(id) {
       // 1. 调用子组件的删除方法（如果存在）
