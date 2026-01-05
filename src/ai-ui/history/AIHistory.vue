@@ -443,7 +443,7 @@ export default {
 
       .history-load-more {
         width: 100%;
-        height: 48px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;

@@ -46,17 +46,6 @@
               :actions="getActions(item)"
               @action="handleAction($event, item, index)"
             >
-              <!-- 在AI回答前面添加刷新按钮 -->
-              <template #before-custom-actions>
-                <div
-                  v-if="item.role === 'ai' && !item.loading"
-                  class="action-item regenerate-btn"
-                  @click="handleRegenerate(item, index)"
-                  title="重新生成"
-                >
-                  <AIIcon size="24" :src="regenerateIcon" class="action-icon" />
-                </div>
-              </template>
             </BubbleFooter>
           </div>
         </template>
@@ -123,7 +112,6 @@ import { TryApi } from './api';
 import trainingSquareIcon from '@/assets/images/try.png';
 import simulateVerifyModal from './modal/simulateVerifyModal.vue'
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
-import regenerateIcon from '@svg/regenerate.svg';
 
 export default {
   name: 'TryAgent',
@@ -163,12 +151,15 @@ export default {
       currentVideoFileCount: 0,
       simulateVerifyModalVisible: false,
       trainingSquareIcon,
-      regenerateIcon,
 
       welcomeConfig: {
         icon: trainingSquareIcon,
         title: 'AI试用',
         description: '我可以识别图片和视频中的内容，判断是否存在您关注的特定对象或行为。上传图片或视频并提出问题，我将给出检测结果。现在就来试试吧！',
+      },
+      actionConfig: {
+        user: ['copy'],
+        bot: ['fresh', 'copy', 'like', 'dislike']
       },
       buttonConfig: { upload: { visible: true, disabled: false }, speech: { visible: false, disabled: false }, clear: { visible: false, disabled: false } },
       inputPlaceholder: '您可以问我任何问题，比如“图片中是否有员工违规”'

@@ -1,6 +1,16 @@
 <template>
   <div class="bubble-footer-actions">
     <slot name="before-custom-actions"></slot>
+    <!-- 0. 重新生成 (fresh) -->
+    <div 
+      v-if="actions.includes('fresh') && item.role === 'ai' && !item.loading" 
+      class="action-item" 
+      @click="handleRegenerate"
+      title="重新生成"
+    >
+      <AIIcon size="24" :src="regenerateIcon" class="action-icon" />
+    </div>
+
     <!-- 1. 复制 -->
     <div 
       v-if="actions.includes('copy')" 
@@ -101,6 +111,7 @@ import dislikeNormalIcon from '@/assets/svg/dislike-normal.svg';
 import dislikeSelectedIcon from '@/assets/svg/dislike-selected.svg';
 import editIcon from '@/assets/svg/edit.svg';
 import copyIcon from '@/assets/svg/copy.svg';
+import regenerateIcon from '@/assets/svg/regenerate.svg';
 
 export default {
   name: 'BubbleFooter',
@@ -134,7 +145,8 @@ export default {
       dislikeNormalIcon,
       dislikeSelectedIcon,
       editIcon,
-      copyIcon
+      copyIcon,
+      regenerateIcon
     };
   },
   computed: {
@@ -249,6 +261,10 @@ export default {
       const newStatus = this.localLikeStatus === type ? '' : type;
       this.localLikeStatus = newStatus;
       this.$emit('action', newStatus || 'cancel-like', this.item);
+    },
+
+    handleRegenerate() {
+      this.$emit('action', 'fresh', this.item);
     }
   }
 };

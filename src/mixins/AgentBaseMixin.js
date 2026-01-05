@@ -38,7 +38,7 @@ export const AgentBaseMixin = {
       // 操作栏配置
       actionConfig: {
         user: ['copy'],
-        bot: ['copy', 'like', 'dislike']
+        bot: ['fresh', 'copy', 'like', 'dislike']
       },
       // OSS 上传器实例
       ossUploader: null,
@@ -265,7 +265,15 @@ export const AgentBaseMixin = {
      * 加载更多历史记录 (分页)
      */
     async handleLoadMore() {
-      if (this.loadingHistory || this.allHistoryLoaded) return;
+      if (this.loadingHistory || this.allHistoryLoaded || this.isStreaming) return;
+      // 2. 【核心修复】预判拦截：
+      // 如果当前消息数量 > 0 且小于一页的限制 (pageSize)，说明当前已经是第一页且不满一页。
+      // 这种情况在逻辑上不可能有“更多更旧”的历史记录，或者是新创建的会话。
+      // 直接标记加载完成，避免无效且可能报错的 historyScrolling 请求。
+      if (this.messages.length > 0 && this.messages.length < this.pageSize) {
+        this.allHistoryLoaded = true;
+        return;
+      }
       await this.loadHistory(true);
     },
 
@@ -372,6 +380,8 @@ export const AgentBaseMixin = {
             this.handleFinish({ index: this.messages.indexOf(aiMsg) });
           },
           onError: (err) => {
+            console.log('err', err);
+            if (err.name === 'AbortError') return;
             console.error('[AgentBaseMixin] SSE Error', err);
             aiMsg.loading = false;
             aiMsg.content += '\n[网络错误，连接断开]';
@@ -400,6 +410,19 @@ export const AgentBaseMixin = {
         this.abortController.abort();
         this.abortController = null;
       }
+
+      // 找到最后一条正在加载的 AI 消息并停止其 loading 状态
+      const lastMsg = this.messages[this.messages.length - 1];
+      if (lastMsg && lastMsg.role === 'ai' && lastMsg.loading) {
+        lastMsg.loading = false;
+        lastMsg.typing = false;
+        
+        // 如果此时还没有任何内容产出，补充 [调用已取消]
+        if (!lastMsg.content || !lastMsg.content.trim()) {
+          lastMsg.content = '[调用已取消]';
+        }
+      }
+
       this.isStreaming = false;
       this.isUploading = false;
     },
@@ -455,6 +478,8 @@ export const AgentBaseMixin = {
           this.$set(this.messages[index], 'content', payload.content);
           this.$message.success('内容已更新');
         }
+      } else if (type === 'fresh') {
+        this.handleRegenerate(payload, index);
       } else if (type === 'like' || type === 'dislike' || type === 'cancel-like') {
         const message = this.messages[index];
         if (!message || message.placement !== 'start') return;
@@ -482,10 +507,39 @@ export const AgentBaseMixin = {
       }
     },
 
+    /**
+     * 重新生成 AI 回答
+     * @param {Object} item 当前点击的 AI 消息对象
+     * @param {Number} index 消息在 messages 数组中的索引
+     */
+    async handleRegenerate(item, index) {
+      if (this.isStreaming) {
+        this.$message.warning('请等待当前回答生成完毕');
+        return;
+      }
+
+      // 找到前一个用户消息
+      const userIndex = index - 1;
+      if (userIndex < 0 || !this.messages[userIndex] || this.messages[userIndex].role !== 'user') {
+        this.$message.warning('无法重新生成回答');
+        return;
+      }
+
+      // 保存用户消息
+      const userMsg = this.messages[userIndex];
+
+      // 重新触发发送逻辑
+      await this.handleSend({
+        text: userMsg.content || '',
+        attachments: userMsg.attachments || []
+      });
+    },
+
     handleWidgetSend(text) {
       this.handleSend({ text });
     },
 
+     
      /**
      * 处理欢迎页推荐词点击
      */

@@ -732,6 +732,10 @@ ${JSON.stringify(confirmData, null, 2)}
         }
       }
     }
+
+    .form-item:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .form-footer {
