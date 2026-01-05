@@ -1,5 +1,5 @@
 <template>
-  <div class="patrol-plan-form-container patrol-plan-form" style=" --ym-primary: rgba(56,142,255,1)" :class="{ 'is-loading': loading, 'is-history-disabled': isHistoryDisabled }">
+  <div class="patrol-plan-form-container patrol-plan-form" style=" --ym-primary: rgba(56,142,255,1)" :class="{ 'is-loading': loading, 'is-history-disabled': isHistoryDisabled, 'is-confirmed': isConfirmed }">
     <div class="title">请确认巡检任务</div>
 
     <div class="form-body">
@@ -8,7 +8,7 @@
         <div class="label">巡检范围</div>
         <div class="content">
           <AreaPickerSelect 
-            v-if="!isConfirmed"
+            v-if="!isConfirmed && !isHistoryDisabled"
             ref="areaPicker"
             :limit="1000"
             :need-clear-all-selection="false"
@@ -90,10 +90,10 @@
               />
             </div>
           </div>
-          <div v-if="hasTimeConflict" class="error-tip">
+          <div v-if="hasTimeConflict && !isHistoryDisabled" class="error-tip">
             <i class="h-icon-info" style="font-size: 18px;"></i> 巡检时间存在重叠或一致，请重新调整
           </div>
-          <div v-else-if="!isConfirmed && (!formData.patrolTime.timeList || formData.patrolTime.timeList.length === 0)" class="error-tip">
+          <div v-else-if="!isConfirmed && !isHistoryDisabled && (!formData.patrolTime.timeList || formData.patrolTime.timeList.length === 0)" class="error-tip">
             <i class="h-icon-info" style="font-size: 18px;"></i> 请添加巡检时间
           </div>
         </div>
@@ -103,7 +103,7 @@
       <div class="form-item">
         <div class="label">任务有效期</div>
         <div class="content">
-          <div v-if="!isConfirmed" class="date-range-wrapper">
+          <div v-if="!isConfirmed && !isHistoryDisabled" class="date-range-wrapper">
             <el-date-picker
               v-model="dateRange"
               type="daterange"
@@ -130,19 +130,20 @@
         <div class="label">门店整改推送</div>
         <div class="content">
           <el-switch
+            v-if="!isConfirmed && !isHistoryDisabled"
             active-color="rgba(56,142,255,1)"
             v-model="problemSheetAssignmentBool"
-            :disabled="isConfirmed || isHistoryDisabled"
             @change="handleSwitchChange"
           />
+          <div v-else class="text-display">{{ problemSheetAssignmentBool ? '已开启' : '已关闭' }}</div>
         </div>
       </div>
     </div>
 
     <!-- 底部按钮 -->
-    <div class="form-footer">
+    <div class="form-footer" v-if="!isHistoryDisabled || isConfirmed">
       <AIButton
-        v-if="!isConfirmed && !isHistoryDisabled"
+        v-if="!isConfirmed"
         :icon="starWhiteIcon"
         text="确认执行"
         :disabled="loading || hasTimeConflict || isFormIncomplete"
@@ -154,13 +155,6 @@
         v-if="isConfirmed"
         :icon="sureWhiteIcon"
         text="已确认"
-        :disabled="true"
-      />
-
-      <AIButton
-        v-if="isHistoryDisabled && !isConfirmed"
-        :icon="starWhiteIcon"
-        text="确认执行"
         :disabled="true"
       />
     </div>
@@ -557,8 +551,13 @@ ${JSON.stringify(confirmData, null, 2)}
 
 
   &.is-history-disabled {
-    opacity: 0.7;
     pointer-events: none;
+
+    &:not(.is-confirmed) {
+      .form-body {
+        border-bottom: none !important;
+      }
+    }
   }
 
   .title {
@@ -571,6 +570,7 @@ ${JSON.stringify(confirmData, null, 2)}
 
   .form-body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
     .form-item {
       margin-bottom: 12px;
       display: flex;

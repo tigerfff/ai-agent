@@ -1,5 +1,5 @@
 <template>
-  <div class="train-plan-form" :class="{ 'is-loading': loading, 'is-history-disabled': isHistoryDisabled }">
+  <div class="train-plan-form" :class="{ 'is-loading': loading, 'is-history-disabled': isHistoryDisabled, 'is-confirmed': isConfirmed }">
     <!-- Loading 蒙层 -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
@@ -19,7 +19,7 @@
         <div class="label">学习{{ isProject ? '项目' : '课程' }}</div>
         <div class="content">
         <AILoadSelect
-            v-if="!isConfirmed"
+            v-if="!isConfirmed && !isHistoryDisabled"
             v-model="formData.courseProjectId"
             :remote-method="handleProjectSearch"
             :selected-options="selectedProjectOptions"
@@ -28,7 +28,7 @@
             :get-option-value="getOptionValue"
             :placeholder="isProject ? '请选择学习项目' : '请选择学习课程'"
             :searchPlaceholder="isProject ? '请输入项目名称搜索' : '请输入课程名称搜索'"
-            :disabled="isHistoryDisabled || loading"
+            :disabled="loading"
             @change="handleProjectChange"
             :popper-append-to-body="true"
           />
@@ -41,12 +41,12 @@
         <div class="label">培训学员</div>
         <div class="content">
           <PersonSelect
-            v-if="!isConfirmed"
+            v-if="!isConfirmed && !isHistoryDisabled"
             v-model="selectedUsers"
             dialogTitle="选择学员"
             placeholder="请选择"
             collapseTags
-            :disabled="isHistoryDisabled || loading"
+            :disabled="loading"
             :selectable="selectable"
             style="width: 80%"
             @change="handleUsersChange"
@@ -65,9 +65,9 @@
     </div>
 
     <!-- 底部按钮 -->
-    <div class="form-footer" >
+    <div class="form-footer" v-if="!isHistoryDisabled || isConfirmed">
       <AIButton
-        v-if="!isConfirmed && !isHistoryDisabled"
+        v-if="!isConfirmed"
         :icon="starWhiteIcon"
         text="确认执行"
         :disabled="!canConfirm || loading"
@@ -78,14 +78,7 @@
       <AIButton
         v-if="isConfirmed"
         :icon="sureWhiteIcon"
-        text="确认执行"
-        :disabled="true"
-      />
-
-      <AIButton
-        v-if="isHistoryDisabled && !isConfirmed"
-        :icon="starWhiteIcon"
-        text="确认执行"
+        text="已确认"
         :disabled="true"
       />
     </div>
@@ -634,8 +627,13 @@ export default {
   }
 
   &.is-history-disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+
+    &:not(.is-confirmed) {
+      .form-body {
+        border-bottom: none !important;
+      }
+    }
   }
 
   .loading-overlay {
