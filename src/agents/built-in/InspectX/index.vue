@@ -33,7 +33,7 @@
           />
         </template>
 
-        <template  #footer="{ item, index }" >
+        <template  #footer="{ item, index, isLast }" >
           <div style="display: flex; align-items: center; gap: 4px;">
             <!-- 停止任务 ymform:patrol_plan_create_result -->
             <PatrolPlanResult
@@ -50,6 +50,7 @@
               v-show="shouldShowFooter(item)"
               :item="item" 
               :actions="getActions(item)"
+              :is-last="isLast"
               @action="handleAction($event, item, index)"
             >
             </BubbleFooter>
@@ -77,7 +78,7 @@
           :file-limit="{
             image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
           }"
-          :max-size="200 * 1024 * 1024"
+          :maxFileCount="1"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="asrConfigProvider"
           :button-config="{

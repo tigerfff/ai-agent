@@ -38,12 +38,13 @@
         enableActions
         class="history-full-width"
       >
-        <template  #footer="{ item, index }" >
+        <template  #footer="{ item, index, isLast }" >
           <div style="display: flex; align-items: center; gap: 4px;">
             <BubbleFooter
               v-show="shouldShowFooter(item)"
               :item="item"
               :actions="getActions(item)"
+              :is-last="isLast"
               @action="handleAction($event, item, index)"
             >
             </BubbleFooter>

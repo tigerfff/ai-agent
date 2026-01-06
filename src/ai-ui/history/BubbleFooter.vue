@@ -3,7 +3,7 @@
     <slot name="before-custom-actions"></slot>
     <!-- 0. 重新生成 (fresh) -->
     <div 
-      v-if="actions.includes('fresh') && item.role === 'ai' && !item.loading" 
+      v-if="actions.includes('fresh') && item.role === 'ai' && isLast" 
       class="action-item" 
       @click="handleRegenerate"
       title="重新生成"
@@ -125,6 +125,11 @@ export default {
     actions: {
       type: Array,
       default: () => []
+    },
+    // 是否为最后一条消息
+    isLast: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
