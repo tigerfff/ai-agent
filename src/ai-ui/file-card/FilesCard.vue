@@ -324,7 +324,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 8px;
     background: #fff;
     overflow: hidden;
 

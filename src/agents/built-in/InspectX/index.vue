@@ -74,6 +74,9 @@
           :enable-stop-button="true"
           placeholder="有问题尽管问我~"
           :allowed-types="['image']"
+          :file-limit="{
+            image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
+          }"
           :max-size="200 * 1024 * 1024"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="asrConfigProvider"

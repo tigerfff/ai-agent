@@ -109,7 +109,7 @@ export default {
     // 自动滚动容差（在这个距离内认为是在底部）
     autoScrollTolerance: {
       type: Number,
-      default: 300
+      default: 100
     },
     // 是否启用默认操作栏
     enableActions: {

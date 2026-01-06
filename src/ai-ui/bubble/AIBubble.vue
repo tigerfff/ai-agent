@@ -17,8 +17,7 @@
       <!-- 1. 附件气泡 (独立渲染) -->
       <div 
         v-if="attachments && attachments.length > 0"
-        class="bubble-body attachments-body"
-        :class="variant"
+        class="bubble-attachments"
       >
         <AIAttachments 
           :value="attachments" 
@@ -43,7 +42,7 @@
 
         <!-- 文本内容渲染 -->
         <div v-else class="bubble-content-mix">
-          <template v-for="(part, idx) in textParts" >
+          <template v-for="(part, idx) in textParts">
             <div 
               :key="'text-' + idx"
               class="markdown-body" 
@@ -286,6 +285,19 @@ export default {
 
     .bubble-content-wrapper {
       align-items: flex-end;
+      max-width: calc(100% - 40px);
+    }
+
+    .bubble-attachments {
+      align-items: flex-end;
+
+      :deep(.attachments-list) {
+        justify-content: flex-end;
+      }
+
+      :deep(.single-image-view) {
+        text-align: right;
+      }
     }
 
     .bubble-body.filled {
@@ -316,6 +328,10 @@ export default {
   
   // 左侧气泡（机器人端）- 白色背景 + 黑色文字
   &.start {
+    .bubble-content-wrapper {
+      max-width: 100%;
+    }
+
     .bubble-body.filled {
       background: #fff;
       color: rgba($color: #000000, $alpha: .7);
@@ -323,7 +339,7 @@ export default {
       
       // 确保所有子元素都是黑色文字
       .markdown-body {
-        color: #333;
+        color: rgba($color: #000000, $alpha: 0.7);
         
         :deep(*) {
           color: inherit;
@@ -355,14 +371,14 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    max-width: 80%;
     min-width: 0;
     gap: 8px; /* 增加气泡间距 */
 
     .bubble-attachments {
-      margin-bottom: 0;
+      margin-bottom: 4px;
       max-width: 100%;
-      width: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .bubble-body {
