@@ -364,6 +364,7 @@ export const AgentBaseMixin = {
 
             if (msgData.text) aiMsg.content += msgData.text;
             if (msgData.msgId && !aiMsg.msgId) aiMsg.msgId = msgData.msgId;
+            if (msgData.createTime) aiMsg.time = msgData.createTime;
             if (msgData.chatId && msgData.chatId !== this.chatId) {
               this.chatId = msgData.chatId;
               this.$emit('select-conversation', this.chatId);

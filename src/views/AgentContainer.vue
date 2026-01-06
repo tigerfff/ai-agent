@@ -670,6 +670,7 @@ export default {
           this.currentSessionStableKey = this.currentConversationId || `empty-${Date.now()}`;
         }
       }
+
     },
     async handleMenuCommand(command, item) {
       const agent = this.$refs.activeAgent;
@@ -804,8 +805,8 @@ export default {
      */
     async fetchAgentTips() {
       try {
-        // 目前只检查培训智能体 "2"
-        const res = await TrainingXApi.getAgentTip(this.$aiClient, { agentIds: ['2'] });
+        // 目前只检查培训智能体 "2",只会巡查3
+        const res = await TrainingXApi.getAgentTip(this.$aiClient, { agentIds: ['3','2'] });
         
         if (res.code === 0 && Array.isArray(res.data)) {
           // 接口返回结构: [{"agentId":"2","hasTip":true}]
