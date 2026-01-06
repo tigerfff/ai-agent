@@ -62,9 +62,9 @@
     <div class="footer">
       <div class="content-wrapper">
         <!-- Mock 测试按钮 -->
-        <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+        <!-- <div style="margin-bottom: 10px; display: flex; gap: 10px;">
           <el-button size="mini" type="warning" plain @click="mockPatrolPlan">测试巡检任务表单</el-button>
-        </div>
+        </div> -->
 
         <AIInput 
           ref="aiInput"
