@@ -338,12 +338,12 @@ export default {
         this.dateRange = [this.formData.startDate, this.formData.endDate];
       }
 
-      // 如果 storeKey 不是 '0'，则使用接口查询名称并反显
-      if (data.storeKey && data.storeKey !== '0') {
+      // 如果有 scopeSearchKey，则使用接口进行模糊查询并反显
+      if (data.scopeSearchKey) {
         try {
           const res = await AreaPickerApi.searchAreaListForBusiness(this.$aiClient, { 
-            condition: data.storeKey, 
-            limit: 1000 
+            condition: data.scopeSearchKey, 
+            limit: 200
           });
 
           if (res && res.code === 0) {
