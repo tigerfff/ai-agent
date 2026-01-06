@@ -66,12 +66,33 @@
       <div 
         v-show="showBackToBottom" 
         class="back-to-bottom-btn"
+        :class="{ 'has-new-message': hasNewMessage }"
         @click="scrollToBottom()"
       >
+        <!-- 半圆环绕动画 -->
+        <svg 
+          v-if="hasNewMessage"
+          class="loading-ring"
+          width="40"
+          height="40"
+          viewBox="0 0 40 40"
+        >
+          <circle
+            class="loading-circle"
+            cx="20"
+            cy="20"
+            r="18"
+            fill="none"
+            stroke="rgba(56, 142, 255, 1)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-dasharray="56.5 113"
+            stroke-dashoffset="0"
+          />
+        </svg>
         <span class="arrow-down">
           <i class="h-icon-angles_down_sm"></i>
         </span>
-        <span class="new-msg-tip" v-if="hasNewMessage">新消息</span>
       </div>
     </transition>
   </div>
@@ -473,6 +494,7 @@ export default {
   .back-to-bottom-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     position: absolute;
     bottom: 20px;
     left: 50%;
@@ -481,17 +503,32 @@ export default {
     border: 1px solid #e4e7ed;
     border-radius: 50%;
     cursor: pointer;
-    display: flex;
-    padding: 4px;
-    align-items: center;
+    width: 40px;
+    height: 40px;
     color: #000;
     z-index: 10;
     transition: all 0.3s;
     user-select: none;
+    position: relative;
 
     &:hover {
       background-color: #f2f6fc;
       transform: translateX(-50%) translateY(-2px);
+    }
+
+    .loading-ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
+      transform: rotate(-90deg);
+      animation: ringRotate 1.5s linear infinite;
+    }
+
+    .loading-circle {
+      transform-origin: center center;
     }
 
     .arrow-down {
@@ -499,17 +536,19 @@ export default {
       font-size: 24px;
       display: flex;
       align-items: center;
-    }
-
-    .new-msg-tip {
-      color: var(--ym-ai-primary-color);
-      font-size: 12px;
+      position: relative;
+      z-index: 1;
     }
   }
 }
 
 @keyframes rotating {
   from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 

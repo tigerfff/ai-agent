@@ -103,22 +103,22 @@
       <div class="form-item">
         <div class="label">任务有效期</div>
         <div class="content">
-          <div v-if="!isConfirmed && !isHistoryDisabled" class="date-range-wrapper">
+          <div v-if="!isConfirmed && !isHistoryDisabled" class="date-range-wrapper single-date-mode">
+            <span class="fixed-start-date">{{ formData.startDate || '今天' }}</span>
+            <span class="range-separator">~</span>
             <el-date-picker
-              v-model="dateRange"
-              type="daterange"
+              v-model="formData.endDate"
+              type="date"
               size="mini"
-              range-separator="~"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
+              placeholder="结束日期"
               format="yyyy/MM/dd"
               value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              @change="handleDateRangeChange"
+              :picker-options="endDatePickerOptions"
               popper-class="patrol-plan-picker-popper"
+              class="end-date-picker"
             />
-            <div v-if="!dateRange || dateRange.length === 0" class="error-tip">
-              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择任务有效期
+            <div v-if="!formData.endDate" class="error-tip">
+              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择结束日期
             </div>
           </div>
           <div v-else class="text-display">{{ formData.startDate }} ~ {{ formData.endDate }}</div>
@@ -191,7 +191,6 @@ export default {
       isConfirmed: false,
       tempTime: null,
       tempTimeRange: [], // 时间段选择器的临时值
-      dateRange: [],
       selectedAreas: [],
       lastSelectedIds: '', // 用于记录上次选中的 ID 组合，防止重复调用接口
       originalPrimaryColor: null, // 保存原始的 --ym-primary 值
@@ -266,25 +265,23 @@ export default {
 
       return issueDays.join('，');
     },
-    pickerOptions() {
+    endDatePickerOptions() {
       return {
         disabledDate: (time) => {
           const now = new Date();
           // 今天 0 点
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-          // 一年前 0 点
-          const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).getTime();
           
-          // 1. 基础限制：不能超过今天，不能早于一年前
-          if (time.getTime() > today || time.getTime() < oneYearAgo) {
+          // 1. 基础限制：结束日期不能早于今天
+          if (time.getTime() < today) {
             return true;
           }
           
-          // 2. 周期频次限制（周频次）
+          // 2. 周期频次限制（周频次）：结束日期必须是周日
           if (this.formData.frequency === 2) {
             const day = time.getDay();
-            // 只能选择周一(1)或周日(0)
-            return day !== 1 && day !== 0;
+            // 0 表示周日
+            return day !== 0;
           }
           
           return false;
@@ -328,16 +325,16 @@ export default {
   },
   methods: {
     async initFormData(data) {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
       this.formData = {
         ...this.formData,
         ...data,
+        startDate: todayStr, // 强制开始日期为今天
         patrolTime: data.patrolTime || { timeType: 0, timeList: [] }
       };
       
-      if (this.formData.startDate && this.formData.endDate) {
-        this.dateRange = [this.formData.startDate, this.formData.endDate];
-      }
-
       // 如果有 scopeSearchKey，则使用接口进行模糊查询并反显
       if (data.scopeSearchKey) {
         try {
@@ -418,28 +415,6 @@ export default {
         // 发生错误时，使用默认值 '0'
         this.formData.storeKey = '0';
         console.error('[PatrolPlanForm] savePatrolScope error:', error);
-      }
-    },
-    handleDateRangeChange(val) {
-      if (val && val.length === 2) {
-        // 周频次特殊校验
-        if (this.formData.frequency === 2) {
-          const start = new Date(val[0]);
-          const end = new Date(val[1]);
-          // getDay: 0为周日，1为周一
-          if (start.getDay() !== 1 || end.getDay() !== 0) {
-            this.$message.warning('周频次任务，有效期开始时间必须为周一，结束时间必须为周日');
-            this.dateRange = [];
-            this.formData.startDate = '';
-            this.formData.endDate = '';
-            return;
-          }
-        }
-        this.formData.startDate = val[0];
-        this.formData.endDate = val[1];
-      } else {
-        this.formData.startDate = '';
-        this.formData.endDate = '';
       }
     },
     handleSwitchChange(val) {
@@ -610,6 +585,8 @@ ${JSON.stringify(confirmData, null, 2)}
             color: rgba(56, 142, 255, 1);
             display: flex;
             align-items: center;
+            height: 22px;
+            line-height: 22px;
             
             ::v-deep .el-tag__close {
               color: rgba(56, 142, 255, 1) !important;
@@ -710,6 +687,53 @@ ${JSON.stringify(confirmData, null, 2)}
           }
 
         .date-range-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          &.single-date-mode {
+            .fixed-start-date {
+              background-color: rgba($color: #000000, $alpha: .04);
+              border: 1px solid rgba(232, 246, 255, 1);
+              padding: 0 8px;
+              height: 24px;
+              line-height: 22px;
+              border-radius: 4px;
+              color: rgba($color: #000000, $alpha: .3);
+              font-size: 12px;
+              box-sizing: border-box;
+              cursor: not-allowed;
+            }
+
+            .range-separator {
+              color: rgba(0, 0, 0, 0.45);
+              font-size: 12px;
+            }
+
+            .end-date-picker {
+              width: 105px !important;
+              
+              ::v-deep .el-input__inner {
+                background-color: rgba(232, 246, 255, 1);
+                border: 1px solid rgba(232, 246, 255, 1);
+                height: 24px !important;
+                line-height: 24px !important;
+                color: rgba(56, 142, 255, 1);
+                font-size: 12px;
+                padding: 0 8px 0 8px;
+              }
+
+              ::v-deep .el-input__prefix {
+                left: 4px;
+                .el-input__icon {
+                  line-height: 24px;
+                  font-size: 12px;
+                  color: rgba(56, 142, 255, 1);
+                }
+              }
+            }
+          }
+
           ::v-deep .el-range-editor.el-input__inner {
             background-color: rgba(232, 246, 255, 1);
             border: 1px solid rgba(232, 246, 255, 1);
