@@ -221,7 +221,7 @@ export default {
   computed: {
     problemSheetAssignmentBool: {
       get() {
-        return this.formData.problemSheetAssignment === 1;
+        return +this.formData.problemSheetAssignment === 1;
       },
       set(val) {
         this.formData.problemSheetAssignment = val ? 1 : 0;
@@ -325,6 +325,7 @@ export default {
   },
   methods: {
     async initFormData(data) {
+      console.log('initFormData', data);
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       
@@ -383,9 +384,13 @@ export default {
       }
 
       // 如果是根目录也返回所有门店
-      if(areas.length === 1 && areas[0].nodeType === 0 && !areas[0].parentId) {
-        this.formData.storeKey = '0';
-        return;
+      // 根目录判断：path 只有一级，例如 "/rootId/" (split 后过滤空值长度为 1)
+      if(areas.length === 1 && areas[0].nodeType === 0) {
+        const pathSegments = (areas[0].path || '').split('/').filter(Boolean);
+        if (pathSegments.length === 1) {
+          this.formData.storeKey = '0';
+          return;
+        }
       }
 
       try {
