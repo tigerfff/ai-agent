@@ -3,7 +3,7 @@
       <el-popover
         ref="popover"
         v-model="expand"
-        placement="bottom-start"
+        placement="right-end"
         width="620"
         trigger="manual"
         popper-class="area-picker-popover"
