@@ -104,21 +104,31 @@
         <div class="label">任务有效期</div>
         <div class="content">
           <div v-if="!isConfirmed && !isHistoryDisabled" class="date-range-wrapper single-date-mode">
-            <span class="fixed-start-date">{{ formData.startDate || '今天' }}</span>
+            <el-date-picker
+              v-model="formData.startDate"
+              type="date"
+              size="mini"
+              placeholder="开始日期"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+              :picker-options="startDatePickerOptions"
+              popper-class="patrol-plan-picker-popper"
+              class="start-date-picker"
+            />
             <span class="range-separator">~</span>
             <el-date-picker
               v-model="formData.endDate"
               type="date"
               size="mini"
               placeholder="结束日期"
-              format="yyyy/MM/dd"
+              format="yyyy-MM-dd"
               value-format="yyyy-MM-dd"
               :picker-options="endDatePickerOptions"
               popper-class="patrol-plan-picker-popper"
               class="end-date-picker"
             />
-            <div v-if="!formData.endDate" class="error-tip">
-              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择结束日期
+            <div v-if="!formData.startDate || !formData.endDate" class="error-tip">
+              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
             </div>
           </div>
           <div v-else class="text-display">{{ formData.startDate }} ~ {{ formData.endDate }}</div>
@@ -265,15 +275,48 @@ export default {
 
       return issueDays.join('，');
     },
+    startDatePickerOptions() {
+      return {
+        disabledDate: (time) => {
+          const now = new Date();
+          // 今天 0 点
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+          // 一年后的今天
+          const oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()).getTime();
+          
+          // 1. 基础限制：开始日期不能早于今天，且不能超过一年
+          if (time.getTime() < today || time.getTime() > oneYearLater) {
+            return true;
+          }
+          
+          // 2. 周期频次限制（周频次）：开始日期只能选周一
+          if (this.formData.frequency === 2) {
+            const day = time.getDay();
+            // 1 表示周一
+            return day !== 1;
+          }
+          
+          return false;
+        }
+      };
+    },
     endDatePickerOptions() {
       return {
         disabledDate: (time) => {
           const now = new Date();
           // 今天 0 点
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+          // 一年后的今天
+          const oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()).getTime();
           
-          // 1. 基础限制：结束日期不能早于今天
-          if (time.getTime() < today) {
+          let minDate = today;
+          if (this.formData.startDate) {
+            const start = new Date(this.formData.startDate.replace(/-/g, '/'));
+            minDate = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+          }
+
+          // 1. 基础限制：结束日期不能早于 minDate，且不能超过一年
+          if (time.getTime() < minDate || time.getTime() > oneYearLater) {
             return true;
           }
           
@@ -694,24 +737,12 @@ ${JSON.stringify(confirmData, null, 2)}
           gap: 8px;
 
           &.single-date-mode {
-            .fixed-start-date {
-              background-color: rgba($color: #000000, $alpha: .04);
-              border: 1px solid rgba(232, 246, 255, 1);
-              padding: 0 8px;
-              height: 24px;
-              line-height: 22px;
-              border-radius: 4px;
-              color: rgba($color: #000000, $alpha: .3);
-              font-size: 12px;
-              box-sizing: border-box;
-              cursor: not-allowed;
-            }
-
             .range-separator {
               color: rgba(0, 0, 0, 0.45);
               font-size: 12px;
             }
 
+            .start-date-picker,
             .end-date-picker {
               width: 105px !important;
               

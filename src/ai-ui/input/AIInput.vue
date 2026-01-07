@@ -641,13 +641,21 @@ export default {
       onText: (text, isFinal) => {
         if (isFinal) {
           // 句子结束，确认文本
-          this.confirmedText += text;
+          let nextConfirmed = this.confirmedText + text;
+          if (this.maxLength && nextConfirmed.length > this.maxLength) {
+            nextConfirmed = nextConfirmed.substring(0, this.maxLength);
+          }
+          this.confirmedText = nextConfirmed;
           this.tempRecognitionText = '';
           this.inputValue = this.confirmedText;
         } else {
           // 实时识别结果
+          let nextInput = this.confirmedText + text;
+          if (this.maxLength && nextInput.length > this.maxLength) {
+            nextInput = nextInput.substring(0, this.maxLength);
+          }
           this.tempRecognitionText = text;
-          this.inputValue = this.confirmedText + text;
+          this.inputValue = nextInput;
         }
         this.$nextTick(() => {
           this.adjustHeight();
@@ -1046,7 +1054,11 @@ export default {
      * @param {string} text - 要设置的文本
      */
     setText(text) {
-      this.inputValue = text || '';
+      let val = text || '';
+      if (this.maxLength && val.length > this.maxLength) {
+        val = val.substring(0, this.maxLength);
+      }
+      this.inputValue = val;
     },
     
     /* ========== 菜单相关方法 ========== */
