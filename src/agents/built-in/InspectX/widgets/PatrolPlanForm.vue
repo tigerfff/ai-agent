@@ -326,13 +326,10 @@ export default {
   methods: {
     async initFormData(data) {
       console.log('initFormData', data);
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       
       this.formData = {
         ...this.formData,
         ...data,
-        startDate: todayStr, // 强制开始日期为今天
         patrolTime: data.patrolTime || { timeType: 0, timeList: [] }
       };
       

@@ -177,5 +177,9 @@ export default {
 1. 当 `groupable` 为 `true` 时，会自动按时间分组
 2. 置顶的会话会显示在最前面
 3. 分组标题支持点击折叠/展开
-4. `time` 字段用于显示，`createTime`/`updateTime` 用于分组计算
+4. `time`字段用于显示，`createTime`/`updateTime` 用于分组计算
+5. **重命名功能**：
+   - 鼠标悬停在真实会话项（非 `conv-` 开头的临时会话）上时，会显示编辑图标。
+   - 点击编辑图标可修改会话标题。
+   - 会话标题的更新通过 `rename` 命令触发。
 

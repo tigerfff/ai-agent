@@ -85,7 +85,7 @@ interface MessageItem {
 | 插槽名 | 说明 | 作用域参数 |
 |--------|------|-----------|
 | widget | 自定义 Widget 渲染 | { info: Object, item: MessageItem, index: number } |
-| footer | 消息底部内容 | { item: MessageItem, index: number } |
+| footer | 消息底部内容 | { item: MessageItem, index: number, isLast: boolean } |
 | avatar | 自定义头像 | { item: MessageItem, index: number } |
 
 ## 使用示例
@@ -237,7 +237,7 @@ export default {
 3. **回到底部按钮**：
    - 当距离底部超过 `backButtonThreshold`（默认 150px）时显示
    - 点击按钮可以快速滚动到底部
-   - 如果有新消息，按钮上会显示"新消息"提示
+   - **新消息动画**：当有新消息到达且用户不在底部时，按钮会显示一个蓝色渐变圆环旋转动画（Loading Ring），提示用户下方有未读消息。
 
 #### 配置参数
 

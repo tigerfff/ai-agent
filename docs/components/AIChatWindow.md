@@ -110,4 +110,8 @@ export default {
 1. 组件内部使用了 `AIAgentContainer`，所有 `AIAgentContainer` 的功能都可用
 2. `open` 方法需要在 `visible` 变为 `true` 后调用（使用 `$nextTick`）
 3. 如果不传 `agentId`，会显示首页（智能体列表）
+4. **窗口周期会话逻辑**：
+   - 每次窗口从关闭状态打开（`visible` 由 `false` 变 `true`）时，会重置所有智能体的“周期缓存”。
+   - 在同一个窗口周期内，切换智能体会保留该智能体上一次的对话状态。
+   - 重新打开窗口则会为每个智能体开启全新的对话。
 
