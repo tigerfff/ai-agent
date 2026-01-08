@@ -1,0 +1,121 @@
+/**
+ * Element UI 日期/时间选择器统一样式
+ * 主题色：rgba(56, 142, 255, 1)
+ */
+
+// 日期选择器弹窗样式（通过 popper-class 应用）
+.patrol-plan-picker-popper,
+.ai-time-tag-picker-popper {
+  // 时间选择器选中项
+  .el-time-spinner__item.active {
+    color: #fff !important;
+    background-color: rgba(56, 142, 255, 1) !important;
+  }
+
+  // 确认按钮
+  .el-time-panel__btn.el-button--primary,
+  .el-button.el-button--primary {
+    background-color: rgba(56, 142, 255, 1) !important;
+    border-color: rgba(56, 142, 255, 1) !important;
+
+    &:hover {
+      background-color: rgba(56, 142, 255, 0.8) !important;
+      border-color: rgba(56, 142, 255, 0.8) !important;
+    }
+  }
+
+  // 日期选择器表格样式
+  .el-date-table {
+    td.today {
+      color: rgba(56, 142, 255, 0.8) !important;
+      
+      span {
+        color: rgba(56, 142, 255, 0.8) !important;
+      }
+    }
+    
+    td.start-date,
+    td.end-date {
+      background-color: rgba(56, 142, 255, 1) !important;
+      color: #fff !important;
+      
+      &:hover {
+        background-color: rgba(56, 142, 255, 0.8) !important;
+      }
+
+      span {
+        color: #FFF !important;
+      }
+    }
+
+    td.selected,
+    td.current {
+      color: #FFF !important;
+      background-color: rgba(56, 142, 255, 1) !important;
+      
+      span {
+        color: #FFF !important;
+      }
+    }
+  }
+
+  // 日期、月份、年份表格中"今天"的标记
+  .el-date-table td.today:after,
+  .el-month-table td.today:after,
+  .el-year-table td.today:after {
+    color: rgba(56, 142, 255, 1) !important;
+  }
+
+  // 日期选择器头部标签
+  .el-picker-panel__header-label {
+    &.active {
+      color: #FFF !important;
+      background-color: rgba(56, 142, 255, 1) !important;
+    }
+
+    &:hover {
+      color: #FFF !important;
+      background-color: rgba(56, 142, 255, 1) !important;
+    }
+  }
+
+  // 月份和年份表格中的选中和当前项
+  .el-month-table,
+  .el-year-table {
+    td.today {
+      background-color: rgba(56, 142, 255, 1) !important;
+      color: #FFF !important;
+      
+      span {
+        color: #FFF !important;
+      }
+    }
+    
+    td.current {
+      color: rgba(56, 142, 255, 1) !important;
+      
+      span {
+        color: rgba(56, 142, 255, 1) !important;
+      }
+    }
+  }
+}
+
+// 日期选择器输入框样式（通过类名应用，需要在组件内使用 ::v-deep）
+// 注意：这些样式需要在组件的 scoped style 中使用，这里只提供注释说明
+// .start-date-picker,
+// .end-date-picker {
+//   width: 105px !important;
+//   
+//   ::v-deep .el-input__inner {
+//     background-color: rgba(232, 246, 255, 1);
+//     border: 1px solid rgba(232, 246, 255, 1);
+//     height: 24px !important;
+//     line-height: 24px !important;
+//     color: rgba(56, 142, 255, 1);
+//     font-size: 12px;
+//     padding: 0 8px 0 8px;
+//   }
+//   ...
+// }
+

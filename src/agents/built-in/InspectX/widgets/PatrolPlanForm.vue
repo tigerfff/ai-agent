@@ -82,11 +82,11 @@
               popper-class="patrol-plan-picker-popper"
               class="end-date-picker"
             />
-            <div v-if="!formData.startDate || !formData.endDate" class="error-tip">
-              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
-            </div>
           </div>
           <div v-else class="text-display">{{ formData.startDate }} ~ {{ formData.endDate }}</div>
+          <div v-if="!formData.startDate || !formData.endDate" class="error-tip">
+              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
+            </div>
         </div>
       </div>
 
@@ -571,6 +571,13 @@ ${JSON.stringify(confirmData, null, 2)}
                   color: rgba(56, 142, 255, 1);
                 }
               }
+              
+              ::v-deep .el-input__suffix {
+                .el-input__icon,
+                .el-date-editor__icon {
+                  color: rgba(56, 142, 255, 1) !important;
+                }
+              }
             }
           }
 
@@ -622,108 +629,8 @@ ${JSON.stringify(confirmData, null, 2)}
 }
 </style>
 
-<!-- 时间/日期选择器弹窗样式（因为使用了 append-to-body，需要使用全局样式，但必须通过 unique class 限制范围） -->
+<!-- 特殊的全局组件样式，使用父级容器类名限制范围 -->
 <style lang="scss">
-  .patrol-plan-picker-popper {
-    // 选中的时间项
-    .el-time-spinner__item.active {
-      color: #fff !important;
-      background-color: rgba(56, 142, 255, 1) !important;
-    }
-
-    // 确认按钮
-    .el-time-panel__btn.el-button--primary,
-    .el-button.el-button--primary {
-      background-color: rgba(56, 142, 255, 1) !important;
-      border-color: rgba(56, 142, 255, 1) !important;
-
-      &:hover {
-        background-color: rgba(56, 142, 255, 0.8) !important;
-        border-color: rgba(56, 142, 255, 0.8) !important;
-      }
-    }
-
-    // 日期选择器样式
-    .el-date-table {
-
-      td.today {
-        color: rgba(56, 142, 255, 0.8) !important;
-        
-        span {
-          color: rgba(56, 142, 255, 0.8) !important;
-        }
-      }
-      
-      td.start-date,
-      td.end-date {
-        background-color: rgba(56, 142, 255, 1) !important;
-        color: #fff !important;
-        
-        &:hover {
-          background-color: rgba(56, 142, 255, 0.8) !important;
-        }
-
-        span {
-          color: #FFF !important;
-        }
-      }
-      
-      
-
-      td.selected,
-      td.current {
-        color: #FFF !important;
-        background-color: rgba(56, 142, 255, 1) !important;
-        
-        span {
-          color: #FFF !important;
-        }
-      }
-    }
-
-    // 日期、月份、年份表格中"今天"的标记
-    .el-date-table td.today:after,
-    .el-month-table td.today:after,
-    .el-year-table td.today:after {
-      color: rgba(56, 142, 255, 1) !important;
-    }
-
-    // 日期选择器头部标签
-    .el-picker-panel__header-label {
-      &.active {
-        color: #FFF !important;
-        background-color: rgba(56, 142, 255, 1) !important;
-      }
-
-      &:hover {
-        color: #FFF !important;
-        background-color: rgba(56, 142, 255, 1) !important;
-      }
-    }
-
-    // 月份和年份表格中的选中和当前项
-    .el-month-table,
-    .el-year-table {
-      td.today {
-        background-color: rgba(56, 142, 255, 1) !important;
-        color: #FFF !important;
-        
-        span {
-          color: #FFF !important;
-        }
-      }
-      
-      td.current {
-        color: rgba(56, 142, 255, 1) !important;
-        
-        span {
-          color: rgba(56, 142, 255, 1) !important;
-        }
-      }
-    }
-  }
-
-  // 特殊的全局组件样式，使用父级容器类名限制范围
   .patrol-plan-form-container {
     .hik-cloud-eBreadcrumb {
       .touchable {
@@ -732,7 +639,5 @@ ${JSON.stringify(confirmData, null, 2)}
       }
     }
   }
-
-  // 下拉选择器全局样式，应尽量通过 popper-class 限制，此处暂保持但提醒注意
 </style>
 

@@ -8,6 +8,7 @@
 // 组件样式
 @use './message-box.scss';
 @use './select.scss';
+@use './date-picker.scss';
 
 // 注意：组件内部的 <style> 标签样式会通过 Vue 组件自动处理
 // 这里只包含全局样式和工具类
