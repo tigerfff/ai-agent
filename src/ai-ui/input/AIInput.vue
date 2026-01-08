@@ -709,7 +709,9 @@ export default {
   beforeDestroy() {
     // 清理语音识别器
     if (this.recognizer) {
+      // 停止识别（stop 内部已包含 destroyStream 释放麦克风逻辑）
       this.recognizer.stop();
+      this.isRecording = false;
     }
     // 移除事件监听器
     if (this.handleClickOutside) {
@@ -998,6 +1000,8 @@ export default {
         return new Promise((resolve) => {
           this.pendingStopResolver = resolve;
           this.recognizer.stop();
+          // 立即同步状态，防止重复触发
+          this.isRecording = false;
           
           // 安全兜底：1.5秒后如果还没触发 onStop 则强制 resolve
           setTimeout(() => {

@@ -129,11 +129,13 @@ export class SpeechRecognizerWrapper {
     if (this.recognizer) {
       try {
         // WebAudioSpeechRecognizer 会自动停止录音和识别
-      this.recognizer.stop();
+        this.recognizer.stop();
         console.log('[ASR] 已停止识别');
       } catch (e) {
         console.warn('[ASR] Stop error:', e);
       }
+      // 释放麦克风权限
+      this.destroyStream();
       this.recognizer = null;
     }
     // 不需要调用 onStop()，因为 OnRecognitionComplete 会触发

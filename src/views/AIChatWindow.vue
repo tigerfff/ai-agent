@@ -9,19 +9,20 @@
     append-to-body
     @close="handleClose"
   >
-    <AgentContainer
-      ref="agentContainer"
-      :is-mini="isMini"
-      v-bind="$attrs"
-      v-on="$listeners"
-      @close="handleClose"
-      @toggle-size="handleToggleSize"
-    >
-      <!-- 透传插槽 -->
-      <template v-for="(_, slot) in $scopedSlots" v-slot:[slot]="scope">
-        <slot :name="slot" v-bind="scope" />
-      </template>
-    </AgentContainer>
+      <AgentContainer
+        v-if="visible"
+        ref="agentContainer"
+        :is-mini="isMini"
+        v-bind="$attrs"
+        v-on="$listeners"
+        @close="handleClose"
+        @toggle-size="handleToggleSize"
+      >
+        <!-- 透传插槽 -->
+        <template v-for="(_, slot) in $scopedSlots" v-slot:[slot]="scope">
+          <slot :name="slot" v-bind="scope" />
+        </template>
+      </AgentContainer>
   </AIDrawer>
 </template>
 
