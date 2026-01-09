@@ -147,9 +147,12 @@
                   v-else
                   :src="voiceIcon" 
                   alt="语音输入" 
+                  style="width: 32px; height: 32px;"
                   class="icon-img" 
                 />
               </div>
+
+              <span style="color: rgba(0,0,0,0.08)">|</span>
 
               <!-- 停止按钮 -->
               <div 
@@ -173,6 +176,7 @@
                 <img 
                   :src="actionButtons.send.disabled ? sendDisabledIcon : sendIcon" 
                   alt="发送" 
+                  style="width: 32px; height: 32px;"
                   class="icon-img" 
                 />
               </div>
@@ -709,7 +713,6 @@ export default {
   beforeDestroy() {
     // 清理语音识别器
     if (this.recognizer) {
-      // 停止识别（stop 内部已包含 destroyStream 释放麦克风逻辑）
       this.recognizer.stop();
       this.isRecording = false;
     }
@@ -1000,7 +1003,8 @@ export default {
         return new Promise((resolve) => {
           this.pendingStopResolver = resolve;
           this.recognizer.stop();
-          // 立即同步状态，防止重复触发
+
+           // 立即同步状态，防止重复触发
           this.isRecording = false;
           
           // 安全兜底：1.5秒后如果还没触发 onStop 则强制 resolve
@@ -1062,7 +1066,6 @@ export default {
       if (this.maxLength && val.length > this.maxLength) {
         val = val.substring(0, this.maxLength);
       }
-      this.inputValue = val;
     },
     
     /* ========== 菜单相关方法 ========== */
@@ -1099,7 +1102,7 @@ export default {
     position: relative;
     box-sizing: border-box;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid rgba(0,0,0,0.12);
     transition: all 0.2s;
 
@@ -1127,7 +1130,7 @@ export default {
       flex-direction: column;
       width: 100%;
       min-height: 100px;
-      padding: 12px 0 12px 16px;
+      padding: 12px 0 12px 12px;
       box-sizing: border-box;
 
       .input-row {
@@ -1198,7 +1201,7 @@ export default {
         justify-content: space-between;
         align-items: center;
         margin-top: 8px;
-        padding-right: 16px;
+        padding-right: 12px;
 
         .action-left,
         .action-right {

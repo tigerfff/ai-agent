@@ -59,7 +59,7 @@
         <div class="label">任务有效期</div>
         <div class="content">
           <div v-if="!isConfirmed && !isHistoryDisabled" class="date-range-wrapper single-date-mode">
-            <el-date-picker
+             <el-date-picker
               v-model="formData.startDate"
               type="date"
               size="mini"
@@ -76,7 +76,7 @@
               type="date"
               size="mini"
               placeholder="结束日期"
-              format="yyyy-MM-dd"
+              format="yyyy/MM/dd"
               value-format="yyyy-MM-dd"
               :picker-options="endDatePickerOptions"
               popper-class="patrol-plan-picker-popper"
@@ -85,14 +85,14 @@
           </div>
           <div v-else class="text-display">{{ formData.startDate }} ~ {{ formData.endDate }}</div>
           <div v-if="!formData.startDate || !formData.endDate" class="error-tip">
-              <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
-            </div>
+            <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
+          </div>
         </div>
       </div>
 
       <!-- 门店整改推送 -->
       <div class="form-item align-center">
-        <div class="label">门店整改推送</div>
+        <div class="label">{{ applicationSceneName }}整改推送</div>
         <div class="content">
           <el-switch
             v-if="!isConfirmed && !isHistoryDisabled"
@@ -138,9 +138,9 @@ import { AreaPickerApi } from '@/ai-ui/base-form/AreaPickerSelect/proxy';
 export default {
   name: 'PatrolPlanForm',
   components: {
+    AITimeTagPicker,
     AreaPickerSelect,
-    AIButton,
-    AITimeTagPicker
+    AIButton
   },
   props: {
     data: {
@@ -196,9 +196,9 @@ export default {
       if (!this.selectedAreas || this.selectedAreas.length === 0) return '';
       return this.selectedAreas.map(a => a.nodeName).join('、');
     },
-    hasTimeConflict() {
-      const list = this.formData.patrolTime.timeList || [];
-      const timeType = this.formData.patrolTime.timeType;
+     hasTimeConflict() {
+      const list = this.formData.patrolTime?.timeList || [];
+      const timeType = this.formData.patrolTime?.timeType;
       if (list.length <= 1) return false;
       
       return list.some((time, index) => {
@@ -430,6 +430,35 @@ export default {
     handleSwitchChange(val) {
       this.formData.problemSheetAssignment = val ? 1 : 0;
     },
+   
+    /**
+     * 处理时间选择器选择结果
+     */
+    handleTimePickerChange(val) {
+      const timeType = this.formData.patrolTime.timeType;
+      
+      if (timeType === 0) {
+        // 时间段：val 是数组 [startTime, endTime]
+        if (val && Array.isArray(val) && val.length === 2) {
+          this.formData.patrolTime.timeList.push({
+            aiStartTime: val[0],
+            aiEndTime: val[1]
+          });
+          // 清空临时值，以便下次选择
+          this.tempTimeRange = [];
+        }
+      } else {
+        // 时间点：val 是单个时间字符串，开始和结束时间相同
+        if (val) {
+          this.formData.patrolTime.timeList.push({
+            aiStartTime: val,
+            aiEndTime: val
+          });
+          // 清空临时值，以便下次选择
+          this.tempTime = null;
+        }
+      }
+    },
     handleConfirm() {
       this.isConfirmed = true;
       
@@ -548,7 +577,6 @@ ${JSON.stringify(confirmData, null, 2)}
               color: rgba(0, 0, 0, 0.45);
               font-size: 12px;
             }
-
             .start-date-picker,
             .end-date-picker {
               width: 105px !important;
@@ -571,8 +599,8 @@ ${JSON.stringify(confirmData, null, 2)}
                   color: rgba(56, 142, 255, 1);
                 }
               }
-              
-              ::v-deep .el-input__suffix {
+
+               ::v-deep .el-input__suffix {
                 .el-input__icon,
                 .el-date-editor__icon {
                   color: rgba(56, 142, 255, 1) !important;
@@ -628,16 +656,3 @@ ${JSON.stringify(confirmData, null, 2)}
   }
 }
 </style>
-
-<!-- 特殊的全局组件样式，使用父级容器类名限制范围 -->
-<style lang="scss">
-  .patrol-plan-form-container {
-    .hik-cloud-eBreadcrumb {
-      .touchable {
-        --ym-primary: rgba(56, 142, 255, 1) !important;
-        color: rgba(56, 142, 255, 1) !important;
-      }
-    }
-  }
-</style>
-

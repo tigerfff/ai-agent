@@ -79,8 +79,9 @@
         :src="likeIconSrc" 
         class="action-icon" 
         size="24"
-        :color="localLikeStatus === 'like' ? '#388eff' : 'currentColor'"
+        v-if="localLikeStatus !== 'like'"
       />
+      <img v-else :src="likeIconSrc" alt="" width="24px" height="24px">
     </div>
 
     <!-- 4. 踩 -->
@@ -95,8 +96,9 @@
         :src="dislikeIconSrc" 
         class="action-icon" 
         size="24"
-        :color="localLikeStatus === 'dislike' ? '#388eff' : 'currentColor'"
+        v-if="localLikeStatus !== 'dislike'"
       />
+       <img v-else :src="dislikeIconSrc" alt="" width="24px" height="24px">
     </div>
 
     <slot name="after-custom-actions"></slot>

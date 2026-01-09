@@ -6,7 +6,6 @@
  * @param {Function} setUploadingState - 设置上传状态的回调 (state: boolean) => void
  */
 export async function handleAgentPreUpload(rawFiles, context, uploader, setUploadingState) {
-  console.log('handleAgentPreUpload', rawFiles, context, uploader, setUploadingState);
   const { updateItem } = context;
 
   if (!uploader) {

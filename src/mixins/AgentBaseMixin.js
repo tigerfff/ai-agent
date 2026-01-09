@@ -418,9 +418,9 @@ export const AgentBaseMixin = {
         lastMsg.loading = false;
         lastMsg.typing = false;
         
-        // 如果此时还没有任何内容产出，补充 [调用已取消]
+        // 如果此时还没有任何内容产出，补充 [用户已终止回答]
         if (!lastMsg.content || !lastMsg.content.trim()) {
-          lastMsg.content = '[调用已取消]';
+          lastMsg.content = '[用户已终止回答]';
         }
       }
 

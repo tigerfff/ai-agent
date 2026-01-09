@@ -16,8 +16,8 @@
         @click="currentPlayerControllerIndex = idx"
         v-show="playerCount > idx">
         <div :id="p.containerID">
-          <span class="tips">请选择监控点</span>
-          <!-- <span class="tips" v-show="!p||!p.player">请选择监控点</span> -->
+          <!-- <span class="tips">请选择监控点</span> -->
+          <span class="tips" v-show="!p||!p.player">请选择监控点</span>
         </div>
       </div>
       <waterMark v-if="watermarkStatus" ref="watermark" v-show="false"></waterMark>
@@ -31,7 +31,7 @@ import waterMark from './simpleWaterMark.vue'
 import { v1 as uuidv1 } from 'uuid'
 import moment from 'moment'
 import _ from 'lodash'
-import { loadScript } from './script-load.js'
+import { loadEZUIKit } from './scriptUtils.js'
 
 export default {
   name: 'uikitComponent',
@@ -106,7 +106,6 @@ export default {
   },
   computed: {
     isHD() {
-      // return this.$store.state.userInfo.videoLevelStatus === 2
       return true
     },
     currentPlayerController() {
@@ -232,8 +231,8 @@ export default {
       this.downloadTimer = null 
     },
     startExtraBtnDownload (pc, downloadVideoName) { // 扩展的录制按钮开始的一些状态设置
-      pc.player.Theme.countTime('add', 0)
-      // pc.player.countTime('add', 0)
+      // pc.player.Theme.countTime('add', 0)
+      pc.player.countTime('add', 0)
       if (downloadVideoName) {
         pc.player.startSave(downloadVideoName)
       } else {
@@ -242,8 +241,8 @@ export default {
     },
     stopExtraBtnDownload (pc) { // 扩展的录制按钮停止的一些状态清除，
       pc.player.stopSave()
-      pc.player.Theme.countTime('destroy', 0)
-      // pc.player.countTime('destroy', 0)
+      // pc.player.Theme.countTime('destroy', 0)
+      pc.player.countTime('destroy', 0)
       pc.player.pluginStatus.loadingClear()
     },
     /**
@@ -463,7 +462,6 @@ export default {
     // 内部方法，播放视频请使用playMacVideo
     async playVideo(pc) {
       let isHD = this.isHD
-      // let channelVideoLevel = this.$store.state.userInfo.videoLevelStatus
       let channelVideoLevel = 3
       if (this.videoLevelEnable && this.localChannelVideoLevel[pc.playInfo.channelId]) {
         channelVideoLevel = this.localChannelVideoLevel[pc.playInfo.channelId]?.videoLevel
@@ -478,14 +476,31 @@ export default {
       pc.url = `ezopen://${pc.playInfo.validateCode ? pc.playInfo.validateCode + '@' : ''}open.ys7.com/${pc.playInfo.deviceSerial}/${pc.playInfo.channelNo}${isHD ? '.hd' : ''}.${this.playModelTag}`
       let playUrl = pc.url
       if (this.switchVideo && pc.playInfo.startTime) {
-        // 控件的回放时间是秒级，这里兼容下，外部可以统一处理
         playUrl += `?begin=${moment(+pc.playInfo.startTime * 1000).format('yyyyMMDDHHmmss')}`
+      }
+      if (pc.player) {
+        pc.player.changePlayUrl({
+          url: playUrl,
+          accessToken: pc.accessToken,
+          token: pc.token,
+        }, () => {
+          pc.player.changeTheme(this.currentThemeData)
+        }, false).then(() => {
+          pc.player.Talk.changeTalkChannelNo(pc.playInfo.channelNo)
+        }).catch((params) => {
+            if(params && [5402, 5404, 5405, 5406, 5411, 5507, 5546, 9048, 9049, 5451, 5558, 6701, 6103].includes(+params.code)) { // 临时方案，异常code首次无法显示，手动触发下
+              pc.player.play()
+            }
+        }).finally(() => {
+          pc.player.changeTheme(this.currentThemeData)
+        })
+        return
       }
       this.syncSize()
       try {
-        // if (!window.EZUIKit) {
-        //   await loadScript('/static/hik-cloud-player-static/ezuikit.js')
-        // }
+        if (!window.EZUIKit) {
+          await loadEZUIKit()
+        }
         pc.player = new EZUIKit.EZUIKitPlayer({
           id: pc.containerID, // 视频容器ID
           url: playUrl,
@@ -516,8 +531,8 @@ export default {
             this.updateLocalChannelVideoLevel(pc)
             this.injectWatermarkIfNeeded(pc)
 
-            let hideId = document.getElementsByClassName('header-controls')[0]
-            hideId.style.display = 'none'
+            // let hideId = document.getElementsByClassName('header-controls')[0]
+            // hideId.style.display = 'none'
 
             this.playSuccessCallback(true)
           },
@@ -809,7 +824,6 @@ export default {
   flex: 1;
   overflow: hidden;
   position: relative;
-  line-height: 0px;
   display: flex;
   flex-direction: column;
   .agent-video-switch {

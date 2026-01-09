@@ -21,12 +21,12 @@
         <template #bottom>
           <slot name="sidebar-bottom">
             <el-popover
-              placement="top-start"
+              placement="right-end"
               width="auto"
               trigger="hover"
               popper-class="ai-contact-popover"
             >
-              <img src="@/assets/images/scan-contact@3x.png" alt="扫码咨询" class="qrcode-img" />
+              <img src="@/assets/images/scan-contact_200@3x.png" alt="扫码咨询" class="qrcode-img" />
               <div slot="reference" class="contact-btn">
                 <img v-if="!isCollapsed" src="@/assets/images/business-contact@3x.png" alt="商务接洽" class="contact-img-full" />
                 <img v-else src="@/assets/images/business-contact@3x-1.png" alt="商务接洽" class="contact-img-mini" />
@@ -73,7 +73,7 @@
               class="header-title-actions"
             >
               <div class="edit-btn" @click="handleTitleRename" title="重命名">
-                <AIIcon :src="editIcon" :size="24" color="rgba(0, 0, 0, 0.7)" />
+                <AIIcon :src="editIcon" :size="24" color="rgba(0, 0, 0, 1)" />
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ import addIcon from '@/assets/svg/add.svg';
 import expandIcon from '@/assets/svg/expand.svg';
 import collapseIcon from '@/assets/svg/collapse.svg';
 import closeWindowIcon from '@/assets/svg/close-window.svg';
-import editIcon from '@/assets/svg/edit.svg';
+import editIcon from '@/assets/svg/top-edit.svg';
 import AIIcon from '@/ai-ui/icon/AIIcon.vue';
 
 export default {
@@ -877,9 +877,10 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
+      padding:  8px 16px 0 16px;
       background: transparent;
       z-index: 10;
+      box-sizing: content-box;
       
       .header-left, .header-right {
         display: flex;
@@ -996,14 +997,15 @@ export default {
 
 .qrcode-img {
   display: block;
-  width: 120px;
-  height: 120px;
+  width: 194px;
+  height: 216px;
 }
 
 .contact-btn {
   cursor: pointer;
   display: flex;
   justify-content: center;
+ 
   
   .contact-img-full {
     height: auto;
@@ -1014,6 +1016,10 @@ export default {
   .contact-img-mini {
     width: 32px;
     height: 32px;
+    padding: 4px;
+    background: #FFF;
+    border-radius: 8px;
+
   }
 }
 </style>
@@ -1046,5 +1052,9 @@ export default {
   min-width: 0 !important;
   box-shadow: none !important;
   background-color: transparent !important;;
+
+  .popper__arrow {
+    display: none !important;
+  }
 }
 </style>

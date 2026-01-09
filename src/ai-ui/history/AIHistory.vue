@@ -8,7 +8,7 @@
     >
       <div class="history-inner">
         <!-- 顶部加载指示器 -->
-        <div v-if="loading || noMore" class="history-load-more" ref="loadMoreRef">
+        <div v-if="loading" class="history-load-more" ref="loadMoreRef">
           <template v-if="loading">
             <i class="h-icon-loading history-loading-icon"></i>
             <span>{{ loadingText }}</span>
@@ -37,9 +37,9 @@
             <slot :name="slotName" v-bind="slotData" :item="item" :index="index"></slot>
           </template>
 
-          <!-- 2. 默认 Footer (操作栏) -->
-          <template #footer>
-            <!-- 优先使用父组件传入的 footer 插槽 -->
+            <!-- 2. 默认 Footer (操作栏) -->
+            <template #footer>
+              <!-- 优先使用父组件传入的 footer 插槽 -->
               <slot name="footer" :item="item" :index="index" :is-last="index === list.length - 1">
               <BubbleFooter 
                 v-if="enableActions"

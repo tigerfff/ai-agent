@@ -3,8 +3,7 @@
     <div class="empty-content">
       <div class="empty-icon">
         <img v-if="displayIcon" :src="displayIcon" :alt="displayTitle" />
-        <img v-else :src="trainingDefaultIcon" :alt="displayTitle"> 
-      </img>
+        <img v-else :src="trainingDefaultIcon" :alt="displayTitle" /> 
       </div>
       <div class="empty-title">{{ displayTitle }}</div>
       <div class="empty-description" v-if="displayDescription">{{ displayDescription }}</div>
@@ -12,23 +11,16 @@
         <slot name="action">
           <el-popover
             v-if="type === 'no-service'"
-            ref="qrPopover"
-            placement="right"
-            width="120"
-            trigger="hover"
-            popper-class="qr-code-popover"
-            :visble-arrow="false"
-            :offset="-100"
+            placement="right-end"
+            width="auto"
+            trigger="click"
+            popper-class="ai-contact-popover"
           > 
             <div slot="reference" class="scan-contact-btn">
               <img src="@/assets/svg/star-white.svg" alt="扫码联系" class="scan-contact-icon" />
               <span>{{ actionText || '扫码联系' }}</span>
             </div>
-            <div class="qr-code-popover-content">
-              <div class="qr-code-wrapper">
-                <img :src="scanContactImage" alt="扫码联系" class="qr-code-image" />
-              </div>
-            </div>
+            <img :src="scanContactImage" alt="扫码联系" class="qrcode-img" />
           </el-popover>
           <el-button 
             v-else-if="actionText" 
@@ -45,9 +37,10 @@
 
 <script>
 // 导入图片资源
+import noPermission from '@/assets/images/no-permission.png';
 import trainingDefaultIcon from '@/assets/images/training-default@3x.png';
 import noPurchaseIcon from '@/assets/images/no-purchase@3x.png';
-import scanContactImage from '@/assets/images/scan-contact@3x.png';
+import scanContactImage from '@/assets/images/scan-contact_200@3x.png';
 
 export default {
   name: 'AIEmpty',
@@ -96,6 +89,7 @@ export default {
   },
   data() {
     return {
+      noPermission,
       trainingDefaultIcon,
       noPurchaseIcon,
       scanContactImage
@@ -111,7 +105,7 @@ export default {
       } else if (this.type === 'no-service') {
         return this.noPurchaseIcon;
       }
-      return this.icon || '';
+      return this.noPermission;
     },
     /**
      * 根据 type 自动确定显示的标题
@@ -210,7 +204,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(-82.01deg, rgba(161,75,254,1) 0%, rgba(5,189,254,1) 100%);
+      background: linear-gradient(-90deg, #9D83FF 0%, #388EFF 100%);
       width: 108px;
       height: 32px;
       border-radius: 8px;
@@ -256,42 +250,23 @@ export default {
 </style>
 
 <style lang="scss">
-  // 二维码弹窗样式
-.qr-code-popover {
+
+  .ai-contact-popover {
   padding: 0 !important;
   border-radius: 8px !important;;
   min-width: 0 !important;
   box-shadow: none !important;
-  
+  background-color: transparent !important;;
 
-  .qr-code-popover-content {
-    .qr-code-wrapper {
-      width: 120px;
-      height: 120px;
-      padding: 0;;
-      border: 1px solid #e4e7ed;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  .popper__arrow {
+    display: none !important;
+  }
 
-      .qr-code-image {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-    }
-
-    .qr-code-tip {
-      text-align: center;
-      color: rgba(0, 0, 0, 0.6);
-      font-size: 13px;
-      line-height: 18px;
-
-      p {
-        margin: 2px 0;
-      }
-    }
+  .qrcode-img {
+    display: block;
+    width: 194px;
+    height: 216px;
   }
 }
+
 </style>

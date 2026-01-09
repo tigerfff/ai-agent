@@ -512,7 +512,7 @@ export default {
     padding: 16px 0 12px;
 
     .footer-text {
-      font-size: 14px;
+      font-size: 12px;
       color: rgba($color: #000000, $alpha: .3);
       text-align: center;
       margin-top: 12px;

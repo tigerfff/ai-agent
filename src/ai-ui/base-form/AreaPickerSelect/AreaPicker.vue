@@ -1,18 +1,21 @@
 <template>
-    <hik-cloud-organizer
+    <hik-cloud-organization
       ref='transfer'
-      :waitSelect='options'
-      :loading='loading'
-      :tableHeadName='tableHeadName'
-      :isTranslate='needTransfer'
-      :checkStrictly ='checkStrictly'
-      @search='searchTrigger'
-      @breadClick='parentChange'
-      @clearSearch='getOptionsData'
-      @departmentChange='parentChange'
-      @selectionChange='selectionChange'
+      :waitSelect="options"
+      :loading="loading"
+      :tableHeadName="tableHeadName"
+      :isTranslate="needTransfer"
+      :checkStrictly ="checkStrictly"
+      @search="searchTrigger"
+      @breadClick="parentChange"
+      @clearSearch="getOptionsData"
+      @departmentChange="parentChange"
+      @selectionChange="selectionChange"
       @breadChange="breadChange">
-    </hik-cloud-organizer>
+      <template slot="rightOpear">
+        <span class="btn" style="color:#2196f3" @click="deleteAll">清空</span>
+      </template>
+    </hik-cloud-organization>
   </template>
   <script>
   import { AreaPickerApi } from './proxy'
@@ -52,6 +55,11 @@
           }
         }
         return arr;
+      },
+      deleteAll() {
+        this.$nextTick(()=>{
+          this.$refs.transfer.initSelected([])
+        })
       },
       breadChange(breads) {
         this.breads = breads
@@ -157,3 +165,9 @@
   }
   </script>
   
+  <style lang="scss" scoped>
+    .btn:hover{
+      cursor: pointer;
+      opacity: 0.8;
+    }
+  </style>

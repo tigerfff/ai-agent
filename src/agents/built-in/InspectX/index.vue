@@ -20,7 +20,7 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         @load-more="handleLoadMore"
-         :ignoreWidgetTypes="['ymform:patrol_plan_delete', 'ymform:patrol_plan_create_result','ymform:patrol_plan_confirm']"
+        :ignoreWidgetTypes="['ymform:patrol_plan_delete', 'ymform:patrol_plan_create_result']"
         class="history-full-width"
       >
         <template #widget="{ item, index }">
@@ -73,7 +73,7 @@
           :loading="isStreaming || isUploading"
           :showClearButton="false"
           :enable-stop-button="true"
-          placeholder="有问题尽管问我~"
+          placeholder="请描述巡查任务的门店范围、方向、时间频次、任务有效期等~"
           :allowed-types="['image']"
           :file-limit="{
             image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
@@ -132,7 +132,7 @@ export default {
       welcomeConfig: {
         icon: trainingSquareIcon,
         title: '智慧巡查',
-        description: '我可以帮你推荐培训内容、制定员工培训计划、检查培训结果，有培训问题随时找我哦～',
+        description: '我可以帮你自动执行门店巡检任务，定时推送巡检报告，帮助你更高效地工作～',
         prompts: [] // 从接口获取
       },
     };
@@ -316,7 +316,7 @@ export default {
     padding: 16px 0 12px;
 
     .footer-text {
-      font-size: 14px;
+      font-size: 12px;
       color: rgba($color: #000000, $alpha: .3);
       text-align: center;
       margin-top: 12px;

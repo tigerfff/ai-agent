@@ -403,7 +403,7 @@ export default {
   &.is-mini {
     .chat-area .content-wrapper,
     .footer .content-wrapper {
-      padding: 0 16px;
+      padding: 0 32px;
       max-width: 100%;
     }
   }

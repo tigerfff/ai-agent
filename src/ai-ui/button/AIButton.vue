@@ -53,7 +53,7 @@ export default {
 
 <style lang="scss" scoped>
 .ai-button {
-  background: linear-gradient(-82.01deg, rgba(161,75,254,1) 0%, rgba(5,189,254,1) 100%);
+  background: linear-gradient(-90deg, #9D83FF 0%, #388EFF 100%);
   width: 108px;
   height: 36px;
   display: flex;

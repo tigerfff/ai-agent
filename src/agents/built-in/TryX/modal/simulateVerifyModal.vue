@@ -456,7 +456,7 @@ export default {
       this.$message.info("视频录制已取消")
       this.videoStartSaveing = false
       await this.$refs.hkvideo.stopSaveVideo()
-      this.endTime = Date.now()
+      // this.endTime = Date.now()
       // 停止刷新token定时器
       if (this.refreshTokenTimer) {
         clearInterval(this.refreshTokenTimer)
@@ -478,7 +478,6 @@ export default {
         }, 5 * 60 * 1000)
       } else {
         this.$refs.hkvideo.stopSaveVideo()
-        this.endTime = Date.now()
         // 停止定时器
         if (this.refreshTokenTimer) {
           clearInterval(this.refreshTokenTimer)
@@ -488,6 +487,7 @@ export default {
     },
     getVideoSaveFile(res) {
       if(res && res.code === 0 && res.data && res.data.file) {
+        this.endTime = Date.now()
         // 计算视频文件大小并格式化显示
         let fileSize = ''
         try {
