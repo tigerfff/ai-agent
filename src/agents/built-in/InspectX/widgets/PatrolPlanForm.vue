@@ -96,6 +96,7 @@
         <div class="label">{{ applicationSceneName }}整改推送</div>
         <div class="content">
           <el-switch
+            size="small"
             v-if="!isConfirmed && !isHistoryDisabled"
             active-color="rgba(56,142,255,1)"
             v-model="problemSheetAssignmentBool"
@@ -509,10 +510,10 @@ ${JSON.stringify(confirmData, null, 2)}
 .patrol-plan-form {
   background: #fff;
   width: 400px;
-  overflow: hidden;
   font-family: var(--ym-ai-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
   position: relative;
   border-radius: 12px;
+  box-sizing: border-box;
 
 
   &.is-history-disabled {
@@ -605,6 +606,7 @@ ${JSON.stringify(confirmData, null, 2)}
             .start-date-picker,
             .end-date-picker {
               width: 105px !important;
+              border-radius: 4px;
               
               ::v-deep .el-input__inner {
                 background-color: rgba(232, 246, 255, 1);
@@ -614,6 +616,7 @@ ${JSON.stringify(confirmData, null, 2)}
                 color: rgba(56, 142, 255, 1);
                 font-size: 12px;
                 padding: 0 8px 0 8px;
+                border-radius: 4px;
               }
 
               ::v-deep .el-input__prefix {
@@ -640,6 +643,7 @@ ${JSON.stringify(confirmData, null, 2)}
             height: 24px;
             line-height: 24px;
             width: 180px;
+            
 
             .el-range-input {
               background-color: transparent;
@@ -666,18 +670,6 @@ ${JSON.stringify(confirmData, null, 2)}
     margin-top: 12px;
     display: flex;
     justify-content: flex-end;
-  }
-
-  // 内部按钮样式，使用 ::v-deep 避免污染全局
-  ::v-deep .el-button--primary {
-    background-color: rgba(56, 142, 255, 1) !important;
-    border-color: rgba(56, 142, 255, 1) !important;
-    border-radius: 4px;
-
-    &:hover {
-      background-color: rgba(56, 142, 255, 0.8) !important;
-      border-color: rgba(56, 142, 255, 0.8) !important;
-    }
   }
 }
 </style>

@@ -24,12 +24,9 @@
         class="history-full-width"
       >
         <template #widget="{ item, index }">
-          <PatrolPlanForm
-            style="padding: 8px"
+          <PatrolPlanConfirm
             v-if="item.content && item.content.includes('ymform:patrol_plan_confirm')"
             :data="parseWidgetData(item, 'ymform:patrol_plan_confirm')"
-            :is-history-disabled="index < messages.length - 1"
-            @send-message="handleWidgetSend"
           />
           <!-- 巡检任务确认表单 -->
           <PatrolPlanForm
@@ -116,9 +113,10 @@
 </template>
 
 <script>
-import trainingSquareIcon from '@/assets/images/training.png';
+import inspectSquareIcon from '@/assets/images/inspect-square.png';
 import { InspectXApi } from './api';
 import PatrolPlanForm from './widgets/PatrolPlanForm.vue';
+import PatrolPlanConfirm from './widgets/PatrolPlanConfirm.vue';
 import PatrolPlanResult from './widgets/PatrolPlanResult.vue';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
 import { parseWidgetData } from './widgets/widgetParser';
@@ -130,6 +128,7 @@ export default {
   mixins: [AgentBaseMixin],
   components: {
     PatrolPlanForm,
+    PatrolPlanConfirm,
     PatrolPlanResult,
     AISuggestWidget
   },
@@ -146,10 +145,10 @@ export default {
   },
   data() {
     return {
-      trainingSquareIcon,
+      inspectSquareIcon,
 
       welcomeConfig: {
-        icon: trainingSquareIcon,
+        icon: inspectSquareIcon,
         title: '智慧巡查',
         description: '我可以帮你自动执行门店巡检任务，定时推送巡检报告，帮助你更高效地工作～',
         prompts: [] // 从接口获取

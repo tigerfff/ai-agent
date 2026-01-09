@@ -317,12 +317,6 @@ export default {
       .bubble-content-mix {
         color: #fff;
       }
-      
-      // Widget 气泡也使用相同的样式
-      &.widget-body {
-        background: linear-gradient(90deg, rgba(53,172,255,1) 0%, rgba(22,122,255,1) 100%);
-        color: #fff;
-      }
     }
   }
   
@@ -347,12 +341,6 @@ export default {
       }
       
       .bubble-content-mix {
-        color: #333;
-      }
-      
-      // Widget 气泡也使用相同的样式
-      &.widget-body {
-        background: #fff;
         color: #333;
       }
     }
@@ -388,6 +376,12 @@ export default {
       line-height: 1.6;
       position: relative;
       word-break: break-word;
+
+      &.widget-body {
+        background: #fff !important;
+        color: rgba($color: #000000, $alpha: 0.7) !important;
+        padding: 16px; /* Widget 场景下内边距稍微缩小一点，更紧凑 */
+      }
 
       .markdown-body {
         font-family: var(--ym-ai-font-family, -apple-system, BlinkMacSystemFont, sans-serif);
@@ -484,24 +478,13 @@ export default {
       }
     }
 
-    // 左侧气泡（机器人端）- 白色背景
-    &.start .bubble-body.filled .widget-wrapper {
+    // Widget 容器在所有状态下使用统一的 Loading 样式（因为背景统一为白色了）
+    .bubble-body.widget-body .widget-wrapper {
       .widget-loading-overlay {
         background: rgba(255, 255, 255, 0.8);
 
         .loading-content {
           color: rgba(0, 0, 0, 0.6);
-        }
-      }
-    }
-
-    // 右侧气泡（用户端）- 蓝色背景
-    &.end .bubble-body.filled .widget-wrapper {
-      .widget-loading-overlay {
-        background: rgba(53, 172, 255, 0.8);
-
-        .loading-content {
-          color: rgba(255, 255, 255, 0.9);
         }
       }
     }
