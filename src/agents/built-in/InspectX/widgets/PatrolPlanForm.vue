@@ -22,7 +22,7 @@
       <div class="form-item">
         <div class="label">巡检方向</div>
         <div class="content">
-          <div class="text-display">{{ formData.templatName || '智能巡检' }}</div>
+          <div class="text-display">{{ displayData.templatName || '智能巡检' }}</div>
         </div>
       </div>
 
@@ -39,8 +39,9 @@
         <div class="label">巡检时间</div>
         <div class="content">
           <AITimeTagPicker
-            v-model="formData.patrolTime.timeList"
-            :time-type="formData.patrolTime.timeType"
+            :value="displayData.patrolTime.timeList"
+            @input="formData.patrolTime.timeList = $event"
+            :time-type="displayData.patrolTime.timeType"
             :disabled="isConfirmed || isHistoryDisabled"
             :peak-config="peakConfig"
             popper-class="patrol-plan-picker-popper"
@@ -48,7 +49,7 @@
           <div v-if="hasTimeConflict && !isHistoryDisabled" class="error-tip">
             <i class="h-icon-info" style="font-size: 18px;"></i> 巡检时间存在重叠或一致，请重新调整
           </div>
-          <div v-else-if="!isConfirmed && !isHistoryDisabled && (!formData.patrolTime.timeList || formData.patrolTime.timeList.length === 0)" class="error-tip">
+          <div v-else-if="!isConfirmed && !isHistoryDisabled && (!displayData.patrolTime.timeList || displayData.patrolTime.timeList.length === 0)" class="error-tip">
             <i class="h-icon-info" style="font-size: 18px;"></i> 请添加巡检时间
           </div>
         </div>
@@ -83,8 +84,8 @@
               class="end-date-picker"
             />
           </div>
-          <div v-else class="text-display">{{ formData.startDate }} ~ {{ formData.endDate }}</div>
-          <div v-if="!formData.startDate || !formData.endDate" class="error-tip">
+          <div v-else class="text-display">{{ displayData.startDate }} ~ {{ displayData.endDate }}</div>
+          <div v-if="!displayData.startDate || !displayData.endDate" class="error-tip">
             <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
           </div>
         </div>
@@ -100,7 +101,7 @@
             v-model="problemSheetAssignmentBool"
             @change="handleSwitchChange"
           />
-          <div v-else class="text-display">{{ problemSheetAssignmentBool ? '已开启' : '已关闭' }}</div>
+          <div v-else class="text-display">{{ +displayData.problemSheetAssignment === 1 ? '已开启' : '已关闭' }}</div>
         </div>
       </div>
     </div>
@@ -157,8 +158,9 @@ export default {
       loading: false,
       isConfirmed: false,
       selectedAreas: [],
-      lastSelectedIds: '', // 用于记录上次选中的 ID 组合，防止重复调用接口
+      lastSelectedIds: '', // 用于记录上次选中的 ID组合，防止重复调用接口
       originalPrimaryColor: null, // 保存原始的 --ym-primary 值
+      initialFormData: null, // 初始数据备份
       formData: {
         questions: [],
         templatName: '',
@@ -184,6 +186,17 @@ export default {
     };
   },
   computed: {
+    /**
+     * 当前应该展示的数据源
+     */
+    displayData() {
+      // 如果已经确认，或者表单还是活跃状态，显示当前修改中的数据
+      if (this.isConfirmed || !this.isHistoryDisabled) {
+        return this.formData;
+      }
+      // 如果是历史记录且未点击确认按钮，显示初始化的备份数据（即 AI 原始生成的数据）
+      return this.initialFormData || this.formData;
+    },
     problemSheetAssignmentBool: {
       get() {
         return +this.formData.problemSheetAssignment === 1;
@@ -193,14 +206,19 @@ export default {
       }
     },
     areaNames() {
-      if (this.formData?.areaNamesByWeb) return this.formData?.areaNamesByWeb;
-      if (!this.selectedAreas || this.selectedAreas.length === 0) return '';
+      if (this.displayData?.areaNamesByWeb) return this.displayData?.areaNamesByWeb;
       
-      return this.selectedAreas.map(a => a.nodeName).join('、');
-      },
-     hasTimeConflict() {
-      const list = this.formData.patrolTime?.timeList || [];
-      const timeType = this.formData.patrolTime?.timeType;
+      // 如果展示的是当前正在编辑的数据，根据选中项计算名称
+      if (this.displayData === this.formData) {
+        if (!this.selectedAreas || this.selectedAreas.length === 0) return '';
+        return this.selectedAreas.map(a => a.nodeName).join('、');
+      }
+      return '';
+    },
+    hasTimeConflict() {
+      const source = this.displayData;
+      const list = source.patrolTime?.timeList || [];
+      const timeType = source.patrolTime?.timeType;
       if (list.length <= 1) return false;
       
       return list.some((time, index) => {
@@ -220,7 +238,7 @@ export default {
       return !hasTime || !hasDate;
     },
     issueDaysLabel() {
-      const { frequency, issueDays } = this.formData;
+      const { frequency, issueDays } = this.displayData;
       if (frequency === 1) {
         return '每天';
       }
@@ -337,11 +355,15 @@ export default {
     async initFormData(data) {
       console.log('initFormData', data);
       
-      this.formData = {
+      const initialized = {
         ...this.formData,
         ...data,
         patrolTime: data.patrolTime || { timeType: 0, timeList: [] }
       };
+
+      // 同时记录当前值和备份值 (使用深拷贝)
+      this.formData = JSON.parse(JSON.stringify(initialized));
+      this.initialFormData = JSON.parse(JSON.stringify(initialized));
       
       // 如果有 scopeSearchKey，则使用接口进行模糊查询并反显
       if (data.scopeSearchKey) {
