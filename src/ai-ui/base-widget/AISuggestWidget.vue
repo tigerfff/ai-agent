@@ -7,7 +7,10 @@
         class="prompt-card"
         @click="handleClick(text)"
       >
-        <div class="prompt-desc">{{ text }}</div>
+        <div class="prompt-desc">
+          <span>{{ text }}</span>
+          <i class="h-icon-angle_right" style="padding: 0 4px; color: #000"></i>
+        </div>
       </div>
     </div>
   </div>
@@ -17,7 +20,6 @@
 export default {
   name: 'AISuggestWidget',
   props: {
-    // 提示词数据对象: { suggestPrompt: ["xxxxx", "yyyyy"] }
     data: {
       type: Object,
       default: () => ({})
@@ -43,6 +45,7 @@ export default {
 
   .welcome-prompts {
     display: flex;
+    flex-direction: column;
     gap: 16px;
     text-align: left;
     flex-wrap: wrap;
@@ -51,7 +54,7 @@ export default {
       background: #fff;
       border: none;
       border-radius: 8px;
-      padding: 8px 16px;
+      padding: 8px 16px 8px 16px;
       cursor: pointer;
       transition: all 0.3s;
       position: relative;
@@ -66,6 +69,8 @@ export default {
       }
 
       .prompt-desc {
+        display: flex;
+        align-items: center;
         color: rgba(0, 0, 0, 0.7);
         font-size: 14px;
         line-height: 22px;
