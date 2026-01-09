@@ -21,7 +21,7 @@
         @complete="handleFinish"
         @load-more="handleLoadMore"
         class="history-full-width"
-        :ignoreWidgetTypes="['ymform:train_confirm','ymform:train_plan_result','ymform:user_train_finish','ymform:train_cancel','ymform:train_video_process_check']"
+        :ignoreWidgetTypes="['ymform:train_confirm','ymform:train_plan_result','ymform:user_train_finish','ymform:train_cancel','ymform:train_video_process_check','ymform:suggest']"
       >
         <!-- 自定义 Widget 渲染 -->
         <template #widget="{ info, item, index }">
@@ -45,45 +45,51 @@
         </template>
 
         <template  #footer="{ item, index, isLast }" >
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <!-- 停止任务 ymForm:train_plan_result-->
-            <template v-if="item.content.includes('ymform:train_plan_result')" >
-              <div 
-                class="stop-task" 
-                :class="{ 'disabled': item.taskCancelled || item.taskCancelling }"
-                @click="handleCancelTask(item)"
+          <div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <!-- 停止任务 ymForm:train_plan_result-->
+              <template v-if="item.content.includes('ymform:train_plan_result')" >
+                <div 
+                  class="stop-task" 
+                  :class="{ 'disabled': item.taskCancelled || item.taskCancelling }"
+                  @click="handleCancelTask(item)"
+                >
+                  <i class="h-icon-close_f" style="font-size: 24px;"></i>
+                  <span>{{ item.taskCancelling ? '取消中...' : '取消任务' }}</span>
+                </div>
+                <span style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
+              </template>
+
+              <template v-else-if="item.content.includes('ymform:user_train_finish')">
+                <UserTrainFinish
+                  :data="item"
+                  :is-history-disabled="index < messages.length - 1"
+                  @send-message="handleWidgetSend"
+                />
+              </template>
+
+              <template v-else-if="item.content.includes('ymform:train_video_process_check')">
+                <TrainResultUpload
+                  :data="item"
+                />
+              </template>
+            
+              <BubbleFooter 
+                v-show="shouldShowFooter(item)"
+                :item="item" 
+                :actions="getActions(item)"
+                :is-last="isLast"
+                @action="handleAction($event, item, index)"
               >
-                <i class="h-icon-close_f" style="font-size: 24px;"></i>
-                <span>{{ item.taskCancelling ? '取消中...' : '取消任务' }}</span>
-              </div>
-              <span style="padding: 0 4px; color: rgba(0, 0, 0, .1);">|</span>
-            </template>
+              </BubbleFooter>
+            </div>
 
-            <template v-else-if="item.content.includes('ymform:user_train_finish')">
-              <UserTrainFinish
-                :data="item"
-                :is-history-disabled="index < messages.length - 1"
-                @send-message="handleWidgetSend"
-              />
-            </template>
-
-            <template v-else-if="item.content.includes('ymform:train_video_process_check')">
-              <TrainResultUpload
-                :data="item"
-              />
-            </template>
-           
-            <BubbleFooter 
-              v-show="shouldShowFooter(item)"
-              :item="item" 
-              :actions="getActions(item)"
-              :is-last="isLast"
-              @action="handleAction($event, item, index)"
-            >
-            </BubbleFooter>
+            <AISuggestWidget
+              v-if="item.content && item.content.includes('ymform:suggest')"
+              :data="parseWidgetData(item, 'ymform:suggest')"
+              @select="handleWelcomeSelect"
+            />
           </div>
-          <!-- {{ item }} -->
-         
         </template>
       </AIHistory>
     </div>
@@ -132,6 +138,7 @@ import UserStudyForm from './widgets/UserStudyForm.vue';
 import UserTrainFinish from './widgets/UserTrainFinish.vue';
 import TrainVideoCard from './widgets/TrainVideoCard.vue';
 import TrainResultUpload from './widgets/TrainResultUpload.vue';
+import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
 import { parseWidgetData } from './widgets/widgetParser';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 
@@ -144,7 +151,8 @@ export default {
     UserStudyForm,
     UserTrainFinish,
     TrainVideoCard,
-    TrainResultUpload
+    TrainResultUpload,
+    AISuggestWidget
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID
@@ -204,6 +212,7 @@ export default {
       // this.mockTrainResultUpload();
     },
     methods: {
+      parseWidgetData,
     /**
      * 提供 API 实例给 Mixin
      */

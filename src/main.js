@@ -29,7 +29,7 @@ Vue.use(Hui)
 Vue.prototype.applicationSceneName = '门店'
 
 // 全局注册 HikCloudOrganizer 组件
-Vue.component(HikCloudOrganizer.name, HikCloudOrganizer)
+Vue.component('hikCloudOrganization', HikCloudOrganizer)
 
 // 注册组件库
 Vue.use(AIComponentLib, {

@@ -20,40 +20,57 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         @load-more="handleLoadMore"
-        :ignoreWidgetTypes="['ymform:patrol_plan_delete', 'ymform:patrol_plan_create_result']"
+        :ignoreWidgetTypes="['ymform:patrol_plan_delete', 'ymform:patrol_plan_create_result','ymform:suggest']"
         class="history-full-width"
       >
         <template #widget="{ item, index }">
+          <PatrolPlanForm
+            style="padding: 8px"
+            v-if="item.content && item.content.includes('ymform:patrol_plan_confirm')"
+            :data="parseWidgetData(item, 'ymform:patrol_plan_confirm')"
+            :is-history-disabled="index < messages.length - 1"
+            @send-message="handleWidgetSend"
+          />
           <!-- 巡检任务确认表单 -->
           <PatrolPlanForm
-            v-if="item.content && item.content.includes('ymform:patrol_plan')"
+            v-else-if="item.content && item.content.includes('ymform:patrol_plan')"
             :data="parseWidgetData(item, 'ymform:patrol_plan')"
             :is-history-disabled="index < messages.length - 1"
             @send-message="handleWidgetSend"
           />
+
+          
         </template>
 
         <template  #footer="{ item, index, isLast }" >
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <!-- 停止任务 ymform:patrol_plan_create_result -->
-            <PatrolPlanResult
-              v-if="item.content && item.content.includes('ymform:patrol_plan_create_result')"
-              :data="parseWidgetData(item, 'ymform:patrol_plan_create_result')"
-              @send-message="handleWidgetSend"
-            />
-            <span 
-              v-if="item.content && item.content.includes('ymform:patrol_plan_create_result')" 
-              style="padding: 0 4px; color: rgba(0, 0, 0, .1);"
-            >|</span>
+          <div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <!-- 停止任务 ymform:patrol_plan_create_result -->
+              <PatrolPlanResult
+                v-if="item.content && item.content.includes('ymform:patrol_plan_create_result')"
+                :data="parseWidgetData(item, 'ymform:patrol_plan_create_result')"
+                @send-message="handleWidgetSend"
+              />
+              <span 
+                v-if="item.content && item.content.includes('ymform:patrol_plan_create_result')" 
+                style="padding: 0 4px; color: rgba(0, 0, 0, .1);"
+              >|</span>
 
-            <BubbleFooter 
-              v-show="shouldShowFooter(item)"
-              :item="item" 
-              :actions="getActions(item)"
-              :is-last="isLast"
-              @action="handleAction($event, item, index)"
-            >
-            </BubbleFooter>
+              <BubbleFooter 
+                v-show="shouldShowFooter(item)"
+                :item="item" 
+                :actions="getActions(item)"
+                :is-last="isLast"
+                @action="handleAction($event, item, index)"
+              >
+              </BubbleFooter>
+            </div>
+            
+            <AISuggestWidget
+              v-if="item.content && item.content.includes('ymform:suggest')"
+              :data="parseWidgetData(item, 'ymform:suggest')"
+              @select="handleWelcomeSelect"
+            />
           </div>
         </template>
       </AIHistory>
@@ -103,6 +120,7 @@ import trainingSquareIcon from '@/assets/images/training.png';
 import { InspectXApi } from './api';
 import PatrolPlanForm from './widgets/PatrolPlanForm.vue';
 import PatrolPlanResult from './widgets/PatrolPlanResult.vue';
+import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
 import { parseWidgetData } from './widgets/widgetParser';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 
@@ -112,7 +130,8 @@ export default {
   mixins: [AgentBaseMixin],
   components: {
     PatrolPlanForm,
-    PatrolPlanResult
+    PatrolPlanResult,
+    AISuggestWidget
   },
   props: {
     // 由父组件 (AgentContainer) 传入，指示当前选中的会话 ID

@@ -193,9 +193,11 @@ export default {
       }
     },
     areaNames() {
+      if (this.formData?.areaNamesByWeb) return this.formData?.areaNamesByWeb;
       if (!this.selectedAreas || this.selectedAreas.length === 0) return '';
+      
       return this.selectedAreas.map(a => a.nodeName).join('、');
-    },
+      },
      hasTimeConflict() {
       const list = this.formData.patrolTime?.timeList || [];
       const timeType = this.formData.patrolTime?.timeType;
@@ -465,6 +467,7 @@ export default {
       // 构造确认数据，确保符合后端要求的 XML 标签内容
       const confirmData = {
         ...this.formData,
+        areaNamesByWeb: this.areaNames
       };
 
       const desc = `以下是巡检任务确认结果`;

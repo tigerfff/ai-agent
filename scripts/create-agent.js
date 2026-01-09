@@ -39,6 +39,28 @@ console.log(`${colors.blue}正在创建目录...${colors.reset}`);
 fs.mkdirSync(targetDir, { recursive: true });
 fs.mkdirSync(path.join(targetDir, 'widgets'), { recursive: true });
 
+// 1.1 生成 widgetParser.js
+const parserTemplate = `
+import { StreamMessageParser } from '@/ai-core/parser/StreamMessageParser';
+
+const parser = new StreamMessageParser();
+
+export function parseWidgetData(data, widgetType) {
+  let content = typeof data === 'string' ? data : (data?.content || '');
+  if (!content) return {};
+
+  try {
+    const tokens = parser.parse(content);
+    const widgetToken = tokens.find(t => t.type === 'widget' && t.widgetType === widgetType);
+    return widgetToken?.data || {};
+  } catch (e) {
+    console.error('Parse data failed:', e);
+    return {};
+  }
+}
+`;
+fs.writeFileSync(path.join(targetDir, 'widgets', 'widgetParser.js'), parserTemplate.trim());
+
 // 2. 生成 api.js
 const apiTemplate = `
 import { buildUrl } from '@/utils/api-prefix';
@@ -182,7 +204,7 @@ fs.writeFileSync(path.join(targetDir, 'api.js'), apiTemplate.trim());
 
 // 3. 生成 index.vue
 const templateHtml = `<template>
-  <div class="try-agent ${agentName.toLowerCase()}-agent" :class="{ 'is-mini': isMini }">
+  <div class="try-agent \${agentName.toLowerCase()}-agent" :class="{ 'is-mini': isMini }">
     <!-- 消息区域 -->
     <div class="chat-area">
       <AIWelcome
@@ -210,13 +232,21 @@ const templateHtml = `<template>
         </template>
 
         <template #footer="{ item, index, isLast }">
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <BubbleFooter 
-              v-show="shouldShowFooter(item)"
-              :item="item" 
-              :actions="getActions(item)"
-              :is-last="isLast"
-              @action="handleAction($event, item, index)"
+          <div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <BubbleFooter 
+                v-show="shouldShowFooter(item)"
+                :item="item" 
+                :actions="getActions(item)"
+                :is-last="isLast"
+                @action="handleAction($event, item, index)"
+              />
+            </div>
+
+            <AISuggestWidget
+              v-if="item.content && item.content.includes('ymform:suggest')"
+              :data="parseWidgetData(item, 'ymform:suggest')"
+              @select="handleWelcomeSelect"
             />
           </div>
         </template>
@@ -348,6 +378,8 @@ import AIHistory from '@/ai-ui/history/AIHistory.vue';
 import AIInput from '@/ai-ui/input/AIInput.vue';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 import AIIcon from '@/ai-ui/icon/AIIcon.vue';
+import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
+import { parseWidgetData } from './widgets/widgetParser';
 
 import { ${agentName}Api } from './api';
 
@@ -359,7 +391,8 @@ export default {
     AIHistory,
     AIInput,
     BubbleFooter,
-    AIIcon
+    AIIcon,
+    AISuggestWidget
   },
   props: {
     conversationId: { type: String, default: '' },
@@ -606,10 +639,15 @@ ${templateStyle}`;
 <script>
 import { ${agentName}Api } from './api';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
+import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
+import { parseWidgetData } from './widgets/widgetParser';
 
 export default {
   name: '${agentName}Agent',
   mixins: [AgentBaseMixin],
+  components: {
+    AISuggestWidget
+  },
   props: {
     conversationId: { type: String, default: '' },
     isMini: { type: Boolean, default: false }
