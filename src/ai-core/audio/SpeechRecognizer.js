@@ -43,9 +43,14 @@ export class SpeechRecognizerWrapper {
       this.stop();
     }
 
+    this.isErrorOccurred = false; // 重置错误标记
+
     try {
       // 确保 SDK 已加载
       const SpeechRecognizerClass = await this.getSDKClass();
+
+      // ... 后面逻辑保持不变
+      // (为了准确匹配，我需要包含更多代码或分开替换)
 
       // 验证必要参数
       if (!config.appId) {
@@ -112,8 +117,16 @@ export class SpeechRecognizerWrapper {
       };
 
       this.recognizer.OnError = (res) => {
+        if (this.isErrorOccurred) return;
+        this.isErrorOccurred = true;
+
         console.error('[ASR] 识别失败', res);
-        this.onError(new Error(res.error_msg || res.message || 'ASR Error'));
+        const error = new Error(res.error_msg || res.message || 'ASR Error');
+        error.code = res.code || res.error_id;
+        
+        // 报错后立即停止识别，释放资源，防止二次报错
+        this.stop();
+        this.onError(error);
       };
 
       // 开始识别（WebAudioSpeechRecognizer 会自动处理录音）
@@ -121,24 +134,35 @@ export class SpeechRecognizerWrapper {
 
     } catch (e) {
       console.error('[ASR] Start failed:', e);
+      this.isErrorOccurred = true;
+      this.stop();
       this.onError(e);
     }
   }
 
   stop() {
     if (this.recognizer) {
+      const recognizer = this.recognizer;
+      this.recognizer = null; // 立即置空，防止重入
+
+      console.log('[ASR] 停止并清理识别器...');
       try {
-        // WebAudioSpeechRecognizer 会自动停止录音和识别
-        this.recognizer.stop();
-        console.log('[ASR] 已停止识别');
+        // 1. 尝试调用 stop
+        if (typeof recognizer.stop === 'function') {
+          recognizer.stop();
+        }
+        // 2. 必须销毁音频流
+        if (typeof recognizer.destroyStream === 'function') {
+          recognizer.destroyStream();
+        }
+        // 3. 某些版本的 SDK 可能需要调用 destroy
+        if (typeof recognizer.destroy === 'function') {
+          recognizer.destroy();
+        }
       } catch (e) {
         console.warn('[ASR] Stop error:', e);
       }
-      // 释放麦克风权限
-      this.destroyStream();
-      this.recognizer = null;
     }
-    // 不需要调用 onStop()，因为 OnRecognitionComplete 会触发
   }
 
   /**

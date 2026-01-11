@@ -221,6 +221,7 @@
  */
 
 import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
+import { ASR_ERROR_MAP } from '@/ai-core/audio/constants';
 import AIAttachments from '@/ai-ui/attachments/AIAttachments.vue';
 import AILottie from '@/ai-ui/lottie/AILottie.vue';
 import speechAnimationData from '@/assets/lottery/speech.json';
@@ -690,7 +691,11 @@ export default {
       /** 识别错误回调 */
       onError: (err) => {
         this.isRecording = false;
-        this.$message && this.$message.error('语音识别失败：' + err.message);
+        
+        // 优先匹配错误码，其次匹配错误名称
+        const errorMsg = ASR_ERROR_MAP[err.code] || ASR_ERROR_MAP[err.name] || err.message || '语音识别失败';
+        this.$message && this.$message.error('语音识别失败：' + errorMsg);
+        
         // 处理等待停止的 Promise
         if (this.pendingStopResolver) {
           this.pendingStopResolver();

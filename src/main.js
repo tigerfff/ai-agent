@@ -49,14 +49,6 @@ Vue.use(AIComponentLib, {
     // 标准化前缀映射，父项目按需覆盖
     prefixMap: {
       chain: '/api',
-      qylite: '',
-      nissan: '',
-      hbl: '',
-      open: '',
-      tenant: '',
-      auth: '',
-      sse: '',
-      teach: ''
     }
   })
 });
