@@ -495,7 +495,7 @@ export default {
 
     .footer-text {
       font-size: 12px;
-      color: rgba($color: #000000, $alpha: .3);
+      color: rgba($color: #000000, $alpha: .2);
       text-align: center;
       margin-top: 12px;
     }

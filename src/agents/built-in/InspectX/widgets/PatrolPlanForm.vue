@@ -296,11 +296,7 @@ export default {
           const oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()).getTime();
           
           let minDate = today;
-          if (this.formData.startDate) {
-            const start = new Date(this.formData.startDate.replace(/-/g, '/'));
-            minDate = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-          }
-
+          
           // 1. 基础限制：结束日期不能早于 minDate，且不能超过一年
           if (time.getTime() < minDate || time.getTime() > oneYearLater) {
             return true;

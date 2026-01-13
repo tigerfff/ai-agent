@@ -267,71 +267,6 @@ var Locale = {
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 // import { createNamespace } from 'hik-cloud-ui/src/utils/create';
 // const [bem, name] = createNamespace('regions-store-container');
 const Method = "get";
@@ -427,6 +362,19 @@ var script = {
                 };
             }
         },
+        areaListProps: {
+            type: [
+                Object,
+                Array
+            ],
+            default: ()=>{
+                return {
+                    method: "get",
+                    url: "/horae/silvans/areas/actions/findAreaPageListByAreaName",
+                    params: {}
+                };
+            }
+        },
         onlyCheckLeaf: {
             type: Boolean,
             default: false
@@ -498,6 +446,10 @@ var script = {
         accordion: {
             type: Boolean,
             default: false
+        },
+        onlyArea: {
+            type: Boolean,
+            default: false
         }
     },
     data () {
@@ -523,12 +475,17 @@ var script = {
             defaultCurrentNode: "",
             defaultExpandedKeys: [],
             /** 保存根节点 */ originArea: "",
-            storeStatus: "1"
+            storeStatus: "1",
+            searchTreeList: []
         };
     },
     computed: {
         isMultiSearch () {
-            return this.storeListProps instanceof Array;
+            if (this.onlyArea) {
+                return this.areaListProps instanceof Array;
+            } else {
+                return this.storeListProps instanceof Array;
+            }
         }
     },
     watch: {
@@ -631,6 +588,7 @@ var script = {
                 });
             }
             data.isSelected = true;
+            console.log(data, idx);
             this.$emit("getClickData", data, idx);
             if (this.isHackReset) {
                 this.hackReset = false;
@@ -687,12 +645,18 @@ var script = {
      * 执行搜索操作
      * 支持单搜索和多搜索模式
      */ searchData () {
+            let proxyName = '';
+            if (this.onlyArea) {
+                proxyName = this.areaListProps;
+            } else {
+                proxyName = this.storeListProps;
+            }
             if (this.isMultiSearch) {
-                Promise.all(this.storeListProps.map((prop)=>this.searchStoreList(prop))).then((allData)=>{
+                Promise.all(proxyName.map((prop)=>this.searchStoreList(prop))).then((allData)=>{
                     this.storeFilterList = allData;
                 });
             } else {
-                this.searchStoreList(this.storeListProps).then((data)=>{
+                this.searchStoreList(proxyName).then((data)=>{
                     this.storeFilterList = data;
                 });
             }
@@ -717,14 +681,32 @@ var script = {
                 prop.params.nodeName = this.condition;
             }
             this.showStoreStatus && (prop.params.storeStatus = this.storeStatus);
+            if (this.onlyArea) {
+                prop.params.pageNo = 1;
+                prop.params.pageSize = 30;
+            }
             return this.getStoreList(prop).then((res)=>{
                 if (res.code * 1 === 0) {
                     res.data = this.nodesProcessHook ? this.nodesProcessHook(res.data) : res.data;
-                    let storeFilterList = res.data || [];
-                    storeFilterList.forEach((item)=>{
-                        item.isSelected = false;
-                        item.selectable = this.selectable ? this.selectable(item) : true;
-                    });
+                    let storeFilterList = [];
+                    if (this.onlyArea) {
+                        storeFilterList = res.data.rows || [];
+                        storeFilterList.forEach((item)=>{
+                            item.nodeId = item.areaId;
+                            item.nodeName = item.areaName;
+                            item.nodeType = 0;
+                            item.parentId = item.parentId;
+                            item.isSelected = false;
+                            item.selectable = this.selectable ? this.selectable(item) : true;
+                        });
+                    } else {
+                        storeFilterList = res.data;
+                        storeFilterList.forEach((item)=>{
+                            item.isSelected = false;
+                            item.selectable = this.selectable ? this.selectable(item) : true;
+                        });
+                    }
+                    console.log(storeFilterList);
                     return storeFilterList;
                 }
                 return [];
@@ -784,6 +766,9 @@ var script = {
                 this.getTreeNext(localTreeAnsyProps).then((res)=>{
                     if (res.code * 1 === 0 && res.data) {
                         res.data = this.nodesProcessHook ? this.nodesProcessHook(res.data) : res.data;
+                        if (this.onlyArea) {
+                            res.data = res.data.filter((item)=>item.nodeType != 1);
+                        }
                         res.data.forEach((item)=>{
                             if (item.nodeType === 0) {
                                 item.icon = `iconfont ${this.areaIcon}`;
@@ -1001,7 +986,7 @@ const __vue_script__ = script;
                 }
             }),
             _c('div', {
-                staticClass: "tree-wrap"
+                class: _vm.isFilter ? 'tree-wrap' : 'tree-wrap-nofilter'
             }, [
                 _c('el-tree', {
                     directives: [
@@ -1070,10 +1055,42 @@ const __vue_script__ = script;
                             }, [
                                 _vm._v(" " + _vm._s(_vm.t("ym.tree.searchNoData")) + " ")
                             ]),
-                            _vm._l(_vm.storeFilterList, function(item) {
+                            _vm.checkBox ? _c('el-checkbox-group', {
+                                staticStyle: {
+                                    "width": "100%"
+                                },
+                                attrs: {
+                                    "vertical": ""
+                                },
+                                model: {
+                                    value: _vm.searchTreeList,
+                                    callback: function($$v) {
+                                        _vm.searchTreeList = $$v;
+                                    },
+                                    expression: "searchTreeList"
+                                }
+                            }, _vm._l(_vm.storeFilterList, function(item, index) {
+                                return _c('el-checkbox', {
+                                    key: index,
+                                    class: {
+                                        itemDisabled: !item.selectable
+                                    },
+                                    attrs: {
+                                        "label": item.nodeId,
+                                        "disabled": !item.selectable
+                                    },
+                                    on: {
+                                        "change": function($event) {
+                                            item.selectable && _vm.storeSelect(item, index);
+                                        }
+                                    }
+                                }, [
+                                    _vm._v(" " + _vm._s(item.storeName || item.nodeName) + " ")
+                                ]);
+                            }), 1) : _vm._l(_vm.storeFilterList, function(item, index) {
                                 return [
                                     item.storeName ? _c('li', {
-                                        key: item.index,
+                                        key: index,
                                         staticClass: "item-chose",
                                         class: {
                                             itemActive: item.isSelected,
@@ -1081,13 +1098,13 @@ const __vue_script__ = script;
                                         },
                                         on: {
                                             "click": function($event) {
-                                                item.selectable && _vm.storeSelect(item);
+                                                item.selectable && _vm.storeSelect(item, index);
                                             }
                                         }
                                     }, [
                                         _vm._v(" " + _vm._s(item.storeName) + " ")
                                     ]) : item.nodeName ? _c('li', {
-                                        key: item.index,
+                                        key: index,
                                         staticClass: "item-chose",
                                         class: {
                                             itemActive: item.isSelected,
@@ -1095,7 +1112,7 @@ const __vue_script__ = script;
                                         },
                                         on: {
                                             "click": function($event) {
-                                                item.selectable && _vm.storeSelect(item);
+                                                item.selectable && _vm.storeSelect(item, index);
                                             }
                                         }
                                     }, [
@@ -1112,7 +1129,7 @@ const __vue_script__ = script;
                                         value: _vm.storeFilterList.reduce(function(sum, arr) {
                                             return sum + arr.length;
                                         }, 0) === 0,
-                                        expression: "\n                storeFilterList.reduce((sum, arr) => sum + arr.length, 0) === 0"
+                                        expression: "storeFilterList.reduce((sum, arr) => sum + arr.length, 0) === 0"
                                     }
                                 ],
                                 staticClass: "msg-tip"

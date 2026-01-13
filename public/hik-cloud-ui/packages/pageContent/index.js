@@ -254,6 +254,10 @@ var script = {
             type: Boolean,
             default: true
         },
+        noPadding: {
+            type: Boolean,
+            default: false
+        },
         // 使用 flex 布局时，水平方向是否居中
         alignCenter: {
             type: Boolean,
@@ -325,7 +329,8 @@ const __vue_script__ = script;
         class: {
             'is-flex': _vm.flex,
             'is-horizontal': _vm.direction === 'horizontal',
-            'is-align-center': _vm.alignCenter
+            'is-align-center': _vm.alignCenter,
+            'no-padding': _vm.noPadding
         }
     }, [
         _vm._t("default")

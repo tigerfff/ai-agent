@@ -35,6 +35,7 @@ export function createDefaultSSEDriver(configProvider) {
         headers,
         body: JSON.stringify(data),
         signal,
+        openWhenHidden: true, // 允许在页面不可见时打开连接
 
         // 关键点：fetch 选项，用于支持 HttpOnly Cookie 和超时控制
         fetch: (input, init) => {

@@ -134,7 +134,7 @@ var script$4 = {
                 default:
                     style.padding = "16px";
             }
-            if (this.padding) {
+            if (this.padding || this.padding === 0) {
                 if (typeof this.padding === 'number') {
                     style.padding = this.padding + 'px';
                 } else if (Array.isArray(this.padding) && this.padding.length > 0) {

@@ -1,241 +1,259 @@
 class Signature {
-    // 初始化
-    initialize() {
+    init() {
+        // 创建容器和canvas元素
         this.createElements();
-        this.getParentElementSize();
-        this.initSignature();
+        // 初始化canvas
+        this.initCanvas();
+        // 绑定事件
+        this.bindEvents();
+        // 监听窗口大小变化
+        this.resizeHandler = this.onResize.bind(this);
+        window.addEventListener('resize', this.resizeHandler);
     }
-    // 创建必要的DOM元素
     createElements() {
         // 清空容器
         this.element.innerHTML = '';
-        // 直接使用传入的元素作为签名容器
+        // 设置容器样式
         this.element.className = 'hik-cloud-signature';
-        this.element.style.backgroundColor = this.bgColor;
+        this.element.style.width = '100%';
+        this.element.style.height = '100%';
+        this.element.style.backgroundColor = this.backgroundColor;
         // 创建canvas
         this.canvas = document.createElement('canvas');
-        this.canvas.id = 'canvas';
+        this.canvas.className = 'hik-cloud-signature__canvas';
         // 创建占位符
         this.placeholderElement = document.createElement('div');
-        this.placeholderElement.className = 'placeholder';
-        this.placeholderElement.textContent = this.placeHolder;
-        this.placeholderElement.style.display = this.showPlaceHolder ? 'block' : 'none';
+        this.placeholderElement.className = 'hik-cloud-signature__placeholder';
+        this.placeholderElement.textContent = this.placeholder;
+        this.placeholderElement.style.color = this.placeholderColor;
+        this.placeholderElement.style.display = 'block';
         // 组装元素
         this.element.appendChild(this.canvas);
         this.element.appendChild(this.placeholderElement);
-        // 设置样式
-        this.updateStyles();
     }
-    // 更新样式
-    updateStyles() {
-        // 直接设置传入元素的样式
-        this.element.style.width = this.canvasWidth + 'px';
-        this.element.style.height = this.canvasHeight + 'px';
-        this.element.style.backgroundColor = this.bgColor;
-    }
-    // 获取父元素尺寸
-    getParentElementSize() {
-        const parentElement = this.element.parentElement;
-        if (parentElement) {
-            const { width, height } = parentElement.getBoundingClientRect();
-            this.canvasWidth = width;
-            this.canvasHeight = height;
-        } else {
-            // 如果没有父元素，使用默认尺寸
-            this.canvasWidth = 432;
-            this.canvasHeight = 200;
-        }
-        this.updateStyles();
-    }
-    // 手动初始化签名组件
-    initSignature() {
-        this.isMobile = /Mobile|Android|iPhone/i.test(navigator.userAgent);
-        this.getCanvas();
-        // 创建并保存事件处理器引用
-        this.startHandler = this.startDraw.bind(this);
-        this.endHandler = this.closeDraw.bind(this);
-        this.leaveHandler = this.handleMouseLeave.bind(this);
-        this.enterHandler = this.handleMouseEnter.bind(this);
-        // 将事件监听器绑定到画布元素上
-        this.canvas.addEventListener(this.isMobile ? "touchstart" : "mousedown", this.startHandler);
-        this.canvas.addEventListener(this.isMobile ? "touchend" : "mouseup", this.endHandler);
-        // 非移动设备添加鼠标离开和进入事件
-        if (!this.isMobile) {
-            this.canvas.addEventListener("mouseleave", this.leaveHandler);
-            this.canvas.addEventListener("mouseenter", this.enterHandler);
-        }
-        this.updateHasSignCallback(false);
-    }
-    getCanvas() {
-        const { x, y } = this.canvas.getBoundingClientRect();
-        this.clientRect = {
-            x,
-            y
-        };
-        this.canvas.width = this.canvasWidth;
-        this.canvas.height = this.canvasHeight;
+    initCanvas() {
+        if (!this.canvas) return;
+        // 设置canvas尺寸
+        this.resize();
+        // 保存初始尺寸
+        this.initialWidth = this.canvas.width;
+        this.initialHeight = this.canvas.height;
         const ctx = this.canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    }
-    // 开始绘制
-    startDraw(event) {
-        // 如果已经在绘制中，直接返回
-        if (this.isDrawing) return;
-        const ctx = this.canvas.getContext('2d');
-        // 获取偏移量及坐标
-        const { offsetX, offsetY, pageX, pageY } = this.isMobile ? event.changedTouches[0] : event;
-        const { x, y } = this.clientRect;
-        this.client = {
-            offsetX: 0,
-            offsetY: 0,
-            endX: 0,
-            endY: 0
-        };
-        // 修改上次的偏移量及坐标
-        this.client.offsetX = offsetX;
-        this.client.offsetY = offsetY;
-        this.client.endX = pageX;
-        this.client.endY = pageY;
-        // 清除以上一次 beginPath 之后的所有路径，进行绘制
-        ctx.beginPath();
-        // 根据配置文件设置相应配置
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.lineWidth = this.lineWidth;
         ctx.strokeStyle = this.lineColor;
-        // 设置画线起始点位
-        ctx.moveTo(this.client.endX - x, this.client.endY - y);
-        // 监听 鼠标移动或手势移动，绑定到画布上
-        const moveHandler = this.draw.bind(this);
-        this.canvas.addEventListener(this.isMobile ? "touchmove" : "mousemove", moveHandler);
-        // 保存引用以便后续移除
-        this.currentMoveHandler = moveHandler;
-        // 设置绘制状态
+    }
+    bindEvents() {
+        if (!this.canvas) return;
+        // 鼠标事件
+        this.mouseDownHandler = this.onMouseDown.bind(this);
+        this.mouseMoveHandler = this.onMouseMove.bind(this);
+        this.mouseUpHandler = this.onMouseUp.bind(this);
+        this.mouseLeaveHandler = this.onMouseLeave.bind(this);
+        // 绑定事件
+        this.canvas.addEventListener('mousedown', this.mouseDownHandler);
+        this.canvas.addEventListener('mousemove', this.mouseMoveHandler);
+        this.canvas.addEventListener('mouseup', this.mouseUpHandler);
+        this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler);
+        // 鼠标进入事件
+        this.canvas.addEventListener('mouseenter', this.mouseEnterHandler);
+    }
+    getPointFromEvent(event) {
+        if (!this.canvas) return {
+            x: 0,
+            y: 0
+        };
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+    startDrawing(point) {
         this.isDrawing = true;
+        this.placeholderElement.style.display = 'none';
+        this.lastPoint = point;
+        // 开始新的笔画
+        this.currentStroke = [
+            point
+        ];
+        this.strokes.push(this.currentStroke);
+        this.startCallback();
     }
-    draw(event) {
-        if (this.showPlaceHolder) {
-            this.showPlaceHolder = false;
-            this.placeholderElement.style.display = 'none';
-        }
-        const { x, y } = this.clientRect;
+    drawLineToPoint(point) {
+        if (!this.isDrawing || !this.canvas) return;
         const ctx = this.canvas.getContext('2d');
-        // 获取当前坐标点位
-        const { pageX, pageY } = this.isMobile ? event.changedTouches[0] : event;
-        // 修改最后一次绘制的坐标点
-        this.client.endX = pageX;
-        this.client.endY = pageY;
-        // 根据坐标点位移动添加线条
-        ctx.lineTo(pageX - x, pageY - y);
-        // 绘制
+        ctx.beginPath();
+        ctx.moveTo(this.lastPoint.x, this.lastPoint.y);
+        ctx.lineTo(point.x, point.y);
         ctx.stroke();
-    }
-    // 结束绘制
-    closeDraw() {
-        // 移除鼠标移动或手势移动监听器
-        if (this.currentMoveHandler) {
-            this.canvas.removeEventListener(this.isMobile ? "touchmove" : "mousemove", this.currentMoveHandler);
-            this.currentMoveHandler = null;
-        }
-        // 重置绘制状态
-        this.isDrawing = false;
-        this.updateHasSignCallback(true);
-    }
-    // 处理鼠标离开绘制区域
-    handleMouseLeave() {
-        if (this.isDrawing) {
-            // 如果正在绘制，停止绘制
-            this.closeDraw();
+        this.lastPoint = point;
+        // 记录路径点
+        if (this.currentStroke) {
+            this.currentStroke.push(point);
         }
     }
-    // 处理鼠标进入绘制区域
-    handleMouseEnter() {
-        // 鼠标进入时重置绘制状态，确保下次点击能正常开始绘制
+    stopDrawing() {
         this.isDrawing = false;
+        this.hasSignatureCallback(true);
+        this.endCallback();
     }
-    getSignatureFile() {
+    onMouseDown(event) {
+        const point = this.getPointFromEvent(event);
+        this.startDrawing(point);
+    }
+    onMouseMove(event) {
+        if (!this.isDrawing) return;
+        const point = this.getPointFromEvent(event);
+        this.drawLineToPoint(point);
+    }
+    onMouseUp() {
+        this.stopDrawing();
+    }
+    onMouseLeave() {
+        this.stopDrawing();
+    }
+    onResize() {
+        // 使用防抖，避免频繁触发
+        if (this.resizeTimer) {
+            clearTimeout(this.resizeTimer);
+        }
+        this.resizeTimer = setTimeout(()=>{
+            this.resize();
+        }, 100);
+    }
+    // 获取签名图像数据URL
+    getDataURL() {
+        if (!this.canvas) return '';
+        return this.canvas.toDataURL('image/png');
+    }
+    // 获取签名图像Blob对象
+    getBlob() {
         return new Promise((resolve)=>{
-            const dataURL = this.canvas.toDataURL('image/png', 0.6);
-            resolve(dataURL);
+            if (!this.canvas) {
+                resolve(null);
+                return;
+            }
+            this.canvas.toBlob(resolve, 'image/png');
         });
     }
+    // 清空签名
     clear() {
+        if (!this.canvas) return;
         const ctx = this.canvas.getContext('2d');
-        this.showPlaceHolder = true;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // 清空笔画数据
+        this.strokes = [];
+        this.currentStroke = null;
+        this.hasSignatureCallback(false);
         this.placeholderElement.style.display = 'block';
-        if (ctx) {
-            ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        }
+        this.clearCallback();
+    }
+    // 重置canvas尺寸
+    resize() {
+        if (!this.canvas || !this.element) return;
+        // 获取容器的实际尺寸
+        const width = this.element.clientWidth;
+        const height = this.element.clientHeight;
+        // 直接设置 canvas 的 width 和 height 属性
+        this.canvas.width = width;
+        this.canvas.height = height;
+        // 设置 canvas 的 CSS 样式确保视觉上也填满容器
+        this.canvas.style.width = width + 'px';
+        this.canvas.style.height = height + 'px';
+        // 重新设置绘图上下文属性
+        const ctx = this.canvas.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = this.lineWidth;
+        ctx.strokeStyle = this.lineColor;
+        // 根据新的画布尺寸重新绘制所有笔画
+        this.redrawStrokes(width, height);
+    }
+    // 重新绘制所有笔画
+    redrawStrokes(newWidth, newHeight) {
+        if (!this.strokes || this.strokes.length === 0) return;
+        const ctx = this.canvas.getContext('2d');
+        // 计算缩放比例（基于初始尺寸）
+        const scaleX = newWidth / this.initialWidth;
+        const scaleY = newHeight / this.initialHeight;
+        // 遍历所有笔画并重新绘制
+        this.strokes.forEach((stroke)=>{
+            if (stroke.length < 2) return;
+            ctx.beginPath();
+            // 缩放第一个点
+            const firstPoint = stroke[0];
+            ctx.moveTo(firstPoint.x * scaleX, firstPoint.y * scaleY);
+            // 绘制后续点
+            for(let i = 1; i < stroke.length; i++){
+                const point = stroke[i];
+                ctx.lineTo(point.x * scaleX, point.y * scaleY);
+            }
+            ctx.stroke();
+        });
     }
     // 销毁实例
     destroy() {
         // 移除事件监听器
         if (this.canvas) {
-            if (this.startHandler) {
-                this.canvas.removeEventListener(this.isMobile ? "touchstart" : "mousedown", this.startHandler);
-                this.startHandler = null;
+            if (this.mouseDownHandler) {
+                this.canvas.removeEventListener('mousedown', this.mouseDownHandler);
             }
-            if (this.endHandler) {
-                this.canvas.removeEventListener(this.isMobile ? "touchend" : "mouseup", this.endHandler);
-                this.endHandler = null;
+            if (this.mouseMoveHandler) {
+                this.canvas.removeEventListener('mousemove', this.mouseMoveHandler);
             }
-            if (this.currentMoveHandler) {
-                this.canvas.removeEventListener(this.isMobile ? "touchmove" : "mousemove", this.currentMoveHandler);
-                this.currentMoveHandler = null;
+            if (this.mouseUpHandler) {
+                this.canvas.removeEventListener('mouseup', this.mouseUpHandler);
             }
-            if (this.leaveHandler) {
-                this.canvas.removeEventListener("mouseleave", this.leaveHandler);
-                this.leaveHandler = null;
+            if (this.mouseLeaveHandler) {
+                this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler);
             }
-            if (this.enterHandler) {
-                this.canvas.removeEventListener("mouseenter", this.enterHandler);
-                this.enterHandler = null;
+            if (this.mouseEnterHandler) {
+                this.canvas.removeEventListener('mouseenter', this.mouseEnterHandler);
             }
+        }
+        // 移除窗口大小变化监听器
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
         }
         // 清空容器
         if (this.element) {
             this.element.innerHTML = '';
         }
     }
-    constructor(elementId, options = {}){
+    constructor(element, options = {}){
         // 配置选项
-        this.lineWidth = options.lineWidth || 1;
-        this.lineColor = options.lineColor || '#000000';
-        this.bgColor = options.bgColor || '#f8f9fb';
-        this.placeHolder = options.placeHolder || '请使用鼠标在此处签名';
-        this.manualInit = options.manualInit || false;
+        this.element = element;
+        this.lineWidth = options.lineWidth || 2;
+        this.lineColor = options.lineColor || '#000';
+        this.backgroundColor = options.backgroundColor || '#f8f9fb';
+        this.placeholder = options.placeholder || '请使用鼠标在此处签名';
+        this.placeholderColor = options.placeholderColor || '#000000';
+        this.startCallback = options.startCallback || (()=>{});
+        this.endCallback = options.endCallback || (()=>{});
+        this.clearCallback = options.clearCallback || (()=>{});
+        this.hasSignatureCallback = options.hasSignatureCallback || (()=>{});
         // 状态数据
-        this.isMobile = false;
         this.isDrawing = false;
-        this.canvas = undefined;
-        this.clientRect = {
-            x: 0,
-            y: 0
-        };
-        this.client = {
-            offsetX: 0,
-            offsetY: 0,
-            endX: 0,
-            endY: 0
-        };
-        this.showPlaceHolder = true;
-        this.canvasWidth = 0;
-        this.canvasHeight = 0;
-        // 事件回调
-        this.updateHasSignCallback = options.updateHasSignCallback || (()=>{});
-        // 获取DOM元素
-        if (typeof elementId === 'string') {
-            this.element = document.getElementById(elementId);
-            if (!this.element) {
-                throw new Error(`Element with id "${elementId}" not found`);
-            }
-        } else if (elementId instanceof HTMLElement) {
-            this.element = elementId;
-        } else {
-            throw new Error('Invalid element parameter. Expected string (id) or HTMLElement.');
-        }
-        if (!this.manualInit) {
-            this.initialize();
-        }
+        this.lastPoint = null;
+        this.canvas = null;
+        this.container = null;
+        this.resizeTimer = null;
+        // 存储所有笔画路径数据，用于resize时重绘
+        this.strokes = [];
+        this.currentStroke = null;
+        // 保存初始画布尺寸，用于计算缩放比例
+        this.initialWidth = 0;
+        this.initialHeight = 0;
+        // 事件处理器引用
+        this.mouseDownHandler = null;
+        this.mouseMoveHandler = null;
+        this.mouseUpHandler = null;
+        this.mouseLeaveHandler = null;
+        this.resizeHandler = null;
+        // 初始化
+        this.init();
     }
 }
 
@@ -249,19 +267,23 @@ var script = {
     props: {
         lineWidth: {
             type: Number,
-            default: 1
+            default: 2
         },
         lineColor: {
             type: String,
             default: '#000000'
         },
-        bgColor: {
+        backgroundColor: {
             type: String,
             default: '#f8f9fb'
         },
-        placeHolder: {
+        placeholder: {
             type: String,
             default: '请使用鼠标在此处签名'
+        },
+        placeholderColor: {
+            type: String,
+            default: '#000000'
         },
         manualInit: {
             type: Boolean,
@@ -282,19 +304,28 @@ var script = {
             const signature = new Signature(this.$refs.HikCloudSignature, {
                 lineWidth: this.lineWidth,
                 lineColor: this.lineColor,
-                bgColor: this.bgColor,
-                placeHolder: this.placeHolder,
-                manualInit: false,
-                updateHasSignCallback: (hasSign)=>{
-                    this.$emit('updateHasSign', hasSign);
+                backgroundColor: this.backgroundColor,
+                placeholder: this.placeholder,
+                placeholderColor: this.placeholderColor,
+                hasSignatureCallback: (hasSignature)=>{
+                    this.$emit('hasSignature', hasSignature);
+                },
+                startCallback: ()=>{
+                    this.$emit('start');
+                },
+                endCallback: ()=>{
+                    this.$emit('end');
+                },
+                clearCallback: ()=>{
+                    this.$emit('clear');
                 }
             });
             // 保存签名实例以便后续使用
             this.signature = signature;
         },
-        async getSignatureFile () {
+        async getDataURL () {
             if (this.signature) {
-                const base64 = await this.signature.getSignatureFile();
+                const base64 = await this.signature.getDataURL();
                 return base64;
             }
             return '';

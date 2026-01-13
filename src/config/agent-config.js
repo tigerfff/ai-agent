@@ -39,7 +39,7 @@ export const ALL_AGENTS = {
     type: 'built-in',
     tags: ['对话模型', '机器视觉'],
     hideConversations: false,
-    component: InspectX, 
+    component: InspectX, // 暂时复用 TryAgent，实际应为 InspectAgent
     permission: {
       underConstruction: false, // 建设中
       serviceName: '巡查服务',

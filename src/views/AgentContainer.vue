@@ -627,7 +627,7 @@ export default {
         const canCreate = await agent.beforeNewChat();
         if (canCreate === false) {
           // 智能体阻止了新建对话
-          return; 
+          return;
         }
       }
 

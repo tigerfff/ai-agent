@@ -18,7 +18,7 @@
           <img src="@/assets/images/IP@3x.png" alt="logo" class="logo-icon" />
           <span>海康云眸-云小智</span>
         </div>
-        <p>AI试用具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
+        <p>云小智具备多个智能场景的 AI技能，可以帮你提高工作效率，快来试试吧～</p>
       </div>
       <div class="agent-grid">
       <div 

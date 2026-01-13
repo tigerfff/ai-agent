@@ -299,7 +299,7 @@ export default {
       line-height: 22px;
       margin-bottom: 4px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 8px;
       color: rgba(0, 0, 0, 0.9);
       transition: all 0.2s;
       justify-content: flex-start;

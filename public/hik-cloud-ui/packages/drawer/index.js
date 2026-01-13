@@ -118,6 +118,10 @@ var script = {
         gray: {
             type: Boolean,
             default: true
+        },
+        noPadding: {
+            type: Boolean,
+            default: false
         }
     },
     data () {
@@ -126,6 +130,9 @@ var script = {
         };
     },
     computed: {
+        paddingClass () {
+            return this.noPadding ? 'no-padding' : '';
+        },
         drawerStyle () {
             if (this.placement === 'left' || this.placement === 'right') {
                 if (!this.width) {
@@ -330,7 +337,7 @@ const __vue_script__ = script;
                     _c('el-scrollbar', {
                         ref: "scrollbar",
                         attrs: {
-                            "wrapClass": _vm.gray ? 'hik-cloud-drawer__scrollbar-wrap--gray' : 'hik-cloud-drawer__scrollbar-wrap'
+                            "wrapClass": _vm.gray ? "hik-cloud-drawer__scrollbar-wrap--gray " + _vm.paddingClass : "hik-cloud-drawer__scrollbar-wrap " + _vm.paddingClass
                         }
                     }, [
                         _vm._t("default")

@@ -177,7 +177,7 @@ const __vue_script__ = script;
         }
     }, [
         !_vm.isEdit ? _c('span', {
-            staticClass: "nameText",
+            staticClass: "hik-cloud-inputEdit__nameText",
             attrs: {
                 "title": _vm.name
             }
@@ -193,7 +193,7 @@ const __vue_script__ = script;
                     expression: "isHover && !isEdit && !disabled"
                 }
             ],
-            staticClass: "h-icon-edit editIcon",
+            staticClass: "h-icon-edit hik-cloud-inputEdit__editIcon",
             style: {
                 'fontSize': _vm.iconSize + 'px'
             },
@@ -229,7 +229,7 @@ const __vue_script__ = script;
             }
         }) : _vm._e(),
         _vm.isEdit ? _c('span', {
-            staticClass: "inputNameEditNumber"
+            staticClass: "hik-cloud-inputEdit__inputNameEditNumber"
         }, [
             _c('span', {
                 staticClass: "txt"

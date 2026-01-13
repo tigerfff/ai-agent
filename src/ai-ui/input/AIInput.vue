@@ -152,7 +152,7 @@
                 />
               </div>
 
-              <span style="color: rgba(0,0,0,0.08)">|</span>
+              <span style="color: rgba(0,0,0,0.08)" v-if="actionButtons.speech.visible &&  actionButtons.stop.visible">|</span>
 
               <!-- 停止按钮 -->
               <div 
@@ -1306,12 +1306,18 @@ export default {
           &.speech-btn {
             &.recording {
               animation: pulse 1.5s infinite;
+
+              &:hover {
+              background: transparent;
+             }
             }
             .speech-animation {
               display: flex;
               align-items: center;
               justify-content: center;
             }
+
+             
           }
         }
 

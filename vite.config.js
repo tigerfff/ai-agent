@@ -88,7 +88,7 @@ export default defineConfig({
       '@svg': fileURLToPath(new URL('./src/assets/svg', import.meta.url)),
       // Hui UI 资源，从 public/hui2.43.2 下引入
       'hui': resolve(__dirname, 'public/hui2.43.2'),
-      '@hcu': resolve(__dirname, 'public/hik-cloud-ui.es.js')
+      '@hcu': resolve(__dirname, 'public/hik-cloud-ui')
     }
   },
 

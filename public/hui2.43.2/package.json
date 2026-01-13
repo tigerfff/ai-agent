@@ -8,6 +8,7 @@
     "types"
   ],
   "main": "lib/hui.common.js",
+  "module": "lib/hui.esm-browser.js",
   "unpkg": "lib/hui.umd.min.js",
   "style": "lib/hui.css",
   "author": "xiangxiao3",
