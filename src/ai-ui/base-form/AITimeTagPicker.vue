@@ -12,6 +12,7 @@
           :class="{ 'is-error': isTimeConflict(time, index) }"
           :closable="!disabled"
           @close="removeTime(index)"
+          v-show="formatTimeDisplay(time)"
         >
           {{ formatTimeDisplay(time) }}
         </el-tag>
@@ -149,7 +150,7 @@ export default {
           return time.aiStartTime.substring(0, 5);
         }
       }
-      return '未知时间';
+      return null;
     },
     isTimeConflict(time, index) {
       const list = this.value || [];

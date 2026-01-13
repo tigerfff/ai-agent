@@ -138,8 +138,8 @@
                   :animation-data="speechAnimationData"
                   :autoplay="true"
                   :loop="true"
-                  :width="24"
-                  :height="24"
+                  :width="32"
+                  :height="32"
                   class="speech-animation"
                 />
                 <!-- 未录音时显示静态图标 -->
@@ -152,7 +152,7 @@
                 />
               </div>
 
-              <span style="color: rgba(0,0,0,0.08)" v-if="actionButtons.speech.visible &&  actionButtons.stop.visible">|</span>
+              <span style="color: rgba(0,0,0,0.08)" v-if="actionButtons.speech.visible &&  actionButtons.send.visible">|</span>
 
               <!-- 停止按钮 -->
               <div 

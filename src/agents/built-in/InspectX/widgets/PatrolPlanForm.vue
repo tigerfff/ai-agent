@@ -88,6 +88,9 @@
           <div v-if="!displayData.startDate || !displayData.endDate" class="error-tip">
             <i class="h-icon-info" style="font-size: 18px;"></i> 请选择有效期
           </div>
+          <div v-else-if="hasInvalidDateRange && !isHistoryDisabled" class="error-tip">
+            <i class="h-icon-info" style="font-size: 18px;"></i> 开始日期必须早于结束日期
+          </div>
         </div>
       </div>
 
@@ -236,7 +239,17 @@ export default {
     isFormIncomplete() {
       const hasTime = this.formData.patrolTime?.timeList?.length > 0;
       const hasDate = this.formData.startDate && this.formData.endDate;
-      return !hasTime || !hasDate;
+      return !hasTime || !hasDate || this.hasInvalidDateRange;
+    },
+    hasInvalidDateRange() {
+      const { startDate, endDate } = this.formData;
+      if (!startDate || !endDate) return false;
+      
+      const start = new Date(startDate.replace(/-/g, '/'));
+      const end = new Date(endDate.replace(/-/g, '/'));
+      
+      // 开始日期必须早于结束日期
+      return start.getTime() >= end.getTime();
     },
     issueDaysLabel() {
       const { frequency, issueDays } = this.displayData;
@@ -296,6 +309,22 @@ export default {
           const oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()).getTime();
           
           let minDate = today;
+          
+          // 如果已选择开始日期，结束日期必须晚于开始日期（不能等于）
+          if (this.formData.startDate) {
+            const start = new Date(this.formData.startDate.replace(/-/g, '/'));
+            const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+            
+            // 对于周频次，结束日期可以是开始日期所在周的周日（但必须 >= 开始日期）
+            // 对于其他频次，结束日期必须严格晚于开始日期（不能等于）
+            if (this.formData.frequency === 2) {
+              // 周频次：结束日期可以是开始日期所在周的周日，但不能早于开始日期
+              minDate = Math.max(today, startDate);
+            } else {
+              // 其他频次：结束日期必须严格晚于开始日期
+              minDate = Math.max(today, startDate + 24 * 60 * 60 * 1000); // 加一天
+            }
+          }
           
           // 1. 基础限制：结束日期不能早于 minDate，且不能超过一年
           if (time.getTime() < minDate || time.getTime() > oneYearLater) {

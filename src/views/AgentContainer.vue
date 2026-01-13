@@ -297,7 +297,7 @@ export default {
     // 合并所有智能体，并注入红点状态
     allAgents() {
       const agents = [...this.builtInAgents, ...this.extraAgents];
-      return agents.map(agent => {
+      const mappedAgents = agents.map(agent => {
         // 检查红点状态
         // agentTips 格式: { "agentId": true/false }
         const hasRedDot = this.agentTips[agent.id] === true; 
@@ -306,6 +306,13 @@ export default {
           ...agent,
           hasRedDot
         };
+      });
+      
+      // 根据 sort 字段排序，数字越小越靠前，如果没有 sort 字段则排在最后
+      return mappedAgents.sort((a, b) => {
+        const sortA = a.sort !== undefined ? a.sort : 999;
+        const sortB = b.sort !== undefined ? b.sort : 999;
+        return sortA - sortB;
       });
     },
     currentAgent() {

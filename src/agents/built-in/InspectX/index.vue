@@ -88,7 +88,7 @@
           :loading="isStreaming || isUploading"
           :showClearButton="false"
           :enable-stop-button="true"
-          placeholder="请描述巡查任务的门店范围、方向、时间频次、任务有效期等~"
+          :placeholder="`请描述巡查任务的${applicationSceneName}范围、方向、时间频次、任务有效期等~`"
           :allowed-types="['image']"
           :file-limit="{
             image: { maxSize: 10 * 1024 * 1024, extensions: ['jpg', 'png', 'jpeg'] },
@@ -151,7 +151,7 @@ export default {
       welcomeConfig: {
         icon: inspectSquareIcon,
         title: '智慧巡查',
-        description: '我可以帮你自动执行门店巡检任务，定时推送巡检报告，帮助你更高效地工作～',
+        description: `我可以帮你自动执行${this.applicationSceneName}巡检任务，定时推送巡检报告，帮助你更高效地工作～`,
         prompts: [] // 从接口获取
       },
     };
@@ -250,14 +250,6 @@ export default {
         "patrolTime": {
           "timeType": 1,
           "timeList": [
-            {
-              "aiStartTime": "08:30:00",
-              "aiEndTime": "10:00:00"
-            },
-            {
-              "aiStartTime": "14:00:00",
-              "aiEndTime": "16:00:00"
-            }
           ]
         },
         "passengerId": ""

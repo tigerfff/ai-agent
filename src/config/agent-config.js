@@ -30,7 +30,7 @@ export const BUSINESS_LINES = {
 // 所有可用的智能体定义
 export const ALL_AGENTS = {
   'inspect-x': {
-    id: '3',
+    id: '1',
     name: '智慧巡查',
     miniName:'巡查',
     icon: inspectIcon,
@@ -40,6 +40,7 @@ export const ALL_AGENTS = {
     tags: ['对话模型', '机器视觉'],
     hideConversations: false,
     component: InspectX, // 暂时复用 TryAgent，实际应为 InspectAgent
+    sort: 1, // 排序字段，数字越小越靠前
     permission: {
       underConstruction: false, // 建设中
       serviceName: '巡查服务',
@@ -73,6 +74,7 @@ export const ALL_AGENTS = {
     tags: ['对话模型', '机器视觉'],
     type: 'built-in',
     component: TryAgent,
+    sort: 3, // 排序字段，数字越小越靠前
     // AI试用通常对所有人开放，无需特殊权限
     permission: null 
   },
@@ -86,6 +88,7 @@ export const ALL_AGENTS = {
     type: 'built-in',
     tags: ['大语言模型'],
     component: TrainingXAgent,
+    sort: 4, // 排序字段，数字越小越靠前
     // 权限配置
     permission: {
       serviceName: '培训服务',        // 服务名称（用于提示）
@@ -114,6 +117,7 @@ export const ALL_AGENTS = {
     description: '简单对话智能生成 SOP 模板',
     type: 'external', // 外部链接类型
     tags: ['SOP', '效率'],
+    sort: 5, // 排序字段，数字越小越靠前
     // 外部链接地址（使用当前域名）
     getUrl: () => {
       window.localStorage.removeItem('Chain_IntelliInspect_addMode')
@@ -179,7 +183,14 @@ export const BUSINESS_LINE_AGENTS = {
  */
 export function getAgentsByBusinessLine(businessLine = BUSINESS_LINES.DEFAULT) {
   const agentIds = BUSINESS_LINE_AGENTS[businessLine] || BUSINESS_LINE_AGENTS[BUSINESS_LINES.DEFAULT];
-  return agentIds.map(id => ALL_AGENTS[id]).filter(Boolean);
+  const agents = agentIds.map(id => ALL_AGENTS[id]).filter(Boolean);
+  
+  // 根据 sort 字段排序，数字越小越靠前，如果没有 sort 字段则排在最后
+  return agents.sort((a, b) => {
+    const sortA = a.sort !== undefined ? a.sort : 999;
+    const sortB = b.sort !== undefined ? b.sort : 999;
+    return sortA - sortB;
+  });
 }
 
 /**
