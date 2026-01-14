@@ -65,7 +65,7 @@ export const ALL_AGENTS = {
   },
   
   'try-x': {
-    id: '1',
+    id: 'try-x',
     name: 'AI试用',
     miniName:'AI试用',
     icon: tryXIcon,

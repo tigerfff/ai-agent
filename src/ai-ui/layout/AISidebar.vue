@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar-wrapper">
+  <div class="sidebar-wrapper" v-show="!(collapsed && agents.length <= 1)">
     <!-- 遮罩层：mini 模式下展开时显示 -->
     <div 
       v-if="isMini && !collapsed" 

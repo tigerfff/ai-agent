@@ -9,9 +9,8 @@
     <!-- 模拟父项目使用组件库 -->
     <AIChatWindow 
       ref="chatWindow"
-      business-line="retail"
+      business-line="open"
       :visible.sync="visible"
-      :extra-agents="customAgents"
       userId="08040da51923457aaaf43e4267abcf4e"
     >
       <!-- 处理自定义智能体的渲染 -->
