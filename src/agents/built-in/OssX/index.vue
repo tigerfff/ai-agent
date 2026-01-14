@@ -1,7 +1,7 @@
 <template>
     <div class="oss-x-container">
       <div class="demo-card">
-        <h2>AIOssUploader 上传模拟</h2>
+        <h2>CosUploader 上传模拟</h2>
         <p class="desc">支持：单文件 / 多文件 分片上传、进度回显、暂停/取消、externalEncrypt 等</p>
   
         <!-- 上传模式切换 -->
@@ -238,7 +238,7 @@
   </template>
   
   <script>
-  import { AIOssUploader } from '@/utils/ai-oss-uploader'
+  import { CosUploader } from '@/utils/cos-uploader'
   
   export default {
     name: 'OssXDemo',
@@ -278,7 +278,7 @@
       }
     },
     created() {
-      this.uploader = new AIOssUploader()
+      this.uploader = new CosUploader()
     },
     methods: {
       getFileStatusText(status) {
