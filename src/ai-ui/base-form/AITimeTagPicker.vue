@@ -105,7 +105,7 @@ export default {
     // 最大数量限制
     maxCount: {
       type: Number,
-      default: 6
+      default: 5
     },
     // 高峰期配置，用于格式化显示
     peakConfig: {

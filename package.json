@@ -74,6 +74,7 @@
     "typed.js": "^2.1.0",
     "underscore": "^1.13.7",
     "uuid": "^9.0.1",
+    "v-lazy-component": "^3.0.9",
     "video.js": "^8.9.0",
     "vue": "^2.7.14",
     "vuedraggable": "^2.24.3",

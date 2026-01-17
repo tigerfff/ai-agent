@@ -54,7 +54,8 @@ export default {
 <style lang="scss" scoped>
 .ai-button {
   background: linear-gradient(-90deg, #9D83FF 0%, #388EFF 100%);
-  width: 108px;
+  // min-width: 108px;
+  padding: 0 12px;
   height: 36px;
   display: flex;
   align-items: center;

@@ -9,7 +9,7 @@
     <!-- 模拟父项目使用组件库 -->
     <AIChatWindow 
       ref="chatWindow"
-      business-line="open"
+      business-line="retail"
       :visible.sync="visible"
       userId="08040da51923457aaaf43e4267abcf4e"
     >

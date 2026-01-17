@@ -3,12 +3,16 @@ import App from './App.vue'
 import '@/style/vars.scss'
 import '@/assets/reset.css'
 import 'hui/lib/hui.css'
-
+import '@hcu/packages/theme-chalk/index.css'
 
 import '@/style/message-box.scss'
 import '@/style/select.scss'
 import Hui from 'hui/lib/hui.esm-browser.js'
 import HikCloudUI from '@hcu/hik-cloud-ui.es.js'
+import VLazyComponent from 'v-lazy-component/vue2'
+import imgCanvas from './demo/ImgCanvas.vue'
+import ImageDrawViewer from './demo/ImageDrawViewer.vue'
+import RightAsideContainer from './demo/RightAsideContainer.vue'
 // 引入我们刚开发的组件库
 import AIComponentLib from './index.js'
 // 简化版 http 封装，用来在本项目里模拟父项目的 this.$http / this.$aiClient 行为
@@ -24,7 +28,14 @@ syncTokenFromUrl('token', 'accessToken', {
 
 Vue.use(Hui)
 Vue.use(HikCloudUI)
+Vue.use(VLazyComponent)
+console.log(VLazyComponent)
 Vue.prototype.applicationSceneName = '222'
+
+// 本地开发 Demo 用：注册组件
+Vue.component('imgCanvas', imgCanvas);
+Vue.component('ImageDrawViewer', ImageDrawViewer);
+Vue.component('RightAsideContainer', RightAsideContainer);
 
 // 全局注册 HikCloudOrganizer 组件
 // Vue.component('hikCloudOrganization', HikCloudOrganizer)

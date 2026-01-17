@@ -1,6 +1,7 @@
 import TrainingXAgent from '@/agents/built-in/TrainingX/index.vue';
 import TryAgent from '@/agents/built-in/TryX/index.vue';
 import InspectX from '@/agents/built-in/InspectX/index.vue';
+import DataAnalysisXAgent from '@/agents/built-in/DataAnalysisX/index.vue';
 import { buildUrl } from '@/utils/api-prefix';
 
 // 导入图标资源
@@ -30,7 +31,7 @@ export const BUSINESS_LINES = {
 // 所有可用的智能体定义
 export const ALL_AGENTS = {
   'inspect-x': {
-    id: '1',
+    id: '3',
     name: '智慧巡查',
     miniName:'巡查',
     icon: inspectIcon,
@@ -63,9 +64,24 @@ export const ALL_AGENTS = {
       // serviceCheckConfig: { url: '...', method: 'get' }
     }
   },
+
+  'data-analysis-x': {
+    id: '4',
+    name: '数据分析',
+    miniName:'分析',
+    icon: dataAnalysisIcon,
+    homeIcon: dataAnalysisHomeIcon,
+    description: '深入分析门店运营数据，智能发现潜在问题并提供改进建议。',
+    type: 'built-in',
+    tags: ['数据建模', '智能分析'],
+    hideConversations: false,
+    component: DataAnalysisXAgent,
+    sort: 2, // 排序字段
+    permission: null
+  },
   
   'try-x': {
-    id: 'try-x',
+    id: '1',
     name: 'AI试用',
     miniName:'AI试用',
     icon: tryXIcon,
@@ -146,7 +162,7 @@ export const BUSINESS_LINE_AGENTS = {
     'inspect-x',
     'try-x',
     'training-x',
-    'data-analysis'
+    'data-analysis-x'
   ],
   [BUSINESS_LINES.MINERVA]: [
     'training-x',
