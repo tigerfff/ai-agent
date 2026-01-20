@@ -97,6 +97,7 @@
           :has-change-ques-btn="true"
           :question="bigImgInfo.question"
           :show-eval-btn="true"
+          :store-name="bigImgInfo.storeName"
           :pic="{
             ...pic,
             captureTime: pic ? pic.captureTime : null
@@ -265,18 +266,42 @@ export default {
       }
     },
     previewImage(img, allPics, question) {
-      this.bigImgInfo.pics = allPics;
-      const index = allPics.indexOf(img);
+      this.bigImgInfo.pics = allPics || [];
+      const index = (allPics || []).indexOf(img);
       this.bigImgInfo.picIndexArr = [index > -1 ? index : 0, 0];
       this.bigImgInfo.storeName = this.currentStore ? this.currentStore.storeName : '';
       this.bigImgInfo.question = question || {};
       this.bigImgInfo.visible = true;
     },
-    changeQues() {
-      console.log('Change question');
+    changeQues(direction) {
+      if (!this.currentStoreProblems || this.currentStoreProblems.length === 0) return;
+      
+      const currentIndex = this.currentStoreProblems.findIndex(p => p.questionId === this.bigImgInfo.question.questionId);
+      
+      let nextIndex = currentIndex;
+      if (direction === 'prev') {
+        if (currentIndex <= 0) {
+          this.$message.info('已经是第一个问题了');
+          return;
+        }
+        nextIndex = currentIndex - 1;
+      } else if (direction === 'next') {
+        if (currentIndex >= this.currentStoreProblems.length - 1) {
+          this.$message.info('已经是最后一个问题了');
+          return;
+        }
+        nextIndex = currentIndex + 1;
+      }
+      
+      const nextProblem = this.currentStoreProblems[nextIndex];
+      this.bigImgInfo.question = nextProblem;
+      this.bigImgInfo.pics = nextProblem.pics || [];
+      // 切换问题后，默认选中该问题的第一个图片
+      this.bigImgInfo.picIndexArr = [0, 0];
     },
     goEval() {
       console.log('Go evaluation');
+      this.$message.info('正在跳转考评页面...');
     },
     graffitiClose() {
       this.bigImgInfo.visible = false;
