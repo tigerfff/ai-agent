@@ -25,6 +25,7 @@ export const BUSINESS_LINES = {
   OPEN: 'open',      // 开发者
   ENTERPRISE: 'enterprise', // 企业
   AIOT: 'aiot',          // 智联
+  CUSTOM: 'custom',      // 自定义（由外部指定展示哪些 ID）
   DEFAULT: 'default'      // 默认（所有智能体）
 };
 
@@ -214,6 +215,9 @@ export const BUSINESS_LINE_AGENTS = {
  * @returns {Array} 智能体配置数组
  */
 export function getAgentsByBusinessLine(businessLine = BUSINESS_LINES.DEFAULT) {
+  // 如果是 custom 类型，默认返回空，由组件内部处理 agentIds
+  if (businessLine === BUSINESS_LINES.CUSTOM) return [];
+
   const agentIds = BUSINESS_LINE_AGENTS[businessLine] || BUSINESS_LINE_AGENTS[BUSINESS_LINES.DEFAULT];
   const agents = agentIds.map(id => ALL_AGENTS[id]).filter(Boolean);
   

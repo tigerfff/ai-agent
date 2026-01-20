@@ -181,7 +181,7 @@
 import AILayout from '@/ai-ui/layout/AILayout.vue';
 import AISidebar from '@/ai-ui/layout/AISidebar.vue';
 import Home from './Home.vue';
-import { getAgentsByBusinessLine, getCurrentBusinessLine } from '@/config/agent-config';
+import { getAgentsByBusinessLine, getCurrentBusinessLine, ALL_AGENTS } from '@/config/agent-config';
 import { formatConversationTime } from '@/utils';
 import { checkAgentPermission, PERMISSION_STATUS } from '@/utils/permission-checker';
 import { TrainingXApi } from '@/agents/built-in/TrainingX/api';
@@ -216,6 +216,11 @@ export default {
     businessLine: {
       type: String,
       default: null
+    },
+    // 当 businessLine 为 'custom' 时，指定要显示的内置智能体 ID 列表
+    agentIds: {
+      type: Array,
+      default: () => []
     },
     // 是否为小窗模式
     isMini: {
@@ -292,6 +297,10 @@ export default {
     },
     // 根据业务线过滤的内置智能体
     builtInAgents() {
+      if (this.currentBusinessLine === 'custom') {
+        // 如果是自定义模式，直接根据传入的 agentIds 从 ALL_AGENTS 中挑出对应的对象
+        return this.agentIds.map(id => ALL_AGENTS[id]).filter(Boolean);
+      }
       return getAgentsByBusinessLine(this.currentBusinessLine);
     },
     // 合并所有智能体，并注入红点状态

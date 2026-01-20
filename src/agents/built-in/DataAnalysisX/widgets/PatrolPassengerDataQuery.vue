@@ -1,16 +1,23 @@
 <template>
   <div class="patrol-passenger-query">
-    <!-- 巡查报表视图 (queryType === 0) -->
-    <template v-if="normalizedQueryType === 0">
-      <!-- 加载中 -->
-      <div v-if="loading" class="loading-state">
-        <i class="h-icon-loading"></i>
-        <p>巡查统计数据分析中...</p>
+    <!-- 加载中 -->
+    <div v-if="loading" class="loading-state">
+      <i class="h-icon-loading"></i>
+      <p>{{ normalizedQueryType === 2 ? '巡查和客流数据分析中...' : (normalizedQueryType === 1 ? '客流统计数据分析中...' : '巡查统计数据分析中...') }}</p>
+    </div>
+
+    <div v-else-if="showCombinedContent" class="combined-report">
+      <!-- 综合大标题 (仅在 queryType === 2 时显示) -->
+      <div v-if="normalizedQueryType === 2" class="report-header main-header">
+        <div class="report-title">{{ formatRangeTitle(data.startDate, data.endDate) }}巡查和客流统计结果</div>
       </div>
 
-      <div v-else-if="hasData" class="patrol-report">
-        <!-- 标题 -->
-        <div class="report-header">
+      <!-- 巡查报表部分 -->
+      <div v-if="showPatrolSection" class="patrol-report-section">
+        <div v-if="normalizedQueryType === 2" class="sub-report-title">一、巡查情况：</div>
+        
+        <!-- 标题 (仅在单独巡查模式下显示) -->
+        <div v-if="normalizedQueryType === 0" class="report-header">
           <div class="report-title">{{ formatRangeTitle(data.startDate, data.endDate) }}巡查统计结果</div>
         </div>
 
@@ -66,41 +73,29 @@
           :title="`${formatRangeTitle(data.startDate, data.endDate)}巡查统计总览`"
           description="已同步至「智慧巡查-区域报表」模块，支持导出或查看详情"
           icon-type="excel"
-          :export-function="toExport"
+          :export-function="(done) => toExport(done, 'patrol')"
           :is-mini="isMini"
-          @show-detail="handleShowDetail"
+          @show-detail="handleShowDetail('patrol')"
         />
       </div>
 
-      <!-- 空状态 -->
-      <div v-else class="empty-state">
-        <i class="h-icon-tip_info_f empty-icon"></i>
-        <p>暂无相关统计数据</p>
-      </div>
-    </template>
-
-    <!-- 客流报表视图 (queryType === 1) -->
-    <template v-else-if="normalizedQueryType === 1">
-      <!-- 加载中 -->
-      <div v-if="loading" class="loading-state">
-        <i class="h-icon-loading"></i>
-        <p>客流统计数据分析中...</p>
-      </div>
-
-      <div v-else-if="hasPassengerData" class="passenger-report">
-        <!-- 标题 -->
-        <div class="report-header">
+      <!-- 客流报表部分 -->
+      <div v-if="showPassengerSection" class="passenger-report-section" :class="{ 'mt-32': normalizedQueryType === 2 }">
+        <div v-if="normalizedQueryType === 2" class="sub-report-title">二、客流情况：</div>
+        
+        <!-- 标题 (仅在单独客流模式下显示) -->
+        <div v-if="normalizedQueryType === 1" class="report-header">
           <div class="report-title">{{ formatRangeTitle(data.startDate, data.endDate) }}客流统计结果</div>
         </div>
 
-          <!-- 1. 客流进入最多 5 门店 -->
-          <div v-if="passengerTopStores.length > 0" class="section-container">
-            <div class="section-header">
-              <span class="dot"></span>
-              <span class="header-text">{{ passengerTopHeaderText }}</span>
-            </div>
-            <EasyTable :columns="passengerTopColumns" :data="passengerTopStores" />
+        <!-- 1. 客流进入最多 5 门店 -->
+        <div v-if="passengerTopStores.length > 0" class="section-container">
+          <div class="section-header">
+            <span class="dot"></span>
+            <span class="header-text">{{ passengerTopHeaderText }}</span>
           </div>
+          <EasyTable :columns="passengerTopColumns" :data="passengerTopStores" />
+        </div>
 
         <!-- 2. 客流进入最少 5 门店 -->
         <div v-if="showPassengerLastStores" class="section-container">
@@ -131,18 +126,18 @@
           description="已同步至「客流统计-客流排行」模块，支持导出或查看详情"
           icon-type="excel"
           icon-wrapper-class="green-bg"
-          :export-function="toExport"
+          :export-function="(done) => toExport(done, 'passenger')"
           :is-mini="isMini"
-          @show-detail="handleShowDetail"
+          @show-detail="handleShowDetail('passenger')"
         />
       </div>
+    </div>
 
-      <!-- 空状态 -->
-      <div v-else class="empty-state">
-        <i class="h-icon-tip_info_f empty-icon"></i>
-        <p>暂无相关客流统计数据</p>
-      </div>
-    </template>
+    <!-- 空状态 -->
+    <div v-else class="empty-state">
+      <i class="h-icon-tip_info_f empty-icon"></i>
+      <p>暂无相关统计数据</p>
+    </div>
   </div>
 </template>
 
@@ -150,6 +145,7 @@
 import { DataAnalysisXApi } from '../api';
 import EasyTable from '@/ai-ui/base-form/EasyTable.vue';
 import ReportDocSection from '@/ai-ui/base-form/ReportDocSection.vue';
+import { navigateToAreaReport, navigateToPassengerRank } from './utils';
 
 export default {
   name: 'PatrolPassengerDataQuery',
@@ -188,7 +184,9 @@ export default {
       passengerChanges: [],
       loading: false,
       areaIdList: [],
-      storeIdList: []
+      storeIdList: [],
+      areaNodes: [], // 新增：存储完整的区域节点对象
+      storeNodes: []  // 新增：存储完整的门店节点对象
     };
   },
   computed: {
@@ -203,6 +201,18 @@ export default {
     // 是否有客流数据
     hasPassengerData() {
       return this.passengerTopStores.length > 0 || this.passengerLastStores.length > 0 || this.passengerChanges.length > 0;
+    },
+    // 是否显示巡查板块
+    showPatrolSection() {
+      return (this.normalizedQueryType === 0 || this.normalizedQueryType === 2) && this.hasData;
+    },
+    // 是否显示客流板块
+    showPassengerSection() {
+      return (this.normalizedQueryType === 1 || this.normalizedQueryType === 2) && this.hasPassengerData;
+    },
+    // 是否有内容展示
+    showCombinedContent() {
+      return this.showPatrolSection || this.showPassengerSection;
     },
     // 是否显示“后5名”门店：只有前5满5个，且后5不为空，且总数 >= 配置阈值时展示
     showLastStores() {
@@ -330,23 +340,27 @@ export default {
             limit: 200
           });
           if (searchRes && searchRes.code === 0 && Array.isArray(searchRes.data)) {
-            const areaIds = [];
-            const storeIds = [];
+            const areaNodes = [];
+            const storeNodes = [];
             searchRes.data.forEach(node => {
               if (node.nodeType === 0) {
-                areaIds.push(node.nodeId);
+                areaNodes.push(node);
               } else if (node.nodeType === 1) {
-                storeIds.push(node.nodeId);
+                storeNodes.push(node);
               }
             });
-            this.areaIdList = areaIds;
-            this.storeIdList = storeIds;
+            this.areaNodes = areaNodes;
+            this.storeNodes = storeNodes;
+            this.areaIdList = areaNodes.map(n => n.nodeId);
+            this.storeIdList = storeNodes.map(n => n.nodeId);
           }
         } else {
           // 如果没有 areaOrStoreName，获取区域树根节点
           const treeRes = await DataAnalysisXApi.getAreaTree(this.client);
           if (treeRes && treeRes.code === 0 && treeRes.data?.nodeList) {
-            this.areaIdList = treeRes.data.nodeList.map(node => node.nodeId);
+            this.areaNodes = treeRes.data.nodeList;
+            this.storeNodes = [];
+            this.areaIdList = this.areaNodes.map(node => node.nodeId);
             this.storeIdList = [];
           }
         }
@@ -355,6 +369,11 @@ export default {
           await this.fetchPatrolData();
         } else if (this.normalizedQueryType === 1) {
           await this.fetchPassengerData();
+        } else if (this.normalizedQueryType === 2) {
+          await Promise.all([
+            this.fetchPatrolData(),
+            this.fetchPassengerData()
+          ]);
         }
       } catch (e) {
         console.error('[PatrolPassengerDataQuery] init failed:', e);
@@ -538,9 +557,10 @@ export default {
         console.error('Fetch passenger data failed:', e);
       }
     },
-    async toExport(done) {
+    async toExport(done, type) {
+      const exportType = type || (this.normalizedQueryType === 1 ? 'passenger' : 'patrol');
       try {
-        if (this.normalizedQueryType === 0) {
+        if (exportType === 'patrol') {
           // 巡查导出
           const params = {
             startDate: this.data.startDate,
@@ -561,7 +581,7 @@ export default {
           if (res && res.code === 0) {
             this.$message.success('导出成功，请前往"下载中心"查看');
           }
-        } else if (this.normalizedQueryType === 1) {
+        } else if (exportType === 'passenger') {
           // 客流导出
           const areaId = this.areaIdList[0] || this.storeIdList[0] || '';
           const params = {
@@ -586,9 +606,25 @@ export default {
         done();
       }
     },
-    handleShowDetail() {
-      // 这里的详情跳转逻辑可以根据需要完善
-      console.log('Show detail');
+    handleShowDetail(type) {
+      // 如果没有传 type，则根据当前 normalizedQueryType 降级处理
+      const detailType = type || (this.normalizedQueryType === 1 ? 'passenger' : 'patrol');
+
+      if (detailType === 'patrol') {
+        // 巡查详情：跳转至「智慧巡查-区域报表」
+        const nodeList = [...this.areaNodes, ...this.storeNodes];
+        navigateToAreaReport({
+          patrolType: 0,
+          tabType: 'store',
+          startDate: this.data.startDate,
+          endDate: this.data.endDate,
+          patrolTemplateId: this.data.templateId,
+          nodeList: nodeList
+        });
+      } else if (detailType === 'passenger') {
+        // 客流详情：跳转至「客流统计-客流排行」
+        navigateToPassengerRank(this.data.startDate, this.data.endDate);
+      }
     }
   }
 };
@@ -607,6 +643,23 @@ export default {
       font-weight: 600;
       color: rgba(0, 0, 0, 0.9);
     }
+  }
+
+  .main-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+
+  .sub-report-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.85);
+    margin: 0 0 16px 0;
+  }
+
+  .mt-32 {
+    margin-top: 32px;
   }
 
   .section-container {

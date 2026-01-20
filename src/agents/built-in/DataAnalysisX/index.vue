@@ -203,7 +203,7 @@ export default {
       const mockData = {
         "startDate": "2026-01-09",
         "endDate": "2026-01-17",
-        "queryType": 1,
+        "queryType": 2,
         "templateId": "06b695ef7bf74bf2a9f4dde08e44eff0",
         "areaOrStoreName": ""
       };

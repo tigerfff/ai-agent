@@ -107,7 +107,6 @@ export default {
     flex-shrink: 0;
     
     &.green-bg {
-      background: rgba(82, 196, 26, 0.1);
       .doc-icon {
         color: #52c41a;
       }
