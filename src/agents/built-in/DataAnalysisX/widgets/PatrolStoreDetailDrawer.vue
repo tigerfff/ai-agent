@@ -13,7 +13,7 @@
       <!-- 左侧门店列表 -->
       <div class="store-list-panel">
         <div class="panel-header">
-          <span class="panel-title">TOP {{ stores.length }} 门店</span>
+          <span class="panel-title">TOP {{ stores.length }} {{ applicationSceneName }}</span>
           <span class="panel-subtitle">问题数</span>
         </div>
         <div class="store-list">
@@ -111,6 +111,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import HikCloudDrawer from '@/../public/hik-cloud-ui/packages/drawer/index.js';
 import ImageGrid from '@/ai-ui/base-form/ImageGrid/index.vue';
 import { DataAnalysisXApi } from '../api';
@@ -128,7 +129,7 @@ export default {
     },
     title: {
       type: String,
-      default: '门店问题详情'
+      default: () => Vue.prototype.applicationSceneName ? `${Vue.prototype.applicationSceneName}问题详情` : '门店问题详情'
     },
     stores: {
       type: Array,

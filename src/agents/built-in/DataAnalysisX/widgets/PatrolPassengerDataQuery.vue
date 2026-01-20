@@ -34,7 +34,7 @@
         <div v-if="showLastStores" class="section-container">
           <div class="section-header">
             <span class="dot"></span>
-            <span class="header-text">上周巡查得分排名后 5 的门店是:</span>
+            <span class="header-text">上周巡查得分排名后 5 的{{ applicationSceneName }}是:</span>
           </div>
           <EasyTable :columns="lastStoreRankColumns" :data="lastStores" />
         </div>
@@ -61,16 +61,16 @@
         <div v-if="alertStores.length > 0" class="section-container alert-section">
           <div class="alert-title">
             <i class="h-icon-tip_info"></i>
-            {{ formatRangeTitle(data.startDate, data.endDate) }}异常门店预警
+            {{ formatRangeTitle(data.startDate, data.endDate) }}异常{{ applicationSceneName }}预警
           </div>
           <div class="alert-content">
-            监测期间，{{ alertStoreNames }}等 {{ alertStores.length }} 家门店，均出现了5次以上的卫生问题，建议对门店进行线下沟通，积极完成整改
+            监测期间，{{ alertStoreNames }}等 {{ alertStores.length }} 家{{ applicationSceneName }}，均出现了{{ alertMinCount }}次以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
           </div>
         </div>
 
         <!-- 6. 巡查统计总览 (Doc Section) -->
         <ReportDocSection
-          :title="`${formatRangeTitle(data.startDate, data.endDate)}巡查统计总览`"
+          :title="`${formatRangeTitle(data.startDate, data.endDate)}的巡店统计总览`"
           description="已同步至「智慧巡查-区域报表」模块，支持导出或查看详情"
           icon-type="excel"
           :export-function="(done) => toExport(done, 'patrol')"
@@ -101,7 +101,7 @@
         <div v-if="showPassengerLastStores" class="section-container">
           <div class="section-header">
             <span class="dot"></span>
-            <span class="header-text">上周门店“客流进入”排名后 5 的门店是:</span>
+            <span class="header-text">上周{{ applicationSceneName }}“客流进入”排名后 5 的{{ applicationSceneName }}是:</span>
           </div>
           <EasyTable :columns="passengerLastColumns" :data="passengerLastStores" />
         </div>
@@ -110,10 +110,10 @@
         <div v-if="passengerChanges.length > 0" class="section-container alert-section">
           <div class="alert-title">
             <i class="h-icon-tip_info alert-icon-blue"></i>
-            {{ formatRangeTitle(data.startDate, data.endDate) }}门店客流重点提醒
+            {{ formatRangeTitle(data.startDate, data.endDate) }}{{ applicationSceneName }}客流重点提醒
           </div>
           <div class="alert-content">
-            监测期间，{{ passengerAlertStoreNames }}等 {{ passengerAlertHighCount }} 家门店的客流增长高于平均水平，建议对门店进行缺货陈列检查避免丢失销售机会。另外，{{ passengerAlertLowStoreName }}的客流出现明显下滑，建议对门店进行营销物料检查。
+            监测期间，{{ passengerAlertStoreNames }}等 {{ passengerAlertHighCount }} 家{{ applicationSceneName }}的客流增长高于平均水平，建议对{{ applicationSceneName }}进行缺货陈列检查避免丢失销售机会。另外，{{ passengerAlertLowStoreName }}的客流出现明显下滑，建议对{{ applicationSceneName }}进行营销物料检查。
           </div>
           <div class="alert-table-wrapper">
             <EasyTable :columns="passengerChangeColumns" :data="passengerChanges" />
@@ -179,6 +179,7 @@ export default {
       topQuestions: [],
       lastQuestions: [],
       alertStores: [], // 异常门店预警数据（最多问题项对应的 top 3 门店）
+      alertQuestionName: '', // 异常问题名称
       passengerTopStores: [],
       passengerLastStores: [],
       passengerChanges: [],
@@ -232,12 +233,12 @@ export default {
     // 动态标题：门店
     storeTopHeaderText() {
       const count = this.topStores.length;
-      return count >= 5 ? '上周巡查得分排名前 5 的门店是:' : `上周巡查得分排名的 ${count} 家门店是:`;
+      return count >= 5 ? `上周巡查得分排名前 5 的${this.applicationSceneName}是:` : `上周巡查得分排名的 ${count} 家${this.applicationSceneName}是:`;
     },
     // 动态标题：客流
     passengerTopHeaderText() {
       const count = this.passengerTopStores.length;
-      return count >= 5 ? '上周门店“客流进入”排名前 5 的门店是:' : `上周门店“客流进入”排名的 ${count} 家门店是:`;
+      return count >= 5 ? `上周${this.applicationSceneName}“客流进入”排名前 5 的${this.applicationSceneName}是:` : `上周${this.applicationSceneName}“客流进入”排名的 ${count} 家${this.applicationSceneName}是:`;
     },
     // 动态标题：问题
     questionTopHeaderText() {
@@ -246,7 +247,7 @@ export default {
     },
     topStoreRankColumns() {
       return [
-        { label: '得分排名前 5 的门店名称', prop: 'storeName' },
+        { label: `得分排名前 5 的${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '平均不合格问题', prop: 'avgQuestionCount', width: '120px' },
         { label: '平均得分', prop: 'avgScore', width: '100px' },
         { label: '平均得分率', prop: 'scoreDisplay', width: '100px' }
@@ -254,7 +255,7 @@ export default {
     },
     lastStoreRankColumns() {
       return [
-        { label: '得分排名后 5 的门店名称', prop: 'storeName' },
+        { label: `得分排名后 5 的${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '平均不合格问题', prop: 'avgQuestionCount', width: '120px' },
         { label: '平均得分', prop: 'avgScore', width: '100px' },
         { label: '平均得分率', prop: 'scoreDisplay', width: '100px' }
@@ -274,19 +275,19 @@ export default {
     },
     passengerTopColumns() {
       return [
-        { label: '“客流进入”最多 5 门店名称', prop: 'storeName' },
+        { label: `“客流进入”最多 5 ${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '进入客流（人次）', prop: 'current', width: '150px' }
       ];
     },
     passengerLastColumns() {
       return [
-        { label: '“客流进入”最少 5 门店名称', prop: 'storeName' },
+        { label: `“客流进入”最少 5 ${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '进入客流（人次）', prop: 'current', width: '150px' }
       ];
     },
     passengerChangeColumns() {
       return [
-        { label: '门店名称', prop: 'storeName' },
+        { label: `${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '进入客流人次', prop: 'current', width: '120px' },
         { 
           label: '较平均水平', 
@@ -308,6 +309,11 @@ export default {
     alertStoreNames() {
       return this.alertStores.slice(0, 3).map(s => s.storeName).join('、');
     },
+    // 异常门店最小出现次数
+    alertMinCount() {
+      if (this.alertStores.length === 0) return 0;
+      return Math.min(...this.alertStores.map(s => s.count || 0));
+    },
     passengerAlertStoreNames() {
       return this.passengerChanges.filter(i => i.chainRate > 0).slice(0, 3).map(s => s.storeName).join('、');
     },
@@ -316,7 +322,7 @@ export default {
     },
     passengerAlertLowStoreName() {
       const lowStores = this.passengerChanges.filter(i => i.chainRate < 0);
-      return lowStores.length > 0 ? lowStores[0].storeName : '部分门店';
+      return lowStores.length > 0 ? lowStores[0].storeName : `部分${this.applicationSceneName}`;
     }
   },
   mounted() {
@@ -478,14 +484,16 @@ export default {
 
           if (mostQRes && mostQRes.code === 0 && mostQRes.data?.questionId) {
             const questionId = mostQRes.data.questionId;
+            this.alertQuestionName = mostQRes.data.questionName || '相关问题';
             // 2. 再获取该问题项对应的 top 3 门店
             const alertRes = await DataAnalysisXApi.queryPatrolAgentMostStore(this.client, {
               questionId: questionId,
               templateId: this.data.templateId,
-              startTime: startTimeTimestamp
+              startTime: startTimeTimestamp,
+              endTime: endTimeTimestamp
             });
             if (alertRes && alertRes.code === 0 && Array.isArray(alertRes.data)) {
-              this.alertStores = alertRes.data.slice(0, 3);
+              this.alertStores = alertRes.data;
             }
           }
         } catch (e) {

@@ -2,15 +2,15 @@
   <div class="patrol-data-push">
     <!-- 标题部分 -->
     <div class="report-header">
-      <div class="report-title">{{ formatDateTitle(data.startDate) }}门店检查总结</div>
+      <div class="report-title">{{ formatDateTitle(data.startDate) }}{{ applicationSceneName }}检查总结</div>
       <div class="report-summary">
-        经过分析，发现您的门店确实普遍存在<span class="highlight">「{{ mostQuestionName || '门店卫生' }}」</span>问题。其中有{{ topStores.length }}家门店问题尤为严重，现场情况如下：
+        经过分析，发现您的{{ applicationSceneName }}确实普遍存在<span class="highlight">「{{ mostQuestionName || '门店卫生' }}」</span>问题。其中有{{ topStores.length }}家{{ applicationSceneName }}问题尤为严重，现场情况如下：
       </div>
     </div>
 
     <!-- TOP 5 门店问题概览 -->
     <div class="section-header">
-      <div class="section-title">TOP {{ topStores.length }} 门店问题概览</div>
+      <div class="section-title">TOP {{ topStores.length }} {{ applicationSceneName }}问题概览</div>
       <div class="view-all" @click="showDetail">查看全部详情</div>
     </div>
     <div class="section-container">
@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="store-image" v-if="store.image">
-            <img :src="store.image" alt="门店问题图片" />
+            <img :src="store.image" :alt="`${applicationSceneName}问题图片`" />
           </div>
         </div>
       </div>
@@ -41,7 +41,7 @@
       <div class="section-header">
         <div class="section-title">
           <i class="h-icon-info_f info-icon"></i>
-          {{ formatDateTitle(data.startDate) }}客流数据重点提醒
+          {{ formatDateTitle(data.startDate) }}{{ applicationSceneName }}客流数据重点提醒
         </div>
       </div>
       <div class="section-desc">
@@ -63,7 +63,7 @@
 
     <!-- 门店卫生巡查问题总览 -->
     <ReportDocSection
-      :title="`${formatDateTitle(data.startDate)}门店问题总览`"
+      :title="`${formatDateTitle(data.startDate)}${applicationSceneName}问题总览`"
       description="已同步至「问题统计」模块，支持下载查看，或点击查看详情"
       icon-type="pdf"
       :export-function="toExport"
@@ -81,7 +81,7 @@
         </div>
       </div>
       <div class="section-desc mini-text">
-        生成自检计划后，门店需拍照上传线下自检结果
+        生成自检计划后，{{ applicationSceneName }}需拍照上传线下自检结果
       </div>
       <div class="problem-grid">
         <div v-for="info in data.questionInfos" :key="info.questionId" class="grid-item">
@@ -160,12 +160,12 @@ export default {
   },
   computed: {
     drawerTitle() {
-      return `${this.formatDateTitle(this.data.startDate)}萧山区问题门店列表`;
+      return `${this.formatDateTitle(this.data.startDate)}萧山区问题${this.applicationSceneName}列表`;
     },
     // 客流数据表格列配置
     trafficTableColumns() {
       return [
-        { label: '异常门店名称', prop: 'storeName' },
+        { label: `异常${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '昨日客流', prop: 'current' },
         { label: '同比', prop: 'lastRate' },
         { label: '环比', prop: 'chainRate' }
@@ -174,11 +174,11 @@ export default {
     // 客流异常动态描述
     trafficDesc() {
       if (!this.trafficData || this.trafficData.length === 0) {
-        return '经监测，暂无客流异常门店。';
+        return `经监测，暂无客流异常${this.applicationSceneName}。`;
       }
       const names = this.trafficData.slice(0, 3).map(item => item.storeName).join('、');
       const suffix = this.trafficData.length > 3 ? '等' : '';
-      return `经监测，${names}${suffix}门店昨日客流异常，其客流数据同比增长率>50% 或 环比增长率>20%。可能因促销活动导致来不及清洁，建议与一线门店进一步确认。`;
+      return `经监测，${names}${suffix}${this.applicationSceneName}昨日客流异常，其客流数据同比增长率>50% 或 环比增长率>20%。可能因促销活动导致来不及清洁，建议与一线${this.applicationSceneName}进一步确认。`;
     }
   },
   mounted() {
