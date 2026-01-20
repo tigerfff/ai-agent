@@ -276,26 +276,30 @@ export default {
     changeQues(direction) {
       if (!this.currentStoreProblems || this.currentStoreProblems.length === 0) return;
       
-      const currentIndex = this.currentStoreProblems.findIndex(p => p.questionId === this.bigImgInfo.question.questionId);
+      // 过滤出有图片的问题列表
+      const problemsWithPics = this.currentStoreProblems.filter(p => p.pics && p.pics.length > 0);
+      if (problemsWithPics.length === 0) return;
+
+      const currentIndex = problemsWithPics.findIndex(p => p.questionId === this.bigImgInfo.question.questionId);
       
-      let nextIndex = currentIndex;
       if (direction === 'prev') {
         if (currentIndex <= 0) {
-          this.$message.info('已经是第一个问题了');
+          this.$message.info('已经是第一个有图片的问题了');
           return;
         }
-        nextIndex = currentIndex - 1;
+        const prevProblem = problemsWithPics[currentIndex - 1];
+        this.bigImgInfo.question = prevProblem;
+        this.bigImgInfo.pics = prevProblem.pics;
       } else if (direction === 'next') {
-        if (currentIndex >= this.currentStoreProblems.length - 1) {
-          this.$message.info('已经是最后一个问题了');
+        if (currentIndex === -1 || currentIndex >= problemsWithPics.length - 1) {
+          this.$message.info('已经是最后一个有图片的问题了');
           return;
         }
-        nextIndex = currentIndex + 1;
+        const nextProblem = problemsWithPics[currentIndex + 1];
+        this.bigImgInfo.question = nextProblem;
+        this.bigImgInfo.pics = nextProblem.pics;
       }
       
-      const nextProblem = this.currentStoreProblems[nextIndex];
-      this.bigImgInfo.question = nextProblem;
-      this.bigImgInfo.pics = nextProblem.pics || [];
       // 切换问题后，默认选中该问题的第一个图片
       this.bigImgInfo.picIndexArr = [0, 0];
     },
