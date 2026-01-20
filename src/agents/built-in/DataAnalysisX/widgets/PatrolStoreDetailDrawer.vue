@@ -315,6 +315,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/style/mixins.scss';
+
 ::v-deep .el-scrollbar__view {
     height: 100%;
 }
@@ -354,6 +356,7 @@ export default {
     .store-list {
       flex: 1;
       overflow-y: auto;
+      @extend %scrollbar;
       
       .store-item {
         height: 48px;
@@ -405,6 +408,7 @@ export default {
     .problem-list {
       flex: 1;
       overflow-y: auto;
+      @extend %scrollbar;
       
       .problem-item {
         border-radius: 4px;
