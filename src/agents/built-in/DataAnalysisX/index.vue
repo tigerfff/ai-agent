@@ -20,11 +20,10 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         @load-more="handleLoadMore"
-        :ignoreWidgetTypes="['ymform:suggest', 'ymform:patrol_plan_offline']"
+        :ignoreWidgetTypes="['ymform:suggest', 'ymform:patrol_plan_offline', 'ymform:patrol_plan_offline_create_result', 'ymform:patrol_plan_offline_delete']"
         class="history-full-width"
       >
         <template #widget="{ item, index }">
-
             <!-- 巡查/客流数据查询 Widget -->
            <PatrolPassengerDataQuery
             v-if="item.content && item.content.includes('ymform:patrol_passenger_data_query')"
@@ -40,14 +39,22 @@
             :is-mini="isMini"
             @send-message="handleWidgetSend"
           />
-
-
-        
         </template>
 
         <template #footer="{ item, index, isLast }">
           <div>
             <div style="display: flex; align-items: center; gap: 4px;">
+              <PatrolSelfCheckResult
+                v-if="item.content && item.content.includes('ymform:patrol_plan_offline_create_result')"
+                :data="parseWidgetData(item, 'ymform:patrol_plan_offline_create_result')"
+                @send-message="handleWidgetSend"
+              />
+
+              <span 
+                v-if="item.content && item.content.includes('ymform:patrol_plan_offline_create_result')" 
+                style="padding: 0 4px; color: rgba(0, 0, 0, .1);"
+              >|</span>
+
               <BubbleFooter 
                 v-show="shouldShowFooter(item)"
                 :item="item" 
@@ -71,9 +78,11 @@
     <div class="footer">
       <div class="content-wrapper">
         <!-- Mock 测试按钮 -->
-        <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+        <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
           <el-button size="mini" type="warning" plain @click="mockPatrolDataReport">测试数据分析报告</el-button>
           <el-button size="mini" type="success" plain @click="mockPatrolQueryReport">测试巡查查询结果</el-button>
+          <el-button size="mini" type="primary" plain @click="mockSelfCheckResult">测试生成自检计划结果</el-button>
+          <el-button size="mini" type="info" plain @click="mockCancelPlanMessage">测试点击取消自检计划</el-button>
         </div>
 
         <AIInput 
@@ -102,6 +111,7 @@ import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
 import PatrolDataPush from './widgets/PatrolDataPush.vue';
 import PatrolPassengerDataQuery from './widgets/PatrolPassengerDataQuery.vue';
+import PatrolSelfCheckResult from './widgets/PatrolSelfCheckResult.vue';
 import dataAnalysisHomeIcon from '@/assets/images/data-analysis-home.png';
 import { parseWidgetData } from './widgets/widgetParser';
 
@@ -111,7 +121,8 @@ export default {
   components: {
     AISuggestWidget,
     PatrolDataPush,
-    PatrolPassengerDataQuery
+    PatrolPassengerDataQuery,
+    PatrolSelfCheckResult
   },
   props: {
     conversationId: { type: String, default: '' },
@@ -217,6 +228,56 @@ export default {
       };
 
       this.messages.push(message);
+    },
+    /**
+     * Mock 自检计划结果测试
+     */
+    mockSelfCheckResult() {
+      const mockData = {
+        "configId": "mock_config_123456"
+      };
+
+      const message = {
+        key: Date.now(),
+        role: 'ai',
+        placement: 'start',
+        content: `计划已为您生成，如有变动可随时取消：\n<ymform:patrol_plan_offline_create_result>\n${JSON.stringify(mockData, null, 2)}\n</ymform:patrol_plan_offline_create_result>`,
+        time: Date.now(),
+        msgId: 'msg-' + Date.now()
+      };
+
+      this.messages.push(message);
+    },
+    /**
+     * Mock 点击取消自检计划后的消息
+     */
+    mockCancelPlanMessage() {
+      const mockData = {
+        "configId": "mock_config_123456"
+      };
+      
+      const message = {
+        key: Date.now(),
+        role: 'user',
+        placement: 'end',
+        content: `取消自检计划<ymform:patrol_plan_offline_delete>${JSON.stringify(mockData)}</ymform:patrol_plan_offline_delete>`,
+        time: Date.now()
+      };
+      
+      this.messages.push(message);
+
+      // 模拟 AI 回复
+      setTimeout(() => {
+        const aiMessage = {
+          key: Date.now(),
+          role: 'ai',
+          placement: 'start',
+          content: '好的，已为您取消该自检计划。',
+          time: Date.now(),
+          msgId: 'msg-' + Date.now()
+        };
+        this.messages.push(aiMessage);
+      }, 1000);
     }
   }
 };
