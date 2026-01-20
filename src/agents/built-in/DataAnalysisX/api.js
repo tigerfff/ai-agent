@@ -1,6 +1,6 @@
 import { buildUrl } from '@/utils/api-prefix';
 
-const AGENT_ID = 'NEW_AGENT_ID'; // 请修改为实际的智能体 ID
+const AGENT_ID = '4'; // 请修改为实际的智能体 ID
 
 export const DataAnalysisXApi = {
   /**
@@ -144,6 +144,17 @@ export const DataAnalysisXApi = {
   },
 
   /**
+   * 出现次数最多的那个问题项，对应的 top 3 门店
+   */
+  queryPatrolAgentMostStore(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/statistic/aiAgent/actions/queryPatrolAgentMostStore', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+
+  /**
    * topN 问题概览
    */
   queryStoreQuestionData(client, data) {
@@ -174,5 +185,104 @@ export const DataAnalysisXApi = {
       method: 'post',
       data
     });
+  },
+
+  /**
+   * 获取客流环比 TOP/BOTTOM
+   */
+  getPassengerChainRateTopBottom(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/statistic/aiAgent/actions/getPassengerChainRateTopBottom', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 获取区域门店树（获取根节点 ID）
+   */
+  getAreaTree(client) {
+    return client.send({
+      url: buildUrl(client, '/chain/basic/areas/actions/findAreaStoreTree', 'chain', '/api'),
+      method: 'get'
+    });
+  },
+
+  /**
+   * 查询门店评分排行
+   */
+  queryStoreRank(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/statistic/patrols/actions/queryStoreRank', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 查询问题项统计
+   */
+  queryQuestionRank(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/statistic/patrols/template/question', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 模糊查询区域或门店列表
+   */
+  searchAreaList(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/basic/users/actions/findUserAreaStoreListByNodeName', 'chain', '/api'),
+      method: 'get',
+      data
+    });
+  },
+
+  /**
+   * 客流排行统计
+   */
+  queryPassengerRank(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/passenger/ranks/actions/agentPassengerRank', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+
+  /**
+   * 客流排行导出
+   */
+  exportPassengerRank(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/passenger/exports/actions/agentExportRankData', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+ 
+  /**
+   * 巡查区域报表导出
+   */
+  exportPatrolAreaOverview(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/statistic/patrols/center/export/actions/patrolAreaOverview', 'chain', '/api'),
+      method: 'post',
+      data
+    });
+  },
+
+   /**
+   * 推送报告导出
+   */
+   pdfExport(client, data) {
+    return client.send({
+      url: buildUrl(client, '/chain/export/patrol/aiAgent/pdf/export', 'chain', '/api'),
+      method: 'post',
+      data
+    });
   }
+
 };

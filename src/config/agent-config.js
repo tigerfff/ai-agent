@@ -77,7 +77,23 @@ export const ALL_AGENTS = {
     hideConversations: false,
     component: DataAnalysisXAgent,
     sort: 2, // 排序字段
-    permission: null
+    permission: {
+      serviceName: '数据分析',        // 服务名称（用于提示）
+      permissionName: '数据分析权限码',   // 权限名称（用于提示）
+      
+      // 1. 检查服务购买 (白名单)
+      checkService: true,
+      serviceCheckConfig: {
+        url: (client) => buildUrl(client, '/chain/patrol/patrolAgent/action/listLearnersByStore', 'chain', '/api'), // 白名单接口
+        method: 'get',
+        data: {}
+      },
+
+      // 2. 检查权限码 (LocalStorage)
+      checkAuth: false,
+      permissionCodeKey: 'authorities', // localStorage 中权限码的 key
+      permissionCode: [],        // 要检查的具体权限码
+    }
   },
   
   'try-x': {

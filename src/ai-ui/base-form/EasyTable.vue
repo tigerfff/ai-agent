@@ -2,7 +2,11 @@
   <table class="easy-table" :class="customClass">
     <thead>
       <tr>
-        <th v-for="(column, index) in columns" :key="index">
+        <th 
+          v-for="(column, index) in columns" 
+          :key="index"
+          :style="{ width: column.width }"
+        >
           {{ column.label }}
         </th>
       </tr>

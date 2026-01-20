@@ -20,10 +20,18 @@
         :back-button-threshold="50"
         @complete="handleFinish"
         @load-more="handleLoadMore"
-        :ignoreWidgetTypes="['ymform:suggest']"
+        :ignoreWidgetTypes="['ymform:suggest', 'ymform:patrol_plan_offline']"
         class="history-full-width"
       >
         <template #widget="{ item, index }">
+
+            <!-- 巡查/客流数据查询 Widget -->
+           <PatrolPassengerDataQuery
+            v-if="item.content && item.content.includes('ymform:patrol_passenger_data_query')"
+            :data="parseWidgetData(item, 'ymform:patrol_passenger_data_query')"
+            :client="$aiClient"
+            :is-mini="isMini"
+          />
           <!-- 数据分析报告 Widget -->
           <PatrolDataPush
             v-if="item.content && item.content.includes('ymform:patrol_data_push')"
@@ -32,6 +40,9 @@
             :is-mini="isMini"
             @send-message="handleWidgetSend"
           />
+
+
+        
         </template>
 
         <template #footer="{ item, index, isLast }">
@@ -62,6 +73,7 @@
         <!-- Mock 测试按钮 -->
         <div style="margin-bottom: 10px; display: flex; gap: 10px;">
           <el-button size="mini" type="warning" plain @click="mockPatrolDataReport">测试数据分析报告</el-button>
+          <el-button size="mini" type="success" plain @click="mockPatrolQueryReport">测试巡查查询结果</el-button>
         </div>
 
         <AIInput 
@@ -89,6 +101,8 @@ import { DataAnalysisXApi } from './api';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
 import PatrolDataPush from './widgets/PatrolDataPush.vue';
+import PatrolPassengerDataQuery from './widgets/PatrolPassengerDataQuery.vue';
+import dataAnalysisHomeIcon from '@/assets/images/data-analysis-home.png';
 import { parseWidgetData } from './widgets/widgetParser';
 
 export default {
@@ -96,7 +110,8 @@ export default {
   mixins: [AgentBaseMixin],
   components: {
     AISuggestWidget,
-    PatrolDataPush
+    PatrolDataPush,
+    PatrolPassengerDataQuery
   },
   props: {
     conversationId: { type: String, default: '' },
@@ -105,9 +120,9 @@ export default {
   data() {
     return {
       welcomeConfig: {
-        title: 'DataAnalysisX',
+        title: '数据分析',
         description: '我是您的智能助手，有什么可以帮您的吗？',
-        prompts: []
+        icon: dataAnalysisHomeIcon
       }
     };
   },
@@ -160,7 +175,7 @@ export default {
      */
     mockPatrolDataReport() {
       const mockData = {
-        "startDate": "2026-02-15",
+        "startDate": "2025-12-15",
         "endDate": "2026-02-15",
         "templateId": "32a0373b23884fd2aca7778db9ce18e4",
         "questionInfos": [
@@ -176,6 +191,28 @@ export default {
         role: 'ai',
         placement: 'start',
         content: `分析完成，这是您的门店检查总结报告：\n<ymform:patrol_data_push>\n${JSON.stringify(mockData, null, 2)}\n</ymform:patrol_data_push>`,
+        time: Date.now()
+      };
+
+      this.messages.push(message);
+    },
+    /**
+     * Mock 巡查查询结果测试
+     */
+    mockPatrolQueryReport() {
+      const mockData = {
+        "startDate": "2026-01-09",
+        "endDate": "2026-01-17",
+        "queryType": 1,
+        "templateId": "06b695ef7bf74bf2a9f4dde08e44eff0",
+        "areaOrStoreName": ""
+      };
+
+      const message = {
+        key: Date.now(),
+        role: 'ai',
+        placement: 'start',
+        content: `这是为您查询到的巡查统计结果：\n<ymform:patrol_passenger_data_query>\n${JSON.stringify(mockData, null, 2)}\n</ymform:patrol_passenger_data_query>`,
         time: Date.now()
       };
 

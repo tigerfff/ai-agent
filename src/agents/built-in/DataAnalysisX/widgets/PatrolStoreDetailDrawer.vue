@@ -152,7 +152,7 @@ export default {
       currentStoreId: '',
       currentStore: null,
       loading: false,
-      expandedProblems: [0], // 默认展开第一个
+      expandedProblems: [], // 默认展开前三个（如果数量超过3个）
       total: 0,
       currentStoreProblems: [],
       // 大图查看器状态
@@ -220,22 +220,8 @@ export default {
         if (res && res.code === 0 && Array.isArray(res.data)) {
           // 将图片数据与问题名称进行合并映射
           this.currentStoreProblems = this.currentStore.questionData.map(q => {
-            let picData = res.data.find(item => item.questionId === q.questionId);
-            
-            // 如果接口返回了数据但图片列表为空，填充 mock 数据方便预览
-            let pics = picData ? picData.pics : [];
-            if (pics.length === 0) {
-              pics = [
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-                { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' }
-              ];
-            }
+            const picData = res.data.find(item => item.questionId === q.questionId);
+            const pics = picData ? (picData.pics || []) : [];
 
             return {
               ...q,
@@ -244,27 +230,28 @@ export default {
           });
           this.total = this.currentStoreProblems.length;
           
-          // 默认展开第一个
-          this.expandedProblems = [0];
+          // 默认展开前三个（如果数量超过3个）
+          this.expandedProblems = Array.from({ length: Math.min(3, this.total) }, (_, i) => i);
         } else {
-          // 回退逻辑：展示基础问题列表并填充 mock 图片
+          // 如果接口返回失败，只展示问题列表，不填充图片
           this.currentStoreProblems = this.currentStore.questionData.map(q => ({
             ...q,
-            pics: [
-              { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' },
-              { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' }
-            ]
+            pics: []
           }));
           this.total = this.currentStoreProblems.length;
+          // 默认展开前三个（如果数量超过3个）
+          this.expandedProblems = Array.from({ length: Math.min(3, this.total) }, (_, i) => i);
         }
       } catch (e) {
         console.error('Fetch store problems failed:', e);
+        // 错误时只展示问题列表，不填充图片
         this.currentStoreProblems = this.currentStore.questionData.map(q => ({
           ...q,
-          pics: [
-            { picUrl: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg' }
-          ]
+          pics: []
         }));
+        this.total = this.currentStoreProblems.length;
+        // 默认展开前三个（如果数量超过3个）
+        this.expandedProblems = Array.from({ length: Math.min(3, this.total) }, (_, i) => i);
       } finally {
         this.loading = false;
       }
@@ -411,6 +398,7 @@ export default {
             line-height: 22px;
             flex: 1;
             padding-right: 12px;
+            word-break: break-all;
           }
           
           i {

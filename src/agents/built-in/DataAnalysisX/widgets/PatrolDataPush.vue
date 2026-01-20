@@ -18,7 +18,9 @@
         <div v-for="(store, index) in topStores" :key="store.storeId" class="store-item">
           <div class="store-info">
             <div class="store-name">
-              <span class="index">{{ index + 1 }}.</span> {{ store.storeName }}
+              <img v-if="index < 5" :src="rankIcons[index]" class="rank-icon" />
+              <span v-else class="index">{{ index + 1 }}.</span>
+              {{ store.storeName }}
             </div>
             <div class="problem-wrapper">
               <div class="problem-tag">【{{ getStoreProblemCount(store) }}个问题】</div>
@@ -35,7 +37,7 @@
     </div>
 
     <!-- 客流数据重点提醒 -->
-    <div class="section-container info-section">
+    <div class="section-container info-section" v-show="trafficData.length">
       <div class="section-header">
         <div class="section-title">
           <i class="h-icon-info_f info-icon"></i>
@@ -60,30 +62,15 @@
     </div>
 
     <!-- 门店卫生巡查问题总览 -->
-    <div class="section-container doc-section" :class="{ 'is-mini-mode': isMini }">
-      <div class="section-header">
-        <div class="doc-icon-wrapper">
-            <i class="h-icon-file_f doc-icon"></i>
-        </div>
-        <div class="doc-content">
-          <p class="section-title">
-            {{ formatDateTitle(data.startDate) }}{{ mostQuestionName || '门店卫生' }}巡查问题总览
-          </p>
-          <p class="section-desc sub-text">
-            已同步至「问题统计」模块，支持下载查看，或点击查看详情
-          </p>
-        </div>
-        
-      </div>
-     
-      <div class="action-buttons">
-        <hik-cloud-sync-export
-        :export-function="toExport"
-        export-label="导出明细"
-        ></hik-cloud-sync-export>
-        <el-button size="mini" icon="h-icon-details" @click="showDetail">详情</el-button>
-      </div>
-    </div>
+    <ReportDocSection
+      :title="`${formatDateTitle(data.startDate)}门店问题总览`"
+      description="已同步至「问题统计」模块，支持下载查看，或点击查看详情"
+      icon-type="pdf"
+      :export-function="toExport"
+      :is-mini="isMini"
+      @show-detail="showDetail"
+      style="margin-bottom: 16px;"
+    />
 
     <!-- 生成自检计划 -->
     <div class="section-container plan-section">
@@ -126,8 +113,14 @@
 <script>
 import { DataAnalysisXApi } from '../api';
 import starWhiteIcon from '@/assets/svg/star-white.svg';
+import rank1 from '@/assets/svg/rank-1.svg';
+import rank2 from '@/assets/svg/rank-2.svg';
+import rank3 from '@/assets/svg/rank-3.svg';
+import rank4 from '@/assets/svg/rank-4.svg';
+import rank5 from '@/assets/svg/rank-5.svg';
 import AIButton from '@/ai-ui/button/AIButton.vue';
 import EasyTable from '@/ai-ui/base-form/EasyTable.vue';
+import ReportDocSection from '@/ai-ui/base-form/ReportDocSection.vue';
 import PatrolStoreDetailDrawer from './PatrolStoreDetailDrawer.vue';
 
 export default {
@@ -136,6 +129,7 @@ export default {
     EasyTable,
     AIButton,
     starWhiteIcon,
+    ReportDocSection,
     PatrolStoreDetailDrawer
   },
   props: {
@@ -155,6 +149,7 @@ export default {
   data() {
     return {
       starWhiteIcon,
+      rankIcons: [rank1, rank2, rank3, rank4, rank5],
       mostQuestionName: '',
       topStores: [],
       trafficData: [],
@@ -190,7 +185,14 @@ export default {
     this.fetchData();
   },
   methods: {
-    toExport(done) {
+    async toExport(done) {
+      const res = await DataAnalysisXApi.pdfExport(this.client, {
+        startTime: this.data.startDate,
+        endTime: this.data.endDate
+      });
+      if (res && res.code === 0) {
+        this.$message.success('导出成功，请前往“下载中心”查看');
+      }
       done();
     },
     formatDateTitle(dateStr) {
@@ -209,95 +211,30 @@ export default {
       
       try {
         // 1. 获取最多问题
-        let mostRes;
-        try {
-          mostRes = await DataAnalysisXApi.queryMostQuestion(this.client, {
-            startTime,
-            endTime
-          });
-        } catch (e) {
-          console.warn('[PatrolDataPush] queryMostQuestion failed, using mock data');
-          mostRes = { code: 0, data: { questionName: '门店卫生' } };
-        }
-
+        const mostRes = await DataAnalysisXApi.queryMostQuestion(this.client, {
+          startTime,
+          endTime
+        });
         if (mostRes && mostRes.code === 0 && mostRes.data) {
           this.mostQuestionName = mostRes.data.questionName;
         }
 
         // 2. 获取 TOP 5 门店概览
-        let topRes;
-        try {
-          topRes = await DataAnalysisXApi.queryStoreQuestionData1(this.client, {
-            startTime,
-            endTime
-          });
-        } catch (e) {
-          console.warn('[PatrolDataPush] queryStoreQuestionData failed, using mock data');
-          topRes = {
-            code: 0,
-            data: [
-              {
-                storeId: '1',
-                storeName: '萧山银隆百货店',
-                questionData: [
-                  { questionName: '地面有大面积积水', questionCount: 15 },
-                  { questionName: '部分员工未按规定佩戴工牌', questionCount: 10 }
-                ]
-              },
-              {
-                storeId: '2',
-                storeName: '萧山万象汇店',
-                questionData: [
-                  { questionName: '货架上陈列杂乱', questionCount: 8 },
-                  { questionName: '缺货未及时补货', questionCount: 2 }
-                ]
-              },
-              {
-                storeId: '3',
-                storeName: '旺角城新天地店',
-                questionData: [
-                  { questionName: '价签对应错误', questionCount: 5 }
-                ]
-              },
-              {
-                storeId: '4',
-                storeName: '萧山宝龙店',
-                questionData: [
-                  { questionName: '垃圾桶满溢未及时清理', questionCount: 3 }
-                ]
-              },
-              {
-                storeId: '5',
-                storeName: '萧山加州阳光店',
-                questionData: [
-                  { questionName: '熟食区部分展柜未及时遮盖', questionCount: 1 }
-                ]
-              }
-            ]
-          };
-        }
-
+        const topRes = await DataAnalysisXApi.queryStoreQuestionData(this.client, {
+          startTime,
+          endTime
+        });
         if (topRes && topRes.code === 0 && Array.isArray(topRes.data)) {
           this.topStores = topRes.data.slice(0, 5);
         }
 
         // 3. 获取客流重点变化
-        try {
-          const trafficRes = await DataAnalysisXApi.getPassengerChanges(this.client, {
-            startTime: this.data.startDate,
-            endTime: this.data.endDate
-          });
-          if (trafficRes.code === 200 && Array.isArray(trafficRes.data)) {
-            this.trafficData = trafficRes.data;
-          } else {
-            console.warn('[PatrolDataPush] getPassengerChanges failed, using mock data');
-            this.trafficData = [
-              { storeId: 'store001', storeName: '萧山银隆百货店', current: 121199, lastRate: 50, chainRate: 33 },
-              { storeId: 'store002', storeName: '萧山万象汇店', current: 99199, lastRate: 67, chainRate: 67 }
-            ];
-          }
-        } catch (e) {
-          console.warn('[PatrolDataPush] getPassengerChanges failed', e);
+        const trafficRes = await DataAnalysisXApi.getPassengerChanges(this.client, {
+          startTime: this.data.startDate,
+          endTime: this.data.endDate
+        });
+        if (trafficRes && trafficRes.code === 200 && Array.isArray(trafficRes.data)) {
+          this.trafficData = trafficRes.data;
         }
       } catch (e) {
         console.error('[PatrolDataPush] fetch data failed:', e);
@@ -318,7 +255,7 @@ export default {
         storeIds: this.topStores.map(s => s.storeId)
       };
       
-      const message = `<ymform:patrol_plan_offline>\n${JSON.stringify(planData, null, 2)}\n</ymform:patrol_plan_offline>`;
+      const message = `生成自检计划<ymform:patrol_plan_offline>\n${JSON.stringify(planData, null, 2)}\n</ymform:patrol_plan_offline>`;
       this.$emit('send-message', message);
     },
     showDetail() {
@@ -415,6 +352,15 @@ export default {
           font-size: 15px;
           font-weight: 500;
           margin-bottom: 4px;
+          display: flex;
+          align-items: center;
+          
+          .rank-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 4px;
+          }
+
           .index {
             color: #fa8c16;
             margin-right: 4px;
@@ -471,62 +417,6 @@ export default {
     .trend-up {
       color: #ff4d4f;
     }
-  }
-
-    .doc-section {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      &.is-mini-mode {
-        flex-direction: column;
-        align-items: flex-start;
-
-        .action-buttons {
-          margin-top: 4px;
-          margin-left: 44px; // 32px (icon) + 12px (gap)
-          justify-content: flex-start;
-          width: calc(100% - 44px);
-          ::v-deep .el-button {
-            font-weight: 400 !important;
-            color: rgba(0,0,0,0.7);
-          }
-        }
-      }
-
-      .section-header{
-        display: flex;
-        align-items: center;
-        .doc-content {
-          margin-left: 12px;
-          .section-title{
-            margin-top: 4px;
-          }
-        }
-      }
-      
-      .doc-icon-wrapper {
-        width: 32px;
-        height: 32px;
-        background: #fff1f0;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        
-        .doc-icon {
-          color: #ff4d4f;
-          font-size: 18px;
-        }
-      }
-
-      .action-buttons {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        justify-content: flex-end;
-      }
   }
 
   .plan-section {
