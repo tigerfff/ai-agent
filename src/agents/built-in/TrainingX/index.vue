@@ -111,14 +111,14 @@
             video: { visible: false },
             document: { visible: false }
           }"
-          :max-size="200 * 1024 * 1024"
-          :before-add-attachments="handlePreUpload"
-          :speech-config-provider="asrConfigProvider"
           :button-config="{
             upload: { visible: false },
             clear: { visible: false },
             speech: { visible: true }, 
           }"
+          :max-size="200 * 1024 * 1024"
+          :before-add-attachments="handlePreUpload"
+          :speech-config-provider="asrConfigProvider"
           :send-disabled="sendBtnDisabled"
           @send="handleSend" 
           @stop="handleStop"

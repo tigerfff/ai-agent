@@ -96,6 +96,17 @@
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="asrConfigProvider"
           :send-disabled="sendBtnDisabled"
+          :allowed-types="[]"
+          :upload-menu="{
+            image: { visible: false },
+            video: { visible: false },
+            document: { visible: false }
+          }"
+          :button-config="{
+            upload: { visible: false },
+            clear: { visible: false },
+            speech: { visible: true }, 
+          }"
           @send="handleSend" 
           @stop="handleStop"
           @file-list-change="inputFilesList = $event"

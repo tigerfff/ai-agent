@@ -296,7 +296,7 @@ export default {
         { label: `${this.applicationSceneName}名称`, prop: 'storeName' },
         { label: '进入客流人次', prop: 'current', width: '120px' },
         { 
-          label: '较平均水平', 
+          label: '环比', 
           prop: 'changeRateDisplay', 
           width: '120px',
           cellClass: (row) => {
@@ -430,7 +430,6 @@ export default {
         endTime,
         areaIdList: this.areaIdList,
         storeIdList: this.storeIdList,
-        offLine: 0
       };
 
       try {
