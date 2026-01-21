@@ -120,7 +120,7 @@ import PatrolPlanForm from './widgets/PatrolPlanForm.vue';
 import PatrolPlanConfirm from './widgets/PatrolPlanConfirm.vue';
 import PatrolPlanResult from './widgets/PatrolPlanResult.vue';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
-import { parseWidgetData } from './widgets/widgetParser';
+import { parseWidgetData } from '@/utils/widget-parser';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 
 export default {

@@ -39,28 +39,6 @@ console.log(`${colors.blue}正在创建目录...${colors.reset}`);
 fs.mkdirSync(targetDir, { recursive: true });
 fs.mkdirSync(path.join(targetDir, 'widgets'), { recursive: true });
 
-// 1.1 生成 widgetParser.js
-const parserTemplate = `
-import { StreamMessageParser } from '@/ai-core/parser/StreamMessageParser';
-
-const parser = new StreamMessageParser();
-
-export function parseWidgetData(data, widgetType) {
-  let content = typeof data === 'string' ? data : (data?.content || '');
-  if (!content) return {};
-
-  try {
-    const tokens = parser.parse(content);
-    const widgetToken = tokens.find(t => t.type === 'widget' && t.widgetType === widgetType);
-    return widgetToken?.data || {};
-  } catch (e) {
-    console.error('Parse data failed:', e);
-    return {};
-  }
-}
-`;
-fs.writeFileSync(path.join(targetDir, 'widgets', 'widgetParser.js'), parserTemplate.trim());
-
 // 2. 生成 api.js
 const apiTemplate = `
 import { buildUrl } from '@/utils/api-prefix';
@@ -379,7 +357,7 @@ import AIInput from '@/ai-ui/input/AIInput.vue';
 import BubbleFooter from '@/ai-ui/history/BubbleFooter.vue';
 import AIIcon from '@/ai-ui/icon/AIIcon.vue';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
-import { parseWidgetData } from './widgets/widgetParser';
+import { parseWidgetData } from '@/utils/widget-parser';
 
 import { ${agentName}Api } from './api';
 
@@ -640,7 +618,7 @@ ${templateStyle}`;
 import { ${agentName}Api } from './api';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
-import { parseWidgetData } from './widgets/widgetParser';
+import { parseWidgetData } from '@/utils/widget-parser';
 
 export default {
   name: '${agentName}Agent',

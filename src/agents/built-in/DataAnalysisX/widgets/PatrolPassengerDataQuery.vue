@@ -60,11 +60,11 @@
         <!-- 5. 异常门店预警 -->
         <div v-if="alertStores.length > 0" class="section-container alert-section">
           <div class="alert-title">
-            <i class="h-icon-tip_info"></i>
+            <i class="h-icon-tip_info alert-icon"></i>
             {{ formatRangeTitle(data.startDate, data.endDate) }}异常{{ applicationSceneName }}预警
           </div>
           <div class="alert-content">
-            监测期间，{{ alertStoreNames }}等 {{ alertStores.length }} 家{{ applicationSceneName }}，均出现了{{ alertMinCount }}次以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
+            监测期间，{{ alertStoreNames }} {{ alertStores.length }}家{{ applicationSceneName }}，出现了{{ alertMinCount }}次以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
           </div>
         </div>
 
@@ -112,8 +112,14 @@
             <i class="h-icon-tip_info alert-icon-blue"></i>
             {{ formatRangeTitle(data.startDate, data.endDate) }}{{ applicationSceneName }}客流重点提醒
           </div>
-          <div class="alert-content">
-            监测期间，{{ passengerAlertStoreNames }}等 {{ passengerAlertHighCount }} 家{{ applicationSceneName }}的客流增长高于平均水平，建议对{{ applicationSceneName }}进行缺货陈列检查避免丢失销售机会。另外，{{ passengerAlertLowStoreName }}的客流出现明显下滑，建议对{{ applicationSceneName }}进行营销物料检查。
+          <div class="alert-content" style="margin-bottom: 12px;">
+            监测期间，<template v-if="passengerAlertHighCount > 0">
+              {{ passengerAlertStoreNames }} {{ passengerAlertHighCount }}家{{ applicationSceneName }}的客流增长高于平均水平，建议对{{ applicationSceneName }}进行缺货陈列检查避免丢失销售机会。
+            </template>
+            <template v-if="passengerAlertHighCount > 0 && passengerAlertLowCount > 0">另外，</template>
+            <template v-if="passengerAlertLowCount > 0">
+              {{ passengerAlertLowStoreName }}的客流出现明显下滑，建议对{{ applicationSceneName }}进行营销物料检查。
+            </template>
           </div>
           <div class="alert-table-wrapper">
             <EasyTable :columns="passengerChangeColumns" :data="passengerChanges" />
@@ -184,6 +190,9 @@ export default {
       passengerLastStores: [],
       passengerChanges: [],
       loading: false,
+      totalStores: 0, // 门店总数
+      totalQuestions: 0, // 问题总数
+      totalPassengerStores: 0, // 客流门店总数
       areaIdList: [],
       storeIdList: [],
       areaNodes: [], // 新增：存储完整的区域节点对象
@@ -217,28 +226,25 @@ export default {
     },
     // 是否显示“后5名”门店：只有前5满5个，且后5不为空，且总数 >= 配置阈值时展示
     showLastStores() {
-      const totalCount = this.topStores.length + this.lastStores.length;
-      return this.topStores.length >= 5 && this.lastStores.length > 0 && totalCount >= this.minCountForBottom;
+      return this.topStores.length >= 5 && this.lastStores.length > 0 && this.totalStores >= this.minCountForBottom;
     },
     // 是否显示“后N名”客流门店：总数 >= 配置阈值时展示
     showPassengerLastStores() {
-      const totalCount = this.passengerTopStores.length + this.passengerLastStores.length;
-      return this.passengerTopStores.length >= 5 && this.passengerLastStores.length > 0 && totalCount >= this.minCountForBottom;
+      return this.passengerTopStores.length >= 5 && this.passengerLastStores.length > 0 && this.totalPassengerStores >= this.minCountForBottom;
     },
     // 是否显示“最少”问题项：只有最多满5个，且最少不为空，且总数 >= 配置阈值时展示
     showLastQuestions() {
-      const totalCount = this.topQuestions.length + this.lastQuestions.length;
-      return this.topQuestions.length >= 5 && this.lastQuestions.length > 0 && totalCount >= this.minCountForBottom;
+      return this.topQuestions.length >= 5 && this.lastQuestions.length > 0 && this.totalQuestions >= this.minCountForBottom;
     },
     // 动态标题：门店
     storeTopHeaderText() {
       const count = this.topStores.length;
-      return count >= 5 ? `上周巡查得分排名前 5 的${this.applicationSceneName}是:` : `上周巡查得分排名的 ${count} 家${this.applicationSceneName}是:`;
+      return count >= 2 ? `上周巡查得分排名前 ${count} 的${this.applicationSceneName}是:` : `上周巡查得分排名第${count}的${this.applicationSceneName}是:`;
     },
     // 动态标题：客流
     passengerTopHeaderText() {
       const count = this.passengerTopStores.length;
-      return count >= 5 ? `上周${this.applicationSceneName}“客流进入”排名前 5 的${this.applicationSceneName}是:` : `上周${this.applicationSceneName}“客流进入”排名的 ${count} 家${this.applicationSceneName}是:`;
+      return count >= 2 ? `上周${this.applicationSceneName}“客流进入”排名前${count}的${this.applicationSceneName}是:` : `上周${this.applicationSceneName}“客流进入”排名弟${count}的${this.applicationSceneName}是:`;
     },
     // 动态标题：问题
     questionTopHeaderText() {
@@ -315,14 +321,18 @@ export default {
       return Math.min(...this.alertStores.map(s => s.count || 0));
     },
     passengerAlertStoreNames() {
-      return this.passengerChanges.filter(i => i.chainRate > 0).slice(0, 3).map(s => s.storeName).join('、');
+      const highStores = this.passengerChanges.filter(i => i.chainRate > 0);
+      return highStores.length > 0 ? (highStores.slice(0, 3).map(s => s.storeName).join('、') + (highStores.length > 3 ? '等' : '')) : '';
     },
     passengerAlertHighCount() {
       return this.passengerChanges.filter(i => i.chainRate > 0).length;
     },
+    passengerAlertLowCount() {
+      return this.passengerChanges.filter(i => i.chainRate < 0).length;
+    },
     passengerAlertLowStoreName() {
       const lowStores = this.passengerChanges.filter(i => i.chainRate < 0);
-      return lowStores.length > 0 ? lowStores[0].storeName : `部分${this.applicationSceneName}`;
+      return lowStores.length > 0 ? (lowStores.slice(0, 3).map(s => s.storeName).join('、') + (lowStores.length > 3 ? '等' : '')) : '';
     }
   },
   mounted() {
@@ -388,6 +398,9 @@ export default {
       }
     },
     async fetchPatrolData() {
+      const startTime = new Date(this.data.startDate).setHours(0, 0, 0, 0);
+      const endTime = new Date(this.data.endDate).setHours(23, 59, 59, 999);
+
       const baseParams = {
         startDate: this.data.startDate,
         endDate: this.data.endDate,
@@ -409,13 +422,13 @@ export default {
           ...baseParams,
           sortField: 'score',
           sortOrder: 'desc',
-          type: 'top10'
         });
         if (topRes && topRes.code === 0) {
           this.topStores = (topRes.data?.storeEvaluations || []).slice(0, 5).map(item => ({
             ...item,
             scoreDisplay: `${item.score}%`
           }));
+          this.totalStores = topRes.data?.totalCount || 0;
         }
 
         // 获取排名后5
@@ -423,7 +436,6 @@ export default {
           ...baseParams,
           sortField: 'score',
           sortOrder: 'asc',
-          type: 'last10'
         });
         if (lastRes && lastRes.code === 0) {
           this.lastStores = (lastRes.data?.storeEvaluations || []).slice(0, 5).map(item => ({
@@ -432,60 +444,46 @@ export default {
           }));
         }
 
-        // 获取问题排行
+        // 获取问题排行 (使用新接口 queryPatrolAgentTopNQuestion)
         const questionParams = {
-          pageNo: 1,
-          pageSize: 5,
-          startDate: this.data.startDate,
-          endDate: this.data.endDate,
-          patrolTemplateId: this.data.templateId,
+          templateId: this.data.templateId,
+          startTime,
+          endTime,
           areaIdList: this.areaIdList,
           storeIdList: this.storeIdList,
-          planConfigId: "",
-          patrolOrganizationId: "",
-          patrolPersonName: "",
-          roleIds: [],
-          storeStatus: "",
-          storeType: "",
-          patrolType: 0,
-          columnList: [5017, 5018, 5103, 5104, 5105, 5106, 5001, 5002, 5003, 5004, 5005, 5006],
-          questionIdList: [],
-          filterCondition: 0,
-          questionType: 0,
-          orderField: "05001"
+          offLine: 0
         };
 
         const topQRes = await DataAnalysisXApi.queryQuestionRank(this.client, {
           ...questionParams,
-          orderFlag: -1 // 降序
+          asc: false
         });
         if (topQRes && topQRes.code === 0) {
-          this.topQuestions = (topQRes.data?.rows || []).slice(0, 5);
+          this.topQuestions = (topQRes.data || []).slice(0, 5);
+          this.totalQuestions = (topQRes.data || []).length;
         }
 
         const lastQRes = await DataAnalysisXApi.queryQuestionRank(this.client, {
           ...questionParams,
-          orderFlag: 1 // 升序
+          asc: true
         });
         if (lastQRes && lastQRes.code === 0) {
-          this.lastQuestions = (lastQRes.data?.rows || []).slice(0, 5);
+          this.lastQuestions = (lastQRes.data || []).slice(0, 5);
         }
 
         // 获取异常门店预警数据（最多问题项对应的 top 3 门店）
         try {
-          const startTimeTimestamp = new Date(this.data.startDate).setHours(0, 0, 0, 0);
-          const endTimeTimestamp = new Date(this.data.endDate).setHours(23, 59, 59, 999);
+          const startTimeTimestamp = startTime;
+          const endTimeTimestamp = endTime;
           
-          // 1. 先通过专门的接口获取出现次数最多的问题项
-          const mostQRes = await DataAnalysisXApi.queryMostQuestion(this.client, {
-            startTime: startTimeTimestamp,
-            endTime: endTimeTimestamp
-          });
+          // 直接从 topQuestions 中获取，优先取次数为数字的项目
+          if (this.topQuestions.length > 0) {
+            let targetQ = this.topQuestions[0];
 
-          if (mostQRes && mostQRes.code === 0 && mostQRes.data?.questionId) {
-            const questionId = mostQRes.data.questionId;
-            this.alertQuestionName = mostQRes.data.questionName || '相关问题';
-            // 2. 再获取该问题项对应的 top 3 门店
+            const questionId = targetQ.questionId;
+            this.alertQuestionName = targetQ.questionName || '相关问题';
+            
+            // 获取该问题项对应的 top 3 门店
             const alertRes = await DataAnalysisXApi.queryPatrolAgentMostStore(this.client, {
               questionId: questionId,
               templateId: this.data.templateId,
@@ -513,7 +511,6 @@ export default {
         orderName: 'inCountRaw',
         startTime: this.data.startDate,
         endTime: this.data.endDate,
-        areaId: areaId,
         areaIdList: this.areaIdList, // 根据用户示例传空
         storeIdList: this.storeIdList  // 根据用户示例传空
       };
@@ -536,6 +533,7 @@ export default {
             ...item,
             current: item.inCountRaw ?? item.current // 确保有 current 字段用于表格展示
           }));
+          this.totalPassengerStores = topRes.data?.total || 0;
         }
 
         // 2. 获取客流进入最少 5 门店 (orderType: "0" 升序)
@@ -552,7 +550,7 @@ export default {
 
         // 3. 获取客流环比 TOP/BOTTOM (Section 3)
         const chainRes = await DataAnalysisXApi.getPassengerChainRateTopBottom(this.client, chainParams);
-        if (chainRes && (chainRes.code === 200 || chainRes.code === 0) && chainRes.data) {
+        if (chainRes.data) {
           const topList = chainRes.data.topList || [];
           const bottomList = chainRes.data.bottomList || [];
           // 合并展示 Top 3 和 Bottom 3
@@ -653,12 +651,6 @@ export default {
     }
   }
 
-  .main-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    padding-bottom: 16px;
-    margin-bottom: 24px;
-  }
-
   .sub-report-title {
     font-size: 16px;
     font-weight: 600;
@@ -721,7 +713,6 @@ export default {
       line-height: 22px;
       font-size: 13px;
       color: rgba(0, 0, 0, 0.65);
-      margin-bottom: 12px;
     }
 
     .alert-table-wrapper {

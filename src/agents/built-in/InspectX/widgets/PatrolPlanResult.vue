@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { parseWidgetData } from './widgetParser';
+import { parseWidgetData } from '@/utils/widget-parser';
 
 export default {
   name: 'PatrolPlanResult',

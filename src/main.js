@@ -30,7 +30,7 @@ Vue.use(Hui)
 Vue.use(HikCloudUI)
 Vue.use(VLazyComponent)
 console.log(VLazyComponent)
-Vue.prototype.applicationSceneName = '222'
+Vue.prototype.applicationSceneName = '监狱'
 
 // 本地开发 Demo 用：注册组件
 Vue.component('imgCanvas', imgCanvas);

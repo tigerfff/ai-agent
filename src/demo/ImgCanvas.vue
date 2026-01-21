@@ -20,16 +20,16 @@ export default {
       default: ''
     },
     aiInfo: {
-      type: String,
-      default: ''
+      type: Array,
+      default: () => [],
     },
     ruleInfo: {
-      type: String,
-      default: ''
+      type: Array,
+      default: () => [],
     },
-    info: {
-      type: String,
-      default: ''
+    ruleInfo: {
+      type: Array,
+      default: () => [],
     },
     width: {
       type: [Number, String],

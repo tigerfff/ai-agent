@@ -102,8 +102,8 @@
             ...pic,
             captureTime: pic ? pic.captureTime : null
           }"
-          @change-ques="changeQues"
-          @go-eval="goEval"
+          @changeQues="changeQues"
+          @goEval="goEval"
         />
       </template>
     </ImageDrawViewer>
@@ -304,9 +304,10 @@ export default {
       // 切换问题后，默认选中该问题的第一个图片
       this.bigImgInfo.picIndexArr = [0, 0];
     },
-    goEval() {
-      console.log('Go evaluation');
-      this.$message.info('正在跳转考评页面...');
+    goEval(patrolRecord) {
+       window.open(
+          `${location.pathname}#/inspect/intelliInspect/intelliRecord/evalDetail?patrolId=${patrolRecord.patrolId}`
+        );
     },
     graffitiClose() {
       this.bigImgInfo.visible = false;

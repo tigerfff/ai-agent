@@ -3,17 +3,17 @@
     <!-- 标题部分 -->
     <div class="report-header">
       <div class="report-title">{{ formatDateTitle(data.startDate) }}{{ applicationSceneName }}检查总结</div>
-      <div class="report-summary">
+      <div class="report-summary" v-show="mostQuestionName">
         经过分析，发现您的{{ applicationSceneName }}确实普遍存在<span class="highlight">「{{ mostQuestionName || '门店卫生' }}」</span>问题。其中有{{ topStores.length }}家{{ applicationSceneName }}问题尤为严重，现场情况如下：
       </div>
     </div>
 
     <!-- TOP 5 门店问题概览 -->
-    <div class="section-header">
+    <div class="section-header" v-show="topStores.length > 0">
       <div class="section-title">TOP {{ topStores.length }} {{ applicationSceneName }}问题概览</div>
       <div class="view-all" @click="showDetail">查看全部详情</div>
     </div>
-    <div class="section-container">
+    <div class="section-container" v-show="topStores.length > 0">
       <div class="store-list">
         <div v-for="(store, index) in topStores" :key="store.storeId" class="store-item">
           <div class="store-info">
@@ -24,7 +24,7 @@
             </div>
             <div class="problem-wrapper">
               <div class="problem-tag">【{{ getStoreProblemCount(store) }}个问题】</div>
-              <div class="problem-desc">
+              <div class="problem-desc" :title="getStoreProblemSummary(store)">
                 {{ getStoreProblemSummary(store) }}
               </div>
             </div>
@@ -53,10 +53,10 @@
         style="margin-top: 8px;"
       >
         <template #cell-lastRate="{ value }">
-          <span class="trend-up">+{{ value }}%</span>
+          <span>+{{ value }}%</span>
         </template>
         <template #cell-chainRate="{ value }">
-          <span class="trend-up">+{{ value }}%</span>
+          <span>+{{ value }}%</span>
         </template>
       </EasyTable>
     </div>
@@ -94,6 +94,7 @@
           :icon="starWhiteIcon"
           text="生成自检计划"
           @click="handleCreatePlan"
+          :disabled="isConfirmed"
         />
       </div>
     </div>
@@ -144,6 +145,10 @@ export default {
     isMini: {
       type: Boolean,
       default: false
+    },
+    isHistoryDisabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -155,12 +160,22 @@ export default {
       trafficData: [],
       drawerVisible: false,
       startTime: 0,
-      endTime: 0
+      endTime: 0,
+      isConfirmed: false
     };
+  },
+  watch: {
+    data:{
+      handler(val) {
+        console.log(val,'val')
+      },
+      deep: true,
+      immediate: true
+    }
   },
   computed: {
     drawerTitle() {
-      return `${this.formatDateTitle(this.data.startDate)}萧山区问题${this.applicationSceneName}列表`;
+      return `${this.formatDateTitle(this.data.startDate)}问题${this.applicationSceneName}列表`;
     },
     // 客流数据表格列配置
     trafficTableColumns() {
@@ -233,7 +248,7 @@ export default {
           startTime: this.data.startDate,
           endTime: this.data.endDate
         });
-        if (trafficRes && trafficRes.code === 200 && Array.isArray(trafficRes.data)) {
+        if (trafficRes.code === 0) {
           this.trafficData = trafficRes.data;
         }
       } catch (e) {
@@ -249,6 +264,7 @@ export default {
       return store.questionData.map((q, i) => `${i + 1}、${q.questionName}`).join('；');
     },
     handleCreatePlan() {
+      if (this.isConfirmed) return;
       const planData = {
         templateId: this.data.templateId,
         questionIds: (this.data.questionInfos || []).map(q => q.questionId),
@@ -257,6 +273,7 @@ export default {
       
       const message = `生成自检计划<ymform:patrol_plan_offline>\n${JSON.stringify(planData, null, 2)}\n</ymform:patrol_plan_offline>`;
       this.$emit('send-message', message);
+      this.isConfirmed = true;
     },
     showDetail() {
       this.drawerVisible = true;

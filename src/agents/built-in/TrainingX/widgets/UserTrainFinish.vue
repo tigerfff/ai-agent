@@ -31,7 +31,7 @@
 <script>
 import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from '../api';
-import { parseWidgetData } from './widgetParser.js';
+import { parseWidgetData } from '@/utils/widget-parser';
 
 export default {
   name: 'UserTrainFinish',

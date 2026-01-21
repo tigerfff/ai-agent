@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { parseWidgetData } from './widgetParser.js';
+import { parseWidgetData } from '@/utils/widget-parser';
 import QRCode from 'qrcode';
 
 export default {

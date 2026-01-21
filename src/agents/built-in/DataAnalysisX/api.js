@@ -224,7 +224,7 @@ export const DataAnalysisXApi = {
    */
   queryQuestionRank(client, data) {
     return client.send({
-      url: buildUrl(client, '/chain/statistic/patrols/template/question', 'chain', '/api'),
+      url: buildUrl(client, '/chain/statistic/aiAgent/actions/queryPatrolAgentTopNQuestion', 'chain', '/api'),
       method: 'post',
       data
     });

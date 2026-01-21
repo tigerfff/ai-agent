@@ -140,7 +140,7 @@ import UserTrainFinish from './widgets/UserTrainFinish.vue';
 import TrainVideoCard from './widgets/TrainVideoCard.vue';
 import TrainResultUpload from './widgets/TrainResultUpload.vue';
 import AISuggestWidget from '@/ai-ui/base-widget/AISuggestWidget.vue';
-import { parseWidgetData } from './widgets/widgetParser';
+import { parseWidgetData } from '@/utils/widget-parser';
 import { AgentBaseMixin } from '@/mixins/AgentBaseMixin';
 
 export default {

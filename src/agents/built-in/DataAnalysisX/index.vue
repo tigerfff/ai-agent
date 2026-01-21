@@ -35,6 +35,7 @@
           <PatrolDataPush
             v-if="item.content && item.content.includes('ymform:patrol_data_push')"
             :data="parseWidgetData(item, 'ymform:patrol_data_push')"
+            :is-history-disabled="index < messages.length - 1"
             :client="$aiClient"
             :is-mini="isMini"
             @send-message="handleWidgetSend"
@@ -113,7 +114,7 @@ import PatrolDataPush from './widgets/PatrolDataPush.vue';
 import PatrolPassengerDataQuery from './widgets/PatrolPassengerDataQuery.vue';
 import PatrolSelfCheckResult from './widgets/PatrolSelfCheckResult.vue';
 import dataAnalysisHomeIcon from '@/assets/images/data-analysis-home.png';
-import { parseWidgetData } from './widgets/widgetParser';
+import { parseWidgetData } from '@/utils/widget-parser';
 
 export default {
   name: 'DataAnalysisXAgent',
@@ -132,7 +133,7 @@ export default {
     return {
       welcomeConfig: {
         title: '数据分析',
-        description: '我是您的智能助手，有什么可以帮您的吗？',
+        description: '我可以帮你总结巡查报告、分析门店客流、巡查情况等任务，帮助你更高效地工作～',
         icon: dataAnalysisHomeIcon
       }
     };
@@ -212,7 +213,7 @@ export default {
      */
     mockPatrolQueryReport() {
       const mockData = {
-        "startDate": "2026-01-09",
+        "startDate": "2025-11-20",
         "endDate": "2026-01-17",
         "queryType": 2,
         "templateId": "06b695ef7bf74bf2a9f4dde08e44eff0",
