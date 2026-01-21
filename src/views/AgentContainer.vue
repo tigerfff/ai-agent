@@ -822,7 +822,7 @@ export default {
     async fetchAgentTips() {
       try {
         // 目前只检查培训智能体 "2",只会巡查3
-        const res = await TrainingXApi.getAgentTip(this.$aiClient, { agentIds: ['3','2'] });
+        const res = await TrainingXApi.getAgentTip(this.$aiClient, { agentIds: ['3','2','4'] });
         
         if (res.code === 0 && Array.isArray(res.data)) {
           // 接口返回结构: [{"agentId":"2","hasTip":true}]

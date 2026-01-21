@@ -53,10 +53,10 @@
         style="margin-top: 8px;"
       >
         <template #cell-lastRate="{ value }">
-          <span>+{{ value }}%</span>
+          <span>{{ value > 0 ? '+' : '' }}{{ value }}%</span>
         </template>
         <template #cell-chainRate="{ value }">
-          <span>+{{ value }}%</span>
+          <span>{{ value > 0 ? '+' : '' }}{{ value }}%</span>
         </template>
       </EasyTable>
     </div>
@@ -71,6 +71,8 @@
       @show-detail="showDetail"
       style="margin-bottom: 16px;"
     />
+
+    <div class="line"></div>
 
     <!-- 生成自检计划 -->
     <div class="section-container plan-section">
@@ -93,6 +95,14 @@
         <AIButton
           :icon="starWhiteIcon"
           text="生成自检计划"
+          @click="handleCreatePlan"
+          v-if="!isConfirmed"
+        />
+
+        <AIButton
+          v-else
+          :icon="sureWhiteIcon"
+          text="已生成自检计划"
           @click="handleCreatePlan"
           :disabled="isConfirmed"
         />
@@ -119,6 +129,7 @@ import rank2 from '@/assets/svg/rank-2.svg';
 import rank3 from '@/assets/svg/rank-3.svg';
 import rank4 from '@/assets/svg/rank-4.svg';
 import rank5 from '@/assets/svg/rank-5.svg';
+import sureWhiteIcon from '@/assets/svg/sure.svg';
 import AIButton from '@/ai-ui/button/AIButton.vue';
 import EasyTable from '@/ai-ui/base-form/EasyTable.vue';
 import ReportDocSection from '@/ai-ui/base-form/ReportDocSection.vue';
@@ -161,7 +172,8 @@ export default {
       drawerVisible: false,
       startTime: 0,
       endTime: 0,
-      isConfirmed: false
+      isConfirmed: false,
+      sureWhiteIcon
     };
   },
   watch: {
@@ -288,6 +300,12 @@ export default {
   color: rgba(0,0,0,0.7);
   width: 100%;
   box-sizing: border-box;
+
+  .line {
+    height: 1px;
+    background: #eee;
+    margin-bottom: 16px;;
+  }
 
   .report-header {
     margin-bottom: 16px;

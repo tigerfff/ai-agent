@@ -64,7 +64,7 @@
             {{ formatRangeTitle(data.startDate, data.endDate) }}异常{{ applicationSceneName }}预警
           </div>
           <div class="alert-content">
-            监测期间，{{ alertStoreNames }} {{ alertStores.length }}家{{ applicationSceneName }}，出现了{{ alertMinCount }}次以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
+            监测期间，{{ alertStoreNames }} {{ alertStores.length }}家{{ applicationSceneName }}，<span v-show="alertStores.length > 1">均</span>出现了{{ alertMinCount }}次及以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
           </div>
         </div>
 
@@ -576,7 +576,20 @@ export default {
             storeType: '',
             patrolOrganizationId: '',
             level: 0,
-            optionalColumns: ['01009', '01101', '01102', '01103', '03101', '03102', '05001', '05002', '05019']
+            optionalColumns: [
+              "01008",
+              "01002",
+              "01003",
+              "01004",
+              "01005",
+              "01006",
+              "01007",
+              "03101",
+              "03102",
+              "05001",
+              "05002",
+              "05019"
+            ]
           };
           const res = await DataAnalysisXApi.exportPatrolAreaOverview(this.client, params);
           if (res && res.code === 0) {
@@ -584,7 +597,7 @@ export default {
           }
         } else if (exportType === 'passenger') {
           // 客流导出
-          const areaId = this.areaIdList[0] || this.storeIdList[0] || '';
+          const areaId = this.areaIdList[0] || '';
           const params = {
             pageNo: 1,
             pageSize: 20,

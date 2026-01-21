@@ -62,7 +62,7 @@
                     >
                          <ImageGrid 
                              :images="[img]" 
-                             :container-width="97"
+                             :container-width="96"
                              @handleClickImage="(img, idx) => previewImage(img, problem.pics, problem)"
                          />
                     </div>
@@ -416,7 +416,7 @@ export default {
         border-radius: 4px;
         margin-bottom: 12px;
         overflow: hidden;
-        padding: 0 16px;
+        padding: 0 14px;
         
         .problem-header {
           border-radius: 8px;
