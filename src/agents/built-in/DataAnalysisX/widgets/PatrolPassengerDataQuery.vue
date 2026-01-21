@@ -355,7 +355,7 @@ export default {
             condition: this.data.areaOrStoreName,
             limit: 200
           });
-          if (searchRes && searchRes.code === 0 && Array.isArray(searchRes.data)) {
+          if (searchRes.code === 0 && searchRes.data?.length > 0) {
             const areaNodes = [];
             const storeNodes = [];
             searchRes.data.forEach(node => {
@@ -369,6 +369,14 @@ export default {
             this.storeNodes = storeNodes;
             this.areaIdList = areaNodes.map(n => n.nodeId);
             this.storeIdList = storeNodes.map(n => n.nodeId);
+          }else{
+            const treeRes = await DataAnalysisXApi.getAreaTree(this.client);
+            if (treeRes && treeRes.code === 0 && treeRes.data?.nodeList) {
+              this.areaNodes = treeRes.data.nodeList;
+              this.storeNodes = [];
+              this.areaIdList = this.areaNodes.map(node => node.nodeId);
+              this.storeIdList = [];
+            }
           }
         } else {
           // 如果没有 areaOrStoreName，获取区域树根节点
@@ -416,103 +424,87 @@ export default {
         rateEnd: 100
       };
 
+      const questionParams = {
+        templateId: this.data.templateId,
+        startTime,
+        endTime,
+        areaIdList: this.areaIdList,
+        storeIdList: this.storeIdList,
+        offLine: 0
+      };
+
       try {
-        // 获取排名前5
-        const topRes = await DataAnalysisXApi.queryStoreRank(this.client, {
-          ...baseParams,
-          sortField: 'score',
-          sortOrder: 'desc',
-        });
-        if (topRes && topRes.code === 0) {
-          this.topStores = (topRes.data?.storeEvaluations || []).slice(0, 5).map(item => ({
+        // 1. 发起所有并行请求
+        const results = await Promise.allSettled([
+          // Top 5 门店 [0]
+          DataAnalysisXApi.queryStoreRank(this.client, { ...baseParams, sortField: 'score', sortOrder: 'desc' }),
+          // Last 5 门店 [1]
+          DataAnalysisXApi.queryStoreRank(this.client, { ...baseParams, sortField: 'score', sortOrder: 'asc' }),
+          // Top 5 问题 [2]
+          DataAnalysisXApi.queryQuestionRank(this.client, { ...questionParams, asc: false }),
+          // Last 5 问题 [3]
+          DataAnalysisXApi.queryQuestionRank(this.client, { ...questionParams, asc: true })
+        ]);
+
+        // 2. 处理 Top 5 门店
+        if (results[0].status === 'fulfilled' && results[0].value?.code === 0) {
+          const res = results[0].value;
+          this.topStores = (res.data?.storeEvaluations || []).slice(0, 5).map(item => ({
             ...item,
-            scoreDisplay: `${item.score}%`
+            scoreDisplay: `${parseFloat(Number(item.score || 0).toFixed(2))}%`
           }));
-          this.totalStores = topRes.data?.totalCount || 0;
+          this.totalStores = res.data?.totalCount || 0;
         }
 
-        // 获取排名后5
-        const lastRes = await DataAnalysisXApi.queryStoreRank(this.client, {
-          ...baseParams,
-          sortField: 'score',
-          sortOrder: 'asc',
-        });
-        if (lastRes && lastRes.code === 0) {
-          this.lastStores = (lastRes.data?.storeEvaluations || []).slice(0, 5).map(item => ({
+        // 3. 处理 Last 5 门店
+        if (results[1].status === 'fulfilled' && results[1].value?.code === 0) {
+          const res = results[1].value;
+          this.lastStores = (res.data?.storeEvaluations || []).slice(0, 5).map(item => ({
             ...item,
-            scoreDisplay: `${item.score}%`
+            scoreDisplay: `${parseFloat(Number(item.score || 0).toFixed(2))}%`
           }));
         }
 
-        // 获取问题排行 (使用新接口 queryPatrolAgentTopNQuestion)
-        const questionParams = {
-          templateId: this.data.templateId,
-          startTime,
-          endTime,
-          areaIdList: this.areaIdList,
-          storeIdList: this.storeIdList,
-          offLine: 0
-        };
-
-        const topQRes = await DataAnalysisXApi.queryQuestionRank(this.client, {
-          ...questionParams,
-          asc: false
-        });
-        if (topQRes && topQRes.code === 0) {
-          this.topQuestions = (topQRes.data || []).slice(0, 5);
-          this.totalQuestions = (topQRes.data || []).length;
+        // 4. 处理 Top 5 问题
+        if (results[2].status === 'fulfilled' && results[2].value?.code === 0) {
+          const res = results[2].value;
+          this.topQuestions = (res.data || []).slice(0, 5);
+          this.totalQuestions = (res.data || []).length;
         }
 
-        const lastQRes = await DataAnalysisXApi.queryQuestionRank(this.client, {
-          ...questionParams,
-          asc: true
-        });
-        if (lastQRes && lastQRes.code === 0) {
-          this.lastQuestions = (lastQRes.data || []).slice(0, 5);
+        // 5. 处理 Last 5 问题
+        if (results[3].status === 'fulfilled' && results[3].value?.code === 0) {
+          const res = results[3].value;
+          this.lastQuestions = (res.data || []).slice(0, 5);
         }
 
-        // 获取异常门店预警数据（最多问题项对应的 top 3 门店）
-        try {
-          const startTimeTimestamp = startTime;
-          const endTimeTimestamp = endTime;
-          
-          // 直接从 topQuestions 中获取，优先取次数为数字的项目
-          if (this.topQuestions.length > 0) {
-            let targetQ = this.topQuestions[0];
-
-            const questionId = targetQ.questionId;
+        // 6. 获取异常门店预警数据（依赖 topQuestions[0]）
+        if (this.topQuestions.length > 0) {
+          const targetQ = this.topQuestions[0];
+          const alertRes = await DataAnalysisXApi.queryPatrolAgentMostStore(this.client, {
+            questionId: targetQ.questionId,
+            templateId: this.data.templateId,
+            startTime,
+            endTime
+          });
+          if (alertRes && alertRes.code === 0 && Array.isArray(alertRes.data)) {
+            this.alertStores = alertRes.data;
             this.alertQuestionName = targetQ.questionName || '相关问题';
-            
-            // 获取该问题项对应的 top 3 门店
-            const alertRes = await DataAnalysisXApi.queryPatrolAgentMostStore(this.client, {
-              questionId: questionId,
-              templateId: this.data.templateId,
-              startTime: startTimeTimestamp,
-              endTime: endTimeTimestamp
-            });
-            if (alertRes && alertRes.code === 0 && Array.isArray(alertRes.data)) {
-              this.alertStores = alertRes.data;
-            }
           }
-        } catch (e) {
-          console.error('[PatrolPassengerDataQuery] Fetch alert stores failed:', e);
         }
       } catch (e) {
-        console.error('Fetch patrol data failed:', e);
+        console.error('[PatrolPassengerDataQuery] fetchPatrolData failed:', e);
       }
     },
     async fetchPassengerData() {
-      // 这里的 areaId 逻辑：优先取搜索到的区域 ID，其次取搜索到的门店 ID，最后取根节点 ID
-      const areaId = this.areaIdList[0] || this.storeIdList[0] || '';
-      
       const rankParams = {
         pageNo: 1,
         pageSize: 5,
         orderName: 'inCountRaw',
         startTime: this.data.startDate,
         endTime: this.data.endDate,
-        areaIdList: this.areaIdList, // 根据用户示例传空
-        storeIdList: this.storeIdList  // 根据用户示例传空
+        areaIdList: this.areaIdList,
+        storeIdList: this.storeIdList
       };
 
       const chainParams = {
@@ -523,44 +515,47 @@ export default {
       };
 
       try {
-        // 1. 获取客流进入最多 5 门店 (orderType: "1" 降序)
-        const topRes = await DataAnalysisXApi.queryPassengerRank(this.client, {
-          ...rankParams,
-          orderType: '1'
-        });
-        if (topRes && topRes.code === 0 && topRes.data?.rows) {
-          this.passengerTopStores = topRes.data.rows.slice(0, 5).map(item => ({
+        // 使用 Promise.allSettled 并发获取客流排行和环比数据
+        const results = await Promise.allSettled([
+          // Top 5 客流 [0]
+          DataAnalysisXApi.queryPassengerRank(this.client, { ...rankParams, orderType: '1' }),
+          // Last 5 客流 [1]
+          DataAnalysisXApi.queryPassengerRank(this.client, { ...rankParams, orderType: '0' }),
+          // 环比 Top/Bottom [2]
+          DataAnalysisXApi.getPassengerChainRateTopBottom(this.client, chainParams)
+        ]);
+
+        // 处理 Top 5 客流
+        if (results[0].status === 'fulfilled' && results[0].value?.code === 0) {
+          const res = results[0].value;
+          this.passengerTopStores = (res.data?.rows || []).slice(0, 5).map(item => ({
             ...item,
-            current: item.inCountRaw ?? item.current // 确保有 current 字段用于表格展示
+            current: item.inCountRaw ?? item.current
           }));
-          this.totalPassengerStores = topRes.data?.total || 0;
+          this.totalPassengerStores = res.data?.total || 0;
         }
 
-        // 2. 获取客流进入最少 5 门店 (orderType: "0" 升序)
-        const lastRes = await DataAnalysisXApi.queryPassengerRank(this.client, {
-          ...rankParams,
-          orderType: '0'
-        });
-        if (lastRes && lastRes.code === 0 && lastRes.data?.rows) {
-          this.passengerLastStores = lastRes.data.rows.slice(0, 5).map(item => ({
+        // 处理 Last 5 客流
+        if (results[1].status === 'fulfilled' && results[1].value?.code === 0) {
+          const res = results[1].value;
+          this.passengerLastStores = (res.data?.rows || []).slice(0, 5).map(item => ({
             ...item,
             current: item.inCountRaw ?? item.current
           }));
         }
 
-        // 3. 获取客流环比 TOP/BOTTOM (Section 3)
-        const chainRes = await DataAnalysisXApi.getPassengerChainRateTopBottom(this.client, chainParams);
-        if (chainRes.data) {
-          const topList = chainRes.data.topList || [];
-          const bottomList = chainRes.data.bottomList || [];
-          // 合并展示 Top 3 和 Bottom 3
+        // 处理环比数据
+        if (results[2].status === 'fulfilled' && results[2].value?.data) {
+          const data = results[2].value.data;
+          const topList = data.topList || [];
+          const bottomList = data.bottomList || [];
           this.passengerChanges = [...topList, ...bottomList].map(item => ({
             ...item,
             changeRateDisplay: item.chainRate >= 0 ? `+${item.chainRate}%` : `${item.chainRate}%`
           }));
         }
       } catch (e) {
-        console.error('Fetch passenger data failed:', e);
+        console.error('[PatrolPassengerDataQuery] fetchPassengerData failed:', e);
       }
     },
     async toExport(done, type) {

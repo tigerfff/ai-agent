@@ -92,7 +92,7 @@
           :loading="isStreaming || isUploading"
           :showClearButton="false"
           :enable-stop-button="true"
-          placeholder="有问题尽管问我~"
+          placeholder="请描述巡查任务的门店范围、方向、时间频次、任务有效期等~"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="asrConfigProvider"
           :send-disabled="sendBtnDisabled"
@@ -217,7 +217,7 @@ export default {
         "endDate": "2026-01-17",
         "queryType": 2,
         "templateId": "06b695ef7bf74bf2a9f4dde08e44eff0",
-        "areaOrStoreName": ""
+        "areaOrStoreName": "杨富程门店"
       };
 
       const message = {
