@@ -324,6 +324,7 @@ export default {
   &.start {
     .bubble-content-wrapper {
       max-width: 100%;
+      // width: 100%;
     }
 
     .bubble-body.filled {
@@ -381,6 +382,7 @@ export default {
         background: #fff !important;
         color: rgba($color: #000000, $alpha: 0.7) !important;
         padding: 16px; /* Widget 场景下内边距稍微缩小一点，更紧凑 */
+        width: 100%;
       }
 
       .markdown-body {

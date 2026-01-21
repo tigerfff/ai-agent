@@ -266,9 +266,9 @@ export const DataAnalysisXApi = {
   /**
    * 巡查区域报表导出
    */
-  exportPatrolAreaOverview(client, data) {
+  exportPatrolStoreOverview(client, data) {
     return client.send({
-      url: buildUrl(client, '/chain/statistic/patrols/center/export/actions/patrolAreaOverview', 'chain', '/api'),
+      url: buildUrl(client, '/chain/statistic/patrols/center/export/actions/patrolStoreOverview', 'chain', '/api'),
       method: 'post',
       data
     });

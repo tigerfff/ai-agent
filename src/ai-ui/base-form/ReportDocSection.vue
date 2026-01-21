@@ -148,6 +148,7 @@ export default {
     align-items: center;
     gap: 12px;
     justify-content: flex-end;
+    margin-left: 48px;
   }
 }
 </style>

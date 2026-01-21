@@ -21,62 +21,68 @@
           <div class="report-title">{{ formatRangeTitle(data.startDate, data.endDate) }}巡查统计结果</div>
         </div>
 
-        <!-- 1. 得分排名前 5 -->
-        <div v-if="topStores.length > 0" class="section-container">
-          <div class="section-header">
-            <span class="dot"></span>
-            <span class="header-text">{{ storeTopHeaderText }}</span>
+        <template v-if="hasData">
+          <!-- 1. 得分排名前 5 -->
+          <div v-if="topStores.length > 0" class="section-container">
+            <div class="section-header">
+              <span class="dot"></span>
+              <span class="header-text">{{ storeTopHeaderText }}</span>
+            </div>
+            <EasyTable :columns="topStoreRankColumns" :data="topStores" />
           </div>
-          <EasyTable :columns="topStoreRankColumns" :data="topStores" />
-        </div>
 
-        <!-- 2. 得分排名后 5 -->
-        <div v-if="showLastStores" class="section-container">
-          <div class="section-header">
-            <span class="dot"></span>
-            <span class="header-text">上周巡查得分排名后 5 的{{ applicationSceneName }}是:</span>
+          <!-- 2. 得分排名后 5 -->
+          <div v-if="showLastStores" class="section-container">
+            <div class="section-header">
+              <span class="dot"></span>
+              <span class="header-text">上周巡查得分排名后 5 的{{ applicationSceneName }}是:</span>
+            </div>
+            <EasyTable :columns="lastStoreRankColumns" :data="lastStores" />
           </div>
-          <EasyTable :columns="lastStoreRankColumns" :data="lastStores" />
-        </div>
 
-        <!-- 3. 出现次数最多的 5 个问题项 -->
-        <div v-if="topQuestions.length > 0" class="section-container">
-          <div class="section-header">
-            <span class="dot"></span>
-            <span class="header-text">{{ questionTopHeaderText }}</span>
+          <!-- 3. 出现次数最多的 5 个问题项 -->
+          <div v-if="topQuestions.length > 0" class="section-container">
+            <div class="section-header">
+              <span class="dot"></span>
+              <span class="header-text">{{ questionTopHeaderText }}</span>
+            </div>
+            <EasyTable :columns="topQuestionRankColumns" :data="topQuestions" />
           </div>
-          <EasyTable :columns="topQuestionRankColumns" :data="topQuestions" />
-        </div>
 
-        <!-- 4. 出现次数最少的 5 个问题项 -->
-        <div v-if="showLastQuestions" class="section-container">
-          <div class="section-header">
-            <span class="dot"></span>
-            <span class="header-text">上周出现次数最少的 5 个问题项:</span>
+          <!-- 4. 出现次数最少的 5 个问题项 -->
+          <div v-if="showLastQuestions" class="section-container">
+            <div class="section-header">
+              <span class="dot"></span>
+              <span class="header-text">上周出现次数最少的 5 个问题项:</span>
+            </div>
+            <EasyTable :columns="lastQuestionRankColumns" :data="lastQuestions" />
           </div>
-          <EasyTable :columns="lastQuestionRankColumns" :data="lastQuestions" />
-        </div>
 
-        <!-- 5. 异常门店预警 -->
-        <div v-if="alertStores.length > 0" class="section-container alert-section">
-          <div class="alert-title">
-            <i class="h-icon-tip_info alert-icon"></i>
-            {{ formatRangeTitle(data.startDate, data.endDate) }}异常{{ applicationSceneName }}预警
+          <!-- 5. 异常门店预警 -->
+          <div v-if="alertStores.length > 0" class="section-container alert-section">
+            <div class="alert-title">
+              <i class="h-icon-tip_info alert-icon"></i>
+              {{ formatRangeTitle(data.startDate, data.endDate) }}异常{{ applicationSceneName }}预警
+            </div>
+            <div class="alert-content">
+              监测期间，{{ alertStoreNames }} {{ alertStores.length }}家{{ applicationSceneName }}，<span v-show="alertStores.length > 1">均</span>出现了{{ alertMinCount }}次及以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
+            </div>
           </div>
-          <div class="alert-content">
-            监测期间，{{ alertStoreNames }} {{ alertStores.length }}家{{ applicationSceneName }}，<span v-show="alertStores.length > 1">均</span>出现了{{ alertMinCount }}次及以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
-          </div>
-        </div>
 
-        <!-- 6. 巡查统计总览 (Doc Section) -->
-        <ReportDocSection
-          :title="`${formatRangeTitle(data.startDate, data.endDate)}的巡店统计总览`"
-          description="已同步至「智慧巡查-区域报表」模块，支持导出或查看详情"
-          icon-type="excel"
-          :export-function="(done) => toExport(done, 'patrol')"
-          :is-mini="isMini"
-          @show-detail="handleShowDetail('patrol')"
-        />
+          <!-- 6. 巡查统计总览 (Doc Section) -->
+          <ReportDocSection
+            :title="`${formatRangeTitle(data.startDate, data.endDate)}的巡店统计总览`"
+            description="已同步至「智慧巡查-区域报表」模块，支持导出或查看详情"
+            icon-type="excel"
+            :export-function="(done) => toExport(done, 'patrol')"
+            :is-mini="isMini"
+            @show-detail="handleShowDetail('patrol')"
+          />
+        </template>
+        <div v-else class="section-empty-state">
+          <i class="h-icon-tip_info empty-icon"></i>
+          <p>暂无相关统计数据</p>
+        </div>
       </div>
 
       <!-- 客流报表部分 -->
@@ -88,54 +94,60 @@
           <div class="report-title">{{ formatRangeTitle(data.startDate, data.endDate) }}客流统计结果</div>
         </div>
 
-        <!-- 1. 客流进入最多 5 门店 -->
-        <div v-if="passengerTopStores.length > 0" class="section-container">
-          <div class="section-header">
-            <span class="dot"></span>
-            <span class="header-text">{{ passengerTopHeaderText }}</span>
+        <template v-if="hasPassengerData">
+          <!-- 1. 客流进入最多 5 门店 -->
+          <div v-if="passengerTopStores.length > 0" class="section-container">
+            <div class="section-header">
+              <span class="dot"></span>
+              <span class="header-text">{{ passengerTopHeaderText }}</span>
+            </div>
+            <EasyTable :columns="passengerTopColumns" :data="passengerTopStores" />
           </div>
-          <EasyTable :columns="passengerTopColumns" :data="passengerTopStores" />
+
+          <!-- 2. 客流进入最少 5 门店 -->
+          <div v-if="showPassengerLastStores" class="section-container">
+            <div class="section-header">
+              <span class="dot"></span>
+              <span class="header-text">上周{{ applicationSceneName }}“客流进入”排名后 5 的{{ applicationSceneName }}是:</span>
+            </div>
+            <EasyTable :columns="passengerLastColumns" :data="passengerLastStores" />
+          </div>
+
+          <!-- 3. 客流重点提醒 -->
+          <div v-if="passengerChanges.length > 0" class="section-container alert-section">
+            <div class="alert-title">
+              <i class="h-icon-tip_info alert-icon-blue"></i>
+              {{ formatRangeTitle(data.startDate, data.endDate) }}{{ applicationSceneName }}客流重点提醒
+            </div>
+            <div class="alert-content" style="margin-bottom: 12px;">
+              监测期间，<template v-if="passengerAlertHighCount > 0">
+                {{ passengerAlertStoreNames }} {{ passengerAlertHighCount }}家{{ applicationSceneName }}的客流增长高于平均水平，建议对{{ applicationSceneName }}进行缺货陈列检查避免丢失销售机会。
+              </template>
+              <template v-if="passengerAlertHighCount > 0 && passengerAlertLowCount > 0">另外，</template>
+              <template v-if="passengerAlertLowCount > 0">
+                {{ passengerAlertLowStoreName }}的客流出现明显下滑，建议对{{ applicationSceneName }}进行营销物料检查。
+              </template>
+            </div>
+            <div class="alert-table-wrapper">
+              <EasyTable :columns="passengerChangeColumns" :data="passengerChanges" />
+            </div>
+          </div>  
+
+          <!-- 4. 客流统计总览 (Doc Section) -->
+          <ReportDocSection
+            :title="`${formatRangeTitle(data.startDate, data.endDate)}客流统计总览`"
+            description="已同步至「客流统计-客流排行」模块，支持导出或查看详情"
+            icon-type="excel"
+            icon-wrapper-class="green-bg"
+            :export-function="(done) => toExport(done, 'passenger')"
+            :is-mini="isMini"
+            @show-detail="handleShowDetail('passenger')"
+          />
+        </template>
+        <div v-else class="section-empty-state">
+          <i class="h-icon-tip_info empty-icon"></i>
+          <p>暂无相关统计数据</p>
         </div>
-
-        <!-- 2. 客流进入最少 5 门店 -->
-        <div v-if="showPassengerLastStores" class="section-container">
-          <div class="section-header">
-            <span class="dot"></span>
-            <span class="header-text">上周{{ applicationSceneName }}“客流进入”排名后 5 的{{ applicationSceneName }}是:</span>
-          </div>
-          <EasyTable :columns="passengerLastColumns" :data="passengerLastStores" />
-        </div>
-
-        <!-- 3. 客流重点提醒 -->
-        <div v-if="passengerChanges.length > 0" class="section-container alert-section">
-          <div class="alert-title">
-            <i class="h-icon-tip_info alert-icon-blue"></i>
-            {{ formatRangeTitle(data.startDate, data.endDate) }}{{ applicationSceneName }}客流重点提醒
-          </div>
-          <div class="alert-content" style="margin-bottom: 12px;">
-            监测期间，<template v-if="passengerAlertHighCount > 0">
-              {{ passengerAlertStoreNames }} {{ passengerAlertHighCount }}家{{ applicationSceneName }}的客流增长高于平均水平，建议对{{ applicationSceneName }}进行缺货陈列检查避免丢失销售机会。
-            </template>
-            <template v-if="passengerAlertHighCount > 0 && passengerAlertLowCount > 0">另外，</template>
-            <template v-if="passengerAlertLowCount > 0">
-              {{ passengerAlertLowStoreName }}的客流出现明显下滑，建议对{{ applicationSceneName }}进行营销物料检查。
-            </template>
-          </div>
-          <div class="alert-table-wrapper">
-            <EasyTable :columns="passengerChangeColumns" :data="passengerChanges" />
-          </div>
-        </div>  
-
-        <!-- 4. 客流统计总览 (Doc Section) -->
-        <ReportDocSection
-          :title="`${formatRangeTitle(data.startDate, data.endDate)}客流统计总览`"
-          description="已同步至「客流统计-客流排行」模块，支持导出或查看详情"
-          icon-type="excel"
-          icon-wrapper-class="green-bg"
-          :export-function="(done) => toExport(done, 'passenger')"
-          :is-mini="isMini"
-          @show-detail="handleShowDetail('passenger')"
-        />
       </div>
     </div>
 
@@ -214,11 +226,15 @@ export default {
     },
     // 是否显示巡查板块
     showPatrolSection() {
-      return (this.normalizedQueryType === 0 || this.normalizedQueryType === 2) && this.hasData;
+      if (this.normalizedQueryType === 0) return this.hasData;
+      if (this.normalizedQueryType === 2) return this.hasData || this.hasPassengerData;
+      return false;
     },
     // 是否显示客流板块
     showPassengerSection() {
-      return (this.normalizedQueryType === 1 || this.normalizedQueryType === 2) && this.hasPassengerData;
+      if (this.normalizedQueryType === 1) return this.hasPassengerData;
+      if (this.normalizedQueryType === 2) return this.hasData || this.hasPassengerData;
+      return false;
     },
     // 是否有内容展示
     showCombinedContent() {
@@ -575,6 +591,7 @@ export default {
             storeType: '',
             patrolOrganizationId: '',
             level: 0,
+            nodeList: [...this.areaNodes, ...this.storeNodes],
             optionalColumns: [
               "01008",
               "01002",
@@ -590,7 +607,7 @@ export default {
               "05019"
             ]
           };
-          const res = await DataAnalysisXApi.exportPatrolAreaOverview(this.client, params);
+          const res = await DataAnalysisXApi.exportPatrolStoreOverview(this.client, params);
           if (res && res.code === 0) {
             this.$message.success('导出成功，请前往"下载中心"查看');
           }
@@ -758,12 +775,27 @@ export default {
   }
 
   .loading-state,
-  .empty-state {
+  .empty-state,
+  .section-empty-state {
     padding: 40px 20px;
     text-align: center;
     color: rgba(0, 0, 0, 0.45);
     background: #f8f9fb;
     border-radius: 8px;
+
+    &.section-empty-state {
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      
+      .empty-icon {
+        margin-bottom: 0;
+        font-size: 24px;
+      }
+    }
 
     .h-icon-loading {
       font-size: 32px;
