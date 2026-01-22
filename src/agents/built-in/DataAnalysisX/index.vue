@@ -224,11 +224,11 @@ export default {
      */
     mockPatrolQueryReport() {
       const mockData = {
-        "startDate": "2025-11-20",
-        "endDate": "2026-01-17",
+        "startDate": "2026-01-19",
+        "endDate": "2026-01-22",
         "queryType": 2,
         "templateId": "06b695ef7bf74bf2a9f4dde08e44eff0",
-        "areaOrStoreName": "杨富程门店"
+        "areaOrStoreName": ""
       };
 
       const message = {

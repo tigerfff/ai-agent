@@ -1,6 +1,6 @@
 <template>
   <hik-cloud-drawer
-    :title="title"
+    :title="displayTitle"
     :visible.sync="localVisible"
     width="800px"
     :mask-closable="true"
@@ -129,7 +129,7 @@ export default {
     },
     title: {
       type: String,
-      default: () => Vue.prototype.applicationSceneName ? `${Vue.prototype.applicationSceneName}问题详情` : '门店问题详情'
+      default: ''
     },
     stores: {
       type: Array,
@@ -168,6 +168,11 @@ export default {
     };
   },
   computed: {
+    displayTitle() {
+      if (this.title) return this.title;
+      const sceneName = this.applicationSceneName || '门店';
+      return `${sceneName}问题详情`;
+    },
     currentStoreProblemCount() {
       if (!this.currentStore) return 0;
       return this.getStoreProblemCount(this.currentStore);

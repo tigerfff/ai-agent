@@ -2,8 +2,8 @@
   <div class="patrol-passenger-query">
     <!-- 加载中 -->
     <div v-if="loading" class="loading-state">
-      <i class="h-icon-loading"></i>
-      <p>{{ normalizedQueryType === 2 ? '巡查和客流数据分析中...' : (normalizedQueryType === 1 ? '客流统计数据分析中...' : '巡查统计数据分析中...') }}</p>
+      <img src="@/assets/images/star-sport.png" alt="loading" class="loading-star-image" />
+      <p>{{ normalizedQueryType === 2 ? '巡查和客流数据统计结果生成中...' : (normalizedQueryType === 1 ? '客流统计结果生成中...' : '巡查统计结果生成中...') }}</p>
     </div>
 
     <div v-else-if="showCombinedContent" class="combined-report">
@@ -437,7 +437,7 @@ export default {
         patrolType: 0,
         filterCondition: 0,
         rateStart: 0,
-        rateEnd: 100
+        rateEnd: 100,
       };
 
       const questionParams = {
@@ -777,14 +777,21 @@ export default {
   .loading-state,
   .empty-state,
   .section-empty-state {
-    padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    padding: 0px 20px;
     text-align: center;
     color: rgba(0, 0, 0, 0.45);
-    background: #f8f9fb;
     border-radius: 8px;
 
+    .loading-star-image{
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+
     &.section-empty-state {
-      padding: 24px 20px;
+      padding: 0 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -799,7 +806,6 @@ export default {
 
     .h-icon-loading {
       font-size: 32px;
-      margin-bottom: 12px;
       color: #388eff;
       display: inline-block;
       animation: rotating 2s linear infinite;
