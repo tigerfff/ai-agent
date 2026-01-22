@@ -27,19 +27,22 @@ export async function handleAgentPreUpload(rawFiles, context, uploader, setUploa
   try {
     await Promise.all(
       rawFiles.map(async (file, index) => {
-        const res = await uploader.upload(file, (percent) => {
-          if (typeof updateItem === 'function') {
-            updateItem(index, {
-              status: 'uploading',
-              percent: Math.round(percent * 100)
-            });
+        // 新版 BaseOssUploader.upload 需要传入 bizCode (080108)
+        const res = await uploader.upload(file, '080108', {
+          onProgress: (percent) => {
+            if (typeof updateItem === 'function') {
+              updateItem(index, {
+                status: 'uploading',
+                percent: percent
+              });
+            }
           }
         });
 
         if (typeof updateItem === 'function') {
           updateItem(index, {
             url: res.url,
-            name: res.name || file.name,
+            name: res.fileName || file.name,
             size: file.size,
             type: file.type.startsWith('video') ? 'video' : 'image',
             rawFile: null,

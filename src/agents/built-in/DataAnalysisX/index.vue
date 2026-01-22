@@ -142,11 +142,7 @@ export default {
   },
   data() {
     return {
-      welcomeConfig: {
-        title: '数据分析',
-        description: '我可以帮你总结巡查报告、分析门店客流、巡查情况等任务，帮助你更高效地工作～',
-        icon: dataAnalysisHomeIcon
-      }
+      welcomeConfig: null
     };
   },
   watch: {
@@ -158,6 +154,13 @@ export default {
         }
       }
     }
+  },
+  mounted(){
+    this.welcomeConfig = {
+        title: '数据分析',
+        description: `我可以帮你总结巡查报告、分析${this.applicationSceneName}客流、巡查情况等任务，帮助你更高效地工作～`,
+        icon: dataAnalysisHomeIcon
+      }
   },
   methods: {
     parseWidgetData(item, type) {

@@ -1,6 +1,5 @@
 import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
-import { OssUploader } from '@/utils/oss-uploader.js';
 import { formatConversationTime } from '@/utils';
 import { adaptMessage } from '@/utils/agent-utils';
 
@@ -111,25 +110,11 @@ export const AgentBaseMixin = {
     },
 
     initUploader() {
-      const api = this.getAgentApi();
-      if (!api) return;
-
-      this.ossUploader = new OssUploader({
-        tokenProvider: async () => {
-          try {
-            const res = await api.getOssToken(this.$aiClient);
-            if (res.code === 0) return res.data;
-            return null;
-          } catch (e) {
-            console.error('[AgentBaseMixin] Fetch STS token failed', e);
-            return null;
-          }
-        }
-      });
+      // 全局配置已在 install 中完成，直接使用 this.$ossUploader 即可
     },
 
     async handlePreUpload(rawFiles, context = {}) {
-      return handleAgentPreUpload(rawFiles, context, this.ossUploader, (val) => {
+      return handleAgentPreUpload(rawFiles, context, this.$ossUploader, (val) => {
         this.isUploading = val;
       });
     },

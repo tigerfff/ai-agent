@@ -30,6 +30,7 @@ import AIEmpty from './ai-ui/empty/AIEmpty.vue';
 import { setAdapter } from './ai-core/adapter';
 import { AIClient } from './ai-core/client/AIClient';
 import { EventBus } from './ai-core/event-bus';
+import { OssUploader, STSProvider } from '../public/oss/index.esm.js';
 
 // 导入样式（Vite 会自动处理 SCSS 编译和打包）
 import './style/index.scss';
@@ -66,6 +67,18 @@ const install = (Vue, options = {}) => {
 
   // 6. 处理适配器注入
   setAdapter(options);
+
+  // 6.1 初始化 OSS 上传器配置
+  const { http, configProvider } = options;
+  const config = typeof configProvider === 'function' ? configProvider() : {};
+  
+  STSProvider.config({
+    httpClient: http,
+    baseURL: config.prefixMap?.chain || config.baseUrl || '/api'
+  });
+
+  // 挂载全局上传实例
+  Vue.prototype.$ossUploader = new OssUploader();
 
   // 7. 挂载全局对象
   const client = new AIClient({
