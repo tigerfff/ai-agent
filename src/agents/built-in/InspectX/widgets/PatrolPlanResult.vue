@@ -12,7 +12,6 @@
 </template>
 
 <script>
-import { parseWidgetData } from '@/utils/widget-parser';
 
 export default {
   name: 'PatrolPlanResult',
@@ -37,6 +36,9 @@ export default {
 
       // 设置取消中状态，防止重复点击
       this.taskCancelling = true;
+
+      // 埋点：取消计划
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_INSPECT_CANCEL);
 
       try {
         // 从 data 中获取 planConfigId

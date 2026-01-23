@@ -575,6 +575,11 @@ export default {
     },
     async toExport(done, type) {
       const exportType = type || (this.normalizedQueryType === 1 ? 'passenger' : 'patrol');
+      
+      // 埋点：报告导出
+      const prefix = exportType === 'patrol' ? '巡查-' : '客流-';
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_REPORT_EXPORT, { prefix });
+
       try {
         if (exportType === 'patrol') {
           // 巡查导出
@@ -639,6 +644,10 @@ export default {
     handleShowDetail(type) {
       // 如果没有传 type，则根据当前 normalizedQueryType 降级处理
       const detailType = type || (this.normalizedQueryType === 1 ? 'passenger' : 'patrol');
+
+      // 埋点：报告详情
+      const prefix = detailType === 'patrol' ? '巡查-' : '客流-';
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_REPORT_DETAIL, { prefix });
 
       if (detailType === 'patrol') {
         // 巡查详情：跳转至「智慧巡查-区域报表」

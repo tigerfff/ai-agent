@@ -33,6 +33,7 @@
         v-if="(content || loading) && (textParts.length > 0 || loading)"
         class="bubble-body text-body" 
         :class="variant"
+        @click="handleBubbleClick"
       >
         <!-- Loading 状态 -->
         <div v-if="loading" class="typing-indicator">
@@ -262,6 +263,12 @@ export default {
           this.$emit('finish');
         }
       );
+    },
+    handleBubbleClick() {
+      // 只有用户消息（end）点击时才触发“发送语-复制”埋点（根据CSV描述）
+      if (this.placement === 'end') {
+        this.$trackEvent(this.$TRACK_EVENTS.MESSAGE_COPY_USER);
+      }
     }
   },
   beforeDestroy() {

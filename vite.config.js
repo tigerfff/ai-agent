@@ -4,7 +4,34 @@ import { resolve } from 'path'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  plugins: [vue2()],
+  plugins: [
+    vue2(),
+    {
+      name: 'fix-crypto-bundle',
+      transform(code, id) {
+        if (id.includes('crypto.common.js')) {
+          // 1. 声明原本缺失的隐式全局变量
+          // 2. 模拟 CommonJS 环境 (module/exports)
+          // 3. 将结果作为 ESM 默认导出
+          return {
+            code: `
+              var _keyStr, _utf8_encode, _utf8_decode;
+              var module = { exports: {} };
+              var exports = module.exports;
+              
+              (function() {
+                ${code}
+              }).call(window);
+              
+              export default module.exports;
+              export const sm4 = module.exports.sm4;
+            `,
+            map: null
+          }
+        }
+      }
+    }
+  ],
 
   // 本地开发服务器配置
   server: {
@@ -88,7 +115,9 @@ export default defineConfig({
       '@svg': fileURLToPath(new URL('./src/assets/svg', import.meta.url)),
       // Hui UI 资源，从 public/hui2.43.2 下引入
       'hui': resolve(__dirname, 'public/hui2.43.2'),
-      '@hcu': resolve(__dirname, 'public/hik-cloud-ui')
+      '@hcu': resolve(__dirname, 'public/hik-cloud-ui'),
+      'sec-crypto': resolve(__dirname, 'public/oss/crypto.common.js'),
+      
     }
   },
 

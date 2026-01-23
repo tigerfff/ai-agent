@@ -29,7 +29,7 @@
         :key="agent.id"
         class="agent-item"
         :class="{ 'active': currentAgentId === agent.id }"
-        @click="$emit('select', agent)"
+        @click="handleAgentSelect(agent)"
         :title="agent.name"
       >
         <span class="agent-icon">
@@ -51,7 +51,7 @@
         </div>
         
         <!-- 新建会话按钮 (始终显示，折叠时变图标) -->
-        <div v-show="!collapsed" class="new-chat-wrapper" :class="{ 'collapsed': collapsed }" @click="$emit('new-chat')">
+        <div v-show="!collapsed" class="new-chat-wrapper" :class="{ 'collapsed': collapsed }" @click="handleNewChat">
           <div class="new-chat-btn" :title="collapsed ? '新建会话' : ''">
             <span class="icon">
               <AIIcon :src="addIcon" :size="24" />
@@ -111,6 +111,12 @@ export default {
   components: {
     AIIcon
   },
+  inject: {
+    getCurrentAgentName: {
+      from: 'getCurrentAgentName',
+      default: () => () => ''
+    }
+  },
   props: {
     agents: {
       type: Array,
@@ -157,10 +163,26 @@ export default {
   },
   methods: {
     toggleCollapse() {
+      this.$trackEvent(this.$TRACK_EVENTS.CHAT_HEADER_NAV_TOGGLE);
       this.$emit('toggle', !this.collapsed);
       this.$emit('update:collapsed', !this.collapsed);
     },
+    handleAgentSelect(agent) {
+      this.$trackEvent(this.$TRACK_EVENTS.NAV_AGENT_SWITCH, {
+        agentName: agent.name
+      });
+      this.$emit('select', agent);
+    },
+    handleNewChat() {
+      this.$trackEvent(this.$TRACK_EVENTS.NAV_CONVERSATION_NEW, {
+        agentName: this.getCurrentAgentName()
+      });
+      this.$emit('new-chat');
+    },
     handleConversationSelect(id) {
+      this.$trackEvent(this.$TRACK_EVENTS.NAV_CONVERSATION_ITEM, {
+        agentName: this.getCurrentAgentName()
+      });
       console.log(id,'id')
       this.$emit('update:activeConversationId', id);
     },
@@ -168,6 +190,17 @@ export default {
       this.$emit('conversation-change', item);
     },
     handleMenuCommand(command, item) {
+      const commandMap = {
+        pin: this.$TRACK_EVENTS.NAV_CONVERSATION_PIN,
+        unpin: this.$TRACK_EVENTS.NAV_CONVERSATION_UNPIN,
+        rename: this.$TRACK_EVENTS.NAV_CONVERSATION_RENAME,
+        delete: this.$TRACK_EVENTS.NAV_CONVERSATION_DELETE
+      };
+      if (commandMap[command]) {
+        this.$trackEvent(commandMap[command], {
+          agentName: this.getCurrentAgentName()
+        });
+      }
       this.$emit('conversation-menu-command', command, item);
     }
   }

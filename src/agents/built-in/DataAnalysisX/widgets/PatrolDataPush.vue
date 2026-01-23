@@ -11,7 +11,7 @@
     <!-- TOP 5 门店问题概览 -->
     <div class="section-header" v-show="topStores.length > 0">
       <div class="section-title">TOP {{ topStores.length }} {{ applicationSceneName }}问题概览</div>
-      <div class="view-all" @click="showDetail">查看全部详情</div>
+      <div class="view-all" @click="handleStoreDetail">查看全部详情</div>
     </div>
     <div class="section-container" v-show="topStores.length > 0">
       <div class="store-list">
@@ -68,7 +68,7 @@
       icon-type="pdf"
       :export-function="toExport"
       :is-mini="isMini"
-      @show-detail="showDetail"
+      @show-detail="handleShowDetail"
       style="margin-bottom: 16px;"
     />
 
@@ -213,6 +213,9 @@ export default {
   },
   methods: {
     async toExport(done) {
+      // 埋点：报告导出
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_REPORT_EXPORT, { prefix: '推送' });
+      
       const res = await DataAnalysisXApi.pdfExport(this.client, {
         startTime: this.data.startDate,
         endTime: this.data.endDate
@@ -269,7 +272,7 @@ export default {
     },
     getStoreProblemCount(store) {
       if (!store.questionData) return 0;
-      return store.questionData.reduce((acc, cur) => acc + (cur.questionCount || 0), 0);
+      return store.questionData.length
     },
     getStoreProblemSummary(store) {
       if (!store.questionData || store.questionData.length === 0) return '无异常情况';
@@ -277,6 +280,10 @@ export default {
     },
     handleCreatePlan() {
       if (this.isConfirmed) return;
+      
+      // 埋点：生成自检计划
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_PLAN_CREATE);
+      
       const planData = {
         templateId: this.data.templateId,
         questionIds: (this.data.questionInfos || []).map(q => q.questionId),
@@ -287,7 +294,14 @@ export default {
       this.$emit('send-message', message);
       this.isConfirmed = true;
     },
-    showDetail() {
+    handleShowDetail() {
+      // 埋点：报告详情
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_REPORT_DETAIL, { prefix: '推送' });
+      this.drawerVisible = true;
+    },
+    handleStoreDetail() {
+      // 埋点：门店详情
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_STORE_DETAIL);
       this.drawerVisible = true;
     }
   }

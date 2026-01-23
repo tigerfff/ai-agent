@@ -20,6 +20,12 @@ export const AgentBaseMixin = {
     BubbleFooter,
     AIIcon
   },
+  inject: {
+    getCurrentAgentName: {
+      from: 'getCurrentAgentName',
+      default: () => () => ''
+    }
+  },
   data() {
     return {
       messages: [],
@@ -39,8 +45,6 @@ export const AgentBaseMixin = {
         user: ['copy'],
         bot: ['fresh', 'copy', 'like', 'dislike']
       },
-      // OSS 上传器实例
-      ossUploader: null,
       // 本地会话映射，用于状态管理
       conversationsMap: new Map()
     };
@@ -96,9 +100,6 @@ export const AgentBaseMixin = {
     this.initUploader();
   },
   beforeDestroy() {
-    if (this.ossUploader) {
-      this.ossUploader.destroy?.();
-    }
   },
   methods: {
     /**
@@ -531,6 +532,12 @@ export const AgentBaseMixin = {
      */
     handleWelcomeSelect(item) {
       if (!item) return;
+
+      // 埋点：意图引导快捷语
+      this.$trackEvent(this.$TRACK_EVENTS.SUGGESTION_CLICK, {
+        agentName: this.getCurrentAgentName()
+      });
+
       // 兼容字符串或对象格式 (item.text 是提示词文本, item.desc 是展示文本)
       const text = typeof item === 'string' ? item : (item.text || item.desc);
       if (text) {

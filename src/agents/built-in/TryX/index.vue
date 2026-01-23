@@ -328,6 +328,13 @@ export default {
           return false;
         }
         
+        // 埋点：添加图片/视频
+        if (data.dataSource === 'uploadImg') {
+          this.$trackEvent(this.$TRACK_EVENTS.WIDGET_AITRY_IMAGE_ADD);
+        } else if (data.dataSource === 'uploadVideo') {
+          this.$trackEvent(this.$TRACK_EVENTS.WIDGET_AITRY_VIDEO_ADD);
+        }
+        
         // 使用 AIInput 暴露的标准方法触发文件选择，不再手动创建 input 标签
         const type = data.dataSource === 'uploadImg' ? 'image' : 'video';
         aiInput.triggerFileSelect(type);

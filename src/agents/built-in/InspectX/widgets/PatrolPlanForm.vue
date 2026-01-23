@@ -40,7 +40,7 @@
         <div class="content">
           <AITimeTagPicker
             :value="displayData.patrolTime.timeList"
-            @input="formData.patrolTime.timeList = $event"
+            @input="handleTimeListChange"
             :time-type="displayData.patrolTime.timeType"
             :disabled="isConfirmed || isHistoryDisabled"
             :peak-config="peakConfig"
@@ -165,6 +165,7 @@ export default {
       lastSelectedIds: '', // 用于记录上次选中的 ID组合，防止重复调用接口
       originalPrimaryColor: null, // 保存原始的 --ym-primary 值
       initialFormData: null, // 初始数据备份
+      lastTimeListLength: 0, // 用于记录上次时间列表长度，区分添加和修改
       formData: {
         questions: [],
         templatName: '',
@@ -391,6 +392,9 @@ export default {
       this.formData = JSON.parse(JSON.stringify(initialized));
       this.initialFormData = JSON.parse(JSON.stringify(initialized));
       
+      // 初始化时间列表长度记录
+      this.lastTimeListLength = (this.formData.patrolTime?.timeList || []).length;
+      
       // 如果有 scopeSearchKey，则使用接口进行模糊查询并反显
       if (data.scopeSearchKey) {
         try {
@@ -424,13 +428,20 @@ export default {
     async handleAreaChecked(areas) {
       // 1. 生成选中的 ID 组合标识并校验是否发生变化
       const currentIds = (areas || []).map(a => a.nodeId).sort().join(',');
-      if (this.lastSelectedIds === currentIds) {
+      const isChanged = this.lastSelectedIds !== currentIds;
+      
+      if (!isChanged) {
         return; // ID 组合未变，不重复调用接口
       }
       this.lastSelectedIds = currentIds;
 
       console.log('areas', areas);
       this.selectedAreas = areas;
+      
+      // 埋点：巡检范围修改
+      if (this.lastSelectedIds) { // 排除初始化时的调用
+        this.$trackEvent(this.$TRACK_EVENTS.WIDGET_INSPECT_SCOPE_CHANGE);
+      }
       
       // 如果未选择任何区域，使用默认值 '0'（表示权限下所有门店）
       if (!areas || areas.length === 0) {
@@ -479,6 +490,12 @@ export default {
     },
     handleSwitchChange(val) {
       this.formData.problemSheetAssignment = val ? 1 : 0;
+      
+      // 埋点：门店整改推送开关
+      const eventKey = val 
+        ? this.$TRACK_EVENTS.WIDGET_INSPECT_PUSH_ENABLE 
+        : this.$TRACK_EVENTS.WIDGET_INSPECT_PUSH_DISABLE;
+      this.$trackEvent(eventKey);
     },
    
     /**
@@ -509,8 +526,30 @@ export default {
         }
       }
     },
+    handleTimeListChange(newTimeList) {
+      const oldLength = this.lastTimeListLength;
+      const newLength = (newTimeList || []).length;
+      
+      // 更新数据
+      this.formData.patrolTime.timeList = newTimeList;
+      
+      // 判断是添加还是修改
+      if (newLength > oldLength) {
+        // 添加时间
+        this.$trackEvent(this.$TRACK_EVENTS.WIDGET_INSPECT_TIME_ADD);
+      } else if (newLength === oldLength && oldLength > 0) {
+        // 修改时间（长度相同但内容可能变化）
+        this.$trackEvent(this.$TRACK_EVENTS.WIDGET_INSPECT_TIME_EDIT);
+      }
+      
+      // 更新记录的长度
+      this.lastTimeListLength = newLength;
+    },
     handleConfirm() {
       this.isConfirmed = true;
+      
+      // 埋点：确认执行
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_INSPECT_CONFIRM);
       
       // 构造确认数据，确保符合后端要求的 XML 标签内容
       const confirmData = {

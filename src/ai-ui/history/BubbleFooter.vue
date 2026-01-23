@@ -117,6 +117,12 @@ import regenerateIcon from '@/assets/svg/regenerate.svg';
 
 export default {
   name: 'BubbleFooter',
+  inject: {
+    getCurrentAgentName: {
+      from: 'getCurrentAgentName',
+      default: () => () => ''
+    }
+  },
   props: {
     // 当前消息对象
     item: {
@@ -193,6 +199,14 @@ export default {
         // 如果没有原始内容，静默返回（可能是只有附件的情况）
         return;
       }
+
+      // 埋点
+      const eventKey = this.item.placement === 'end' 
+        ? this.$TRACK_EVENTS.MESSAGE_COPY_USER 
+        : this.$TRACK_EVENTS.MESSAGE_COPY_AI;
+      this.$trackEvent(eventKey, {
+        agentName: this.getCurrentAgentName()
+      });
       
       // 过滤掉 widget 标签内容
       text = this.cleanTextFromWidgets(text);
@@ -266,11 +280,33 @@ export default {
     handleLike(type) {    
         // 如果已经是当前状态，则取消（设为 null 或 ''）
       const newStatus = this.localLikeStatus === type ? '' : type;
+
+      // 埋点映射
+      const trackMap = {
+        'like': this.$TRACK_EVENTS.MESSAGE_LIKE,
+        'dislike': this.$TRACK_EVENTS.MESSAGE_DISLIKE,
+        'cancel-like': this.$TRACK_EVENTS.MESSAGE_UNLIKE,
+        'cancel-dislike': this.$TRACK_EVENTS.MESSAGE_UNDISLIKE
+      };
+
+      let trackKey = '';
+      if (newStatus === 'like') trackKey = trackMap['like'];
+      else if (newStatus === 'dislike') trackKey = trackMap['dislike'];
+      else if (this.localLikeStatus === 'like') trackKey = trackMap['cancel-like'];
+      else if (this.localLikeStatus === 'dislike') trackKey = trackMap['cancel-dislike'];
+
+      if (trackKey) {
+        this.$trackEvent(trackKey, {
+          agentName: this.getCurrentAgentName()
+        });
+      }
+
       this.localLikeStatus = newStatus;
       this.$emit('action', newStatus || 'cancel-like', this.item);
     },
 
     handleRegenerate() {
+      this.$trackEvent(this.$TRACK_EVENTS.MESSAGE_RETRY);
       this.$emit('action', 'fresh', this.item);
     }
   }

@@ -487,6 +487,9 @@ export default {
     },
     getVideoSaveFile(res) {
       if(res && res.code === 0 && res.data && res.data.file) {
+        // 埋点：添加视频（弹框中录制完成）
+        this.$trackEvent(this.$TRACK_EVENTS.WIDGET_AITRY_VIDEO_ADD);
+        
         this.endTime = Date.now()
         // 计算视频文件大小并格式化显示
         let fileSize = ''
@@ -540,6 +543,10 @@ export default {
           this.$message.warning('请选择有视频的窗口进行抓图')
           return
         }
+        
+        // 埋点：添加视频截图
+        this.$trackEvent(this.$TRACK_EVENTS.WIDGET_AITRY_SNAPSHOT_ADD);
+        
         this.captureing = true
         this.$refs.hkvideo.capturePictureFile()
       } catch (e) {

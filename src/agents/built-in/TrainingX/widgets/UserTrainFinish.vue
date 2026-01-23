@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import { OssUploader } from '@/utils/oss-uploader.js';
 import { TrainingXApi } from '../api';
 import { parseWidgetData } from '@/utils/widget-parser';
 
@@ -48,7 +47,6 @@ export default {
   },
   data() {
     return {
-      ossUploader: null,
       parsedData: {},
       taskList: [], // 任务列表，包含 taskId, taskName, status, isUploading, uploaded
       loading: false
@@ -74,29 +72,9 @@ export default {
   created() {
     // 解析 widget 数据
     this.parsedData = parseWidgetData(this.data, 'ymform:user_train_finish');
-    this.initUploader();
     this.loadTaskInfo();
   },
   methods: {
-    /**
-     * 初始化 OSS 上传器
-     */
-    async initUploader() {
-      try {
-        const tokenProvider = async () => {
-          const res = await TrainingXApi.getOssToken(this.$aiClient);
-          if (res.code === 0 && res.data) {
-            return res.data;
-          }
-          throw new Error('Failed to get OSS token');
-        };
-        
-        this.ossUploader = new OssUploader({ tokenProvider });
-      } catch (e) {
-        console.error('[UserTrainFinish] Init uploader failed:', e);
-      }
-    },
-
     /**
      * 加载任务信息
      */
@@ -220,7 +198,7 @@ export default {
      * 上传视频
      */
     async uploadVideo(file, task) {
-      if (!this.ossUploader) {
+      if (!this.$ossUploader) {
         this.$message?.error('上传器未初始化');
         return;
       }
@@ -235,9 +213,11 @@ export default {
 
       try {
         // 1. 上传视频到 OSS
-        const uploadResult = await this.ossUploader.upload(file, (percent) => {
-          // 可以在这里更新进度
-          console.log(`[UserTrainFinish] Upload progress for ${task.taskName}:`, Math.round(percent * 100) + '%');
+        const uploadResult = await this.$ossUploader.upload(file, '080108', {
+          onProgress: (percent) => {
+            // 可以在这里更新进度
+            console.log(`[UserTrainFinish] Upload progress for ${task.taskName}:`, percent + '%');
+          }
         });
 
         const videoUrl = uploadResult.url;

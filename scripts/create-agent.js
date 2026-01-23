@@ -345,7 +345,6 @@ if (type === 'standalone') {
 <script>
 import { SpeechRecognizerWrapper } from '@/ai-core/audio/SpeechRecognizer';
 import { handleAgentPreUpload } from '@/utils/agent-upload';
-import { OssUploader } from '@/utils/oss-uploader.js';
 import { formatConversationTime } from '@/utils';
 import { adaptMessage } from '@/utils/agent-utils';
 
@@ -394,7 +393,6 @@ export default {
         user: ['copy'],
         bot: ['fresh', 'copy', 'like', 'dislike']
       },
-      ossUploader: null,
       conversationsMap: new Map(),
       welcomeConfig: {
         title: '${agentName}',
@@ -436,31 +434,13 @@ export default {
     }
   },
   created() {
-    this.initUploader();
   },
   beforeDestroy() {
-    if (this.ossUploader) this.ossUploader.destroy?.();
   },
   methods: {
     getAgentApi() { return ${agentName}Api; },
-    initUploader() {
-      const api = this.getAgentApi();
-      if (!api) return;
-      this.ossUploader = new OssUploader({
-        tokenProvider: async () => {
-          try {
-            const res = await api.getOssToken(this.$aiClient);
-            if (res.code === 0) return res.data;
-            return null;
-          } catch (e) {
-            console.error('Fetch STS token failed', e);
-            return null;
-          }
-        }
-      });
-    },
     async handlePreUpload(rawFiles, context = {}) {
-      return handleAgentPreUpload(rawFiles, context, this.ossUploader, (val) => {
+      return handleAgentPreUpload(rawFiles, context, this.$ossUploader, (val) => {
         this.isUploading = val;
       });
     },

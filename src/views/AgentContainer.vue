@@ -46,7 +46,7 @@
         :is-mini="isMini"
         @select="handleSelectAgent"
         @toggle-size="toggleWindowSize"
-        @close="closeWindow"
+        @close="closeWindow('home')"
       />
 
       <!-- 场景 2: 具体智能体页面 -->
@@ -84,7 +84,7 @@
               <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" v-if="isMini" :src="expandIcon" class="icon-svg" />
               <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" v-else :src="collapseIcon" class="icon-svg" />
             </div>
-            <div class="toggle-btn" title="关闭" @click="closeWindow">
+            <div class="toggle-btn" title="关闭" @click="closeWindow('agent')">
               <AIIcon color="rgba(0, 0, 0, 0.7)" size="24" :src="closeWindowIcon" class="icon-svg" />
             </div>
           </div>
@@ -235,6 +235,7 @@ export default {
   },
   provide() {
     return {
+      getCurrentAgentName: () => this.currentAgent?.name || '',
       sessionApi: {
         updateCurrentTitle: (title) => {
           const chat = this.conversations.find(c => c.id === this.currentConversationId);
@@ -355,9 +356,30 @@ export default {
   },
   methods: {
     toggleWindowSize() {
+      // 根据当前页面类型（home 或 agent）使用不同的埋点事件
+      if (this.isHome) {
+        // Home 页面：使用 SELECT_PAGE_* 系列
+        const eventKey = this.isMini ? this.$TRACK_EVENTS.SELECT_PAGE_FULL : this.$TRACK_EVENTS.SELECT_PAGE_MIN;
+        this.$trackEvent(eventKey);
+      } else {
+        // 对话页面：使用 CHAT_HEADER_* 系列
+        const eventKey = this.isMini ? this.$TRACK_EVENTS.CHAT_HEADER_FULL : this.$TRACK_EVENTS.CHAT_HEADER_MIN;
+        this.$trackEvent(eventKey, {
+          agentName: this.currentAgent?.name || ''
+        });
+      }
       this.$emit('toggle-size');
     },
-    closeWindow() {
+    closeWindow(type) {
+      if (type === 'home') {
+        // Home 页面关闭
+        this.$trackEvent(this.$TRACK_EVENTS.SELECT_PAGE_CLOSE);
+      } else {
+        // 对话页面退出
+        this.$trackEvent(this.$TRACK_EVENTS.CHAT_HEADER_EXIT, {
+          agentName: this.currentAgent?.name || ''
+        });
+      }
       this.$emit('close');
     },
 
@@ -748,6 +770,9 @@ export default {
      * 点击标题旁边的编辑按钮
      */
     handleTitleRename() {
+      this.$trackEvent(this.$TRACK_EVENTS.CHAT_HEADER_RENAME, {
+        agentName: this.currentAgent?.name || ''
+      });
       // 1. 检查是否有当前会话
       if (!this.currentConversationId || this.currentConversationId.startsWith('conv-')) {
         return;

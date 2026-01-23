@@ -11,7 +11,7 @@
       ref="chatWindow"
       business-line="custom" 
       :visible.sync="visible"
-      :agent-ids="['inspect-x', 'data-analysis-x']" 
+      :agent-ids="['inspect-x', 'data-analysis-x','training-x','try-x']" 
       userId="08040da51923457aaaf43e4267abcf4e"
     >
       <!-- 处理自定义智能体的渲染 -->

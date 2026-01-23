@@ -2,11 +2,11 @@
   <div class="ai-home" :class="{ 'is-mini': isMini }">
     <div class="home-header-bar">
       <div class="header-right">
-        <div class="toggle-btn" @click="toggleWindowSize" :title="isMini ? '最大化' : '还原'">
+        <div class="toggle-btn" @click="$emit('toggle-size')" :title="isMini ? '最大化' : '还原'">
           <img v-if="isMini" src="@/assets/svg/expand.svg" alt="最大化" class="icon-svg" />
           <img v-else src="@/assets/svg/collapse.svg" alt="还原" class="icon-svg" />
         </div>
-        <div class="toggle-btn" title="关闭" @click="closeWindow">
+        <div class="toggle-btn" title="关闭" @click="$emit('close')">
           <img src="@/assets/svg/close-window.svg" alt="关闭" class="icon-svg" />
         </div>
       </div>
@@ -25,7 +25,7 @@
         v-for="agent in agents" 
         :key="agent.id" 
         class="agent-card"
-        @click="$emit('select', agent)"
+        @click="handleAgentSelect(agent)"
       >
         <div class="card-header-row">
           <div class="card-icon">
@@ -72,12 +72,15 @@ export default {
       selectionPageBg
     };
   },
+  mounted(){
+    this.$trackEvent(this.$TRACK_EVENTS.AVATAR_CLICK);
+  },
   methods: {
-    toggleWindowSize() {
-      this.$emit('toggle-size');
-    },
-    closeWindow() {
-      this.$emit('close');
+    handleAgentSelect(agent) {
+      this.$trackEvent(this.$TRACK_EVENTS.SELECT_AGENT_CARD, {
+        agentName: agent.name
+      });
+      this.$emit('select', agent);
     }
   }
 };

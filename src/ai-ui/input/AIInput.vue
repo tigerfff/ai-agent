@@ -244,6 +244,12 @@ export default {
     AIAttachments,
     AILottie
   },
+  inject: {
+    getCurrentAgentName: {
+      from: 'getCurrentAgentName',
+      default: () => () => ''
+    }
+  },
   props: {
     /** 输入框的值（v-model） */
     value: {
@@ -964,6 +970,17 @@ export default {
      * @param {string} type - 文件类型：'image' | 'video' | 'document'
      */
     triggerFileSelect(type) {
+      const eventKeyMap = {
+        image: this.$TRACK_EVENTS.INPUT_ATTACH_IMAGE,
+        video: this.$TRACK_EVENTS.INPUT_ATTACH_VIDEO,
+        document: this.$TRACK_EVENTS.INPUT_ATTACH_SNAPSHOT // 文档这里暂时映射为抓图或其它，视CSV而定
+      };
+      if (eventKeyMap[type]) {
+        this.$trackEvent(eventKeyMap[type], {
+          agentName: this.getCurrentAgentName()
+        });
+      }
+
       const input = this.$refs.fileInput;
       if (!input) return;
       let accept = '*/*';
@@ -989,12 +1006,18 @@ export default {
     /** 切换录音状态（开始/停止） */
     async toggleRecord() {
       if (this.isRecording) {
+        this.$trackEvent(this.$TRACK_EVENTS.INPUT_VOICE_OFF, {
+          agentName: this.getCurrentAgentName()
+        });
         await this.stopRecording();
       } else {
         if (!this.speechConfigProvider) return;
         try {
           const config = await this.speechConfigProvider();
           if (!config) return;
+          this.$trackEvent(this.$TRACK_EVENTS.INPUT_VOICE_ON, {
+            agentName: this.getCurrentAgentName()
+          });
           this.isRecording = true;
           this.recognizer.start(config);
         } catch (e) {
@@ -1033,6 +1056,11 @@ export default {
         await this.stopRecording();
       }
       if (this.isSubmitDisabled) return;
+
+      this.$trackEvent(this.$TRACK_EVENTS.INPUT_SEND, {
+        agentName: this.getCurrentAgentName()
+      });
+
       const data = { text: this.inputValue, attachments: this.fileList };
       if (this.beforeSend) {
         try {

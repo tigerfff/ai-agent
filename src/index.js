@@ -30,7 +30,10 @@ import AIEmpty from './ai-ui/empty/AIEmpty.vue';
 import { setAdapter } from './ai-core/adapter';
 import { AIClient } from './ai-core/client/AIClient';
 import { EventBus } from './ai-core/event-bus';
+import '../public/oss/crypto.common.js';
 import { OssUploader, STSProvider } from '../public/oss/index.esm.js';
+import { eventTracker, TRACK_EVENTS } from './utils/event-tracker';
+
 
 // 导入样式（Vite 会自动处理 SCSS 编译和打包）
 import './style/index.scss';
@@ -88,6 +91,18 @@ const install = (Vue, options = {}) => {
   
   Vue.prototype.$aiClient = client;
   Vue.prototype.$aiEventBus = EventBus;
+
+  // 8. 埋点追踪器初始化
+  eventTracker.init({
+    sendClickMessage: options.sendClickMessage || Vue.prototype.sendClickMessage,
+    eventMap: options.eventMap,
+    defaultEty: options.trackEty
+  });
+  
+  Vue.prototype.$trackEvent = (eventKey, params) => {
+    eventTracker.track(eventKey, params);
+  };
+  Vue.prototype.$TRACK_EVENTS = TRACK_EVENTS;
 };
 
 // 导出所有组件和工具

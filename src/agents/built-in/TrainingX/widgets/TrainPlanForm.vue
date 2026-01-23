@@ -397,6 +397,9 @@ export default {
       this.formData.userIds = users.map(user => {
         return user?.userId || user?.roleId || user?.id || '';
       }).filter(Boolean);
+      
+      // 埋点：培训学员调整
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_TRAIN_USERS_CHANGE);
     },
     /**
      * 处理项目/课程搜索（AILoadSelect 的 remoteMethod）
@@ -497,6 +500,9 @@ export default {
      */
     handleProjectChange(selectedId, selectedItem) {
       if (selectedItem) {
+        // 埋点：学习项目修改
+        this.$trackEvent(this.$TRACK_EVENTS.WIDGET_TRAIN_PROJECT_CHANGE);
+        
         // 更新选中选项列表
         this.selectedProjectOptions = [selectedItem];
         // 重置详情加载状态
@@ -573,6 +579,9 @@ export default {
         console.warn('[TrainPlanForm] Cannot confirm: missing project/course or users');
         return;
       }
+
+      // 埋点：确认执行
+      this.$trackEvent(this.$TRACK_EVENTS.WIDGET_TRAIN_CONFIRM);
 
       this.isConfirmed = true;
       
