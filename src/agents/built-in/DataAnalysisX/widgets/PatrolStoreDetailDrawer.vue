@@ -63,7 +63,7 @@
                          <ImageGrid 
                              :images="[img]" 
                              :container-width="96"
-                             @handleClickImage="(img, idx) => previewImage(img, problem.pics, problem)"
+                             @handleClickImage="() => previewImage(imgIdx, problem.pics, problem)"
                          />
                     </div>
                     <div v-if="!problem.pics || problem.pics.length === 0" class="no-image">
@@ -271,9 +271,8 @@ export default {
         this.expandedProblems.push(index);
       }
     },
-    previewImage(img, allPics, question) {
+    previewImage(index, allPics, question) {
       this.bigImgInfo.pics = allPics || [];
-      const index = (allPics || []).indexOf(img);
       this.bigImgInfo.picIndexArr = [index > -1 ? index : 0, 0];
       this.bigImgInfo.storeName = this.currentStore ? this.currentStore.storeName : '';
       this.bigImgInfo.question = question || {};
@@ -420,17 +419,30 @@ export default {
       .problem-item {
         border-radius: 4px;
         margin-bottom: 12px;
-        overflow: hidden;
         padding: 0 14px;
         
         .problem-header {
-          border-radius: 8px;
-          background: rgba(0,0,0,0.04);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background-color: #FFF;
           padding: 8px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           cursor: pointer;
+
+          &::after {
+            content: '';
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            position: absolute;
+            background-color: #eeeff1;
+            border-radius: 8px;
+            z-index: -1;
+          }
           
           .problem-desc {
             font-size: 14px;

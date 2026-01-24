@@ -216,13 +216,10 @@ export default {
       // 埋点：报告导出
       this.$trackEvent(this.$TRACK_EVENTS.WIDGET_DATA_REPORT_EXPORT, { prefix: '推送' });
       
-      const res = await DataAnalysisXApi.pdfExport(this.client, {
+      await DataAnalysisXApi.pdfExport(this.client, {
         startTime: this.data.startDate,
         endTime: this.data.endDate
       });
-      if (res && res.code === 0) {
-        this.$message.success('导出成功，请前往“下载中心”查看');
-      }
       done();
     },
     formatDateTitle(dateStr) {
@@ -399,7 +396,7 @@ export default {
 
         .store-name {
           font-size: 15px;
-          font-weight: 500;
+          font-weight: 600;
           margin-bottom: 4px;
           display: flex;
           align-items: center;

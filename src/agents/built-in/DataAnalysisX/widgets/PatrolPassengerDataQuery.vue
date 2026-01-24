@@ -35,7 +35,7 @@
           <div v-if="showLastStores" class="section-container">
             <div class="section-header">
               <span class="dot"></span>
-              <span class="header-text">上周巡查得分排名后 5 的{{ applicationSceneName }}是:</span>
+              <span class="header-text">{{ formatRangeTitle(data.startDate, data.endDate) }}巡查得分排名后 5 的{{ applicationSceneName }}是:</span>
             </div>
             <EasyTable :columns="lastStoreRankColumns" :data="lastStores" />
           </div>
@@ -53,7 +53,7 @@
           <div v-if="showLastQuestions" class="section-container">
             <div class="section-header">
               <span class="dot"></span>
-              <span class="header-text">上周出现次数最少的 5 个问题项:</span>
+              <span class="header-text">{{ formatRangeTitle(data.startDate, data.endDate) }}出现次数最少的 5 个问题项:</span>
             </div>
             <EasyTable :columns="lastQuestionRankColumns" :data="lastQuestions" />
           </div>
@@ -65,7 +65,7 @@
               {{ formatRangeTitle(data.startDate, data.endDate) }}异常{{ applicationSceneName }}预警
             </div>
             <div class="alert-content">
-              监测期间，{{ alertStoreNames }} {{ alertStores.length }}家{{ applicationSceneName }}，<span v-show="alertStores.length > 1">均</span>出现了{{ alertMinCount }}次及以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
+              监测期间，{{ alertStoreNames }}等{{ alertStores.length }}家{{ applicationSceneName }}，<span v-show="alertStores.length > 1">均</span>出现了{{ alertMinCount }}次及以上的“{{ alertQuestionName }}”问题，建议对{{ applicationSceneName }}进行线下沟通，积极完成整改
             </div>
           </div>
 
@@ -108,7 +108,7 @@
           <div v-if="showPassengerLastStores" class="section-container">
             <div class="section-header">
               <span class="dot"></span>
-              <span class="header-text">上周{{ applicationSceneName }}“客流进入”排名后 5 的{{ applicationSceneName }}是:</span>
+              <span class="header-text">{{ formatRangeTitle(data.startDate, data.endDate) }}{{ applicationSceneName }}“客流进入”排名后 5 的{{ applicationSceneName }}是:</span>
             </div>
             <EasyTable :columns="passengerLastColumns" :data="passengerLastStores" />
           </div>
@@ -254,18 +254,16 @@ export default {
     },
     // 动态标题：门店
     storeTopHeaderText() {
-      const count = this.topStores.length;
-      return count >= 2 ? `上周巡查得分排名前 ${count} 的${this.applicationSceneName}是:` : `上周巡查得分排名第${count}的${this.applicationSceneName}是:`;
+      return `${this.formatRangeTitle(this.data.startDate, this.data.endDate)}巡查得分排名前5的${this.applicationSceneName}是`;
     },
     // 动态标题：客流
     passengerTopHeaderText() {
-      const count = this.passengerTopStores.length;
-      return count >= 2 ? `上周${this.applicationSceneName}“客流进入”排名前${count}的${this.applicationSceneName}是:` : `上周${this.applicationSceneName}“客流进入”排名弟${count}的${this.applicationSceneName}是:`;
+      return `${this.formatRangeTitle(this.data.startDate, this.data.endDate)}${this.applicationSceneName}“客流进入”排名前5的${this.applicationSceneName}是`
     },
     // 动态标题：问题
     questionTopHeaderText() {
-      const count = this.topQuestions.length;
-      return count >= 5 ? '上周出现次数最多的 5 个问题项:' : `上周出现次数最多的 ${count} 个问题项:`;
+      const title = this.formatRangeTitle(this.data.startDate, this.data.endDate);
+      return `${title}出现次数最多的5个问题项`;
     },
     topStoreRankColumns() {
       return [
@@ -359,7 +357,11 @@ export default {
       if (!start || !end) return '';
       const s = new Date(start);
       const e = new Date(end);
-      return `${s.getMonth() + 1}月${s.getDate()}日-${e.getMonth() + 1}月${e.getDate()}日`;
+      const sStr = `${s.getMonth() + 1}月${s.getDate()}日`;
+      if (s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth() && s.getDate() === e.getDate()) {
+        return sStr;
+      }
+      return `${sStr}-${e.getMonth() + 1}月${e.getDate()}日`;
     },
     async initData() {
       this.loading = true;
@@ -466,7 +468,7 @@ export default {
           const res = results[0].value;
           this.topStores = (res.data?.storeEvaluations || []).slice(0, 5).map(item => ({
             ...item,
-            scoreDisplay: `${parseFloat(Number(item.score || 0).toFixed(2))}%`
+            scoreDisplay: `${parseFloat(Number(item.score * 100 || 0).toFixed(2))}%`
           }));
           this.totalStores = res.data?.totalCount || 0;
         }
@@ -476,7 +478,7 @@ export default {
           const res = results[1].value;
           this.lastStores = (res.data?.storeEvaluations || []).slice(0, 5).map(item => ({
             ...item,
-            scoreDisplay: `${parseFloat(Number(item.score || 0).toFixed(2))}%`
+            scoreDisplay: `${parseFloat(Number(item.score * 100 || 0).toFixed(2))}%`
           }));
         }
 
@@ -612,10 +614,7 @@ export default {
               "05019"
             ]
           };
-          const res = await DataAnalysisXApi.exportPatrolStoreOverview(this.client, params);
-          if (res && res.code === 0) {
-            this.$message.success('导出成功，请前往"下载中心"查看');
-          }
+          await DataAnalysisXApi.exportPatrolStoreOverview(this.client, params);
         } else if (exportType === 'passenger') {
           // 客流导出
           const areaId = this.areaIdList[0] || '';
@@ -630,10 +629,7 @@ export default {
             areaIdList: this.areaIdList,
             storeIdList: this.storeIdList
           };
-          const res = await DataAnalysisXApi.exportPassengerRank(this.client, params);
-          if (res && res.code === 0) {
-            this.$message.success('导出成功，请前往“下载中心”查看');
-          }
+          await DataAnalysisXApi.exportPassengerRank(this.client, params);
         }
       } catch (e) { 
         console.error('[PatrolPassengerDataQuery] export failed:', e);

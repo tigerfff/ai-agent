@@ -92,7 +92,7 @@
           :loading="isStreaming || isUploading"
           :showClearButton="false"
           :enable-stop-button="true"
-          placeholder="请描述巡查任务的门店范围、方向、时间频次、任务有效期等~"
+          placeholder="请就一年内门店的巡查情况，客流情况等进行询问~"
           :before-add-attachments="handlePreUpload"
           :speech-config-provider="asrConfigProvider"
           :send-disabled="sendBtnDisabled"
@@ -159,7 +159,8 @@ export default {
     this.welcomeConfig = {
         title: '数据分析',
         description: `我可以帮你总结巡查报告、分析${this.applicationSceneName}客流、巡查情况等任务，帮助你更高效地工作～`,
-        icon: dataAnalysisHomeIcon
+        icon: dataAnalysisHomeIcon,
+        prompts: [] // 从接口获取
       }
   },
   methods: {
