@@ -131,10 +131,12 @@ class EventTracker {
     const trackData = {
       lc,
       ety: params.ety || this.defaultEty,
-      biz: {
-        ...presetBiz,    // 映射表生成的参数
-        ...params.extraBiz, // 允许手动补充额外的 biz (可选)
-      },
+      biz: Object.fromEntries(
+        Object.entries({
+          ...presetBiz,
+          ...params.extraBiz,
+        }).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+      ),
     };
 
     console.log(`[EventTracker] Sending to Parent:`, trackData);

@@ -30,8 +30,8 @@ import AIEmpty from './ai-ui/empty/AIEmpty.vue';
 import { setAdapter } from './ai-core/adapter';
 import { AIClient } from './ai-core/client/AIClient';
 import { EventBus } from './ai-core/event-bus';
-import '../public/oss/crypto.common.js';
-import { OssUploader, STSProvider } from '../public/oss/index.esm.js';
+import './utils/oss/crypto.common.js';
+import { OssUploader, STSProvider } from './utils/oss/index.esm.js';
 import { eventTracker, TRACK_EVENTS } from './utils/event-tracker';
 
 
@@ -137,3 +137,5 @@ export {
 export default {
   install
 };
+// 导出常量（关键：让父项目可以拿到枚举）
+export { TRACK_EVENTS };

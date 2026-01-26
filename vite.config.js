@@ -116,8 +116,7 @@ export default defineConfig({
       // Hui UI 资源，从 public/hui2.43.2 下引入
       'hui': resolve(__dirname, 'public/hui2.43.2'),
       '@hcu': resolve(__dirname, 'public/hik-cloud-ui'),
-      'sec-crypto': resolve(__dirname, 'public/oss/crypto.common.js'),
-      
+      'sec-crypto': resolve(__dirname, 'src/utils/oss/crypto.common.js'),
     }
   },
 
