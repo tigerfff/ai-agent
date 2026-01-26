@@ -141,7 +141,7 @@ export default {
     font-size: 12px;
     color: rgba(0, 0, 0, 0.45);
     margin: 2px 0 0 0;
-  }
+  } 
 
   .action-buttons {
     display: flex;
@@ -149,6 +149,10 @@ export default {
     gap: 12px;
     justify-content: flex-end;
     margin-left: 48px;
+    ::v-deep .el-button {
+      font-weight: 400 !important;
+      color: rgba(0,0,0,0.7);
+    }
   }
 }
 </style>

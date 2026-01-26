@@ -79,12 +79,12 @@
     <div class="footer">
       <div class="content-wrapper">
         <!-- Mock 测试按钮 -->
-        <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <!-- <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
           <el-button size="mini" type="warning" plain @click="mockPatrolDataReport">测试数据分析报告</el-button>
           <el-button size="mini" type="success" plain @click="mockPatrolQueryReport">测试巡查查询结果</el-button>
           <el-button size="mini" type="primary" plain @click="mockSelfCheckResult">测试生成自检计划结果</el-button>
           <el-button size="mini" type="info" plain @click="mockCancelPlanMessage">测试点击取消自检计划</el-button>
-        </div>
+        </div> -->
 
         <AIInput 
           ref="aiInput"

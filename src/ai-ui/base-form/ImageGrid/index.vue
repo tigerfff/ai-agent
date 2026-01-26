@@ -14,7 +14,6 @@
         :style="gridItemStyle(index)"
         @click="handleClickImage(image, index)"
       >
-       <LazyComponent>
           <imgCanvas 
             class="img-canvas" 
             :url="image.picUrl"  
@@ -25,7 +24,6 @@
             :height="gridItemHeight"
             v-bind="$attrs"
           ></imgCanvas>
-        </LazyComponent>
       </div>
     </div>
     <div class="image-grid-count" v-show="count > 1">

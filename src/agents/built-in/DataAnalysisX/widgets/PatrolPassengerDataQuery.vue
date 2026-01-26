@@ -692,7 +692,7 @@ export default {
   }
 
   .section-container {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 
     .section-header {
       display: flex;

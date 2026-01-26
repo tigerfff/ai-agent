@@ -176,15 +176,6 @@ export default {
       sureWhiteIcon
     };
   },
-  watch: {
-    data:{
-      handler(val) {
-        console.log(val,'val')
-      },
-      deep: true,
-      immediate: true
-    }
-  },
   computed: {
     drawerTitle() {
       return `${this.formatDateTitle(this.data.startDate)}问题${this.applicationSceneName}列表`;
@@ -396,7 +387,7 @@ export default {
 
         .store-name {
           font-size: 15px;
-          font-weight: 600;
+          font-weight: 700;
           margin-bottom: 4px;
           display: flex;
           align-items: center;

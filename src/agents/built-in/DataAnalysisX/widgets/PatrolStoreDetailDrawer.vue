@@ -52,25 +52,23 @@
             </div>
             
             <el-collapse-transition>
-              <div v-show="expandedProblems.includes(index)" class="problem-body">
-                <LazyComponent>
-                  <div class="image-list">
-                    <div
-                      v-for="(img, imgIdx) in problem.pics"
-                      :key="imgIdx"
-                      class="image-item"
-                    >
-                         <ImageGrid 
-                             :images="[img]" 
-                             :container-width="96"
-                             @handleClickImage="() => previewImage(imgIdx, problem.pics, problem)"
-                         />
-                    </div>
-                    <div v-if="!problem.pics || problem.pics.length === 0" class="no-image">
-                      暂无图片
-                    </div>
+              <div v-if="expandedProblems.includes(index)" class="problem-body">
+                <div class="image-list">
+                  <div
+                    v-for="(img, imgIdx) in problem.pics"
+                    :key="imgIdx"
+                    class="image-item"
+                  >
+                       <ImageGrid 
+                           :images="[img]" 
+                           :container-width="96"
+                           @handleClickImage="() => previewImage(imgIdx, problem.pics, problem)"
+                       />
                   </div>
-                </LazyComponent>
+                  <div v-if="!problem.pics || problem.pics.length === 0" class="no-image">
+                    暂无图片
+                  </div>
+                </div>
               </div>
             </el-collapse-transition>
           </div>
@@ -198,7 +196,7 @@ export default {
     },
     getStoreProblemCount(store) {
       if (!store.questionData) return 0;
-      return store.questionData.reduce((acc, cur) => acc + (cur.questionCount || 0), 0);
+      return store.questionData.length
     },
     selectStore(store) {
       this.currentStoreId = store.storeId;
@@ -238,7 +236,7 @@ export default {
           this.total = this.currentStoreProblems.length;
           
           // 默认展开前三个（如果数量超过3个）
-          this.expandedProblems = Array.from({ length: Math.min(3, this.total) }, (_, i) => i);
+          this.expandedProblems = Array.from({ length: Math.min(5, this.total) }, (_, i) => i);
         } else {
           // 如果接口返回失败，只展示问题列表，不填充图片
           this.currentStoreProblems = this.currentStore.questionData.map(q => ({
