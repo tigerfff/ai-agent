@@ -49,7 +49,6 @@ export default {
   },
   watch: {
     visible(val) {
-      console.log('AIChatWindow visible changed:', val);
       // 每次打开窗口时，执行周期重置逻辑
       if (val && this.$refs.agentContainer) {
         if (typeof this.$refs.agentContainer.resetCycle === 'function') {
@@ -65,7 +64,6 @@ export default {
     }
   },
   mounted() {
-    console.log('AIChatWindow mounted');
   },
   computed: {
     drawerWidth() {

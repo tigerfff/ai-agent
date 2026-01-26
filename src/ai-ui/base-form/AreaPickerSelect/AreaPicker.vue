@@ -101,7 +101,6 @@
       },
       // 搜索
       async handleIconClick (keyword, cb) {
-        console.log('keyword', keyword);
         if (!keyword) return
         try {
           this.loading = true

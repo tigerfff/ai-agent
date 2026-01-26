@@ -348,7 +348,6 @@ export default {
      * 场景：自定义 slot 智能体，不需要左侧历史和新建会话按钮
      */
     shouldHideConversations() {
-      console.log(this.currentAgent,'this.currentAgent')
       if (!this.currentAgent) return false;
       // 仅当为 slot 类型，且配置了 hideConversations=true 时隐藏
       return this.currentAgent.hideConversations === true;
@@ -480,7 +479,6 @@ export default {
       this.checkingPermission = true;
       try {
         const permissionResult = await checkAgentPermission(this.$aiClient, this.userId, agent);
-        console.log(permissionResult,'permissionResult')
         this.permissionStatus = permissionResult;
       } catch (e) {
         console.error('[AgentContainer] Permission check failed:', e);

@@ -79,8 +79,8 @@ export const ALL_AGENTS = {
     component: DataAnalysisXAgent,
     sort: 2, // 排序字段
     permission: {
-      serviceName: '巡查统计',        // 服务名称（用于提示）
-      permissionName: '数据分析权限码',   // 权限名称（用于提示）
+      serviceName: '数据分析服务',        // 服务名称（用于提示）
+      permissionName: '巡查统计权限',   // 权限名称（用于提示）
       
       // 1. 检查服务购买 (白名单)
       checkService: true,

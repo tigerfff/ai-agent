@@ -367,7 +367,6 @@ export const AgentBaseMixin = {
             this.handleFinish({ index: this.messages.indexOf(aiMsg) });
           },
           onError: (err) => {
-            console.log('err', err);
             if (err.name === 'AbortError') return;
             console.error('[AgentBaseMixin] SSE Error', err);
             aiMsg.loading = false;

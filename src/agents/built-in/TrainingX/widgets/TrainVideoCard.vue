@@ -60,7 +60,6 @@ export default {
       return '培训视频';
     },
     previewFile() {
-      console.log(this.videoUrl,'this.videoUrl')
       if (!this.videoUrl) return null;
       return [{
         url: this.videoUrl,

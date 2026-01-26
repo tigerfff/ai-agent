@@ -97,7 +97,6 @@ class EventTracker {
 
   track(eventKey, params = {}) {
     // 打印调试信息
-    console.log(`[EventTracker] Tracking: ${eventKey}`, params);
 
     if (!this.sendClickMessage) {
       if (process.env.NODE_ENV === 'development') {
@@ -139,7 +138,6 @@ class EventTracker {
       ),
     };
 
-    console.log(`[EventTracker] Sending to Parent:`, trackData);
 
     try {
       this.sendClickMessage(trackData);

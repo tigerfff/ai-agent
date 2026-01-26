@@ -183,7 +183,6 @@ export default {
       this.$trackEvent(this.$TRACK_EVENTS.NAV_CONVERSATION_ITEM, {
         agentName: this.getCurrentAgentName()
       });
-      console.log(id,'id')
       this.$emit('update:activeConversationId', id);
     },
     handleConversationChange(item) {

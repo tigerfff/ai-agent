@@ -351,8 +351,6 @@ export default {
       
       const { scrollTop, scrollHeight, clientHeight } = el;
 
-      console.log('scrollTop', scrollTop);
-
       // 触发向上分页加载：必须有滚动条且触达顶部阈值
       const hasScrollbar = scrollHeight > clientHeight;
       if (!this.loading && !this.noMore && !this.isLoadMoreTriggered && hasScrollbar && scrollTop <= this.loadMoreThreshold) {
@@ -369,8 +367,6 @@ export default {
       // 按钮显示逻辑
       this.showBackToBottom = dist > this.backButtonThreshold;
       this.userScrolledUp = dist > this.autoScrollTolerance;
-
-      console.log('dist', dist);
 
       if (dist <= this.autoScrollTolerance) {
         this.hasNewMessage = false;

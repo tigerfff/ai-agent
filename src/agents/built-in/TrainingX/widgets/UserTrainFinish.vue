@@ -216,12 +216,10 @@ export default {
         const uploadResult = await this.$ossUploader.upload(file, '080108', {
           onProgress: (percent) => {
             // 可以在这里更新进度
-            console.log(`[UserTrainFinish] Upload progress for ${task.taskName}:`, percent + '%');
           }
         });
 
         const videoUrl = uploadResult.url;
-        console.log(`[UserTrainFinish] Video uploaded for ${task.taskName}:`, videoUrl);
 
         // 2. 获取视频时长（如果可能）
         const duration = await this.getVideoDuration(file);
@@ -298,8 +296,6 @@ export default {
       if (res.code !== 0) {
         throw new Error(res.message || '提交实操失败');
       }
-
-      console.log(`[UserTrainFinish] Operation submitted for task ${taskId}:`, res);
     },
 
     /**

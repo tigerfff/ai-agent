@@ -923,7 +923,6 @@ var OssUploader = /*#__PURE__*/function () {
                 checkpoint: options.checkpoint,
                 meta: meta,
                 progress: function progress(p, cpt) {
-                  console.log(p, cpt, "progress");
                   // cpt 里包含 uploadId 和已上传的分片信息
                   latestCheckpoint = cpt || latestCheckpoint; // 更新最新的 checkpoint
                   if (options.onProgress) {

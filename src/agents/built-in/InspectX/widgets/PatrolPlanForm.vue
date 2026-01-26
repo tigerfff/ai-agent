@@ -380,7 +380,6 @@ export default {
   },
   methods: {
     async initFormData(data) {
-      console.log('initFormData', data);
       
       const initialized = {
         ...this.formData,
@@ -435,7 +434,6 @@ export default {
       }
       this.lastSelectedIds = currentIds;
 
-      console.log('areas', areas);
       this.selectedAreas = areas;
       
       // 埋点：巡检范围修改
@@ -562,7 +560,6 @@ export default {
 ${JSON.stringify(confirmData, null, 2)}
 </ymform:patrol_plan_confirm>`;
 
-      console.log(message)
 
       this.$emit('send-message', message);
     }

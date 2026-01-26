@@ -85,7 +85,6 @@ export default {
   },
   methods: {
     openChat() {
-      console.log('openChat clicked');
       // this.visible = true;
       this.$refs.chatWindow.open({
         agentId: '',
@@ -100,7 +99,6 @@ export default {
           url: '/test',
           method: 'GET'
         });
-        console.log('请求成功', res);
       } catch (e) {
         console.error('请求失败', e);
         this.$message.error('请求测试失败');

@@ -475,7 +475,6 @@ export default {
       if (this.isOptionDisabled(item)) return;
       
       const value = this.getOptionValue(item);
-      console.log('[AILoadSelect] handleOptionClick:', { value, item, currentValue: this.currentValue });
       
       if (this.multiple) {
         // 多选
@@ -495,7 +494,6 @@ export default {
         this.$emit('change', currentValues, item);
       } else {
         // 单选：直接 emit input 来更新 v-model
-        console.log('[AILoadSelect] Emitting input:', value);
         this.$emit('input', value);
         // 延迟关闭，确保 change 事件先触发
         this.$nextTick(() => {

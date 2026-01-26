@@ -256,7 +256,6 @@ export default {
     
     // 处理选择器变化（临时值）
     handlePickerChange(users) {
-      console.log('handlePickerChange', users);
       this.tempSelectedUsers = users;
     },
     

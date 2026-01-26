@@ -4,13 +4,13 @@
     <div class="report-header">
       <div class="report-title">{{ formatDateTitle(data.startDate) }}{{ applicationSceneName }}检查总结</div>
       <div class="report-summary" v-show="mostQuestionName">
-        经过分析，发现您的{{ applicationSceneName }}确实普遍存在<span class="highlight">「{{ mostQuestionName || '门店卫生' }}」</span>问题。其中有{{ topStores.length }}家{{ applicationSceneName }}问题尤为严重，现场情况如下：
+        经过分析，发现您的{{ applicationSceneName }}确实普遍存在<span>「{{ mostQuestionName || '门店卫生' }}」</span>问题。其中有{{ topStores.length }}家{{ applicationSceneName }}问题尤为严重，现场情况如下：
       </div>
     </div>
 
     <!-- TOP 5 门店问题概览 -->
     <div class="section-header" v-show="topStores.length > 0">
-      <div class="section-title">TOP {{ topStores.length }} {{ applicationSceneName }}问题概览</div>
+      <div class="section-title">TOP5{{ applicationSceneName }}问题概览</div>
       <div class="view-all" @click="handleStoreDetail">查看全部详情</div>
     </div>
     <div class="section-container" v-show="topStores.length > 0">
