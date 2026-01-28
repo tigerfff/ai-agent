@@ -88,7 +88,7 @@
       <div class="problem-grid">
         <div v-for="info in data.questionInfos" :key="info.questionId" class="grid-item">
           <span class="dot"></span>
-          <span class="grid-item-text">{{ info.questionName }}</span>
+          <span class="grid-item-text" :title="info.questionName">{{ info.questionName }}</span>
         </div>
       </div>
       <div class="plan-footer">

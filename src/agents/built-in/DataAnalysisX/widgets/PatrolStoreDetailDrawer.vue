@@ -13,7 +13,7 @@
       <!-- 左侧门店列表 -->
       <div class="store-list-panel">
         <div class="panel-header">
-          <span class="panel-title">TOP {{ stores.length }} {{ applicationSceneName }}</span>
+          <span class="panel-title">TOP5{{ applicationSceneName }}</span>
           <span class="panel-subtitle">问题数</span>
         </div>
         <div class="store-list">
@@ -24,9 +24,9 @@
             :class="{ active: currentStoreId === store.storeId }"
             @click="selectStore(store)"
           >
-            <span class="store-name">
+            <span class="store-name" :title="store.storeName">
               <span class="index">{{ index + 1 }}、</span>
-              {{ store.storeName }}
+              <span class="name-text">{{ store.storeName }}</span>
             </span>
             <span class="problem-count">{{ getStoreProblemCount(store) }}</span>
           </div>
@@ -90,34 +90,17 @@
       content-dec=""
       @close="graffitiClose"
     >
-      <template v-slot:rightAside="{ pic }">
-        <RightAsideContainer
-          :has-change-ques-btn="true"
-          :question="bigImgInfo.question"
-          :show-eval-btn="true"
-          :store-name="bigImgInfo.storeName"
-          :pic="{
-            ...pic,
-            captureTime: pic ? pic.captureTime : null
-          }"
-          @changeQues="changeQues"
-          @goEval="goEval"
-        />
-      </template>
     </ImageDrawViewer>
   </hik-cloud-drawer>
 </template>
 
 <script>
-import Vue from 'vue';
-import HikCloudDrawer from '@/../public/hik-cloud-ui/packages/drawer/index.js';
 import ImageGrid from '@/ai-ui/base-form/ImageGrid/index.vue';
 import { DataAnalysisXApi } from '../api';
 
 export default {
   name: 'PatrolStoreDetailDrawer',
   components: {
-    HikCloudDrawer,
     ImageGrid
   },
   props: {
@@ -382,15 +365,22 @@ export default {
         .store-name {
           font-size: 14px;
           color: rgba(0,0,0,0.7);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
           display: flex;
           align-items: center;
+          flex: 1;
+          min-width: 0;
+          margin-right: 12px;
           
           .index {
             color: rgba(0,0,0,0.45);
-            margin-right: 4px;
+            flex-shrink: 0;
+          }
+
+          .name-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
         }
         

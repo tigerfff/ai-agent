@@ -39,12 +39,11 @@
   "exports": {
     ".": {
       "import": "./lib/hik-cloud-agentX.es.js",
-      "require": "./lib/hik-cloud-agentX.umd.js",
-      "style": "./lib/style.css"
+      "require": "./lib/hik-cloud-agentX.umd.js"
     },
     "./style": {
-      "import": "./src/style/index.scss",
-      "require": "./src/style/index.scss"
+      "import": "./src/lib/style.css",
+      "require": "./src/lib/style.css"
     }
   },
   "peerDependencies": {

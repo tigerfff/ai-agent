@@ -202,7 +202,7 @@ export default {
   },
   created() {
     // 获取白名单用户列表（全局共享，只调用一次）
-    // this.fetchWhiteUserList();
+    this.fetchWhiteUserList();
     
     // ========== 临时 Mock 数据（测试用，可随时删除） ==========
     // 在控制台调用：this.$refs.activeAgent.mockTrainPlanForm() 来测试表单

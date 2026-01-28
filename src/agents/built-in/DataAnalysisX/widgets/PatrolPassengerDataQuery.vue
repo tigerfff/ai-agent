@@ -12,6 +12,11 @@
         <div class="report-title">{{ formatRangeTitle(data.startDate, data.endDate) }}巡查和客流统计结果</div>
       </div>
 
+      <!-- 暂无指定门店提示 -->
+      <div v-if="showFallbackNotice" class="fallback-notice">
+        注：暂无指定范围的数据，以下为您权限下的全部{{ applicationSceneName }}/区域数据
+      </div>
+
       <!-- 巡查报表部分 -->
       <div v-if="showPatrolSection" class="patrol-report-section">
         <div v-if="normalizedQueryType === 2" class="sub-report-title">一、巡查情况：</div>
@@ -208,7 +213,8 @@ export default {
       areaIdList: [],
       storeIdList: [],
       areaNodes: [], // 新增：存储完整的区域节点对象
-      storeNodes: []  // 新增：存储完整的门店节点对象
+      storeNodes: [], // 新增：存储完整的门店节点对象
+      showFallbackNotice: false // 是否显示“暂无指定门店数据”的提示
     };
   },
   computed: {
@@ -387,6 +393,7 @@ export default {
             this.storeNodes = storeNodes;
             this.areaIdList = areaNodes.map(n => n.nodeId);
             this.storeIdList = storeNodes.map(n => n.nodeId);
+            this.showFallbackNotice = false;
           }else{
             const treeRes = await DataAnalysisXApi.getAreaTree(this.client);
             if (treeRes && treeRes.code === 0 && treeRes.data?.nodeList) {
@@ -394,9 +401,11 @@ export default {
               this.storeNodes = [];
               this.areaIdList = this.areaNodes.map(node => node.nodeId);
               this.storeIdList = [];
+              this.showFallbackNotice = true;
             }
           }
         } else {
+          this.showFallbackNotice = false;
           // 如果没有 areaOrStoreName，获取区域树根节点
           const treeRes = await DataAnalysisXApi.getAreaTree(this.client);
           if (treeRes && treeRes.code === 0 && treeRes.data?.nodeList) {
@@ -678,6 +687,14 @@ export default {
       font-weight: 600;
       color: rgba(0, 0, 0, 0.9);
     }
+  }
+
+  .fallback-notice {
+    margin-bottom: 4px;
+    border-radius: 4px;
+    color: #FF5E34;
+    font-size: 14px;
+    line-height: 20px;
   }
 
   .sub-report-title {
