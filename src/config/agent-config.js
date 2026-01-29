@@ -74,6 +74,7 @@ export const ALL_AGENTS = {
     homeIcon: dataAnalysisHomeIcon,
     description: '深入分析门店运营数据，智能发现潜在问题并提供改进建议。',
     type: 'built-in',
+    businessGroup: 'data-analysis', // 业务组标识
     tags: ['数据建模', '智能分析'],
     hideConversations: false,
     component: DataAnalysisXAgent,
@@ -95,6 +96,23 @@ export const ALL_AGENTS = {
       permissionCodeKey: 'authorities', // localStorage 中权限码的 key
       permissionCode: [],        // 要检查的具体权限码
     }
+  },
+
+  'data-analysis-old': {
+    id: 'data-analysis-old',
+    name: '数据分析(旧)',
+    miniName:'分析',
+    icon: dataAnalysisIcon,
+    homeIcon: dataAnalysisHomeIcon,
+    description: '数据分析旧版本。',
+    type: 'slot',
+    businessGroup: 'data-analysis', // 业务组标识
+    isOld: true,
+    hidden: true, // 在侧边栏隐藏
+    tags: ['旧版'],
+    hideConversations: true,
+    sort: 99,
+    permission: null
   },
   
   'try-x': {

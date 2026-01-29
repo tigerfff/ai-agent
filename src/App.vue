@@ -3,7 +3,11 @@
     <div class="host-page-mock">
       <h1>业务系统宿主页面</h1>
       <p>这是一个模拟的业务系统背景。</p>
-      <button class="open-btn" @click="openChat">打开 AI 助手</button>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="open-btn" @click="openChat">打开 AI 助手</button>
+        <button class="open-btn" style="background: #67c23a;" @click="openDataAnalysisNew">数据分析(新)</button>
+        <button class="open-btn" style="background: #e6a23c;" @click="openDataAnalysisOld">数据分析(旧)</button>
+      </div>
     </div>
 
     <!-- 模拟父项目使用组件库 -->
@@ -11,12 +15,19 @@
       ref="chatWindow"
       business-line="custom" 
       :visible.sync="visible"
-      :agent-ids="['inspect-x', 'data-analysis-x','training-x','try-x']" 
+      :agent-ids="['inspect-x', 'data-analysis-x','training-x','try-x', 'data-analysis-old']" 
       userId="08040da51923457aaaf43e4267abcf4e"
     >
       <!-- 处理自定义智能体的渲染 -->
       <template #agent-view="{ agent }">
-        <div class="custom-view-wrapper">
+        <div v-if="agent.id === 'data-analysis-old'" class="custom-view-wrapper" style="background: #fffbe6;">
+          <h2>{{ agent.name }} (旧版 Slot)</h2>
+          <p>这里是父项目注入的老版本数据分析逻辑。</p>
+          <div style="margin-top: 20px;">
+            <button class="open-btn" @click="switchToNew">切换到新版</button>
+          </div>
+        </div>
+        <div v-else class="custom-view-wrapper">
           <h2>{{ agent.name }} (Custom)</h2>
           <p>Agent ID: {{ agent.id }}</p>
           <p>这里是父项目注入的自定义业务组件。</p>
@@ -91,6 +102,25 @@ export default {
         chatId: ''
       });
       // this.$refs.chatWindow.open();
+    },
+    openDataAnalysisNew() {
+      this.$refs.chatWindow.open({
+        businessId: 'data-analysis',
+        version: 'new'
+      });
+    },
+    openDataAnalysisOld() {
+      this.$refs.chatWindow.open({
+        businessId: 'data-analysis',
+        version: 'old'
+      });
+    },
+    switchToNew() {
+      // 通过 EventBus 通知容器切换到新版
+      this.$aiEventBus.$emit('command:switch-agent', {
+        businessId: 'data-analysis',
+        version: 'new'
+      });
     },
     async testRequest() {
       try {

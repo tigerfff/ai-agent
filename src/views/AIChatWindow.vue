@@ -80,7 +80,10 @@ export default {
     handleToggleSize() {
       this.isMini = !this.isMini;
     },
-    // 对外暴露的 open 方法
+    /**
+     * 对外暴露的 open 方法
+     * @param {Object} params - { agentId, chatId, businessId, version }
+     */
     open(params) {
       this.$emit('update:visible', true);
       // 等待 DOM 更新后调用子组件的初始化方法

@@ -78,6 +78,10 @@
     <!-- 输入区域 -->
     <div class="footer">
       <div class="content-wrapper">
+        <!-- 版本切换测试按钮 -->
+        <div style="margin-bottom: 10px; display: flex; justify-content: flex-end;">
+          <el-button size="mini" type="text" @click="switchToOld">切换到旧版</el-button>
+        </div>
         <!-- Mock 测试按钮 -->
         <!-- <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
           <el-button size="mini" type="warning" plain @click="mockPatrolDataReport">测试数据分析报告</el-button>
@@ -196,6 +200,12 @@ export default {
     },
     handleWidgetSend(text) {
       this.handleSend({ text });
+    },
+    switchToOld() {
+      this.$aiEventBus.$emit('command:switch-agent', {
+        businessId: 'data-analysis',
+        version: 'old'
+      });
     },
     /**
      * Mock 数据分析报告测试

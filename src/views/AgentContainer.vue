@@ -6,8 +6,8 @@
     <template #sider>
       <AISidebar 
         v-if="!isHome"
-        :agents="allAgents" 
-        :current-agent-id="currentAgentId"
+        :agents="displayAgents" 
+        :current-agent-id="activeSidebarId"
         :conversations="filteredConversations"
         :active-conversation-id="currentConversationId"
         :collapsed.sync="isCollapsed"
@@ -325,6 +325,20 @@ export default {
         return sortA - sortB;
       });
     },
+    // 侧边栏实际展示的智能体（过滤掉隐藏的）
+    displayAgents() {
+      return this.allAgents.filter(a => !a.hidden);
+    },
+    // 侧边栏当前高亮的 ID
+    activeSidebarId() {
+      const current = this.allAgents.find(a => a.id === this.currentAgentId);
+      // 如果当前选中的是隐藏的智能体，且属于某个业务组，则高亮该组中未隐藏的主智能体
+      if (current && current.businessGroup) {
+        const mainAgent = this.displayAgents.find(a => a.businessGroup === current.businessGroup);
+        return mainAgent ? mainAgent.id : this.currentAgentId;
+      }
+      return this.currentAgentId;
+    },
     currentAgent() {
       return this.allAgents.find(a => a.id === this.currentAgentId);
     },
@@ -391,48 +405,59 @@ export default {
 
     /**
      * 初始化状态（支持 Deep Link）
-     * @param {Object} params - { agentId, chatId }
+     * @param {Object} params - { agentId, chatId, businessId, version }
      */
     async initializeState(params) {
-      const { agentId, chatId } = params || {};
+      const { agentId, chatId, businessId, version } = params || {};
 
-      // 1. 如果没有传参数，或者 agentId 为空 -> 回到首页
-      if (!agentId) {
+      let targetAgentId = agentId;
+
+      // 1. 如果传了 businessId，则根据业务组和版本逻辑去寻找真正的 Agent ID
+      if (businessId) {
+        const groupAgents = this.allAgents.filter(a => a.businessGroup === businessId);
+        
+        if (version === 'old') {
+          // 寻找标记为旧版的
+          const oldAgent = groupAgents.find(a => a.isOld);
+          targetAgentId = oldAgent ? oldAgent.id : targetAgentId;
+        } else {
+          // 默认寻找主版本（没有 hidden 标记的）
+          const mainAgent = groupAgents.find(a => !a.hidden);
+          targetAgentId = mainAgent ? mainAgent.id : targetAgentId;
+        }
+      }
+
+      // 2. 如果没有找到目标 ID -> 回到首页
+      if (!targetAgentId) {
         this.currentAgentId = null;
         this.currentConversationId = null;
         return;
       }
 
-      // 2. 尝试查找目标智能体
-      let targetAgent = this.allAgents.find(a => a.id === agentId);
+      // 3. 尝试查找目标智能体
+      let targetAgent = this.allAgents.find(a => a.id === targetAgentId);
       let targetChatId = chatId;
 
-      // 3. 如果没找到，降级为第一个智能体
+      // 4. 如果没找到，降级为第一个智能体
       if (!targetAgent) {
         if (this.allAgents.length > 0) {
           targetAgent = this.allAgents[0];
-          // 既然 Agent 都不对，传入的 chatId 也就没有意义了，直接丢弃，让 handleSelectAgent 自动选第一个会话
           targetChatId = null; 
         } else {
-          // 没有任何智能体，无法操作
           return;
         }
       }
 
-      // 4. 选中智能体
+      // 5. 选中智能体
       await this.handleSelectAgent(targetAgent);
         
 
-        // 5. 如果指定了会话 ID，尝试选中它
-        // 注意：handleSelectAgent 会默认选中第一个会话，这里进行覆盖
-        if (targetChatId) {
-          // 这里不需要判断 chatId 是否在 conversations 列表中
-          // 因为 handleUpdateConversationList 会在组件加载后再次校验
-          this.currentConversationId = targetChatId;
-          this.currentSessionStableKey = targetChatId;
-          // 更新周期缓存
-          this.cycleSessions[targetAgent.id] = targetChatId;
-        }
+      // 6. 如果指定了会话 ID，尝试选中它
+      if (targetChatId) {
+        this.currentConversationId = targetChatId;
+        this.currentSessionStableKey = targetChatId;
+        this.cycleSessions[targetAgent.id] = targetChatId;
+      }
     },
 
     collapsedMenuForMini() {
@@ -850,7 +875,13 @@ export default {
   },
   mounted() {
     this.fetchAgentTips();
-    // this.checkSingleAgent(); // 移除默认自动选中
+    // 监听内部切换智能体事件
+    this.$aiEventBus.$on('command:switch-agent', (params) => {
+      this.initializeState(params);
+    });
+  },
+  beforeDestroy() {
+    this.$aiEventBus.$off('command:switch-agent');
   },
   watch: {
     isMini: {
