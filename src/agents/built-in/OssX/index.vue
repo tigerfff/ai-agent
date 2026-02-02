@@ -234,12 +234,40 @@
           </div>
         </template>
       </div>
+
+      <!-- 批量测试 bizCode -->
+      <div class="demo-card bizcode-test-card">
+        <h2>批量测试 bizCode</h2>
+        <p class="desc">对预置的 bizCode 逐个请求 STS 凭证，检查后端是否支持（不实际上传文件）</p>
+        <div class="form-item">
+          <el-button type="primary" :loading="bizCodeTestRunning" @click="runBizCodeTest">
+            {{ bizCodeTestRunning ? '测试中...' : '运行测试' }}
+          </el-button>
+          <span v-if="bizCodeTestResults.length" class="result-summary">
+            通过 {{ bizCodeTestResults.filter(r => r.ok).length }} / {{ bizCodeTestResults.length }}
+          </span>
+        </div>
+        <div v-if="bizCodeTestResults.length" class="bizcode-result-table">
+          <el-table :data="bizCodeTestResults" size="small" border max-height="400">
+            <el-table-column prop="code" label="bizCode" width="100" />
+            <el-table-column prop="name" label="名称" min-width="200" show-overflow-tooltip />
+            <el-table-column label="结果" width="90">
+              <template slot-scope="{ row }">
+                <span :class="row.ok ? 'text-success' : 'text-error'">{{ row.ok ? '✅ 通过' : '❌ 失败' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="error" label="错误信息" min-width="220" show-overflow-tooltip />
+          </el-table>
+        </div>
+      </div>
     </div>
   </template>
   
   <script>
-  import { CosUploader } from '@/utils/cos-uploader'
-  
+  import { OssUploader } from '@/utils/oss-uploader'
+  import { STSProvider } from '@/utils/sts-provider'
+  import { BIZCODE_LIST } from './bizcode-list'
+
   export default {
     name: 'OssXDemo',
     data() {
@@ -266,7 +294,11 @@
         abortMap: new Map(),
         pauseMap: new Map(),      // 暂停句柄 Map（新功能）
         results: [],
-        uploader: null
+        uploader: null,
+
+        // 批量测试 bizCode
+        bizCodeTestResults: [],
+        bizCodeTestRunning: false
       }
     },
     computed: {
@@ -290,6 +322,25 @@
           paused: '已暂停'
         }
         return map[status] || '待上传'
+      },
+
+      /** 批量测试 bizCode：逐个请求 STS 凭证 */
+      async runBizCodeTest() {
+        if (this.bizCodeTestRunning) return
+        this.bizCodeTestRunning = true
+        this.bizCodeTestResults = []
+        const provider = new STSProvider()
+        for (const item of BIZCODE_LIST) {
+          const row = { code: item.code, name: item.name, ok: false, error: '' }
+          try {
+            await provider.getCredentials({ bizCode: item.code })
+            row.ok = true
+          } catch (e) {
+            row.error = (e && e.message) || String(e)
+          }
+          this.bizCodeTestResults.push(row)
+        }
+        this.bizCodeTestRunning = false
       },
 
       /**
@@ -1066,6 +1117,28 @@
             }
           }
         }
+      }
+    }
+
+    .bizcode-test-card {
+      margin-top: 24px;
+
+      .result-summary {
+        margin-left: 12px;
+        font-size: 14px;
+        color: #606266;
+      }
+
+      .bizcode-result-table {
+        margin-top: 16px;
+      }
+
+      .text-success {
+        color: #67c23a;
+      }
+
+      .text-error {
+        color: #f56c6c;
       }
     }
     

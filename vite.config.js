@@ -49,7 +49,7 @@ export default defineConfig({
         // rewrite: (path) => path.replace(/^\/api/, '/v1')
       },
       '/api': {
-        target: 'https://pbchain.hik-cloud.com',
+        target: 'https://chain.hik-cloud.com',
         changeOrigin: true,
         rewrite: (path) => {
           // /api/inspect/... 或 /api/enterprise/... 保持不变
