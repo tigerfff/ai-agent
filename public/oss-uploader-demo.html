@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSS Uploader 纯 HTML Demo</title>
+  <!-- Element UI 样式 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/theme-chalk/index.css" />
+  <style>
+    body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f5f7fa; }
+    #app { max-width: 900px; margin: 0 auto; }
+    .page-title { font-size: 24px; font-weight: 600; color: #303133; margin-bottom: 8px; }
+    .page-desc { color: #606266; margin-bottom: 24px; font-size: 14px; }
+    .demo-card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .demo-card h2 { font-size: 18px; margin: 0 0 8px 0; color: #303133; }
+    .demo-card .desc { color: #909399; font-size: 13px; margin-bottom: 20px; }
+    .form-item { margin-bottom: 16px; }
+    .form-item label { display: block; margin-bottom: 6px; color: #606266; font-size: 14px; }
+    .upload-area { border: 1px dashed #dcdfe6; border-radius: 6px; padding: 32px; text-align: center; cursor: pointer; background: #fafafa; transition: background .2s; }
+    .upload-area:hover { background: #f0f9ff; border-color: #409eff; }
+    .upload-area .file-name { font-weight: 500; margin: 0 0 4px 0; }
+    .upload-area .file-size { color: #909399; font-size: 12px; margin: 0; }
+    .actions { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .progress-wrap { margin-top: 16px; }
+    .progress-row { margin-bottom: 12px; }
+    .progress-row .status-text { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+    .progress-bar { height: 8px; background: #e4e7ed; border-radius: 4px; overflow: hidden; }
+    .progress-inner { height: 100%; background: #409eff; border-radius: 4px; transition: width .3s; }
+    .result-area { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ebeef5; }
+    .result-area h3 { font-size: 14px; margin: 0 0 12px 0; color: #303133; }
+    .result-item { padding: 12px; border-radius: 6px; background: #f0f9eb; border: 1px solid #c2e7b0; }
+    .result-item a { color: #409eff; word-break: break-all; }
+    .code-section { margin-top: 32px; }
+    .code-section h3 { font-size: 16px; margin: 0 0 12px 0; color: #303133; }
+    pre { margin: 0 0 16px 0; padding: 16px; background: #282c34; color: #abb2bf; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+    pre code { font-family: "Consolas", "Monaco", monospace; }
+    .code-caption { font-size: 13px; color: #606266; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1 class="page-title">OSS Uploader 纯 HTML Demo</h1>
+    <p class="page-desc">本页通过 CDN 引入 Vue、Element UI、ali-oss，包含可运行的上传演示与接入代码示例。</p>
+
+    <!-- 演示区 -->
+    <div class="demo-card">
+      <h2>上传演示</h2>
+      <p class="desc">下方为模拟演示：使用模拟的 tokenProvider 与模拟上传，仅用于展示交互与进度；真实接入请使用代码示例中的方式。</p>
+      <div class="form-item">
+        <label>业务编码 (bizCode)</label>
+        <el-input v-model="bizCode" placeholder="例如 70201" style="max-width: 200px;" :disabled="uploading"></el-input>
+      </div>
+      <div class="form-item">
+        <label>选择文件</label>
+        <div class="upload-area" @click="triggerInput">
+          <template v-if="!file">
+            <p style="margin:0;color:#909399;">点击选择文件</p>
+          </template>
+          <template v-else>
+            <p class="file-name">{{ file.name }}</p>
+            <p class="file-size">{{ (file.size / 1024).toFixed(2) }} KB</p>
+          </template>
+        </div>
+        <input ref="fileInput" type="file" style="display:none" @change="onFileChange" />
+      </div>
+      <div class="actions">
+        <el-button type="primary" :loading="uploading" :disabled="!file || uploading" @click="startUpload">开始上传</el-button>
+        <el-button @click="reset">重置</el-button>
+      </div>
+      <div v-if="file && (progress > 0 || result)" class="progress-wrap">
+        <div class="progress-row">
+          <div class="status-text">
+            <span>{{ file.name }}</span>
+            <span>{{ progress }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-inner" :style="{ width: progress + '%' }"></div>
+          </div>
+        </div>
+      </div>
+      <div v-if="result" class="result-area">
+        <h3>上传结果</h3>
+        <div class="result-item">
+          <p><strong>URL:</strong> <a :href="result.url" target="_blank" rel="noopener">{{ result.url }}</a></p>
+          <p style="margin:8px 0 0 0;font-size:12px;color:#909399;">（演示为模拟结果，真实环境为 OSS 返回地址）</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 代码示例区 -->
+    <div class="demo-card code-section">
+      <h2>代码示例</h2>
+      <p class="desc">在纯 HTML 中通过 CDN 使用 OssUploader 的完整示例。</p>
+
+      <p class="code-caption">1. 引入 CDN（Vue、Element UI、ali-oss）</p>
+      <pre><code>&lt;!-- Vue 2 --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.min.js"&gt;&lt;/script&gt;
+&lt;!-- Element UI --&gt;
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/theme-chalk/index.css" /&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/index.js"&gt;&lt;/script&gt;
+&lt;!-- 阿里云 OSS 浏览器 SDK --&gt;
+&lt;script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.18.0.min.js"&gt;&lt;/script&gt;</code></pre>
+
+      <p class="code-caption">2. 创建 OssUploader（需提供 tokenProvider）</p>
+      <pre><code>// tokenProvider 需返回 Promise&lt;{ accessKeyId, accessKeySecret, securityToken, bucket, region, domain?, object }&gt;
+// 实际项目中通常通过后端接口按 bizCode 换取 STS 凭证
+const uploader = new OssUploader({
+  tokenProvider: () => fetch('/api/oss/sts?bizCode=' + bizCode).then(r => r.json())
+});
+
+// 上传文件（带进度）
+const result = await uploader.upload(file, (percent) => {
+  console.log('进度:', Math.round(percent * 100) + '%');
+});
+console.log('文件地址:', result.url);</code></pre>
+
+      <p class="code-caption">3. OssUploader 核心实现（与项目 src/utils/oss-uploader.js 一致）</p>
+      <pre><code>class OssUploader {
+  constructor(options) {
+    this.tokenProvider = options.tokenProvider; // () => Promise&lt;credentials&gt;
+    this.client = null;
+  }
+  async initClient() {
+    if (this.client) return this.client;
+    const credentials = await this.tokenProvider();
+    this.client = new OSS({
+      accessKeyId: credentials.accessKeyId,
+      accessKeySecret: credentials.accessKeySecret,
+      stsToken: credentials.securityToken,
+      bucket: credentials.bucket,
+      region: credentials.region,
+      secure: true
+    });
+    return this.client;
+  }
+  async upload(file, onProgress) {
+    const client = await this.initClient();
+    const key = credentials.object + this.generateKey(file);
+    if (typeof onProgress === 'function') {
+      return client.multipartUpload(key, file, { progress: p => onProgress(p) });
+    }
+    return client.put(key, file);
+  }
+}</code></pre>
+
+      <p class="code-caption">4. 与 STSProvider 配合（Vue 项目内）</p>
+      <pre><code>import { OssUploader } from '@/utils/oss-uploader';
+import { STSProvider } from '@/utils/sts-provider';
+
+// 安装时已配置 STSProvider.config({ httpClient, baseURL })
+const stsProvider = new STSProvider();
+const uploader = new OssUploader({
+  tokenProvider: () => stsProvider.getCredentials({ bizCode: '70201' })
+});
+
+const res = await uploader.upload(file, (percent) => {
+  this.progress = Math.round(percent * 100);
+});
+this.fileUrl = res.url;</code></pre>
+    </div>
+  </div>
+
+  <!-- CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.14/lib/index.js"></script>
+  <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.18.0.min.js"></script>
+  <script>
+    // 全局 ali-oss 可能为 OSS 或 AliyunOSS，依 CDN 而定
+    (function() {
+      var OSS = window.OSS || window.AliyunOSS || (window.aliyun && window.aliyun.OSS);
+      if (!OSS) {
+        console.warn('ali-oss SDK 未正确加载，演示将使用模拟上传');
+      }
+    })();
+
+    Vue.use(window.ElementUI || window.ELEMENT);
+
+    new Vue({
+      el: '#app',
+      data: {
+        bizCode: '70201',
+        file: null,
+        uploading: false,
+        progress: 0,
+        result: null
+      },
+      methods: {
+        triggerInput() {
+          if (this.uploading) return;
+          this.$refs.fileInput.click();
+        },
+        onFileChange(e) {
+          var f = e.target.files[0];
+          if (f) {
+            this.file = f;
+            this.result = null;
+            this.progress = 0;
+          }
+        },
+        startUpload() {
+          if (!this.file || this.uploading) return;
+          var vm = this;
+          vm.uploading = true;
+          vm.progress = 0;
+          vm.result = null;
+
+          // 模拟上传：无真实后端时仅做进度与结果展示
+          var steps = 20;
+          var step = 0;
+          var tick = function() {
+            step++;
+            vm.progress = Math.min(100, Math.round((step / steps) * 100));
+            if (step < steps) {
+              setTimeout(tick, 80);
+            } else {
+              vm.progress = 100;
+              vm.result = {
+                url: 'https://example-bucket.oss-cn-hangzhou.aliyuncs.com/demo/' + vm.file.name,
+                name: vm.file.name,
+                size: vm.file.size,
+                type: vm.file.type
+              };
+              vm.uploading = false;
+            }
+          };
+          setTimeout(tick, 100);
+        },
+        reset() {
+          this.file = null;
+          this.progress = 0;
+          this.result = null;
+          this.uploading = false;
+          if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

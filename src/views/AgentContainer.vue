@@ -42,7 +42,7 @@
       <!-- 场景 1: 首页列表 -->
       <Home 
         v-if="isHome" 
-        :agents="allAgents"
+        :agents="displayAgents"
         :is-mini="isMini"
         @select="handleSelectAgent"
         @toggle-size="toggleWindowSize"
@@ -278,6 +278,8 @@ export default {
       checkingPermission: false,    // 是否正在检查权限
       agentTips: {}, // 智能体红点状态
       cycleSessions: {}, // 窗口周期内的会话缓存 { agentId: chatId }
+      // 版本偏好缓存
+      localVersionPreferences: JSON.parse(localStorage.getItem('ai_agent_version_prefs') || '{}'),
       historyIcon,
       addIcon,
       expandIcon,
@@ -312,8 +314,20 @@ export default {
         // agentTips 格式: { "agentId": true/false }
         const hasRedDot = this.agentTips[agent.id] === true; 
         
+        // 动态计算隐藏状态
+        let isHidden = agent.hidden;
+        if (agent.businessGroup) {
+          const pref = this.localVersionPreferences[agent.businessGroup] || 'new';
+          if (pref === 'old') {
+            isHidden = !agent.isOld;
+          } else {
+            isHidden = !!agent.isOld;
+          }
+        }
+
         return {
           ...agent,
+          hidden: isHidden,
           hasRedDot
         };
       });
@@ -410,6 +424,13 @@ export default {
     async initializeState(params) {
       const { agentId, chatId, businessId, version } = params || {};
 
+      // 如果指定了业务组和版本，记录偏好并持久化
+      if (businessId && version) {
+        this.$set(this.localVersionPreferences, businessId, version);
+        localStorage.setItem('ai_agent_version_prefs', JSON.stringify(this.localVersionPreferences));
+        this.$emit('version-change', { businessId, version });
+      }
+
       let targetAgentId = agentId;
 
       // 1. 如果传了 businessId，则根据业务组和版本逻辑去寻找真正的 Agent ID
@@ -446,6 +467,14 @@ export default {
         } else {
           return;
         }
+      }
+
+      // 4.1 若通过 agentId 打开且该智能体属于某业务组，同步缓存版本偏好
+      if (targetAgent.businessGroup && !(businessId && version)) {
+        const versionToSave = targetAgent.isOld ? 'old' : 'new';
+        this.$set(this.localVersionPreferences, targetAgent.businessGroup, versionToSave);
+        localStorage.setItem('ai_agent_version_prefs', JSON.stringify(this.localVersionPreferences));
+        this.$emit('version-change', { businessId: targetAgent.businessGroup, version: versionToSave });
       }
 
       // 5. 选中智能体

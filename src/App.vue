@@ -15,16 +15,51 @@
       ref="chatWindow"
       business-line="custom" 
       :visible.sync="visible"
-      :agent-ids="['inspect-x', 'data-analysis-x','training-x','try-x', 'data-analysis-old']" 
+      :agent-ids="['inspect-x', 'data-analysis-x','training-x','try-x']" 
+      :extra-agents="customAgents"
       userId="08040da51923457aaaf43e4267abcf4e"
     >
       <!-- 处理自定义智能体的渲染 -->
       <template #agent-view="{ agent }">
-        <div v-if="agent.id === 'data-analysis-old'" class="custom-view-wrapper" style="background: #fffbe6;">
-          <h2>{{ agent.name }} (旧版 Slot)</h2>
-          <p>这里是父项目注入的老版本数据分析逻辑。</p>
-          <div style="margin-top: 20px;">
-            <button class="open-btn" @click="switchToNew">切换到新版</button>
+        <div v-if="agent.id === 'data-analysis-old'" class="custom-view-wrapper old-version-container">
+          <div class="old-header">
+            <h2>{{ agent.name }} (旧版 Slot)</h2>
+            <el-tag type="warning" size="small">Legacy Version</el-tag>
+          </div>
+          
+          <div class="old-content">
+            <p class="description">这里是父项目注入的老版本数据分析逻辑，基于传统的报表展示方式。</p>
+            
+            <div class="mock-stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">总销售额</div>
+                <div class="stat-value">{{ oldVersionData.totalSales }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">订单数</div>
+                <div class="stat-value">{{ oldVersionData.orderCount }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">活跃用户</div>
+                <div class="stat-value">{{ oldVersionData.activeUsers }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">转化率</div>
+                <div class="stat-value">{{ oldVersionData.conversionRate }}</div>
+              </div>
+            </div>
+
+            <div class="mock-chart-placeholder">
+              <div class="chart-title">销售趋势图 (模拟)</div>
+              <div class="chart-bars">
+                <div v-for="i in 7" :key="i" class="bar" :style="{ height: (30 + Math.random() * 60) + '%' }"></div>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <el-button type="primary" size="medium" @click="switchToNew">立即体验 AI 新版</el-button>
+              <el-button size="medium" @click="testRequest">导出旧版报表</el-button>
+            </div>
           </div>
         </div>
         <div v-else class="custom-view-wrapper">
@@ -53,8 +88,28 @@ export default {
   data() {
     return {
       visible: false,
+      // 模拟旧版数据分析的数据
+      oldVersionData: {
+        totalSales: '¥ 1,284,500',
+        orderCount: 1256,
+        activeUsers: 856,
+        conversionRate: '12.5%'
+      },
       // 父项目定义的额外智能体
       customAgents: [
+        {
+          id: 'data-analysis-old',
+          name: '数据分析(旧)',
+          miniName: '分析',
+          icon: '📊',
+          description: '数据分析旧版本。',
+          type: 'slot',
+          businessGroup: 'data-analysis',
+          isOld: true,
+          hideConversations: true,
+          sort: 2,
+          permission: null
+        },
         {
           // 基础参数
           id: 'order-helper',
@@ -98,7 +153,7 @@ export default {
     openChat() {
       // this.visible = true;
       this.$refs.chatWindow.open({
-        agentId: '',
+        agentId: '4',
         chatId: ''
       });
       // this.$refs.chatWindow.open();
@@ -175,5 +230,73 @@ body,
   background: #e6fffb;
   height: 100%;
   border-radius: 8px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.old-version-container {
+  background: #fffbe6 !important;
+  border: 1px solid #ffe58f;
+  
+  .old-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    h2 { margin: 0; color: #856404; }
+  }
+
+  .description {
+    color: #856404;
+    margin-bottom: 30px;
+  }
+
+  .mock-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+
+    .stat-card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      
+      .stat-label { font-size: 14px; color: #999; margin-bottom: 8px; }
+      .stat-value { font-size: 20px; font-weight: bold; color: #333; }
+    }
+  }
+
+  .mock-chart-placeholder {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+
+    .chart-title { font-size: 14px; font-weight: bold; margin-bottom: 20px; }
+    .chart-bars {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      gap: 10px;
+      
+      .bar {
+        width: 30px;
+        background: #ffe58f;
+        border-radius: 4px 4px 0 0;
+        transition: height 0.3s;
+      }
+    }
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 16px;
+  }
 }
 </style>

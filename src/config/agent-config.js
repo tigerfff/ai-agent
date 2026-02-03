@@ -98,23 +98,6 @@ export const ALL_AGENTS = {
     }
   },
 
-  'data-analysis-old': {
-    id: 'data-analysis-old',
-    name: '数据分析(旧)',
-    miniName:'分析',
-    icon: dataAnalysisIcon,
-    homeIcon: dataAnalysisHomeIcon,
-    description: '数据分析旧版本。',
-    type: 'slot',
-    businessGroup: 'data-analysis', // 业务组标识
-    isOld: true,
-    hidden: true, // 在侧边栏隐藏
-    tags: ['旧版'],
-    hideConversations: true,
-    sort: 99,
-    permission: null
-  },
-  
   'try-x': {
     id: '1',
     name: 'AI试用',
